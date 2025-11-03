@@ -7,7 +7,7 @@ import {
 import { UserDto } from '@app/contracts/shared-dto/user/user.dto';
 
 export interface IUserService {
-  create(createUserDto: CreateUserDto): Promise<String>;
+  create(createUserDto: CreateUserDto): Promise<Ack>;
   findAll(): Promise<UserDto[]>;
   findOne(id: number): Promise<UserDto>;
   updateProfile(
@@ -19,7 +19,7 @@ export interface IUserService {
     updateRestriction: UpdateRestriction,
   ): Promise<Ack>;
   updateLike(id: number, delta: number): Promise<Ack>;
-  updateReport(id: number): Promise<Ack>;
-  updateFollow(id: number): Promise<Ack>;
-  remove(id: number): Promise<String>;
+  updateReport(id: number, delta: number): Promise<Ack>;
+  updateFollow(id: number, delta: number): Promise<Ack>;
+  remove(id: number): Promise<Ack>;
 }

@@ -7,7 +7,7 @@ export class UpdateProfileUserDto extends PartialType(UserDto) {
 }
 
 export class UpdateRestriction extends PartialType(UserDto) {
-  content_visibilityPrivate?: boolean | undefined;
-  liked_visibilityPrivate?: boolean | undefined;
-  pinned_visibilityPrivate?: boolean | undefined;
+  content_visibility?: boolean | undefined;
+  liked_visibility?: boolean | undefined;
+  pinned_visibility?: boolean | undefined;
 }

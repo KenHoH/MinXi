@@ -28,7 +28,6 @@ export class UserService implements IUserService {
     try {
       return await firstValueFrom(this.userClient.send(USER_MSG.findOne, id));
     } catch (err) {
-      // 👇 rethrow so your RpcToHttpFilter can process it correctly
       throw new RpcException(err?.error || err);
     }
   }
@@ -45,13 +44,13 @@ export class UserService implements IUserService {
   async remove(id: number) {
     return firstValueFrom(this.userClient.send(USER_MSG.remove, id));
   }
-  async updateFollow(id: number): Promise<Ack> {
+  async updateFollow(id: number, delta: number): Promise<Ack> {
     return firstValueFrom(this.userClient.send(USER_MSG.updateFollow, id));
   }
   async updateLike(id: number, delta: number): Promise<Ack> {
     return firstValueFrom(this.userClient.send(USER_MSG.updateLike, id));
   }
-  async updateReport(id: number): Promise<Ack> {
+  async updateReport(id: number, delta: number): Promise<Ack> {
     return firstValueFrom(this.userClient.send(USER_MSG.updateReport, id));
   }
   async updateRestriction(

@@ -18,41 +18,25 @@ export class Repository {
   constructor(private readonly prisma: UserDatabaseConnection) {}
 
   async createUser(newUser: CreateUserDto) {
-    try {
-      const user = await this.prisma.user.create({
-        data: {
-          username: newUser.username,
-          password: newUser.password,
-          desc: '你好很高興見到你',
-          follower: 0,
-          profile_picture: '',
-          total_like: 0,
-          total_reports: 0,
-          liked_visibilityPrivate: false,
-          pinned_visibilityPrivate: false,
-          content_visibilityPrivate: false,
-        },
-      });
-      return 'Success Creating User ' + user.username;
-    } catch (error) {
-      console.error('Error creating user:', error);
-      throw new InternalServerErrorException({
-        statusCode: 500,
-        message: 'Failed to create user',
-        error: error.message,
-      });
-    }
+    await this.prisma.user.create({
+      data: {
+        username: newUser.username,
+        password: newUser.password,
+        desc: '你好很高興見到你',
+        follower: 0,
+        profile_picture: '',
+        total_like: 0,
+        total_reports: 0,
+        liked_visibilityPrivate: false,
+        pinned_visibilityPrivate: false,
+        content_visibilityPrivate: false,
+      },
+    });
   }
-  async findAll(): Promise<UserDto[]> {
-    try {
-      const users = await this.prisma.user.findMany({
-        orderBy: { user_id: 'asc' },
-      });
-      return users.map(mapToDto);
-    } catch (error) {
-      console.error('Error fetching users:', error);
-      throw new InternalServerErrorException('Failed to fetch all users');
-    }
+  async findAll() {
+    return await this.prisma.user.findMany({
+      orderBy: { user_id: 'asc' },
+    });
   }
 
   async findOne(id: number) {
@@ -62,79 +46,69 @@ export class Repository {
     return user;
   }
 
-  async updateProfile(
-    id: number,
-    update: UpdateProfileUserDto,
-  ): Promise<UserDto> {
-    try {
-      const updatedUser = await this.prisma.user.update({
-        where: { user_id: id },
-        data: {
-          desc: update.desc,
-          profile_picture: update.profile_picture,
-        },
-      });
-
-      return mapToDto(updatedUser);
-    } catch (error) {
-      console.error(`Error updating user ${id}:`, error);
-      throw new InternalServerErrorException('Failed to update user');
-    }
+  async updateProfile(id: number, update: UpdateProfileUserDto) {
+    return this.prisma.user.update({
+      where: { user_id: id },
+      data: {
+        desc: update.desc,
+        profile_picture: update.profile_picture,
+      },
+    });
   }
 
-  async remove(id: number): Promise<boolean> {
-    try {
-      await this.prisma.user.delete({ where: { user_id: id } });
-      return true;
-    } catch (error) {
-      console.error(`Error deleting user ${id}:`, error);
-      throw new InternalServerErrorException('Failed to delete user');
-    }
+  async remove(id: number) {
+    return this.prisma.user.delete({
+      where: { user_id: id },
+      select: {
+        user_id: true,
+        username: true,
+      },
+    });
   }
 
-  async updateRestriction(
-    id: number,
-    restriction: UpdateRestriction,
-  ): Promise<Ack> {
-    try {
-      await this.prisma.user.update({
-        where: {
-          user_id: id,
-        },
-        data: {
-          content_visibilityPrivate: restriction.content_visibilityPrivate,
-          liked_visibilityPrivate: restriction.liked_visibilityPrivate,
-          pinned_visibilityPrivate: restriction.pinned_visibilityPrivate,
-        },
-      });
-
-      return {
-        Msg: 'Success update restriction',
-        Valid: true,
-      };
-    } catch (error) {
-      console.error(`Error updating restrictions for user ${id}:`, error);
-
-      throw new InternalServerErrorException('Failed to update restriction');
-    }
+  async updateRestriction(id: number, restriction: UpdateRestriction) {
+    await this.prisma.user.update({
+      where: {
+        user_id: id,
+      },
+      data: {
+        content_visibilityPrivate: restriction.content_visibilityPrivate,
+        liked_visibilityPrivate: restriction.liked_visibilityPrivate,
+        pinned_visibilityPrivate: restriction.pinned_visibilityPrivate,
+      },
+    });
   }
 
   async updateLike(id: number, total_like: number) {
-    try {
-      await this.prisma.user.update({
-        where: {
-          user_id: id,
-        },
-        data: {
-          total_like: total_like,
-        },
-      });
+    return await this.prisma.user.update({
+      where: {
+        user_id: id,
+      },
+      data: {
+        total_like: total_like,
+      },
+    });
+  }
 
-      return true;
-    } catch (error) {
-      console.error(`Error updating restrictions for user ${id}:`, error);
+  async updateFollow(id: number, total_follow: number) {
+    return await this.prisma.user.update({
+      where: {
+        user_id: id,
+      },
+      data: {
+        follower: total_follow,
+      },
+    });
+  }
 
-      throw new InternalServerErrorException('Failed to update restriction');
-    }
+  async updateReport(id: number, total_report: number) {
+    return await this.prisma.user.update({
+      where: {
+        user_id: id,
+      },
+      data: {
+        total_reports: total_report,
+      },
+    });
   }
 }
