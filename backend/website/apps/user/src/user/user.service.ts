@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateUserDto } from '@app/contracts/shared-dto/user/create-user.dto';
 import {
   UpdateProfileUserDto,
@@ -7,6 +7,8 @@ import {
 import { Repository } from './repository/repository';
 import { IUserService } from '@app/common/interfaces/user/IUserService';
 import { Ack } from '@app/contracts/shared-dto/ack.dto';
+import { mapToDto } from './utils/mapToDto';
+import { RpcException } from '@nestjs/microservices';
 
 @Injectable()
 export class UserService implements IUserService {
@@ -21,7 +23,9 @@ export class UserService implements IUserService {
   }
 
   async findOne(id: number) {
-    return this.repo.findOne(id);
+    const user = await this.repo.findOne(id);
+    if (!user) throw new NotFoundException(`User with ID ${id} not found`);
+    return mapToDto(user);
   }
 
   async updateProfile(id: number, updateProfileUserDto: UpdateProfileUserDto) {
@@ -36,17 +40,23 @@ export class UserService implements IUserService {
   }
 
   async updateLike(id: number, delta: number): Promise<Ack> {
-    try {
-      const user = this.repo
-    } catch (error) {
-      
-    }
-
-
-
+    return {
+      Msg: 'Still Developing',
+      Valid: false,
+    };
   }
-  async updateFollow(id: number): Promise<Ack> {}
-  async updateReport(id: number): Promise<Ack> {}
+  async updateFollow(id: number): Promise<Ack> {
+    return {
+      Msg: 'Still Developing',
+      Valid: false,
+    };
+  }
+  async updateReport(id: number): Promise<Ack> {
+    return {
+      Msg: 'Still Developing',
+      Valid: false,
+    };
+  }
 
   async remove(id: number) {
     return `This action removes a #${id} user`;

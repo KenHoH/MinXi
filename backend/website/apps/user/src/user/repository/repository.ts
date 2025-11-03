@@ -55,16 +55,11 @@ export class Repository {
     }
   }
 
-  async findOne(id: number): Promise<UserDto> {
-    try {
-      const user = await this.prisma.user.findUnique({
-        where: { user_id: id },
-      });
-      if (!user) throw new NotFoundException(`User with ID ${id} not found`);
-      return mapToDto(user);
-    } catch (error) {
-      throw new InternalServerErrorException('Failed to fetch user');
-    }
+  async findOne(id: number) {
+    const user = await this.prisma.user.findUnique({
+      where: { user_id: id },
+    });
+    return user;
   }
 
   async updateProfile(

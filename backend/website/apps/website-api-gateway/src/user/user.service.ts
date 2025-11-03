@@ -1,11 +1,15 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { HttpException, Inject, Injectable } from '@nestjs/common';
 import { CreateUserDto } from '@app/contracts/shared-dto/user/create-user.dto';
-import { UpdateProfileUserDto } from '@app/contracts/shared-dto/user/update-user.dto';
-import { ClientProxy } from '@nestjs/microservices';
+import {
+  UpdateProfileUserDto,
+  UpdateRestriction,
+} from '@app/contracts/shared-dto/user/update-user.dto';
+import { ClientProxy, RpcException } from '@nestjs/microservices';
 import { USER_SERVICES } from '@app/common/constants/services';
 import { IUserService } from '@app/common/interfaces/user/IUserService';
 import { firstValueFrom, lastValueFrom } from 'rxjs';
 import { USER_MSG } from '@app/common/constants/messageEvent';
+import { Ack } from '@app/contracts/shared-dto/ack.dto';
 
 @Injectable()
 export class UserService implements IUserService {
@@ -21,7 +25,12 @@ export class UserService implements IUserService {
   }
 
   async findOne(id: number) {
-    return firstValueFrom(this.userClient.send(USER_MSG.findOne, id));
+    try {
+      return await firstValueFrom(this.userClient.send(USER_MSG.findOne, id));
+    } catch (err) {
+      // 👇 rethrow so your RpcToHttpFilter can process it correctly
+      throw new RpcException(err?.error || err);
+    }
   }
 
   async updateProfile(id: number, updateProfileUserDto: UpdateProfileUserDto) {
@@ -35,5 +44,20 @@ export class UserService implements IUserService {
 
   async remove(id: number) {
     return firstValueFrom(this.userClient.send(USER_MSG.remove, id));
+  }
+  async updateFollow(id: number): Promise<Ack> {
+    return firstValueFrom(this.userClient.send(USER_MSG.updateFollow, id));
+  }
+  async updateLike(id: number, delta: number): Promise<Ack> {
+    return firstValueFrom(this.userClient.send(USER_MSG.updateLike, id));
+  }
+  async updateReport(id: number): Promise<Ack> {
+    return firstValueFrom(this.userClient.send(USER_MSG.updateReport, id));
+  }
+  async updateRestriction(
+    id: number,
+    updateRestriction: UpdateRestriction,
+  ): Promise<Ack> {
+    return firstValueFrom(this.userClient.send(USER_MSG.updateRestriction, id));
   }
 }

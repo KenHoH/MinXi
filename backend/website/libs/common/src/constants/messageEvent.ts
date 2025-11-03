@@ -4,4 +4,8 @@ export const USER_MSG = {
   findOne: 'user.findOneUser',
   updateProfile: 'user.updateProfile',
   remove: 'user.removeUser',
+  updateRestriction: 'user.updateRestriction',
+  updateFollow: 'user.updateFollow',
+  updateLike: 'user.updateLike',
+  updateReport: 'user.updateReport',
 };
