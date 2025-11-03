@@ -63,8 +63,6 @@ export class Repository {
       if (!user) throw new NotFoundException(`User with ID ${id} not found`);
       return mapToDto(user);
     } catch (error) {
-      console.error(`Error fetching user ${id}:`, error);
-      if (error instanceof NotFoundException) throw error;
       throw new InternalServerErrorException('Failed to fetch user');
     }
   }
