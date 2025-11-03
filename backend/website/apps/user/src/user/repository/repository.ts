@@ -5,9 +5,13 @@ import {
 } from '@nestjs/common';
 import { UserDatabaseConnection } from '@app/common/database/user-database-connection/user-database-connection';
 import { CreateUserDto } from '@app/contracts/shared-dto/user/create-user.dto';
-import { UpdateProfileUserDto } from '@app/contracts/shared-dto/user/update-user.dto';
+import {
+  UpdateProfileUserDto,
+  UpdateRestriction,
+} from '@app/contracts/shared-dto/user/update-user.dto';
 import { UserDto } from '@app/contracts/shared-dto/user/user.dto';
 import { mapToDto } from '../utils/mapToDto';
+import { Ack } from '@app/contracts/shared-dto/ack.dto';
 
 @Injectable()
 export class Repository {
@@ -92,6 +96,52 @@ export class Repository {
     } catch (error) {
       console.error(`Error deleting user ${id}:`, error);
       throw new InternalServerErrorException('Failed to delete user');
+    }
+  }
+
+  async updateRestriction(
+    id: number,
+    restriction: UpdateRestriction,
+  ): Promise<Ack> {
+    try {
+      await this.prisma.user.update({
+        where: {
+          user_id: id,
+        },
+        data: {
+          content_visibilityPrivate: restriction.content_visibilityPrivate,
+          liked_visibilityPrivate: restriction.liked_visibilityPrivate,
+          pinned_visibilityPrivate: restriction.pinned_visibilityPrivate,
+        },
+      });
+
+      return {
+        Msg: 'Success update restriction',
+        Valid: true,
+      };
+    } catch (error) {
+      console.error(`Error updating restrictions for user ${id}:`, error);
+
+      throw new InternalServerErrorException('Failed to update restriction');
+    }
+  }
+
+  async updateLike(id: number, total_like: number) {
+    try {
+      await this.prisma.user.update({
+        where: {
+          user_id: id,
+        },
+        data: {
+          total_like: total_like,
+        },
+      });
+
+      return true;
+    } catch (error) {
+      console.error(`Error updating restrictions for user ${id}:`, error);
+
+      throw new InternalServerErrorException('Failed to update restriction');
     }
   }
 }
