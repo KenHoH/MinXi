@@ -16,6 +16,7 @@ import {
   UpdateRestriction,
 } from '@app/contracts/shared-dto/user/update-user.dto';
 import { RpcTranslateFilter } from '@app/common/filters/rpc-translate/rpc-translate.filter';
+import { deltaDto } from '@app/contracts/shared-dto/user/delta.dto';
 
 @Controller('user')
 @UseFilters(RpcTranslateFilter)
@@ -46,26 +47,17 @@ export class UserController {
   }
 
   @Patch(':id/like')
-  updateLike(
-    @Param('id', ParseIntPipe) id: number,
-    @Body() body: { delta: number },
-  ) {
+  updateLike(@Param('id', ParseIntPipe) id: number, @Body() body: deltaDto) {
     return this.userService.updateLike(id, body.delta);
   }
 
   @Patch(':id/follow')
-  updateFollow(
-    @Param('id', ParseIntPipe) id: number,
-    @Body() body: { delta: number },
-  ) {
+  updateFollow(@Param('id', ParseIntPipe) id: number, @Body() body: deltaDto) {
     return this.userService.updateFollow(id, body.delta);
   }
 
   @Patch(':id/report')
-  updateReport(
-    @Param('id', ParseIntPipe) id: number,
-    @Body() body: { delta: number },
-  ) {
+  updateReport(@Param('id', ParseIntPipe) id: number, @Body() body: deltaDto) {
     return this.userService.updateReport(id, body.delta);
   }
 

@@ -2,7 +2,6 @@ import {
   HttpException,
   HttpStatus,
   Injectable,
-  InternalServerErrorException,
   Logger,
   NotFoundException,
 } from '@nestjs/common';
@@ -15,8 +14,8 @@ import { Repository } from './repository/repository';
 import { IUserService } from '@app/common/interfaces/user/IUserService';
 import { Ack } from '@app/contracts/shared-dto/ack.dto';
 import { mapToDto } from './utils/mapToDto';
-import { RpcCustomException } from '@app/common/errors/error-rpc';
 import { httpToRpc } from '@app/common/utils/httpToRpc';
+import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class UserService implements IUserService {
@@ -25,6 +24,9 @@ export class UserService implements IUserService {
 
   async create(dto: CreateUserDto): Promise<Ack> {
     try {
+      const hash = await bcrypt.hash(dto.password, 10);
+      dto.password = hash;
+
       await this.repo.createUser(dto);
       return {
         Msg: `User '${dto.username}' created successfully`,

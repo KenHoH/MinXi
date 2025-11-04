@@ -2,10 +2,16 @@ import { NestFactory } from '@nestjs/core';
 import { WebsiteApiGatewayModule } from './website-api-gateway.module';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { RpcTranslateFilter } from '@app/common/filters/rpc-translate/rpc-translate.filter';
+import { ValidationPipe } from '@nestjs/common';
 
 async function bootstrap() {
   const app = await NestFactory.create(WebsiteApiGatewayModule);
   app.useGlobalFilters(new RpcTranslateFilter());
+  app.useGlobalPipes(
+    new ValidationPipe({
+      transform: true,
+    }),
+  );
   const config = new DocumentBuilder()
     .setTitle('Website API')
     .setDescription('API documentation for Website Gateway')
