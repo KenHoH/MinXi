@@ -117,4 +117,13 @@ export class Repository {
       },
     });
   }
+
+  async findByName(name: string) {
+    this.logger.log(name);
+    return await this.prisma.user.findUnique({
+      where: {
+        username: name,
+      },
+    });
+  }
 }

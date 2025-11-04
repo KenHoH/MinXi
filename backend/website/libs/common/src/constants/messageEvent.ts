@@ -8,4 +8,11 @@ export const USER_MSG = {
   updateFollow: 'user.updateFollow',
   updateLike: 'user.updateLike',
   updateReport: 'user.updateReport',
+  findByName: 'user.findByName',
+};
+
+export const AUTH_MSG = {
+  login: 'auth.login',
+  refresh: 'auth.refresh',
+  logout: 'auth.logout',
 };

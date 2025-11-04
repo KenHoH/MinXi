@@ -16,6 +16,9 @@ import { Ack } from '@app/contracts/shared-dto/ack.dto';
 import { mapToDto } from './utils/mapToDto';
 import { httpToRpc } from '@app/common/utils/httpToRpc';
 import * as bcrypt from 'bcrypt';
+import { UserDto } from '@app/contracts/shared-dto/user/user.dto';
+import { NameRequest } from '@app/contracts/shared-dto/user/find.name.dto';
+import { CredentialRes } from '@app/contracts/shared-dto/user/Creds.dto';
 
 @Injectable()
 export class UserService implements IUserService {
@@ -160,5 +163,19 @@ export class UserService implements IUserService {
     }
 
     return { Msg: 'User deleted successfully', Valid: true };
+  }
+  async findByName(dto: NameRequest): Promise<CredentialRes> {
+    this.logger.log(dto);
+    const result = await this.repo.findByName(dto.name);
+    if (!result) {
+      this.logger.warn('User not found by name');
+      throw httpToRpc(
+        new HttpException('User Not Found By Name', HttpStatus.NOT_FOUND),
+      );
+    }
+    return {
+      username: result.username,
+      password: result.password,
+    };
   }
 }

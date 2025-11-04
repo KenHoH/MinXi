@@ -7,6 +7,7 @@ import {
   UpdateRestriction,
 } from '@app/contracts/shared-dto/user/update-user.dto';
 import { USER_MSG } from '@app/common/constants/messageEvent';
+import { NameRequest } from '@app/contracts/shared-dto/user/find.name.dto';
 
 @Controller()
 export class UserController {
@@ -58,5 +59,10 @@ export class UserController {
   @MessagePattern(USER_MSG.remove)
   async remove(@Payload() id: number) {
     return this.userService.remove(id);
+  }
+
+  @MessagePattern(USER_MSG.findByName)
+  async findByName(@Payload() dto: NameRequest) {
+    return this.userService.findByName(dto);
   }
 }

@@ -1,5 +1,7 @@
 import { Ack } from '@app/contracts/shared-dto/ack.dto';
 import { CreateUserDto } from '@app/contracts/shared-dto/user/create-user.dto';
+import { CredentialRes } from '@app/contracts/shared-dto/user/Creds.dto';
+import { NameRequest } from '@app/contracts/shared-dto/user/find.name.dto';
 import {
   UpdateProfileUserDto,
   UpdateRestriction,
@@ -22,4 +24,5 @@ export interface IUserService {
   updateReport(id: number, delta: number): Promise<Ack>;
   updateFollow(id: number, delta: number): Promise<Ack>;
   remove(id: number): Promise<Ack>;
+  findByName(dto: NameRequest): Promise<CredentialRes>;
 }

@@ -1,19 +1,18 @@
 import { NestFactory } from '@nestjs/core';
 import { Transport, MicroserviceOptions } from '@nestjs/microservices';
-import { AuthModule } from './auth.module';
-import { HttpToRpcFilter } from '@app/common/filters/http-to-rpc/http-to-rpc.filter';
+import { AuthAppModule } from './auth-app.module';
+import { AUTH_SERVICES } from '@app/common/constants/services';
 
 async function bootstrap() {
   const app = await NestFactory.createMicroservice<MicroserviceOptions>(
-    AuthModule,
+    AuthAppModule,
     {
       transport: Transport.TCP,
       options: {
-        port: 3001,
+        port: AUTH_SERVICES.PORT,
       },
     },
   );
-  app.useGlobalFilters(new HttpToRpcFilter());
   await app.listen();
 }
 bootstrap();
