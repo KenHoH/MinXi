@@ -1,12 +1,11 @@
 import { NestFactory } from '@nestjs/core';
 import { WebsiteApiGatewayModule } from './website-api-gateway.module';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
-import { RpcToHttpFilter } from '@app/common/filters/rpc-to-http/rpc-to-http.filter';
+import { RpcExceptionFilter } from '@app/common/filters/rpc-exception/rpc-exception.filter';
 
 async function bootstrap() {
   const app = await NestFactory.create(WebsiteApiGatewayModule);
-  app.useGlobalFilters(new RpcToHttpFilter());
-
+  app.useGlobalFilters(new RpcExceptionFilter());
   const config = new DocumentBuilder()
     .setTitle('Website API')
     .setDescription('API documentation for Website Gateway')

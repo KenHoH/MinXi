@@ -14,8 +14,8 @@ import { Repository } from './repository/repository';
 import { IUserService } from '@app/common/interfaces/user/IUserService';
 import { Ack } from '@app/contracts/shared-dto/ack.dto';
 import { mapToDto } from './utils/mapToDto';
-import { RpcException } from '@nestjs/microservices';
 import { rpcError } from './utils/RpcError';
+import { RpcCustomException } from '@app/common/errors/error-rpc';
 
 @Injectable()
 export class UserService implements IUserService {
@@ -54,7 +54,7 @@ export class UserService implements IUserService {
     const user = await this.repo.findOne(id);
     if (!user) {
       this.logger.warn(`User with ID ${id} not found`);
-      throw rpcError(HttpStatus.NOT_FOUND, `User with ID ${id} not found`);
+      throw new RpcCustomException(404, 'User not found', { id });
     }
     return mapToDto(user);
   }
@@ -93,25 +93,20 @@ export class UserService implements IUserService {
   }
 
   async updateLike(id: number, delta: number): Promise<Ack> {
-    try {
-      const user = await this.repo.findOne(id);
-      if (!user) {
-        this.logger.warn(`User with ID ${id} not found for like update`);
-        throw rpcError(HttpStatus.NOT_FOUND, `User with ID ${id} not found`);
-      }
-
-      user.total_like += delta;
-      const result = await this.repo.updateLike(id, user.total_like);
-
-      if (!result) {
-        return { Msg: 'Failed to update like', Valid: false };
-      }
-
-      return { Msg: 'Like count updated successfully', Valid: true };
-    } catch (error) {
-      this.logger.error(`Error updating like for user ${id}: ${error.message}`);
-      throw rpcError(HttpStatus.INTERNAL_SERVER_ERROR, 'Failed to update like');
+    const user = await this.repo.findOne(id);
+    if (!user) {
+      this.logger.warn(`User with ID ${id} not found for like update`);
+      throw rpcError(HttpStatus.NOT_FOUND, `User with ID ${id} not found`);
     }
+
+    user.total_like += delta;
+    const result = await this.repo.updateLike(id, user.total_like);
+
+    if (!result) {
+      return { Msg: 'Failed to update like', Valid: false };
+    }
+
+    return { Msg: 'Like count updated successfully', Valid: true };
   }
 
   async updateFollow(id: number, delta: number): Promise<Ack> {

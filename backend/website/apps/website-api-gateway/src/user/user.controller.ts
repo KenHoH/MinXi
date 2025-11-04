@@ -7,6 +7,7 @@ import {
   Param,
   Delete,
   ParseIntPipe,
+  UseFilters,
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import { CreateUserDto } from '@app/contracts/shared-dto/user/create-user.dto';
@@ -14,8 +15,10 @@ import {
   UpdateProfileUserDto,
   UpdateRestriction,
 } from '@app/contracts/shared-dto/user/update-user.dto';
+import { RpcExceptionFilter } from '@app/common/filters/rpc-exception/rpc-exception.filter';
 
 @Controller('user')
+@UseFilters(RpcExceptionFilter)
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
@@ -34,34 +37,44 @@ export class UserController {
     return this.userService.findOne(+id);
   }
 
-  @Patch(':id')
+  @Patch(':id/profile')
   update(
     @Param('id', ParseIntPipe) id: number,
-    @Body() updateUserDto: UpdateProfileUserDto,
+    @Body() body: UpdateProfileUserDto,
   ) {
-    return this.userService.updateProfile(+id, updateUserDto);
+    return this.userService.updateProfile(+id, body);
   }
-  @Patch('/updateRestriction/:id')
+
+  @Patch(':id/like')
+  updateLike(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() body: { delta: number },
+  ) {
+    return this.userService.updateLike(id, body.delta);
+  }
+
+  @Patch(':id/follow')
+  updateFollow(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() body: { delta: number },
+  ) {
+    return this.userService.updateFollow(id, body.delta);
+  }
+
+  @Patch(':id/report')
+  updateReport(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() body: { delta: number },
+  ) {
+    return this.userService.updateReport(id, body.delta);
+  }
+
+  @Patch(':id/restriction')
   updateRestriction(
     @Param('id', ParseIntPipe) id: number,
-    @Body() update: UpdateRestriction,
+    @Body() dto: UpdateRestriction,
   ) {
-    return this.userService.updateRestriction(+id, update);
-  }
-
-  @Patch('/updateLike/:id')
-  updateLike(@Param('id', ParseIntPipe) id: number, @Body() delta: number) {
-    return this.userService.updateLike(+id, delta);
-  }
-
-  @Patch('/updateFollow/:id')
-  updateFollow(@Param('id', ParseIntPipe) id: number, @Body() delta: number) {
-    return this.userService.updateFollow(+id, delta);
-  }
-
-  @Patch('/updateReport/:id')
-  updateReport(@Param('id', ParseIntPipe) id: number, @Body() delta: number) {
-    return this.userService.updateReport(+id, delta);
+    return this.userService.updateRestriction(id, dto);
   }
 
   @Delete(':id')

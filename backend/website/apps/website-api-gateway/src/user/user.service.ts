@@ -1,4 +1,11 @@
-import { HttpException, Inject, Injectable } from '@nestjs/common';
+import {
+  HttpException,
+  HttpStatus,
+  Inject,
+  Injectable,
+  Logger,
+  UseFilters,
+} from '@nestjs/common';
 import { CreateUserDto } from '@app/contracts/shared-dto/user/create-user.dto';
 import {
   UpdateProfileUserDto,
@@ -13,6 +20,7 @@ import { Ack } from '@app/contracts/shared-dto/ack.dto';
 
 @Injectable()
 export class UserService implements IUserService {
+  private readonly logger = new Logger(UserService.name);
   constructor(@Inject(USER_SERVICES.CLIENT) private userClient: ClientProxy) {}
   async create(createUserDto: CreateUserDto) {
     return await firstValueFrom(
@@ -27,8 +35,14 @@ export class UserService implements IUserService {
   async findOne(id: number) {
     try {
       return await firstValueFrom(this.userClient.send(USER_MSG.findOne, id));
-    } catch (err) {
-      throw new RpcException(err?.error || err);
+    } catch (error) {
+      this.logger.log(error);
+      const payload = error.message || {};
+      this.logger.log(payload);
+      throw new HttpException(
+        error.message || 'Internal Server Error Custom',
+        error.code || 500,
+      );
     }
   }
 
@@ -44,19 +58,30 @@ export class UserService implements IUserService {
   async remove(id: number) {
     return firstValueFrom(this.userClient.send(USER_MSG.remove, id));
   }
-  async updateFollow(id: number, delta: number): Promise<Ack> {
-    return firstValueFrom(this.userClient.send(USER_MSG.updateFollow, id));
-  }
   async updateLike(id: number, delta: number): Promise<Ack> {
-    return firstValueFrom(this.userClient.send(USER_MSG.updateLike, id));
+    return firstValueFrom(
+      this.userClient.send(USER_MSG.updateLike, { id, delta }),
+    );
   }
+
+  async updateFollow(id: number, delta: number): Promise<Ack> {
+    return firstValueFrom(
+      this.userClient.send(USER_MSG.updateFollow, { id, delta }),
+    );
+  }
+
   async updateReport(id: number, delta: number): Promise<Ack> {
-    return firstValueFrom(this.userClient.send(USER_MSG.updateReport, id));
+    return firstValueFrom(
+      this.userClient.send(USER_MSG.updateReport, { id, delta }),
+    );
   }
-  async updateRestriction(
-    id: number,
-    updateRestriction: UpdateRestriction,
-  ): Promise<Ack> {
-    return firstValueFrom(this.userClient.send(USER_MSG.updateRestriction, id));
+
+  async updateRestriction(id: number, updateRestriction: UpdateRestriction) {
+    return firstValueFrom(
+      this.userClient.send(USER_MSG.updateRestriction, {
+        id,
+        dto: updateRestriction,
+      }),
+    );
   }
 }

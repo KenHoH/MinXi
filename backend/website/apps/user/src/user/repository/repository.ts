@@ -50,7 +50,7 @@ export class Repository {
     return this.prisma.user.update({
       where: { user_id: id },
       data: {
-        desc: update.desc,
+        desc: 'Testing',
         profile_picture: update.profile_picture,
       },
     });

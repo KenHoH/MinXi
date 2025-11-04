@@ -6,10 +6,8 @@ import {
   UpdateProfileUserDto,
   UpdateRestriction,
 } from '@app/contracts/shared-dto/user/update-user.dto';
-import { HttpToRpcFilter } from '@app/common/filters/http-to-rpc/http-to-rpc.filter';
 import { USER_MSG } from '@app/common/constants/messageEvent';
 
-@UseFilters(HttpToRpcFilter)
 @Controller()
 export class UserController {
   constructor(private readonly userService: UserService) {}
@@ -30,29 +28,31 @@ export class UserController {
   }
 
   @MessagePattern(USER_MSG.updateProfile)
-  async update(
-    @Payload() id: number,
-    updateProfileUserDto: UpdateProfileUserDto,
+  async updateProfile(
+    @Payload() data: { id: number; dto: UpdateProfileUserDto },
   ) {
-    return this.userService.updateProfile(id, updateProfileUserDto);
+    return this.userService.updateProfile(data.id, data.dto);
+  }
+  @MessagePattern(USER_MSG.updateLike)
+  async updateLike(@Payload() data: { id: number; delta: number }) {
+    return this.userService.updateLike(data.id, data.delta);
+  }
+
+  @MessagePattern(USER_MSG.updateFollow)
+  async updateFollow(@Payload() data: { id: number; delta: number }) {
+    return this.userService.updateFollow(data.id, data.delta);
+  }
+
+  @MessagePattern(USER_MSG.updateReport)
+  async updateReport(@Payload() data: { id: number; delta: number }) {
+    return this.userService.updateReport(data.id, data.delta);
   }
 
   @MessagePattern(USER_MSG.updateRestriction)
-  async updateRestriction(@Payload() id: number, dto: UpdateRestriction) {
-    return this.userService.updateRestriction(id, dto);
-  }
-
-  @MessagePattern(USER_MSG.updateLike)
-  async updateLike(@Payload() id: number, delta: number) {
-    return this.userService.updateLike(id, delta);
-  }
-  @MessagePattern(USER_MSG.updateReport)
-  async updateReport(@Payload() id: number, delta: number) {
-    return this.userService.updateReport(id, delta);
-  }
-  @MessagePattern(USER_MSG.updateFollow)
-  async updateFollow(@Payload() id: number, delta: number) {
-    return this.userService.updateFollow(id, delta);
+  async updateRestriction(
+    @Payload() data: { id: number; dto: UpdateRestriction },
+  ) {
+    return this.userService.updateRestriction(data.id, data.dto);
   }
 
   @MessagePattern(USER_MSG.remove)
