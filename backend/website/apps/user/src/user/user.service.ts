@@ -1,4 +1,5 @@
 import {
+  HttpException,
   HttpStatus,
   Injectable,
   InternalServerErrorException,
@@ -14,8 +15,8 @@ import { Repository } from './repository/repository';
 import { IUserService } from '@app/common/interfaces/user/IUserService';
 import { Ack } from '@app/contracts/shared-dto/ack.dto';
 import { mapToDto } from './utils/mapToDto';
-import { rpcError } from './utils/RpcError';
 import { RpcCustomException } from '@app/common/errors/error-rpc';
+import { httpToRpc } from '@app/common/utils/httpToRpc';
 
 @Injectable()
 export class UserService implements IUserService {
@@ -33,19 +34,24 @@ export class UserService implements IUserService {
       this.logger.error(
         `Failed to create user '${dto.username}': ${error.message}`,
       );
-      throw rpcError(HttpStatus.INTERNAL_SERVER_ERROR, 'Failed to create user');
+      throw httpToRpc(
+        new HttpException('Failed to Create User', HttpStatus.BAD_REQUEST),
+      );
     }
   }
 
   async findAll() {
     try {
       const users = await this.repo.findAll();
+      if (!users)
+        throw httpToRpc(
+          new HttpException('Error Fetching All Users', HttpStatus.NOT_FOUND),
+        );
       return users.map(mapToDto);
     } catch (error) {
       this.logger.error(`Error fetching users: ${error.message}`);
-      throw rpcError(
-        HttpStatus.INTERNAL_SERVER_ERROR,
-        'Failed to fetch all users',
+      throw httpToRpc(
+        new HttpException('Error Fetching All Users', HttpStatus.NOT_FOUND),
       );
     }
   }
@@ -54,26 +60,26 @@ export class UserService implements IUserService {
     const user = await this.repo.findOne(id);
     if (!user) {
       this.logger.warn(`User with ID ${id} not found`);
-      throw new RpcCustomException(404, 'User not found', { id });
+      throw httpToRpc(new NotFoundException('User not found'));
     }
     return mapToDto(user);
   }
 
   async updateProfile(id: number, dto: UpdateProfileUserDto) {
+    this.logger.log(dto);
     try {
-      const user = await this.repo.findOne(id);
-      if (!user) {
-        this.logger.warn(`User with ID ${id} not found for profile update`);
-        throw rpcError(HttpStatus.NOT_FOUND, `User with ID ${id} not found`);
-      }
-
       const updatedUser = await this.repo.updateProfile(id, dto);
       return mapToDto(updatedUser);
     } catch (error) {
       this.logger.error(
         `Failed to update profile for user ${id}: ${error.message}`,
       );
-      throw rpcError(400, 'Failed to update user profile');
+      throw httpToRpc(
+        new HttpException(
+          'Failed to update user profile',
+          HttpStatus.BAD_REQUEST,
+        ),
+      );
     }
   }
 
@@ -85,9 +91,11 @@ export class UserService implements IUserService {
       this.logger.error(
         `Failed to update restriction for user ${id}: ${error.message}`,
       );
-      throw rpcError(
-        HttpStatus.INTERNAL_SERVER_ERROR,
-        'Failed to update restriction',
+      throw httpToRpc(
+        new HttpException(
+          'Failed to update user restriction',
+          HttpStatus.BAD_REQUEST,
+        ),
       );
     }
   }
@@ -96,7 +104,7 @@ export class UserService implements IUserService {
     const user = await this.repo.findOne(id);
     if (!user) {
       this.logger.warn(`User with ID ${id} not found for like update`);
-      throw rpcError(HttpStatus.NOT_FOUND, `User with ID ${id} not found`);
+      throw httpToRpc(new NotFoundException('User not found'));
     }
 
     user.total_like += delta;
@@ -110,70 +118,45 @@ export class UserService implements IUserService {
   }
 
   async updateFollow(id: number, delta: number): Promise<Ack> {
-    try {
-      const user = await this.repo.findOne(id);
-      if (!user) {
-        this.logger.warn(`User with ID ${id} not found for follow update`);
-        throw rpcError(HttpStatus.NOT_FOUND, `User with ID ${id} not found`);
-      }
-
-      user.follower += delta;
-      const result = await this.repo.updateFollow(id, user.follower);
-
-      if (!result) {
-        return { Msg: 'Failed to update follower count', Valid: false };
-      }
-
-      return { Msg: 'Follower count updated successfully', Valid: true };
-    } catch (error) {
-      this.logger.error(
-        `Error updating follow for user ${id}: ${error.message}`,
-      );
-      throw rpcError(
-        HttpStatus.INTERNAL_SERVER_ERROR,
-        'Failed to update follower count',
-      );
+    const user = await this.repo.findOne(id);
+    if (!user) {
+      this.logger.warn(`User with ID ${id} not found for follow update`);
+      throw httpToRpc(new NotFoundException('User not found'));
     }
+
+    user.follower += delta;
+    const result = await this.repo.updateFollow(id, user.follower);
+
+    if (!result) {
+      return { Msg: 'Failed to update follower count', Valid: false };
+    }
+
+    return { Msg: 'Follower count updated successfully', Valid: true };
   }
 
   async updateReport(id: number, delta: number): Promise<Ack> {
-    try {
-      const user = await this.repo.findOne(id);
-      if (!user) {
-        this.logger.warn(`User with ID ${id} not found for report update`);
-        throw rpcError(HttpStatus.NOT_FOUND, `User with ID ${id} not found`);
-      }
-
-      user.total_reports += delta;
-      const result = await this.repo.updateReport(id, user.total_reports);
-
-      if (!result) {
-        return { Msg: 'Failed to update report count', Valid: false };
-      }
-
-      return { Msg: 'Report count updated successfully', Valid: true };
-    } catch (error) {
-      this.logger.error(
-        `Error updating report for user ${id}: ${error.message}`,
-      );
-      throw rpcError(
-        HttpStatus.INTERNAL_SERVER_ERROR,
-        'Failed to update report count',
-      );
+    const user = await this.repo.findOne(id);
+    if (!user) {
+      this.logger.warn(`User with ID ${id} not found for report update`);
+      throw httpToRpc(new NotFoundException('User not found'));
     }
+
+    user.total_reports += delta;
+    const result = await this.repo.updateReport(id, user.total_reports);
+
+    if (!result) {
+      return { Msg: 'Failed to update report count', Valid: false };
+    }
+
+    return { Msg: 'Report count updated successfully', Valid: true };
   }
 
   async remove(id: number): Promise<Ack> {
-    try {
-      const result = await this.repo.remove(id);
-      if (!result) {
-        return { Msg: 'Failed to delete user', Valid: false };
-      }
-
-      return { Msg: 'User deleted successfully', Valid: true };
-    } catch (error) {
-      this.logger.error(`Error deleting user ${id}: ${error.message}`);
-      throw rpcError(HttpStatus.INTERNAL_SERVER_ERROR, 'Failed to delete user');
+    const result = await this.repo.remove(id);
+    if (!result) {
+      return { Msg: 'Failed to delete user', Valid: false };
     }
+
+    return { Msg: 'User deleted successfully', Valid: true };
   }
 }

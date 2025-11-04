@@ -15,10 +15,10 @@ import {
   UpdateProfileUserDto,
   UpdateRestriction,
 } from '@app/contracts/shared-dto/user/update-user.dto';
-import { RpcExceptionFilter } from '@app/common/filters/rpc-exception/rpc-exception.filter';
+import { RpcTranslateFilter } from '@app/common/filters/rpc-translate/rpc-translate.filter';
 
 @Controller('user')
-@UseFilters(RpcExceptionFilter)
+@UseFilters(RpcTranslateFilter)
 export class UserController {
   constructor(private readonly userService: UserService) {}
 

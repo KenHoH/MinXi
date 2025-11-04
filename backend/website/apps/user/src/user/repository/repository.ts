@@ -1,6 +1,7 @@
 import {
   Injectable,
   InternalServerErrorException,
+  Logger,
   NotFoundException,
 } from '@nestjs/common';
 import { UserDatabaseConnection } from '@app/common/database/user-database-connection/user-database-connection';
@@ -16,7 +17,7 @@ import { Ack } from '@app/contracts/shared-dto/ack.dto';
 @Injectable()
 export class Repository {
   constructor(private readonly prisma: UserDatabaseConnection) {}
-
+  private readonly logger = new Logger(Repository.name);
   async createUser(newUser: CreateUserDto) {
     await this.prisma.user.create({
       data: {
@@ -47,10 +48,12 @@ export class Repository {
   }
 
   async updateProfile(id: number, update: UpdateProfileUserDto) {
+    this.logger.log(update.desc);
+    this.logger.log(update.profile_picture);
     return this.prisma.user.update({
       where: { user_id: id },
       data: {
-        desc: 'Testing',
+        desc: update.desc,
         profile_picture: update.profile_picture,
       },
     });
@@ -67,14 +70,17 @@ export class Repository {
   }
 
   async updateRestriction(id: number, restriction: UpdateRestriction) {
+    this.logger.log(restriction.content_visibility);
+    this.logger.log(restriction.liked_visibility);
+    this.logger.log(restriction.pinned_visibility);
     await this.prisma.user.update({
       where: {
         user_id: id,
       },
       data: {
-        content_visibilityPrivate: restriction.content_visibilityPrivate,
-        liked_visibilityPrivate: restriction.liked_visibilityPrivate,
-        pinned_visibilityPrivate: restriction.pinned_visibilityPrivate,
+        content_visibilityPrivate: restriction.content_visibility,
+        liked_visibilityPrivate: restriction.liked_visibility,
+        pinned_visibilityPrivate: restriction.pinned_visibility,
       },
     });
   }

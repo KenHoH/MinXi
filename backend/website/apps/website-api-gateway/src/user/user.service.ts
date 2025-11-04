@@ -4,7 +4,6 @@ import {
   Inject,
   Injectable,
   Logger,
-  UseFilters,
 } from '@nestjs/common';
 import { CreateUserDto } from '@app/contracts/shared-dto/user/create-user.dto';
 import {
@@ -33,24 +32,14 @@ export class UserService implements IUserService {
   }
 
   async findOne(id: number) {
-    try {
-      return await firstValueFrom(this.userClient.send(USER_MSG.findOne, id));
-    } catch (error) {
-      this.logger.log(error);
-      const payload = error.message || {};
-      this.logger.log(payload);
-      throw new HttpException(
-        error.message || 'Internal Server Error Custom',
-        error.code || 500,
-      );
-    }
+    return await firstValueFrom(this.userClient.send(USER_MSG.findOne, id));
   }
 
   async updateProfile(id: number, updateProfileUserDto: UpdateProfileUserDto) {
     return firstValueFrom(
       this.userClient.send(USER_MSG.updateProfile, {
         id: id,
-        updateProfileUserDto: updateProfileUserDto,
+        dto: updateProfileUserDto,
       }),
     );
   }
