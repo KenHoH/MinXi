@@ -3,7 +3,8 @@ import { AuthService } from './auth.service';
 import { AuthController } from './auth.controller';
 import { ClientsModule, Transport } from '@nestjs/microservices';
 import { AUTH_SERVICES } from '@app/common/constants/services';
-
+import { AuthModule as AuthModuleCommon } from '@app/common/auth/auth.module';
+import { JwtRefreshGuard } from '@app/common/auth/jwt-refresh-guard/jwt-refresh.guard';
 @Module({
   imports: [
     ClientsModule.register([
@@ -13,8 +14,9 @@ import { AUTH_SERVICES } from '@app/common/constants/services';
         options: { port: AUTH_SERVICES.PORT },
       },
     ]),
+    AuthModuleCommon,
   ],
   controllers: [AuthController],
-  providers: [AuthService],
+  providers: [AuthService, JwtRefreshGuard],
 })
 export class AuthModule {}

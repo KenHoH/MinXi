@@ -54,8 +54,8 @@ export class AuthService implements IAuthService {
 
     this.logger.warn(user.user_id);
     this.logger.warn(user.username);
-    const payload = { sub: user.userId, username: user.username };
-
+    const payload = { sub: user.user_id, username: user.username };
+    this.logger.debug('JWT payload:', payload);
     const accessSecret = this.configService.get<string>('JWT_SECRET')!;
     const refreshSecret = this.configService.get<string>('JWT_REFRESH_SECRET')!;
 
@@ -69,7 +69,7 @@ export class AuthService implements IAuthService {
     this.logger.warn(user);
     const refreshTtl = 7 * 24 * 60 * 60; // 7 days
     await this.cacheManager.set(
-      `refresh_${user.userId}`,
+      `refresh_${user.user_id}`,
       refreshToken,
       refreshTtl,
     );
