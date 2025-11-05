@@ -1,4 +1,9 @@
-import { Inject, Injectable, Logger } from '@nestjs/common';
+import {
+  Inject,
+  Injectable,
+  InternalServerErrorException,
+  Logger,
+} from '@nestjs/common';
 import { IAuthService } from '@app/common/interfaces/auth/IAuthService';
 import { LoginDto } from '@app/contracts/shared-dto/auth/request/login.dto';
 import { TokenResponseDto } from '@app/contracts/shared-dto/auth/response/refreshResponse.dto';
@@ -16,6 +21,7 @@ export class AuthService implements IAuthService {
   constructor(@Inject(AUTH_SERVICES.CLIENT) private authClient: ClientProxy) {}
 
   async login(dto: LoginDto): Promise<TokenResponseDto> {
+    this.logger.warn('Testing IN LOGIN');
     return await firstValueFrom(this.authClient.send(AUTH_MSG.login, dto));
   }
   async refresh(dto: RefreshTokenRequestDto): Promise<TokenResponseDto> {

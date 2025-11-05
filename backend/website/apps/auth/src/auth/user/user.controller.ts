@@ -17,6 +17,8 @@ import {
 } from '@app/contracts/shared-dto/user/update-user.dto';
 import { RpcTranslateFilter } from '@app/common/filters/rpc-translate/rpc-translate.filter';
 import { deltaDto } from '@app/contracts/shared-dto/user/delta.dto';
+import { Payload } from '@nestjs/microservices';
+import { NameRequest } from '@app/contracts/shared-dto/user/find.name.dto';
 
 @Controller('user')
 @UseFilters(RpcTranslateFilter)
@@ -72,5 +74,10 @@ export class UserController {
   @Delete(':id')
   remove(@Param('id', ParseIntPipe) id: number) {
     return this.userService.remove(+id);
+  }
+
+  @Post('/name')
+  findByName(@Payload() body: NameRequest) {
+    return this.userService.findByName(body);
   }
 }

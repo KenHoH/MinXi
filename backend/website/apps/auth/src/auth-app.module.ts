@@ -1,11 +1,10 @@
 import { Module } from '@nestjs/common';
 import { AuthModule } from './auth/auth.module';
-import { UserModule } from './user/user.module';
-import { CommonModule } from '@app/common';
+import { JwtRefresh } from './auth/jwt-refresh/jwt-refresh';
 
 @Module({
-  imports: [AuthModule, UserModule],
+  imports: [AuthModule],
   controllers: [],
-  providers: [],
+  providers: [JwtRefresh],
 })
 export class AuthAppModule {}

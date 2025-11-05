@@ -176,6 +176,7 @@ export class UserService implements IUserService {
     return {
       username: result.username,
       password: result.password,
+      user_id: result.user_id,
     };
   }
 }

@@ -6,13 +6,16 @@ import {
   Patch,
   Param,
   Delete,
+  UseFilters,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { LoginDto } from '@app/contracts/shared-dto/auth/request/login.dto';
 import { RefreshTokenRequestDto } from '@app/contracts/shared-dto/auth/request/refreshRequest.dto';
 import { LogoutRequest } from '@app/contracts/shared-dto/auth/request/logout.dto';
+import { RpcTranslateFilter } from '@app/common/filters/rpc-translate/rpc-translate.filter';
 
 @Controller('auth')
+@UseFilters(RpcTranslateFilter)
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 

@@ -1,4 +1,4 @@
-import { Controller } from '@nestjs/common';
+import { Controller, Logger } from '@nestjs/common';
 import { MessagePattern, Payload } from '@nestjs/microservices';
 import { AuthService } from './auth.service';
 import { AUTH_MSG } from '@app/common/constants/messageEvent';
@@ -9,9 +9,10 @@ import { LogoutRequest } from '@app/contracts/shared-dto/auth/request/logout.dto
 @Controller()
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
-
+  private readonly logger = new Logger(AuthController.name);
   @MessagePattern(AUTH_MSG.login)
   login(@Payload() dto: LoginDto) {
+    this.logger.warn('THIS LOGIN IN SERVICE CONTROLLER');
     return this.authService.login(dto);
   }
 

@@ -16,6 +16,9 @@ import { IUserService } from '@app/common/interfaces/user/IUserService';
 import { firstValueFrom, lastValueFrom } from 'rxjs';
 import { USER_MSG } from '@app/common/constants/messageEvent';
 import { Ack } from '@app/contracts/shared-dto/ack.dto';
+import { UserDto } from '@app/contracts/shared-dto/user/user.dto';
+import { NameRequest } from '@app/contracts/shared-dto/user/find.name.dto';
+import { CredentialRes } from '@app/contracts/shared-dto/user/Creds.dto';
 
 @Injectable()
 export class UserService implements IUserService {
@@ -72,5 +75,8 @@ export class UserService implements IUserService {
         dto: updateRestriction,
       }),
     );
+  }
+  async findByName(dto: NameRequest): Promise<CredentialRes> {
+    return firstValueFrom(this.userClient.send(USER_MSG.findByName, dto));
   }
 }
