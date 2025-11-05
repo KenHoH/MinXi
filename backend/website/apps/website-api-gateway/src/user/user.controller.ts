@@ -24,6 +24,7 @@ import { JwtAuthGuard } from '@app/common/auth/jwt-auth-guard/jwt-auth.guard';
 
 @Controller('user')
 @UseFilters(RpcTranslateFilter)
+@UseGuards(JwtAuthGuard)
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
@@ -32,7 +33,6 @@ export class UserController {
     return this.userService.create(createUserDto);
   }
 
-  @UseGuards(JwtAuthGuard)
   @Get()
   findAll() {
     return this.userService.findAll();

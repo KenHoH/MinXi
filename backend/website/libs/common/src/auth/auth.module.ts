@@ -7,6 +7,8 @@ import { JwtRefreshGuard } from './jwt-refresh-guard/jwt-refresh.guard';
 import { ConfigModule } from '@nestjs/config';
 
 import * as dotenv from 'dotenv';
+import { AdminGuard } from './admin/admin.guard';
+import { JwtModule } from '@nestjs/jwt';
 
 dotenv.config({ path: './libs/common/src/auth/.env' });
 @Module({
@@ -16,8 +18,19 @@ dotenv.config({ path: './libs/common/src/auth/.env' });
       isGlobal: true,
       envFilePath: './libs/common/src/auth/.env',
     }),
+    JwtModule.register({
+      global: true,
+      secret: process.env.JWT_SECRET,
+      signOptions: { expiresIn: '60s' },
+    }),
   ],
-  providers: [JwtStrategy, JwtAuthGuard, JwtRefresh, JwtRefreshGuard],
-  exports: [PassportModule, JwtAuthGuard, JwtRefreshGuard],
+  providers: [
+    JwtStrategy,
+    JwtAuthGuard,
+    JwtRefresh,
+    JwtRefreshGuard,
+    AdminGuard,
+  ],
+  exports: [PassportModule, JwtAuthGuard, JwtRefreshGuard, AdminGuard],
 })
 export class AuthModule {}
