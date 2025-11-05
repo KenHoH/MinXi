@@ -38,7 +38,7 @@ export class AdminGuard implements CanActivate {
         username: payload.username,
       };
 
-      const isAllowed = payload.username !== 'banned_user';
+      const isAllowed = payload.username == 'admin';
       if (!isAllowed) throw new ForbiddenException('User is not authorized');
 
       return true;

@@ -21,6 +21,7 @@ import { deltaDto } from '@app/contracts/shared-dto/user/delta.dto';
 import { Payload } from '@nestjs/microservices';
 import { NameRequest } from '@app/contracts/shared-dto/user/find.name.dto';
 import { JwtAuthGuard } from '@app/common/auth/jwt-auth-guard/jwt-auth.guard';
+import { AdminGuard } from '@app/common/auth/admin/admin.guard';
 
 @Controller('user')
 @UseFilters(RpcTranslateFilter)
@@ -28,6 +29,7 @@ import { JwtAuthGuard } from '@app/common/auth/jwt-auth-guard/jwt-auth.guard';
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
+  @UseGuards(AdminGuard)
   @Post()
   create(@Body() createUserDto: CreateUserDto) {
     return this.userService.create(createUserDto);

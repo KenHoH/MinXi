@@ -5,6 +5,7 @@ import { ClientsModule, Transport } from '@nestjs/microservices';
 import { USER_SERVICES } from '@app/common/constants/services';
 import { AuthModule } from '@app/common/auth/auth.module';
 import { JwtAuthGuard } from '@app/common/auth/jwt-auth-guard/jwt-auth.guard';
+import { AdminGuard } from '@app/common/auth/admin/admin.guard';
 
 @Module({
   imports: [
@@ -18,6 +19,6 @@ import { JwtAuthGuard } from '@app/common/auth/jwt-auth-guard/jwt-auth.guard';
     AuthModule,
   ],
   controllers: [UserController],
-  providers: [UserService, JwtAuthGuard],
+  providers: [UserService, JwtAuthGuard, AdminGuard],
 })
 export class UserModule {}
