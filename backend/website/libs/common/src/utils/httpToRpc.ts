@@ -1,9 +1,11 @@
-import { HttpException } from '@nestjs/common';
+import { HttpException, Logger } from '@nestjs/common';
 import { RpcCustomException } from '../errors/error-rpc';
 
 export function httpToRpc(
   error: HttpException | Error | any,
 ): RpcCustomException {
+  const logger = new Logger(httpToRpc.name);
+  logger.fatal('HttpToRpc');
   if (error instanceof HttpException) {
     const response = error.getResponse() as any;
     const status = error.getStatus();

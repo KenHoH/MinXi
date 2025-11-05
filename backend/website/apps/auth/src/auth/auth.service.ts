@@ -52,6 +52,8 @@ export class AuthService implements IAuthService {
     if (!passwordValid)
       throw httpToRpc(new UnauthorizedException('Invalid credentials'));
 
+    this.logger.warn(user.user_id);
+    this.logger.warn(user.username);
     const payload = { sub: user.userId, username: user.username };
 
     const accessSecret = this.configService.get<string>('JWT_SECRET')!;

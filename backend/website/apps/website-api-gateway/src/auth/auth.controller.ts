@@ -7,6 +7,7 @@ import {
   Param,
   Delete,
   UseFilters,
+  UseGuards,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { LoginDto } from '@app/contracts/shared-dto/auth/request/login.dto';

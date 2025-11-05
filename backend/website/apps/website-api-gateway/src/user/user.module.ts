@@ -3,6 +3,8 @@ import { UserService } from './user.service';
 import { UserController } from './user.controller';
 import { ClientsModule, Transport } from '@nestjs/microservices';
 import { USER_SERVICES } from '@app/common/constants/services';
+import { AuthModule } from '@app/common/auth/auth.module';
+import { JwtAuthGuard } from '@app/common/auth/jwt-auth-guard/jwt-auth.guard';
 
 @Module({
   imports: [
@@ -13,8 +15,9 @@ import { USER_SERVICES } from '@app/common/constants/services';
         options: { port: USER_SERVICES.PORT },
       },
     ]),
+    AuthModule,
   ],
   controllers: [UserController],
-  providers: [UserService],
+  providers: [UserService, JwtAuthGuard],
 })
 export class UserModule {}

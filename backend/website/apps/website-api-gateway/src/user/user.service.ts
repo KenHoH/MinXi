@@ -31,6 +31,7 @@ export class UserService implements IUserService {
   }
 
   async findAll() {
+    this.logger.debug("DEBUG");
     return await firstValueFrom(this.userClient.send(USER_MSG.findAll, {}));
   }
 

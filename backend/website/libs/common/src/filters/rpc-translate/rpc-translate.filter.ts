@@ -1,20 +1,53 @@
 import { RpcCustomException } from '@app/common/errors/error-rpc';
-import { Catch, ArgumentsHost, ExceptionFilter, Logger } from '@nestjs/common';
+import {
+  Catch,
+  ArgumentsHost,
+  ExceptionFilter,
+  Logger,
+  HttpException,
+} from '@nestjs/common';
 import { Response } from 'express';
 
 @Catch()
 export class RpcTranslateFilter implements ExceptionFilter {
   private readonly logger = new Logger(RpcTranslateFilter.name);
-  catch(exception: RpcCustomException, host: ArgumentsHost) {
-    const ctx = host.switchToHttp();
-    const res = ctx.getResponse<Response>();
 
-    const message = exception.message ?? 'Internal server error';
-    return res.status(exception.code).json({
-      statusCode: exception.code,
-      message,
-      details: exception.details,
-      timestamp: new Date().toISOString(),
-    });
+  catch(exception: any, host: ArgumentsHost) {
+    const contextType = host.getType();
+
+    if (contextType === 'http') {
+      const ctx = host.switchToHttp();
+      const res = ctx.getResponse<Response>();
+
+      const status =
+        typeof exception.getStatus === 'function'
+          ? exception.getStatus()
+          : (exception.code ?? 500);
+
+      const message =
+        typeof exception.getResponse === 'function'
+          ? exception.getResponse()
+          : (exception.message ?? 'Internal server error');
+
+      this.logger.error(`HTTP Exception: ${message}`);
+
+      return res.status(status).json({
+        statusCode: status,
+        message,
+        timestamp: new Date().toISOString(),
+      });
+    }
+
+    if (contextType === 'rpc') {
+      this.logger.error(
+        `RPC Exception caught: ${exception.message ?? exception}`,
+      );
+      throw new RpcCustomException(
+        exception.code ?? 500,
+        exception.message ?? 'Internal server error',
+      );
+    }
+
+    this.logger.error(`Unknown context type: ${contextType}`);
   }
 }

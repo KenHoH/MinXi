@@ -8,6 +8,7 @@ import {
   Delete,
   ParseIntPipe,
   UseFilters,
+  UseGuards,
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import { CreateUserDto } from '@app/contracts/shared-dto/user/create-user.dto';
@@ -19,6 +20,7 @@ import { RpcTranslateFilter } from '@app/common/filters/rpc-translate/rpc-transl
 import { deltaDto } from '@app/contracts/shared-dto/user/delta.dto';
 import { Payload } from '@nestjs/microservices';
 import { NameRequest } from '@app/contracts/shared-dto/user/find.name.dto';
+import { JwtAuthGuard } from '@app/common/auth/jwt-auth-guard/jwt-auth.guard';
 
 @Controller('user')
 @UseFilters(RpcTranslateFilter)
@@ -30,6 +32,7 @@ export class UserController {
     return this.userService.create(createUserDto);
   }
 
+  @UseGuards(JwtAuthGuard)
   @Get()
   findAll() {
     return this.userService.findAll();
