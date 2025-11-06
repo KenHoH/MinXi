@@ -7,3 +7,8 @@ export const AUTH_SERVICES = {
   CLIENT: 'AUTH_CLIENT',
   PORT: 3002,
 };
+
+export const LOG_SERVICES = {
+  CLIENT: 'LOG_CLIENT',
+  PORT: 3005,
+};

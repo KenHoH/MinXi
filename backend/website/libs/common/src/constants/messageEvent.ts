@@ -16,3 +16,11 @@ export const AUTH_MSG = {
   refresh: 'auth.refresh',
   logout: 'auth.logout',
 };
+
+export const LOG_MSG = {
+  create: 'log.create',
+  findAll: 'log.findAll',
+  findOne: 'log.findOne',
+  findDate: 'log.findDate',
+  remove: 'log.remove',
+};

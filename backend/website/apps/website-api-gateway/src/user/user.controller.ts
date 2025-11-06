@@ -9,6 +9,7 @@ import {
   ParseIntPipe,
   UseFilters,
   UseGuards,
+  UseInterceptors,
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import { CreateUserDto } from '@app/contracts/shared-dto/user/create-user.dto';
@@ -22,10 +23,14 @@ import { Payload } from '@nestjs/microservices';
 import { NameRequest } from '@app/contracts/shared-dto/user/find.name.dto';
 import { JwtAuthGuard } from '@app/common/auth/jwt-auth-guard/jwt-auth.guard';
 import { AdminGuard } from '@app/common/auth/admin/admin.guard';
+import { LogInterceptor } from '@app/common/interceptor/log/log.interceptor';
+import { ApiBearerAuth } from '@nestjs/swagger';
 
 @Controller('user')
 @UseFilters(RpcTranslateFilter)
 @UseGuards(JwtAuthGuard)
+@UseInterceptors(LogInterceptor)
+@ApiBearerAuth()
 export class UserController {
   constructor(private readonly userService: UserService) {}
 

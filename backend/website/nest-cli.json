@@ -46,6 +46,15 @@
         "tsConfigPath": "libs/contracts/tsconfig.lib.json"
       }
     },
+    "log-app": {
+      "type": "application",
+      "root": "apps/log-app",
+      "entryFile": "main",
+      "sourceRoot": "apps/log-app/src",
+      "compilerOptions": {
+        "tsConfigPath": "apps/log-app/tsconfig.app.json"
+      }
+    },
     "user": {
       "type": "application",
       "root": "apps/user",

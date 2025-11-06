@@ -6,10 +6,19 @@
 
 generator client {
   provider = "prisma-client-js"
-  output   = "../generated/log-client"
+  output   = "../log/generated/log-client"
 }
 
 datasource db {
   provider = "mysql"
   url      = env("LOG_DATABASE_URL")
+}
+
+model UserLog {
+  id        Int       @id @default(autoincrement())
+  userId    Int
+  method    String
+  path      String
+  meta      Json?     
+  createdAt DateTime  @default(now()) 
 }
