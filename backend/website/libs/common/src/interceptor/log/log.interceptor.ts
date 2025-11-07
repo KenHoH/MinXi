@@ -14,6 +14,7 @@ import {
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { ClientProxy } from '@nestjs/microservices';
+import { randomInt } from 'crypto';
 import { from, Observable, switchMap, tap } from 'rxjs';
 
 @Injectable()
@@ -68,13 +69,14 @@ export class LogInterceptor implements NestInterceptor {
             next: () => {
               logger.log(`Completed ${method} ${path} by user ${userId}`);
               logger.log(dto);
-              this.client.send(LOG_MSG.create, { userId, dto }).subscribe({
-                complete: () => logger.log('Success sending the message'),
-                error: (err) =>
-                  logger.error(
-                    `Log service failed to process request for ${method} ${path} by user ${userId}: ${err.message}`,
-                  ),
-              });
+              if (Math.random() < 0.2)
+                this.client.send(LOG_MSG.create, { userId, dto }).subscribe({
+                  complete: () => logger.log('Success sending the message'),
+                  error: (err) =>
+                    logger.error(
+                      `Log service failed to process request for ${method} ${path} by user ${userId}: ${err.message}`,
+                    ),
+                });
             },
             error: (err) =>
               logger.error(
