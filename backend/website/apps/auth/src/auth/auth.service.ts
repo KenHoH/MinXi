@@ -42,10 +42,20 @@ export class AuthService implements IAuthService {
   }
 
   async login(dto: LoginDto): Promise<TokenResponseDto> {
+    try {
+      await firstValueFrom(
+        this.userClient.send(USER_MSG.findByName, { name: dto.username }),
+      );
+    } catch (error) {
+      this.logger.fatal(error);
+      throw httpToRpc(new UnauthorizedException('User not found'));
+    }
+
     const user = await firstValueFrom(
       this.userClient.send(USER_MSG.findByName, { name: dto.username }),
     );
 
+    if (!user) this.logger.fatal('User Not Found');
     if (!user) throw httpToRpc(new UnauthorizedException('User not found'));
 
     const passwordValid = await bcrypt.compare(dto.password, user.password);

@@ -10,6 +10,7 @@ import { LogoutRequest } from '@app/contracts/shared-dto/auth/request/logout.dto
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
   private readonly logger = new Logger(AuthController.name);
+
   @MessagePattern(AUTH_MSG.login)
   login(@Payload() dto: LoginDto) {
     this.logger.warn('THIS LOGIN IN SERVICE CONTROLLER');

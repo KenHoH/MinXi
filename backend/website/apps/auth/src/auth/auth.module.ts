@@ -8,7 +8,7 @@ import { ClientsModule, Transport } from '@nestjs/microservices';
 import { USER_SERVICES } from '@app/common/constants/services';
 import * as dotenv from 'dotenv';
 
-dotenv.config({ path: './libs/common/src/auth/.env' });
+dotenv.config({ path: './libs/common/src/guard/.env' });
 
 @Module({
   imports: [

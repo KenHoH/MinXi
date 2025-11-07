@@ -48,31 +48,39 @@ export class UserService implements IUserService {
   async findAll() {
     try {
       const users = await this.repo.findAll();
-      if (!users)
+      if (!users) {
         throw httpToRpc(
           new HttpException('Error Fetching All Users', HttpStatus.NOT_FOUND),
         );
+      }
       return users.map(mapToDto);
     } catch (error) {
       this.logger.error(`Error fetching users: ${error.message}`);
       throw httpToRpc(
-        new HttpException('Error Fetching All Users', HttpStatus.NOT_FOUND),
+        new HttpException('Error Fetching All Users', HttpStatus.BAD_REQUEST),
       );
     }
   }
 
   async findOne(id: number) {
-    const user = await this.repo.findOne(id);
-    if (!user) {
-      this.logger.warn(`User with ID ${id} not found`);
-      throw httpToRpc(new NotFoundException('User not found'));
+    try {
+      const user = await this.repo.findOne(id);
+      if (!user) {
+        this.logger.warn(`User with ID ${id} not found`);
+        throw httpToRpc(new NotFoundException('User not found'));
+      }
+      return mapToDto(user);
+    } catch (error) {
+      this.logger.error(`Failed to find user ${id}: ${error.message}`);
+      throw httpToRpc(
+        new HttpException('Failed to find user', HttpStatus.BAD_REQUEST),
+      );
     }
-    return mapToDto(user);
   }
 
   async updateProfile(id: number, dto: UpdateProfileUserDto) {
-    this.logger.log(dto);
     try {
+      this.logger.log(dto);
       const updatedUser = await this.repo.updateProfile(id, dto);
       return mapToDto(updatedUser);
     } catch (error) {
@@ -106,77 +114,130 @@ export class UserService implements IUserService {
   }
 
   async updateLike(id: number, delta: number): Promise<Ack> {
-    const user = await this.repo.findOne(id);
-    if (!user) {
-      this.logger.warn(`User with ID ${id} not found for like update`);
-      throw httpToRpc(new NotFoundException('User not found'));
+    try {
+      const user = await this.repo.findOne(id);
+      if (!user) {
+        this.logger.warn(`User with ID ${id} not found for like update`);
+        throw httpToRpc(new NotFoundException('User not found'));
+      }
+
+      user.total_like += delta;
+      const result = await this.repo.updateLike(id, user.total_like);
+
+      if (!result) {
+        return { Msg: 'Failed to update like', Valid: false };
+      }
+
+      return { Msg: 'Like count updated successfully', Valid: true };
+    } catch (error) {
+      this.logger.error(
+        `Failed to update like for user ${id}: ${error.message}`,
+      );
+      throw httpToRpc(
+        new HttpException(
+          'Failed to update like count',
+          HttpStatus.BAD_REQUEST,
+        ),
+      );
     }
-
-    user.total_like += delta;
-    const result = await this.repo.updateLike(id, user.total_like);
-
-    if (!result) {
-      return { Msg: 'Failed to update like', Valid: false };
-    }
-
-    return { Msg: 'Like count updated successfully', Valid: true };
   }
 
   async updateFollow(id: number, delta: number): Promise<Ack> {
-    const user = await this.repo.findOne(id);
-    if (!user) {
-      this.logger.warn(`User with ID ${id} not found for follow update`);
-      throw httpToRpc(new NotFoundException('User not found'));
+    try {
+      const user = await this.repo.findOne(id);
+      if (!user) {
+        this.logger.warn(`User with ID ${id} not found for follow update`);
+        throw httpToRpc(new NotFoundException('User not found'));
+      }
+
+      user.follower += delta;
+      const result = await this.repo.updateFollow(id, user.follower);
+
+      if (!result) {
+        return { Msg: 'Failed to update follower count', Valid: false };
+      }
+
+      return { Msg: 'Follower count updated successfully', Valid: true };
+    } catch (error) {
+      this.logger.error(
+        `Failed to update follower count for user ${id}: ${error.message}`,
+      );
+      throw httpToRpc(
+        new HttpException(
+          'Failed to update follower count',
+          HttpStatus.BAD_REQUEST,
+        ),
+      );
     }
-
-    user.follower += delta;
-    const result = await this.repo.updateFollow(id, user.follower);
-
-    if (!result) {
-      return { Msg: 'Failed to update follower count', Valid: false };
-    }
-
-    return { Msg: 'Follower count updated successfully', Valid: true };
   }
 
   async updateReport(id: number, delta: number): Promise<Ack> {
-    const user = await this.repo.findOne(id);
-    if (!user) {
-      this.logger.warn(`User with ID ${id} not found for report update`);
-      throw httpToRpc(new NotFoundException('User not found'));
+    try {
+      const user = await this.repo.findOne(id);
+      if (!user) {
+        this.logger.warn(`User with ID ${id} not found for report update`);
+        throw httpToRpc(new NotFoundException('User not found'));
+      }
+
+      user.total_reports += delta;
+      const result = await this.repo.updateReport(id, user.total_reports);
+
+      if (!result) {
+        return { Msg: 'Failed to update report count', Valid: false };
+      }
+
+      return { Msg: 'Report count updated successfully', Valid: true };
+    } catch (error) {
+      this.logger.error(
+        `Failed to update report count for user ${id}: ${error.message}`,
+      );
+      throw httpToRpc(
+        new HttpException(
+          'Failed to update report count',
+          HttpStatus.BAD_REQUEST,
+        ),
+      );
     }
-
-    user.total_reports += delta;
-    const result = await this.repo.updateReport(id, user.total_reports);
-
-    if (!result) {
-      return { Msg: 'Failed to update report count', Valid: false };
-    }
-
-    return { Msg: 'Report count updated successfully', Valid: true };
   }
 
   async remove(id: number): Promise<Ack> {
-    const result = await this.repo.remove(id);
-    if (!result) {
-      return { Msg: 'Failed to delete user', Valid: false };
-    }
-
-    return { Msg: 'User deleted successfully', Valid: true };
-  }
-  async findByName(dto: NameRequest): Promise<CredentialRes> {
-    this.logger.log(dto);
-    const result = await this.repo.findByName(dto.name);
-    if (!result) {
-      this.logger.warn('User not found by name');
+    try {
+      const result = await this.repo.remove(id);
+      if (!result) {
+        throw httpToRpc(new NotFoundException('User not found'));
+      }
+      return { Msg: 'User deleted successfully', Valid: true };
+    } catch (error) {
+      this.logger.error(`Failed to delete user ${id}: ${error.message}`);
       throw httpToRpc(
-        new HttpException('User Not Found By Name', HttpStatus.NOT_FOUND),
+        new HttpException('Failed to delete user', HttpStatus.BAD_REQUEST),
       );
     }
-    return {
-      username: result.username,
-      password: result.password,
-      user_id: result.user_id,
-    };
+  }
+
+  async findByName(dto: NameRequest): Promise<CredentialRes> {
+    try {
+      this.logger.log(dto);
+      const result = await this.repo.findByName(dto.name);
+      if (!result) {
+        this.logger.warn('User not found by name');
+        throw httpToRpc(
+          new HttpException('User Not Found By Name', HttpStatus.NOT_FOUND),
+        );
+      }
+      return {
+        username: result.username,
+        password: result.password,
+        user_id: result.user_id,
+      };
+    } catch (error) {
+      this.logger.error(`Failed to find user by name: ${error.message}`);
+      throw httpToRpc(
+        new HttpException(
+          'Failed to find user by name',
+          HttpStatus.BAD_REQUEST,
+        ),
+      );
+    }
   }
 }

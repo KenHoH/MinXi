@@ -1,10 +1,4 @@
-import {
-  HttpException,
-  HttpStatus,
-  Inject,
-  Injectable,
-  Logger,
-} from '@nestjs/common';
+import { Inject, Injectable, Logger } from '@nestjs/common';
 import { CreateUserDto } from '@app/contracts/shared-dto/user/create-user.dto';
 import {
   UpdateProfileUserDto,
@@ -16,7 +10,6 @@ import { IUserService } from '@app/common/interfaces/user/IUserService';
 import { firstValueFrom, lastValueFrom } from 'rxjs';
 import { USER_MSG } from '@app/common/constants/messageEvent';
 import { Ack } from '@app/contracts/shared-dto/ack.dto';
-import { UserDto } from '@app/contracts/shared-dto/user/user.dto';
 import { NameRequest } from '@app/contracts/shared-dto/user/find.name.dto';
 import { CredentialRes } from '@app/contracts/shared-dto/user/Creds.dto';
 
@@ -31,7 +24,6 @@ export class UserService implements IUserService {
   }
 
   async findAll() {
-    this.logger.debug("DEBUG");
     return await firstValueFrom(this.userClient.send(USER_MSG.findAll, {}));
   }
 

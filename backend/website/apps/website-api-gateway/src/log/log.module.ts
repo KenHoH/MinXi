@@ -5,7 +5,7 @@ import { ClientsModule, Transport } from '@nestjs/microservices';
 import { LOG_SERVICES } from '@app/common/constants/services';
 import { ContractsModule } from '@app/contracts';
 import { CommonModule } from '@app/common';
-import { AdminGuard } from '@app/common/auth/admin/admin.guard';
+import { AdminGuard } from '@app/common/guard/admin/admin.guard';
 
 @Module({
   imports: [

@@ -4,9 +4,9 @@ import { ClientProxy } from '@nestjs/microservices';
 import { ILogService } from '@app/common/interfaces/log/ILogService';
 import { Ack } from '@app/contracts/shared-dto/ack.dto';
 import { LogReq } from '@app/contracts/shared-dto/log/request/log.req.dto';
-import { UserLog } from 'apps/log-app/src/log/entities/log.entity';
 import { firstValueFrom } from 'rxjs';
 import { LOG_MSG } from '@app/common/constants/messageEvent';
+import { UserLog } from 'apps/log-app/src/log/entities/log.entity';
 
 @Injectable()
 export class LogService implements ILogService {

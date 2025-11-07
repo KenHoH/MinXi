@@ -21,8 +21,8 @@ import { RpcTranslateFilter } from '@app/common/filters/rpc-translate/rpc-transl
 import { deltaDto } from '@app/contracts/shared-dto/user/delta.dto';
 import { Payload } from '@nestjs/microservices';
 import { NameRequest } from '@app/contracts/shared-dto/user/find.name.dto';
-import { JwtAuthGuard } from '@app/common/auth/jwt-auth-guard/jwt-auth.guard';
-import { AdminGuard } from '@app/common/auth/admin/admin.guard';
+import { JwtAuthGuard } from '@app/common/guard/jwt-auth-guard/jwt-auth.guard';
+import { AdminGuard } from '@app/common/guard/admin/admin.guard';
 import { LogInterceptor } from '@app/common/interceptor/log/log.interceptor';
 import { ApiBearerAuth } from '@nestjs/swagger';
 
@@ -86,7 +86,7 @@ export class UserController {
     return this.userService.remove(+id);
   }
 
-  @Post('/name')
+  @Get('/name')
   findByName(@Payload() body: NameRequest) {
     return this.userService.findByName(body);
   }

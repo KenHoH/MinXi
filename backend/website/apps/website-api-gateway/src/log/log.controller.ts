@@ -15,7 +15,7 @@ import {
 import { LogService } from './log.service';
 import { LogReq } from '@app/contracts/shared-dto/log/request/log.req.dto';
 import { Payload } from '@nestjs/microservices';
-import { AdminGuard } from '@app/common/auth/admin/admin.guard';
+import { AdminGuard } from '@app/common/guard/admin/admin.guard';
 import { RpcTranslateFilter } from '@app/common/filters/rpc-translate/rpc-translate.filter';
 import { ApiBearerAuth } from '@nestjs/swagger';
 

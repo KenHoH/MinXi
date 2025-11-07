@@ -10,9 +10,6 @@ import {
   UpdateProfileUserDto,
   UpdateRestriction,
 } from '@app/contracts/shared-dto/user/update-user.dto';
-import { UserDto } from '@app/contracts/shared-dto/user/user.dto';
-import { mapToDto } from '../utils/mapToDto';
-import { Ack } from '@app/contracts/shared-dto/ack.dto';
 
 @Injectable()
 export class Repository {

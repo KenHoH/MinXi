@@ -27,9 +27,10 @@ export class RpcTranslateFilter implements ExceptionFilter {
       const message =
         typeof exception.getResponse === 'function'
           ? exception.getResponse()
-          : (exception.message ?? 'Internal server error');
+          : (exception.message ?? 'Internal serverer error');
 
       this.logger.error(`HTTP Exception: ${message}`);
+      this.logger.error(`HTTP Exception Status: ${status}`);
 
       return res.status(status).json({
         statusCode: status,
@@ -44,7 +45,7 @@ export class RpcTranslateFilter implements ExceptionFilter {
       );
       throw new RpcCustomException(
         exception.code ?? 500,
-        exception.message ?? 'Internal server error',
+        exception.message ?? 'Internal servers error',
       );
     }
 

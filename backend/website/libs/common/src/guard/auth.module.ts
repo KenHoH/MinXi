@@ -10,7 +10,7 @@ import * as dotenv from 'dotenv';
 import { AdminGuard } from './admin/admin.guard';
 import { JwtModule } from '@nestjs/jwt';
 
-dotenv.config({ path: './libs/common/src/auth/.env' });
+dotenv.config({ path: './libs/common/src/guard/.env' });
 @Module({
   imports: [
     PassportModule.register({ defaultStrategy: 'access' }),
