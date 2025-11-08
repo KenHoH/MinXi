@@ -1,0 +1,53 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../content/generated/content-client"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("CONTENT_DATABASE_URL")
+}
+
+model Content {
+  content_id        Int      @id @default(autoincrement())
+  creator_id        Int
+  parent_id         Int?
+  title             String?
+  description       String?
+  post_type         PostType
+  visibilityPrivate Boolean  @default(false)
+  views             Int      @default(0)
+  likes             Int      @default(0)
+  comments          Int      @default(0)
+  pins              Int      @default(0)
+  reports           Int      @default(0)
+  area_id           Int
+  created_at        DateTime @default(now())
+
+  files File[]
+
+  @@unique([content_id, area_id])
+}
+
+model File {
+  file_id    Int     @id @default(autoincrement())
+  content_id Int
+  filepath   String
+  thumbnail  String?
+
+  content Content @relation(fields: [content_id], references: [content_id])
+
+  @@unique([content_id, filepath])
+}
+
+enum PostType {
+  TEXT
+  IMAGE
+  VIDEO
+}
