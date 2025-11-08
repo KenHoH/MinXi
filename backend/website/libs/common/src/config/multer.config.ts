@@ -3,13 +3,22 @@ import { extname } from 'path';
 
 export const MulterConfiguration = {
   storage: diskStorage({
-    destination: './uploads',
+    destination: (req, file, callback) => {
+      let destPath = './uploads/'; 
+
+      if (file.fieldname === 'image') {
+        destPath += 'thumbnail'; 
+      } else if (file.fieldname === 'video') {
+        destPath += 'content'; 
+      }
+
+      callback(null, destPath);
+    },
 
     filename: (req, file, callback) => {
       const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
       const extension = extname(file.originalname);
-      const fileName = `${uniqueSuffix}${extension}`;
-      callback(null, fileName);
+      callback(null, `${uniqueSuffix}${extension}`);
     },
   }),
 };

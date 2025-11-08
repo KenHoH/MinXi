@@ -25,24 +25,6 @@ export type Content = $Result.DefaultSelection<Prisma.$ContentPayload>
 export type File = $Result.DefaultSelection<Prisma.$FilePayload>
 
 /**
- * Enums
- */
-export namespace $Enums {
-  export const PostType: {
-  TEXT: 'TEXT',
-  IMAGE: 'IMAGE',
-  VIDEO: 'VIDEO'
-};
-
-export type PostType = (typeof PostType)[keyof typeof PostType]
-
-}
-
-export type PostType = $Enums.PostType
-
-export const PostType: typeof $Enums.PostType
-
-/**
  * ##  Prisma Client ʲˢ
  *
  * Type-safe database client for TypeScript & Node.js
@@ -949,36 +931,6 @@ export namespace Prisma {
    */
 
 
-  /**
-   * Count Type ContentCountOutputType
-   */
-
-  export type ContentCountOutputType = {
-    files: number
-  }
-
-  export type ContentCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    files?: boolean | ContentCountOutputTypeCountFilesArgs
-  }
-
-  // Custom InputTypes
-  /**
-   * ContentCountOutputType without action
-   */
-  export type ContentCountOutputTypeDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the ContentCountOutputType
-     */
-    select?: ContentCountOutputTypeSelect<ExtArgs> | null
-  }
-
-  /**
-   * ContentCountOutputType without action
-   */
-  export type ContentCountOutputTypeCountFilesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    where?: FileWhereInput
-  }
-
 
   /**
    * Models
@@ -1026,7 +978,7 @@ export namespace Prisma {
     parent_id: number | null
     title: string | null
     description: string | null
-    post_type: $Enums.PostType | null
+    post_type: string | null
     visibilityPrivate: boolean | null
     views: number | null
     likes: number | null
@@ -1043,7 +995,7 @@ export namespace Prisma {
     parent_id: number | null
     title: string | null
     description: string | null
-    post_type: $Enums.PostType | null
+    post_type: string | null
     visibilityPrivate: boolean | null
     views: number | null
     likes: number | null
@@ -1239,9 +1191,9 @@ export namespace Prisma {
     content_id: number
     creator_id: number
     parent_id: number | null
-    title: string | null
-    description: string | null
-    post_type: $Enums.PostType
+    title: string
+    description: string
+    post_type: string
     visibilityPrivate: boolean
     views: number
     likes: number
@@ -1286,8 +1238,6 @@ export namespace Prisma {
     reports?: boolean
     area_id?: boolean
     created_at?: boolean
-    files?: boolean | Content$filesArgs<ExtArgs>
-    _count?: boolean | ContentCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["content"]>
 
 
@@ -1310,23 +1260,17 @@ export namespace Prisma {
   }
 
   export type ContentOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"content_id" | "creator_id" | "parent_id" | "title" | "description" | "post_type" | "visibilityPrivate" | "views" | "likes" | "comments" | "pins" | "reports" | "area_id" | "created_at", ExtArgs["result"]["content"]>
-  export type ContentInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    files?: boolean | Content$filesArgs<ExtArgs>
-    _count?: boolean | ContentCountOutputTypeDefaultArgs<ExtArgs>
-  }
 
   export type $ContentPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     name: "Content"
-    objects: {
-      files: Prisma.$FilePayload<ExtArgs>[]
-    }
+    objects: {}
     scalars: $Extensions.GetPayloadResult<{
       content_id: number
       creator_id: number
       parent_id: number | null
-      title: string | null
-      description: string | null
-      post_type: $Enums.PostType
+      title: string
+      description: string
+      post_type: string
       visibilityPrivate: boolean
       views: number
       likes: number
@@ -1675,7 +1619,6 @@ export namespace Prisma {
    */
   export interface Prisma__ContentClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
     readonly [Symbol.toStringTag]: "PrismaPromise"
-    files<T extends Content$filesArgs<ExtArgs> = {}>(args?: Subset<T, Content$filesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$FilePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1710,7 +1653,7 @@ export namespace Prisma {
     readonly parent_id: FieldRef<"Content", 'Int'>
     readonly title: FieldRef<"Content", 'String'>
     readonly description: FieldRef<"Content", 'String'>
-    readonly post_type: FieldRef<"Content", 'PostType'>
+    readonly post_type: FieldRef<"Content", 'String'>
     readonly visibilityPrivate: FieldRef<"Content", 'Boolean'>
     readonly views: FieldRef<"Content", 'Int'>
     readonly likes: FieldRef<"Content", 'Int'>
@@ -1736,10 +1679,6 @@ export namespace Prisma {
      */
     omit?: ContentOmit<ExtArgs> | null
     /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: ContentInclude<ExtArgs> | null
-    /**
      * Filter, which Content to fetch.
      */
     where: ContentWhereUniqueInput
@@ -1758,10 +1697,6 @@ export namespace Prisma {
      */
     omit?: ContentOmit<ExtArgs> | null
     /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: ContentInclude<ExtArgs> | null
-    /**
      * Filter, which Content to fetch.
      */
     where: ContentWhereUniqueInput
@@ -1779,10 +1714,6 @@ export namespace Prisma {
      * Omit specific fields from the Content
      */
     omit?: ContentOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: ContentInclude<ExtArgs> | null
     /**
      * Filter, which Content to fetch.
      */
@@ -1832,10 +1763,6 @@ export namespace Prisma {
      */
     omit?: ContentOmit<ExtArgs> | null
     /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: ContentInclude<ExtArgs> | null
-    /**
      * Filter, which Content to fetch.
      */
     where?: ContentWhereInput
@@ -1884,10 +1811,6 @@ export namespace Prisma {
      */
     omit?: ContentOmit<ExtArgs> | null
     /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: ContentInclude<ExtArgs> | null
-    /**
      * Filter, which Contents to fetch.
      */
     where?: ContentWhereInput
@@ -1931,10 +1854,6 @@ export namespace Prisma {
      */
     omit?: ContentOmit<ExtArgs> | null
     /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: ContentInclude<ExtArgs> | null
-    /**
      * The data needed to create a Content.
      */
     data: XOR<ContentCreateInput, ContentUncheckedCreateInput>
@@ -1963,10 +1882,6 @@ export namespace Prisma {
      * Omit specific fields from the Content
      */
     omit?: ContentOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: ContentInclude<ExtArgs> | null
     /**
      * The data needed to update a Content.
      */
@@ -2008,10 +1923,6 @@ export namespace Prisma {
      */
     omit?: ContentOmit<ExtArgs> | null
     /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: ContentInclude<ExtArgs> | null
-    /**
      * The filter to search for the Content to update in case it exists.
      */
     where: ContentWhereUniqueInput
@@ -2038,10 +1949,6 @@ export namespace Prisma {
      */
     omit?: ContentOmit<ExtArgs> | null
     /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: ContentInclude<ExtArgs> | null
-    /**
      * Filter which Content to delete.
      */
     where: ContentWhereUniqueInput
@@ -2062,30 +1969,6 @@ export namespace Prisma {
   }
 
   /**
-   * Content.files
-   */
-  export type Content$filesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the File
-     */
-    select?: FileSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the File
-     */
-    omit?: FileOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: FileInclude<ExtArgs> | null
-    where?: FileWhereInput
-    orderBy?: FileOrderByWithRelationInput | FileOrderByWithRelationInput[]
-    cursor?: FileWhereUniqueInput
-    take?: number
-    skip?: number
-    distinct?: FileScalarFieldEnum | FileScalarFieldEnum[]
-  }
-
-  /**
    * Content without action
    */
   export type ContentDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -2097,10 +1980,6 @@ export namespace Prisma {
      * Omit specific fields from the Content
      */
     omit?: ContentOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: ContentInclude<ExtArgs> | null
   }
 
 
@@ -2119,32 +1998,37 @@ export namespace Prisma {
   export type FileAvgAggregateOutputType = {
     file_id: number | null
     content_id: number | null
+    content_area_id: number | null
   }
 
   export type FileSumAggregateOutputType = {
     file_id: number | null
     content_id: number | null
+    content_area_id: number | null
   }
 
   export type FileMinAggregateOutputType = {
     file_id: number | null
-    content_id: number | null
     filepath: string | null
     thumbnail: string | null
+    content_id: number | null
+    content_area_id: number | null
   }
 
   export type FileMaxAggregateOutputType = {
     file_id: number | null
-    content_id: number | null
     filepath: string | null
     thumbnail: string | null
+    content_id: number | null
+    content_area_id: number | null
   }
 
   export type FileCountAggregateOutputType = {
     file_id: number
-    content_id: number
     filepath: number
     thumbnail: number
+    content_id: number
+    content_area_id: number
     _all: number
   }
 
@@ -2152,32 +2036,37 @@ export namespace Prisma {
   export type FileAvgAggregateInputType = {
     file_id?: true
     content_id?: true
+    content_area_id?: true
   }
 
   export type FileSumAggregateInputType = {
     file_id?: true
     content_id?: true
+    content_area_id?: true
   }
 
   export type FileMinAggregateInputType = {
     file_id?: true
-    content_id?: true
     filepath?: true
     thumbnail?: true
+    content_id?: true
+    content_area_id?: true
   }
 
   export type FileMaxAggregateInputType = {
     file_id?: true
-    content_id?: true
     filepath?: true
     thumbnail?: true
+    content_id?: true
+    content_area_id?: true
   }
 
   export type FileCountAggregateInputType = {
     file_id?: true
-    content_id?: true
     filepath?: true
     thumbnail?: true
+    content_id?: true
+    content_area_id?: true
     _all?: true
   }
 
@@ -2269,9 +2158,10 @@ export namespace Prisma {
 
   export type FileGroupByOutputType = {
     file_id: number
-    content_id: number
     filepath: string
     thumbnail: string | null
+    content_id: number
+    content_area_id: number
     _count: FileCountAggregateOutputType | null
     _avg: FileAvgAggregateOutputType | null
     _sum: FileSumAggregateOutputType | null
@@ -2295,36 +2185,33 @@ export namespace Prisma {
 
   export type FileSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
     file_id?: boolean
-    content_id?: boolean
     filepath?: boolean
     thumbnail?: boolean
-    content?: boolean | ContentDefaultArgs<ExtArgs>
+    content_id?: boolean
+    content_area_id?: boolean
   }, ExtArgs["result"]["file"]>
 
 
 
   export type FileSelectScalar = {
     file_id?: boolean
-    content_id?: boolean
     filepath?: boolean
     thumbnail?: boolean
+    content_id?: boolean
+    content_area_id?: boolean
   }
 
-  export type FileOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"file_id" | "content_id" | "filepath" | "thumbnail", ExtArgs["result"]["file"]>
-  export type FileInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    content?: boolean | ContentDefaultArgs<ExtArgs>
-  }
+  export type FileOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"file_id" | "filepath" | "thumbnail" | "content_id" | "content_area_id", ExtArgs["result"]["file"]>
 
   export type $FilePayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     name: "File"
-    objects: {
-      content: Prisma.$ContentPayload<ExtArgs>
-    }
+    objects: {}
     scalars: $Extensions.GetPayloadResult<{
       file_id: number
-      content_id: number
       filepath: string
       thumbnail: string | null
+      content_id: number
+      content_area_id: number
     }, ExtArgs["result"]["file"]>
     composites: {}
   }
@@ -2665,7 +2552,6 @@ export namespace Prisma {
    */
   export interface Prisma__FileClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
     readonly [Symbol.toStringTag]: "PrismaPromise"
-    content<T extends ContentDefaultArgs<ExtArgs> = {}>(args?: Subset<T, ContentDefaultArgs<ExtArgs>>): Prisma__ContentClient<$Result.GetResult<Prisma.$ContentPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -2696,9 +2582,10 @@ export namespace Prisma {
    */
   interface FileFieldRefs {
     readonly file_id: FieldRef<"File", 'Int'>
-    readonly content_id: FieldRef<"File", 'Int'>
     readonly filepath: FieldRef<"File", 'String'>
     readonly thumbnail: FieldRef<"File", 'String'>
+    readonly content_id: FieldRef<"File", 'Int'>
+    readonly content_area_id: FieldRef<"File", 'Int'>
   }
     
 
@@ -2715,10 +2602,6 @@ export namespace Prisma {
      * Omit specific fields from the File
      */
     omit?: FileOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: FileInclude<ExtArgs> | null
     /**
      * Filter, which File to fetch.
      */
@@ -2738,10 +2621,6 @@ export namespace Prisma {
      */
     omit?: FileOmit<ExtArgs> | null
     /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: FileInclude<ExtArgs> | null
-    /**
      * Filter, which File to fetch.
      */
     where: FileWhereUniqueInput
@@ -2759,10 +2638,6 @@ export namespace Prisma {
      * Omit specific fields from the File
      */
     omit?: FileOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: FileInclude<ExtArgs> | null
     /**
      * Filter, which File to fetch.
      */
@@ -2812,10 +2687,6 @@ export namespace Prisma {
      */
     omit?: FileOmit<ExtArgs> | null
     /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: FileInclude<ExtArgs> | null
-    /**
      * Filter, which File to fetch.
      */
     where?: FileWhereInput
@@ -2864,10 +2735,6 @@ export namespace Prisma {
      */
     omit?: FileOmit<ExtArgs> | null
     /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: FileInclude<ExtArgs> | null
-    /**
      * Filter, which Files to fetch.
      */
     where?: FileWhereInput
@@ -2911,10 +2778,6 @@ export namespace Prisma {
      */
     omit?: FileOmit<ExtArgs> | null
     /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: FileInclude<ExtArgs> | null
-    /**
      * The data needed to create a File.
      */
     data: XOR<FileCreateInput, FileUncheckedCreateInput>
@@ -2943,10 +2806,6 @@ export namespace Prisma {
      * Omit specific fields from the File
      */
     omit?: FileOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: FileInclude<ExtArgs> | null
     /**
      * The data needed to update a File.
      */
@@ -2988,10 +2847,6 @@ export namespace Prisma {
      */
     omit?: FileOmit<ExtArgs> | null
     /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: FileInclude<ExtArgs> | null
-    /**
      * The filter to search for the File to update in case it exists.
      */
     where: FileWhereUniqueInput
@@ -3017,10 +2872,6 @@ export namespace Prisma {
      * Omit specific fields from the File
      */
     omit?: FileOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: FileInclude<ExtArgs> | null
     /**
      * Filter which File to delete.
      */
@@ -3053,10 +2904,6 @@ export namespace Prisma {
      * Omit specific fields from the File
      */
     omit?: FileOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: FileInclude<ExtArgs> | null
   }
 
 
@@ -3096,9 +2943,10 @@ export namespace Prisma {
 
   export const FileScalarFieldEnum: {
     file_id: 'file_id',
-    content_id: 'content_id',
     filepath: 'filepath',
-    thumbnail: 'thumbnail'
+    thumbnail: 'thumbnail',
+    content_id: 'content_id',
+    content_area_id: 'content_area_id'
   };
 
   export type FileScalarFieldEnum = (typeof FileScalarFieldEnum)[keyof typeof FileScalarFieldEnum]
@@ -3122,7 +2970,8 @@ export namespace Prisma {
 
   export const ContentOrderByRelevanceFieldEnum: {
     title: 'title',
-    description: 'description'
+    description: 'description',
+    post_type: 'post_type'
   };
 
   export type ContentOrderByRelevanceFieldEnum = (typeof ContentOrderByRelevanceFieldEnum)[keyof typeof ContentOrderByRelevanceFieldEnum]
@@ -3152,13 +3001,6 @@ export namespace Prisma {
    * Reference to a field of type 'String'
    */
   export type StringFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'String'>
-    
-
-
-  /**
-   * Reference to a field of type 'PostType'
-   */
-  export type EnumPostTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'PostType'>
     
 
 
@@ -3193,9 +3035,9 @@ export namespace Prisma {
     content_id?: IntFilter<"Content"> | number
     creator_id?: IntFilter<"Content"> | number
     parent_id?: IntNullableFilter<"Content"> | number | null
-    title?: StringNullableFilter<"Content"> | string | null
-    description?: StringNullableFilter<"Content"> | string | null
-    post_type?: EnumPostTypeFilter<"Content"> | $Enums.PostType
+    title?: StringFilter<"Content"> | string
+    description?: StringFilter<"Content"> | string
+    post_type?: StringFilter<"Content"> | string
     visibilityPrivate?: BoolFilter<"Content"> | boolean
     views?: IntFilter<"Content"> | number
     likes?: IntFilter<"Content"> | number
@@ -3204,15 +3046,14 @@ export namespace Prisma {
     reports?: IntFilter<"Content"> | number
     area_id?: IntFilter<"Content"> | number
     created_at?: DateTimeFilter<"Content"> | Date | string
-    files?: FileListRelationFilter
   }
 
   export type ContentOrderByWithRelationInput = {
     content_id?: SortOrder
     creator_id?: SortOrder
     parent_id?: SortOrderInput | SortOrder
-    title?: SortOrderInput | SortOrder
-    description?: SortOrderInput | SortOrder
+    title?: SortOrder
+    description?: SortOrder
     post_type?: SortOrder
     visibilityPrivate?: SortOrder
     views?: SortOrder
@@ -3222,21 +3063,20 @@ export namespace Prisma {
     reports?: SortOrder
     area_id?: SortOrder
     created_at?: SortOrder
-    files?: FileOrderByRelationAggregateInput
     _relevance?: ContentOrderByRelevanceInput
   }
 
   export type ContentWhereUniqueInput = Prisma.AtLeast<{
-    content_id?: number
     content_id_area_id?: ContentContent_idArea_idCompoundUniqueInput
     AND?: ContentWhereInput | ContentWhereInput[]
     OR?: ContentWhereInput[]
     NOT?: ContentWhereInput | ContentWhereInput[]
+    content_id?: IntFilter<"Content"> | number
     creator_id?: IntFilter<"Content"> | number
     parent_id?: IntNullableFilter<"Content"> | number | null
-    title?: StringNullableFilter<"Content"> | string | null
-    description?: StringNullableFilter<"Content"> | string | null
-    post_type?: EnumPostTypeFilter<"Content"> | $Enums.PostType
+    title?: StringFilter<"Content"> | string
+    description?: StringFilter<"Content"> | string
+    post_type?: StringFilter<"Content"> | string
     visibilityPrivate?: BoolFilter<"Content"> | boolean
     views?: IntFilter<"Content"> | number
     likes?: IntFilter<"Content"> | number
@@ -3245,15 +3085,14 @@ export namespace Prisma {
     reports?: IntFilter<"Content"> | number
     area_id?: IntFilter<"Content"> | number
     created_at?: DateTimeFilter<"Content"> | Date | string
-    files?: FileListRelationFilter
-  }, "content_id" | "content_id_area_id">
+  }, "content_id_area_id">
 
   export type ContentOrderByWithAggregationInput = {
     content_id?: SortOrder
     creator_id?: SortOrder
     parent_id?: SortOrderInput | SortOrder
-    title?: SortOrderInput | SortOrder
-    description?: SortOrderInput | SortOrder
+    title?: SortOrder
+    description?: SortOrder
     post_type?: SortOrder
     visibilityPrivate?: SortOrder
     views?: SortOrder
@@ -3277,9 +3116,9 @@ export namespace Prisma {
     content_id?: IntWithAggregatesFilter<"Content"> | number
     creator_id?: IntWithAggregatesFilter<"Content"> | number
     parent_id?: IntNullableWithAggregatesFilter<"Content"> | number | null
-    title?: StringNullableWithAggregatesFilter<"Content"> | string | null
-    description?: StringNullableWithAggregatesFilter<"Content"> | string | null
-    post_type?: EnumPostTypeWithAggregatesFilter<"Content"> | $Enums.PostType
+    title?: StringWithAggregatesFilter<"Content"> | string
+    description?: StringWithAggregatesFilter<"Content"> | string
+    post_type?: StringWithAggregatesFilter<"Content"> | string
     visibilityPrivate?: BoolWithAggregatesFilter<"Content"> | boolean
     views?: IntWithAggregatesFilter<"Content"> | number
     likes?: IntWithAggregatesFilter<"Content"> | number
@@ -3295,18 +3134,18 @@ export namespace Prisma {
     OR?: FileWhereInput[]
     NOT?: FileWhereInput | FileWhereInput[]
     file_id?: IntFilter<"File"> | number
-    content_id?: IntFilter<"File"> | number
     filepath?: StringFilter<"File"> | string
     thumbnail?: StringNullableFilter<"File"> | string | null
-    content?: XOR<ContentScalarRelationFilter, ContentWhereInput>
+    content_id?: IntFilter<"File"> | number
+    content_area_id?: IntFilter<"File"> | number
   }
 
   export type FileOrderByWithRelationInput = {
     file_id?: SortOrder
-    content_id?: SortOrder
     filepath?: SortOrder
     thumbnail?: SortOrderInput | SortOrder
-    content?: ContentOrderByWithRelationInput
+    content_id?: SortOrder
+    content_area_id?: SortOrder
     _relevance?: FileOrderByRelevanceInput
   }
 
@@ -3316,17 +3155,18 @@ export namespace Prisma {
     AND?: FileWhereInput | FileWhereInput[]
     OR?: FileWhereInput[]
     NOT?: FileWhereInput | FileWhereInput[]
-    content_id?: IntFilter<"File"> | number
     filepath?: StringFilter<"File"> | string
     thumbnail?: StringNullableFilter<"File"> | string | null
-    content?: XOR<ContentScalarRelationFilter, ContentWhereInput>
+    content_id?: IntFilter<"File"> | number
+    content_area_id?: IntFilter<"File"> | number
   }, "file_id" | "content_id_filepath">
 
   export type FileOrderByWithAggregationInput = {
     file_id?: SortOrder
-    content_id?: SortOrder
     filepath?: SortOrder
     thumbnail?: SortOrderInput | SortOrder
+    content_id?: SortOrder
+    content_area_id?: SortOrder
     _count?: FileCountOrderByAggregateInput
     _avg?: FileAvgOrderByAggregateInput
     _max?: FileMaxOrderByAggregateInput
@@ -3339,17 +3179,19 @@ export namespace Prisma {
     OR?: FileScalarWhereWithAggregatesInput[]
     NOT?: FileScalarWhereWithAggregatesInput | FileScalarWhereWithAggregatesInput[]
     file_id?: IntWithAggregatesFilter<"File"> | number
-    content_id?: IntWithAggregatesFilter<"File"> | number
     filepath?: StringWithAggregatesFilter<"File"> | string
     thumbnail?: StringNullableWithAggregatesFilter<"File"> | string | null
+    content_id?: IntWithAggregatesFilter<"File"> | number
+    content_area_id?: IntWithAggregatesFilter<"File"> | number
   }
 
   export type ContentCreateInput = {
+    content_id?: number
     creator_id: number
     parent_id?: number | null
-    title?: string | null
-    description?: string | null
-    post_type: $Enums.PostType
+    title: string
+    description: string
+    post_type: string
     visibilityPrivate?: boolean
     views?: number
     likes?: number
@@ -3358,16 +3200,15 @@ export namespace Prisma {
     reports?: number
     area_id: number
     created_at?: Date | string
-    files?: FileCreateNestedManyWithoutContentInput
   }
 
   export type ContentUncheckedCreateInput = {
     content_id?: number
     creator_id: number
     parent_id?: number | null
-    title?: string | null
-    description?: string | null
-    post_type: $Enums.PostType
+    title: string
+    description: string
+    post_type: string
     visibilityPrivate?: boolean
     views?: number
     likes?: number
@@ -3376,15 +3217,15 @@ export namespace Prisma {
     reports?: number
     area_id: number
     created_at?: Date | string
-    files?: FileUncheckedCreateNestedManyWithoutContentInput
   }
 
   export type ContentUpdateInput = {
+    content_id?: IntFieldUpdateOperationsInput | number
     creator_id?: IntFieldUpdateOperationsInput | number
     parent_id?: NullableIntFieldUpdateOperationsInput | number | null
-    title?: NullableStringFieldUpdateOperationsInput | string | null
-    description?: NullableStringFieldUpdateOperationsInput | string | null
-    post_type?: EnumPostTypeFieldUpdateOperationsInput | $Enums.PostType
+    title?: StringFieldUpdateOperationsInput | string
+    description?: StringFieldUpdateOperationsInput | string
+    post_type?: StringFieldUpdateOperationsInput | string
     visibilityPrivate?: BoolFieldUpdateOperationsInput | boolean
     views?: IntFieldUpdateOperationsInput | number
     likes?: IntFieldUpdateOperationsInput | number
@@ -3393,16 +3234,15 @@ export namespace Prisma {
     reports?: IntFieldUpdateOperationsInput | number
     area_id?: IntFieldUpdateOperationsInput | number
     created_at?: DateTimeFieldUpdateOperationsInput | Date | string
-    files?: FileUpdateManyWithoutContentNestedInput
   }
 
   export type ContentUncheckedUpdateInput = {
     content_id?: IntFieldUpdateOperationsInput | number
     creator_id?: IntFieldUpdateOperationsInput | number
     parent_id?: NullableIntFieldUpdateOperationsInput | number | null
-    title?: NullableStringFieldUpdateOperationsInput | string | null
-    description?: NullableStringFieldUpdateOperationsInput | string | null
-    post_type?: EnumPostTypeFieldUpdateOperationsInput | $Enums.PostType
+    title?: StringFieldUpdateOperationsInput | string
+    description?: StringFieldUpdateOperationsInput | string
+    post_type?: StringFieldUpdateOperationsInput | string
     visibilityPrivate?: BoolFieldUpdateOperationsInput | boolean
     views?: IntFieldUpdateOperationsInput | number
     likes?: IntFieldUpdateOperationsInput | number
@@ -3411,16 +3251,15 @@ export namespace Prisma {
     reports?: IntFieldUpdateOperationsInput | number
     area_id?: IntFieldUpdateOperationsInput | number
     created_at?: DateTimeFieldUpdateOperationsInput | Date | string
-    files?: FileUncheckedUpdateManyWithoutContentNestedInput
   }
 
   export type ContentCreateManyInput = {
     content_id?: number
     creator_id: number
     parent_id?: number | null
-    title?: string | null
-    description?: string | null
-    post_type: $Enums.PostType
+    title: string
+    description: string
+    post_type: string
     visibilityPrivate?: boolean
     views?: number
     likes?: number
@@ -3432,11 +3271,12 @@ export namespace Prisma {
   }
 
   export type ContentUpdateManyMutationInput = {
+    content_id?: IntFieldUpdateOperationsInput | number
     creator_id?: IntFieldUpdateOperationsInput | number
     parent_id?: NullableIntFieldUpdateOperationsInput | number | null
-    title?: NullableStringFieldUpdateOperationsInput | string | null
-    description?: NullableStringFieldUpdateOperationsInput | string | null
-    post_type?: EnumPostTypeFieldUpdateOperationsInput | $Enums.PostType
+    title?: StringFieldUpdateOperationsInput | string
+    description?: StringFieldUpdateOperationsInput | string
+    post_type?: StringFieldUpdateOperationsInput | string
     visibilityPrivate?: BoolFieldUpdateOperationsInput | boolean
     views?: IntFieldUpdateOperationsInput | number
     likes?: IntFieldUpdateOperationsInput | number
@@ -3451,9 +3291,9 @@ export namespace Prisma {
     content_id?: IntFieldUpdateOperationsInput | number
     creator_id?: IntFieldUpdateOperationsInput | number
     parent_id?: NullableIntFieldUpdateOperationsInput | number | null
-    title?: NullableStringFieldUpdateOperationsInput | string | null
-    description?: NullableStringFieldUpdateOperationsInput | string | null
-    post_type?: EnumPostTypeFieldUpdateOperationsInput | $Enums.PostType
+    title?: StringFieldUpdateOperationsInput | string
+    description?: StringFieldUpdateOperationsInput | string
+    post_type?: StringFieldUpdateOperationsInput | string
     visibilityPrivate?: BoolFieldUpdateOperationsInput | boolean
     views?: IntFieldUpdateOperationsInput | number
     likes?: IntFieldUpdateOperationsInput | number
@@ -3467,46 +3307,54 @@ export namespace Prisma {
   export type FileCreateInput = {
     filepath: string
     thumbnail?: string | null
-    content: ContentCreateNestedOneWithoutFilesInput
+    content_id: number
+    content_area_id: number
   }
 
   export type FileUncheckedCreateInput = {
     file_id?: number
-    content_id: number
     filepath: string
     thumbnail?: string | null
+    content_id: number
+    content_area_id: number
   }
 
   export type FileUpdateInput = {
     filepath?: StringFieldUpdateOperationsInput | string
     thumbnail?: NullableStringFieldUpdateOperationsInput | string | null
-    content?: ContentUpdateOneRequiredWithoutFilesNestedInput
+    content_id?: IntFieldUpdateOperationsInput | number
+    content_area_id?: IntFieldUpdateOperationsInput | number
   }
 
   export type FileUncheckedUpdateInput = {
     file_id?: IntFieldUpdateOperationsInput | number
-    content_id?: IntFieldUpdateOperationsInput | number
     filepath?: StringFieldUpdateOperationsInput | string
     thumbnail?: NullableStringFieldUpdateOperationsInput | string | null
+    content_id?: IntFieldUpdateOperationsInput | number
+    content_area_id?: IntFieldUpdateOperationsInput | number
   }
 
   export type FileCreateManyInput = {
     file_id?: number
-    content_id: number
     filepath: string
     thumbnail?: string | null
+    content_id: number
+    content_area_id: number
   }
 
   export type FileUpdateManyMutationInput = {
     filepath?: StringFieldUpdateOperationsInput | string
     thumbnail?: NullableStringFieldUpdateOperationsInput | string | null
+    content_id?: IntFieldUpdateOperationsInput | number
+    content_area_id?: IntFieldUpdateOperationsInput | number
   }
 
   export type FileUncheckedUpdateManyInput = {
     file_id?: IntFieldUpdateOperationsInput | number
-    content_id?: IntFieldUpdateOperationsInput | number
     filepath?: StringFieldUpdateOperationsInput | string
     thumbnail?: NullableStringFieldUpdateOperationsInput | string | null
+    content_id?: IntFieldUpdateOperationsInput | number
+    content_area_id?: IntFieldUpdateOperationsInput | number
   }
 
   export type IntFilter<$PrismaModel = never> = {
@@ -3531,10 +3379,10 @@ export namespace Prisma {
     not?: NestedIntNullableFilter<$PrismaModel> | number | null
   }
 
-  export type StringNullableFilter<$PrismaModel = never> = {
-    equals?: string | StringFieldRefInput<$PrismaModel> | null
-    in?: string[] | null
-    notIn?: string[] | null
+  export type StringFilter<$PrismaModel = never> = {
+    equals?: string | StringFieldRefInput<$PrismaModel>
+    in?: string[]
+    notIn?: string[]
     lt?: string | StringFieldRefInput<$PrismaModel>
     lte?: string | StringFieldRefInput<$PrismaModel>
     gt?: string | StringFieldRefInput<$PrismaModel>
@@ -3543,14 +3391,7 @@ export namespace Prisma {
     startsWith?: string | StringFieldRefInput<$PrismaModel>
     endsWith?: string | StringFieldRefInput<$PrismaModel>
     search?: string
-    not?: NestedStringNullableFilter<$PrismaModel> | string | null
-  }
-
-  export type EnumPostTypeFilter<$PrismaModel = never> = {
-    equals?: $Enums.PostType | EnumPostTypeFieldRefInput<$PrismaModel>
-    in?: $Enums.PostType[]
-    notIn?: $Enums.PostType[]
-    not?: NestedEnumPostTypeFilter<$PrismaModel> | $Enums.PostType
+    not?: NestedStringFilter<$PrismaModel> | string
   }
 
   export type BoolFilter<$PrismaModel = never> = {
@@ -3569,19 +3410,9 @@ export namespace Prisma {
     not?: NestedDateTimeFilter<$PrismaModel> | Date | string
   }
 
-  export type FileListRelationFilter = {
-    every?: FileWhereInput
-    some?: FileWhereInput
-    none?: FileWhereInput
-  }
-
   export type SortOrderInput = {
     sort: SortOrder
     nulls?: NullsOrder
-  }
-
-  export type FileOrderByRelationAggregateInput = {
-    _count?: SortOrder
   }
 
   export type ContentOrderByRelevanceInput = {
@@ -3702,10 +3533,10 @@ export namespace Prisma {
     _max?: NestedIntNullableFilter<$PrismaModel>
   }
 
-  export type StringNullableWithAggregatesFilter<$PrismaModel = never> = {
-    equals?: string | StringFieldRefInput<$PrismaModel> | null
-    in?: string[] | null
-    notIn?: string[] | null
+  export type StringWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: string | StringFieldRefInput<$PrismaModel>
+    in?: string[]
+    notIn?: string[]
     lt?: string | StringFieldRefInput<$PrismaModel>
     lte?: string | StringFieldRefInput<$PrismaModel>
     gt?: string | StringFieldRefInput<$PrismaModel>
@@ -3714,20 +3545,10 @@ export namespace Prisma {
     startsWith?: string | StringFieldRefInput<$PrismaModel>
     endsWith?: string | StringFieldRefInput<$PrismaModel>
     search?: string
-    not?: NestedStringNullableWithAggregatesFilter<$PrismaModel> | string | null
-    _count?: NestedIntNullableFilter<$PrismaModel>
-    _min?: NestedStringNullableFilter<$PrismaModel>
-    _max?: NestedStringNullableFilter<$PrismaModel>
-  }
-
-  export type EnumPostTypeWithAggregatesFilter<$PrismaModel = never> = {
-    equals?: $Enums.PostType | EnumPostTypeFieldRefInput<$PrismaModel>
-    in?: $Enums.PostType[]
-    notIn?: $Enums.PostType[]
-    not?: NestedEnumPostTypeWithAggregatesFilter<$PrismaModel> | $Enums.PostType
+    not?: NestedStringWithAggregatesFilter<$PrismaModel> | string
     _count?: NestedIntFilter<$PrismaModel>
-    _min?: NestedEnumPostTypeFilter<$PrismaModel>
-    _max?: NestedEnumPostTypeFilter<$PrismaModel>
+    _min?: NestedStringFilter<$PrismaModel>
+    _max?: NestedStringFilter<$PrismaModel>
   }
 
   export type BoolWithAggregatesFilter<$PrismaModel = never> = {
@@ -3752,10 +3573,10 @@ export namespace Prisma {
     _max?: NestedDateTimeFilter<$PrismaModel>
   }
 
-  export type StringFilter<$PrismaModel = never> = {
-    equals?: string | StringFieldRefInput<$PrismaModel>
-    in?: string[]
-    notIn?: string[]
+  export type StringNullableFilter<$PrismaModel = never> = {
+    equals?: string | StringFieldRefInput<$PrismaModel> | null
+    in?: string[] | null
+    notIn?: string[] | null
     lt?: string | StringFieldRefInput<$PrismaModel>
     lte?: string | StringFieldRefInput<$PrismaModel>
     gt?: string | StringFieldRefInput<$PrismaModel>
@@ -3764,12 +3585,7 @@ export namespace Prisma {
     startsWith?: string | StringFieldRefInput<$PrismaModel>
     endsWith?: string | StringFieldRefInput<$PrismaModel>
     search?: string
-    not?: NestedStringFilter<$PrismaModel> | string
-  }
-
-  export type ContentScalarRelationFilter = {
-    is?: ContentWhereInput
-    isNot?: ContentWhereInput
+    not?: NestedStringNullableFilter<$PrismaModel> | string | null
   }
 
   export type FileOrderByRelevanceInput = {
@@ -3785,39 +3601,44 @@ export namespace Prisma {
 
   export type FileCountOrderByAggregateInput = {
     file_id?: SortOrder
-    content_id?: SortOrder
     filepath?: SortOrder
     thumbnail?: SortOrder
+    content_id?: SortOrder
+    content_area_id?: SortOrder
   }
 
   export type FileAvgOrderByAggregateInput = {
     file_id?: SortOrder
     content_id?: SortOrder
+    content_area_id?: SortOrder
   }
 
   export type FileMaxOrderByAggregateInput = {
     file_id?: SortOrder
-    content_id?: SortOrder
     filepath?: SortOrder
     thumbnail?: SortOrder
+    content_id?: SortOrder
+    content_area_id?: SortOrder
   }
 
   export type FileMinOrderByAggregateInput = {
     file_id?: SortOrder
-    content_id?: SortOrder
     filepath?: SortOrder
     thumbnail?: SortOrder
+    content_id?: SortOrder
+    content_area_id?: SortOrder
   }
 
   export type FileSumOrderByAggregateInput = {
     file_id?: SortOrder
     content_id?: SortOrder
+    content_area_id?: SortOrder
   }
 
-  export type StringWithAggregatesFilter<$PrismaModel = never> = {
-    equals?: string | StringFieldRefInput<$PrismaModel>
-    in?: string[]
-    notIn?: string[]
+  export type StringNullableWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: string | StringFieldRefInput<$PrismaModel> | null
+    in?: string[] | null
+    notIn?: string[] | null
     lt?: string | StringFieldRefInput<$PrismaModel>
     lte?: string | StringFieldRefInput<$PrismaModel>
     gt?: string | StringFieldRefInput<$PrismaModel>
@@ -3826,24 +3647,10 @@ export namespace Prisma {
     startsWith?: string | StringFieldRefInput<$PrismaModel>
     endsWith?: string | StringFieldRefInput<$PrismaModel>
     search?: string
-    not?: NestedStringWithAggregatesFilter<$PrismaModel> | string
-    _count?: NestedIntFilter<$PrismaModel>
-    _min?: NestedStringFilter<$PrismaModel>
-    _max?: NestedStringFilter<$PrismaModel>
-  }
-
-  export type FileCreateNestedManyWithoutContentInput = {
-    create?: XOR<FileCreateWithoutContentInput, FileUncheckedCreateWithoutContentInput> | FileCreateWithoutContentInput[] | FileUncheckedCreateWithoutContentInput[]
-    connectOrCreate?: FileCreateOrConnectWithoutContentInput | FileCreateOrConnectWithoutContentInput[]
-    createMany?: FileCreateManyContentInputEnvelope
-    connect?: FileWhereUniqueInput | FileWhereUniqueInput[]
-  }
-
-  export type FileUncheckedCreateNestedManyWithoutContentInput = {
-    create?: XOR<FileCreateWithoutContentInput, FileUncheckedCreateWithoutContentInput> | FileCreateWithoutContentInput[] | FileUncheckedCreateWithoutContentInput[]
-    connectOrCreate?: FileCreateOrConnectWithoutContentInput | FileCreateOrConnectWithoutContentInput[]
-    createMany?: FileCreateManyContentInputEnvelope
-    connect?: FileWhereUniqueInput | FileWhereUniqueInput[]
+    not?: NestedStringNullableWithAggregatesFilter<$PrismaModel> | string | null
+    _count?: NestedIntNullableFilter<$PrismaModel>
+    _min?: NestedStringNullableFilter<$PrismaModel>
+    _max?: NestedStringNullableFilter<$PrismaModel>
   }
 
   export type IntFieldUpdateOperationsInput = {
@@ -3862,12 +3669,8 @@ export namespace Prisma {
     divide?: number
   }
 
-  export type NullableStringFieldUpdateOperationsInput = {
-    set?: string | null
-  }
-
-  export type EnumPostTypeFieldUpdateOperationsInput = {
-    set?: $Enums.PostType
+  export type StringFieldUpdateOperationsInput = {
+    set?: string
   }
 
   export type BoolFieldUpdateOperationsInput = {
@@ -3878,50 +3681,8 @@ export namespace Prisma {
     set?: Date | string
   }
 
-  export type FileUpdateManyWithoutContentNestedInput = {
-    create?: XOR<FileCreateWithoutContentInput, FileUncheckedCreateWithoutContentInput> | FileCreateWithoutContentInput[] | FileUncheckedCreateWithoutContentInput[]
-    connectOrCreate?: FileCreateOrConnectWithoutContentInput | FileCreateOrConnectWithoutContentInput[]
-    upsert?: FileUpsertWithWhereUniqueWithoutContentInput | FileUpsertWithWhereUniqueWithoutContentInput[]
-    createMany?: FileCreateManyContentInputEnvelope
-    set?: FileWhereUniqueInput | FileWhereUniqueInput[]
-    disconnect?: FileWhereUniqueInput | FileWhereUniqueInput[]
-    delete?: FileWhereUniqueInput | FileWhereUniqueInput[]
-    connect?: FileWhereUniqueInput | FileWhereUniqueInput[]
-    update?: FileUpdateWithWhereUniqueWithoutContentInput | FileUpdateWithWhereUniqueWithoutContentInput[]
-    updateMany?: FileUpdateManyWithWhereWithoutContentInput | FileUpdateManyWithWhereWithoutContentInput[]
-    deleteMany?: FileScalarWhereInput | FileScalarWhereInput[]
-  }
-
-  export type FileUncheckedUpdateManyWithoutContentNestedInput = {
-    create?: XOR<FileCreateWithoutContentInput, FileUncheckedCreateWithoutContentInput> | FileCreateWithoutContentInput[] | FileUncheckedCreateWithoutContentInput[]
-    connectOrCreate?: FileCreateOrConnectWithoutContentInput | FileCreateOrConnectWithoutContentInput[]
-    upsert?: FileUpsertWithWhereUniqueWithoutContentInput | FileUpsertWithWhereUniqueWithoutContentInput[]
-    createMany?: FileCreateManyContentInputEnvelope
-    set?: FileWhereUniqueInput | FileWhereUniqueInput[]
-    disconnect?: FileWhereUniqueInput | FileWhereUniqueInput[]
-    delete?: FileWhereUniqueInput | FileWhereUniqueInput[]
-    connect?: FileWhereUniqueInput | FileWhereUniqueInput[]
-    update?: FileUpdateWithWhereUniqueWithoutContentInput | FileUpdateWithWhereUniqueWithoutContentInput[]
-    updateMany?: FileUpdateManyWithWhereWithoutContentInput | FileUpdateManyWithWhereWithoutContentInput[]
-    deleteMany?: FileScalarWhereInput | FileScalarWhereInput[]
-  }
-
-  export type ContentCreateNestedOneWithoutFilesInput = {
-    create?: XOR<ContentCreateWithoutFilesInput, ContentUncheckedCreateWithoutFilesInput>
-    connectOrCreate?: ContentCreateOrConnectWithoutFilesInput
-    connect?: ContentWhereUniqueInput
-  }
-
-  export type StringFieldUpdateOperationsInput = {
-    set?: string
-  }
-
-  export type ContentUpdateOneRequiredWithoutFilesNestedInput = {
-    create?: XOR<ContentCreateWithoutFilesInput, ContentUncheckedCreateWithoutFilesInput>
-    connectOrCreate?: ContentCreateOrConnectWithoutFilesInput
-    upsert?: ContentUpsertWithoutFilesInput
-    connect?: ContentWhereUniqueInput
-    update?: XOR<XOR<ContentUpdateToOneWithWhereWithoutFilesInput, ContentUpdateWithoutFilesInput>, ContentUncheckedUpdateWithoutFilesInput>
+  export type NullableStringFieldUpdateOperationsInput = {
+    set?: string | null
   }
 
   export type NestedIntFilter<$PrismaModel = never> = {
@@ -3946,10 +3707,10 @@ export namespace Prisma {
     not?: NestedIntNullableFilter<$PrismaModel> | number | null
   }
 
-  export type NestedStringNullableFilter<$PrismaModel = never> = {
-    equals?: string | StringFieldRefInput<$PrismaModel> | null
-    in?: string[] | null
-    notIn?: string[] | null
+  export type NestedStringFilter<$PrismaModel = never> = {
+    equals?: string | StringFieldRefInput<$PrismaModel>
+    in?: string[]
+    notIn?: string[]
     lt?: string | StringFieldRefInput<$PrismaModel>
     lte?: string | StringFieldRefInput<$PrismaModel>
     gt?: string | StringFieldRefInput<$PrismaModel>
@@ -3958,14 +3719,7 @@ export namespace Prisma {
     startsWith?: string | StringFieldRefInput<$PrismaModel>
     endsWith?: string | StringFieldRefInput<$PrismaModel>
     search?: string
-    not?: NestedStringNullableFilter<$PrismaModel> | string | null
-  }
-
-  export type NestedEnumPostTypeFilter<$PrismaModel = never> = {
-    equals?: $Enums.PostType | EnumPostTypeFieldRefInput<$PrismaModel>
-    in?: $Enums.PostType[]
-    notIn?: $Enums.PostType[]
-    not?: NestedEnumPostTypeFilter<$PrismaModel> | $Enums.PostType
+    not?: NestedStringFilter<$PrismaModel> | string
   }
 
   export type NestedBoolFilter<$PrismaModel = never> = {
@@ -4038,10 +3792,10 @@ export namespace Prisma {
     not?: NestedFloatNullableFilter<$PrismaModel> | number | null
   }
 
-  export type NestedStringNullableWithAggregatesFilter<$PrismaModel = never> = {
-    equals?: string | StringFieldRefInput<$PrismaModel> | null
-    in?: string[] | null
-    notIn?: string[] | null
+  export type NestedStringWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: string | StringFieldRefInput<$PrismaModel>
+    in?: string[]
+    notIn?: string[]
     lt?: string | StringFieldRefInput<$PrismaModel>
     lte?: string | StringFieldRefInput<$PrismaModel>
     gt?: string | StringFieldRefInput<$PrismaModel>
@@ -4050,20 +3804,10 @@ export namespace Prisma {
     startsWith?: string | StringFieldRefInput<$PrismaModel>
     endsWith?: string | StringFieldRefInput<$PrismaModel>
     search?: string
-    not?: NestedStringNullableWithAggregatesFilter<$PrismaModel> | string | null
-    _count?: NestedIntNullableFilter<$PrismaModel>
-    _min?: NestedStringNullableFilter<$PrismaModel>
-    _max?: NestedStringNullableFilter<$PrismaModel>
-  }
-
-  export type NestedEnumPostTypeWithAggregatesFilter<$PrismaModel = never> = {
-    equals?: $Enums.PostType | EnumPostTypeFieldRefInput<$PrismaModel>
-    in?: $Enums.PostType[]
-    notIn?: $Enums.PostType[]
-    not?: NestedEnumPostTypeWithAggregatesFilter<$PrismaModel> | $Enums.PostType
+    not?: NestedStringWithAggregatesFilter<$PrismaModel> | string
     _count?: NestedIntFilter<$PrismaModel>
-    _min?: NestedEnumPostTypeFilter<$PrismaModel>
-    _max?: NestedEnumPostTypeFilter<$PrismaModel>
+    _min?: NestedStringFilter<$PrismaModel>
+    _max?: NestedStringFilter<$PrismaModel>
   }
 
   export type NestedBoolWithAggregatesFilter<$PrismaModel = never> = {
@@ -4088,10 +3832,10 @@ export namespace Prisma {
     _max?: NestedDateTimeFilter<$PrismaModel>
   }
 
-  export type NestedStringFilter<$PrismaModel = never> = {
-    equals?: string | StringFieldRefInput<$PrismaModel>
-    in?: string[]
-    notIn?: string[]
+  export type NestedStringNullableFilter<$PrismaModel = never> = {
+    equals?: string | StringFieldRefInput<$PrismaModel> | null
+    in?: string[] | null
+    notIn?: string[] | null
     lt?: string | StringFieldRefInput<$PrismaModel>
     lte?: string | StringFieldRefInput<$PrismaModel>
     gt?: string | StringFieldRefInput<$PrismaModel>
@@ -4100,13 +3844,13 @@ export namespace Prisma {
     startsWith?: string | StringFieldRefInput<$PrismaModel>
     endsWith?: string | StringFieldRefInput<$PrismaModel>
     search?: string
-    not?: NestedStringFilter<$PrismaModel> | string
+    not?: NestedStringNullableFilter<$PrismaModel> | string | null
   }
 
-  export type NestedStringWithAggregatesFilter<$PrismaModel = never> = {
-    equals?: string | StringFieldRefInput<$PrismaModel>
-    in?: string[]
-    notIn?: string[]
+  export type NestedStringNullableWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: string | StringFieldRefInput<$PrismaModel> | null
+    in?: string[] | null
+    notIn?: string[] | null
     lt?: string | StringFieldRefInput<$PrismaModel>
     lte?: string | StringFieldRefInput<$PrismaModel>
     gt?: string | StringFieldRefInput<$PrismaModel>
@@ -4115,162 +3859,10 @@ export namespace Prisma {
     startsWith?: string | StringFieldRefInput<$PrismaModel>
     endsWith?: string | StringFieldRefInput<$PrismaModel>
     search?: string
-    not?: NestedStringWithAggregatesFilter<$PrismaModel> | string
-    _count?: NestedIntFilter<$PrismaModel>
-    _min?: NestedStringFilter<$PrismaModel>
-    _max?: NestedStringFilter<$PrismaModel>
-  }
-
-  export type FileCreateWithoutContentInput = {
-    filepath: string
-    thumbnail?: string | null
-  }
-
-  export type FileUncheckedCreateWithoutContentInput = {
-    file_id?: number
-    filepath: string
-    thumbnail?: string | null
-  }
-
-  export type FileCreateOrConnectWithoutContentInput = {
-    where: FileWhereUniqueInput
-    create: XOR<FileCreateWithoutContentInput, FileUncheckedCreateWithoutContentInput>
-  }
-
-  export type FileCreateManyContentInputEnvelope = {
-    data: FileCreateManyContentInput | FileCreateManyContentInput[]
-    skipDuplicates?: boolean
-  }
-
-  export type FileUpsertWithWhereUniqueWithoutContentInput = {
-    where: FileWhereUniqueInput
-    update: XOR<FileUpdateWithoutContentInput, FileUncheckedUpdateWithoutContentInput>
-    create: XOR<FileCreateWithoutContentInput, FileUncheckedCreateWithoutContentInput>
-  }
-
-  export type FileUpdateWithWhereUniqueWithoutContentInput = {
-    where: FileWhereUniqueInput
-    data: XOR<FileUpdateWithoutContentInput, FileUncheckedUpdateWithoutContentInput>
-  }
-
-  export type FileUpdateManyWithWhereWithoutContentInput = {
-    where: FileScalarWhereInput
-    data: XOR<FileUpdateManyMutationInput, FileUncheckedUpdateManyWithoutContentInput>
-  }
-
-  export type FileScalarWhereInput = {
-    AND?: FileScalarWhereInput | FileScalarWhereInput[]
-    OR?: FileScalarWhereInput[]
-    NOT?: FileScalarWhereInput | FileScalarWhereInput[]
-    file_id?: IntFilter<"File"> | number
-    content_id?: IntFilter<"File"> | number
-    filepath?: StringFilter<"File"> | string
-    thumbnail?: StringNullableFilter<"File"> | string | null
-  }
-
-  export type ContentCreateWithoutFilesInput = {
-    creator_id: number
-    parent_id?: number | null
-    title?: string | null
-    description?: string | null
-    post_type: $Enums.PostType
-    visibilityPrivate?: boolean
-    views?: number
-    likes?: number
-    comments?: number
-    pins?: number
-    reports?: number
-    area_id: number
-    created_at?: Date | string
-  }
-
-  export type ContentUncheckedCreateWithoutFilesInput = {
-    content_id?: number
-    creator_id: number
-    parent_id?: number | null
-    title?: string | null
-    description?: string | null
-    post_type: $Enums.PostType
-    visibilityPrivate?: boolean
-    views?: number
-    likes?: number
-    comments?: number
-    pins?: number
-    reports?: number
-    area_id: number
-    created_at?: Date | string
-  }
-
-  export type ContentCreateOrConnectWithoutFilesInput = {
-    where: ContentWhereUniqueInput
-    create: XOR<ContentCreateWithoutFilesInput, ContentUncheckedCreateWithoutFilesInput>
-  }
-
-  export type ContentUpsertWithoutFilesInput = {
-    update: XOR<ContentUpdateWithoutFilesInput, ContentUncheckedUpdateWithoutFilesInput>
-    create: XOR<ContentCreateWithoutFilesInput, ContentUncheckedCreateWithoutFilesInput>
-    where?: ContentWhereInput
-  }
-
-  export type ContentUpdateToOneWithWhereWithoutFilesInput = {
-    where?: ContentWhereInput
-    data: XOR<ContentUpdateWithoutFilesInput, ContentUncheckedUpdateWithoutFilesInput>
-  }
-
-  export type ContentUpdateWithoutFilesInput = {
-    creator_id?: IntFieldUpdateOperationsInput | number
-    parent_id?: NullableIntFieldUpdateOperationsInput | number | null
-    title?: NullableStringFieldUpdateOperationsInput | string | null
-    description?: NullableStringFieldUpdateOperationsInput | string | null
-    post_type?: EnumPostTypeFieldUpdateOperationsInput | $Enums.PostType
-    visibilityPrivate?: BoolFieldUpdateOperationsInput | boolean
-    views?: IntFieldUpdateOperationsInput | number
-    likes?: IntFieldUpdateOperationsInput | number
-    comments?: IntFieldUpdateOperationsInput | number
-    pins?: IntFieldUpdateOperationsInput | number
-    reports?: IntFieldUpdateOperationsInput | number
-    area_id?: IntFieldUpdateOperationsInput | number
-    created_at?: DateTimeFieldUpdateOperationsInput | Date | string
-  }
-
-  export type ContentUncheckedUpdateWithoutFilesInput = {
-    content_id?: IntFieldUpdateOperationsInput | number
-    creator_id?: IntFieldUpdateOperationsInput | number
-    parent_id?: NullableIntFieldUpdateOperationsInput | number | null
-    title?: NullableStringFieldUpdateOperationsInput | string | null
-    description?: NullableStringFieldUpdateOperationsInput | string | null
-    post_type?: EnumPostTypeFieldUpdateOperationsInput | $Enums.PostType
-    visibilityPrivate?: BoolFieldUpdateOperationsInput | boolean
-    views?: IntFieldUpdateOperationsInput | number
-    likes?: IntFieldUpdateOperationsInput | number
-    comments?: IntFieldUpdateOperationsInput | number
-    pins?: IntFieldUpdateOperationsInput | number
-    reports?: IntFieldUpdateOperationsInput | number
-    area_id?: IntFieldUpdateOperationsInput | number
-    created_at?: DateTimeFieldUpdateOperationsInput | Date | string
-  }
-
-  export type FileCreateManyContentInput = {
-    file_id?: number
-    filepath: string
-    thumbnail?: string | null
-  }
-
-  export type FileUpdateWithoutContentInput = {
-    filepath?: StringFieldUpdateOperationsInput | string
-    thumbnail?: NullableStringFieldUpdateOperationsInput | string | null
-  }
-
-  export type FileUncheckedUpdateWithoutContentInput = {
-    file_id?: IntFieldUpdateOperationsInput | number
-    filepath?: StringFieldUpdateOperationsInput | string
-    thumbnail?: NullableStringFieldUpdateOperationsInput | string | null
-  }
-
-  export type FileUncheckedUpdateManyWithoutContentInput = {
-    file_id?: IntFieldUpdateOperationsInput | number
-    filepath?: StringFieldUpdateOperationsInput | string
-    thumbnail?: NullableStringFieldUpdateOperationsInput | string | null
+    not?: NestedStringNullableWithAggregatesFilter<$PrismaModel> | string | null
+    _count?: NestedIntNullableFilter<$PrismaModel>
+    _min?: NestedStringNullableFilter<$PrismaModel>
+    _max?: NestedStringNullableFilter<$PrismaModel>
   }
 
 

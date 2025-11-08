@@ -12,3 +12,8 @@ export const LOG_SERVICES = {
   CLIENT: 'LOG_CLIENT',
   PORT: 3005,
 };
+
+export const CONTENT_SERVICES = {
+  CLIENT: 'CONTENT_CLIENT',
+  PORT: 3006,
+};

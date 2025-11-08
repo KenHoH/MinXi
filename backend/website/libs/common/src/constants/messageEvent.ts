@@ -24,3 +24,20 @@ export const LOG_MSG = {
   findDate: 'log.findDate',
   remove: 'log.remove',
 };
+
+export const CONTENT_MSG = {
+  create: 'content.create',
+  createFile: 'content.createFile',
+  updateView: 'content.view',
+  updateLike: 'content.like',
+  updatePin: 'content.pin',
+  updateComment: 'content.like',
+  updateReport: 'content.report',
+  setPrivate: 'content.private',
+  setPublic: 'content.public',
+  findAll: 'content.findAll',
+  findOne: 'content.findOne',
+  getStats: 'content.getStats',
+  getByUser: 'content.getByUser',
+  remove: 'content.remove',
+};

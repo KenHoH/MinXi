@@ -140,9 +140,10 @@ exports.Prisma.ContentScalarFieldEnum = {
 
 exports.Prisma.FileScalarFieldEnum = {
   file_id: 'file_id',
-  content_id: 'content_id',
   filepath: 'filepath',
-  thumbnail: 'thumbnail'
+  thumbnail: 'thumbnail',
+  content_id: 'content_id',
+  content_area_id: 'content_area_id'
 };
 
 exports.Prisma.SortOrder = {
@@ -157,18 +158,15 @@ exports.Prisma.NullsOrder = {
 
 exports.Prisma.ContentOrderByRelevanceFieldEnum = {
   title: 'title',
-  description: 'description'
+  description: 'description',
+  post_type: 'post_type'
 };
 
 exports.Prisma.FileOrderByRelevanceFieldEnum = {
   filepath: 'filepath',
   thumbnail: 'thumbnail'
 };
-exports.PostType = exports.$Enums.PostType = {
-  TEXT: 'TEXT',
-  IMAGE: 'IMAGE',
-  VIDEO: 'VIDEO'
-};
+
 
 exports.Prisma.ModelName = {
   Content: 'Content',

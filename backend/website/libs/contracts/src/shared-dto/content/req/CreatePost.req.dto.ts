@@ -11,8 +11,8 @@ export class CreatePostDto {
   area_id: number;
 
   @ApiProperty()
-  @IsInt()
-  post_type: number;
+  @IsString()
+  post_type: string;
 
   @ApiProperty()
   @IsInt()

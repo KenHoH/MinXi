@@ -15,12 +15,12 @@ datasource db {
 }
 
 model Content {
-  content_id        Int      @id @default(autoincrement())
+  content_id        Int      @default(autoincrement())
   creator_id        Int
   parent_id         Int?
-  title             String?
-  description       String?
-  post_type         PostType
+  title             String
+  description       String
+  post_type         String
   visibilityPrivate Boolean  @default(false)
   views             Int      @default(0)
   likes             Int      @default(0)
@@ -30,24 +30,17 @@ model Content {
   area_id           Int
   created_at        DateTime @default(now())
 
-  files File[]
-
-  @@unique([content_id, area_id])
+  @@id([content_id, area_id])
 }
 
 model File {
-  file_id    Int     @id @default(autoincrement())
-  content_id Int
-  filepath   String
-  thumbnail  String?
+  file_id   Int     @id @default(autoincrement())
+  filepath  String
+  thumbnail String?
 
-  content Content @relation(fields: [content_id], references: [content_id])
+  content_id      Int
+  content_area_id Int
 
   @@unique([content_id, filepath])
-}
-
-enum PostType {
-  TEXT
-  IMAGE
-  VIDEO
+  @@index([content_id, content_area_id])
 }
