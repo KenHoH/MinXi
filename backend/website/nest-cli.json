@@ -28,6 +28,15 @@
         "tsConfigPath": "apps/auth/tsconfig.app.json"
       }
     },
+    "board-app": {
+      "type": "application",
+      "root": "apps/board-app",
+      "entryFile": "main",
+      "sourceRoot": "apps/board-app/src",
+      "compilerOptions": {
+        "tsConfigPath": "apps/board-app/tsconfig.app.json"
+      }
+    },
     "common": {
       "type": "library",
       "root": "libs/common",
@@ -35,6 +44,15 @@
       "sourceRoot": "libs/common/src",
       "compilerOptions": {
         "tsConfigPath": "libs/common/tsconfig.lib.json"
+      }
+    },
+    "content-app": {
+      "type": "application",
+      "root": "apps/content-app",
+      "entryFile": "main",
+      "sourceRoot": "apps/content-app/src",
+      "compilerOptions": {
+        "tsConfigPath": "apps/content-app/tsconfig.app.json"
       }
     },
     "contracts": {

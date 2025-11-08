@@ -3,15 +3,45 @@ import { WebsiteApiGatewayModule } from './website-api-gateway.module';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { RpcTranslateFilter } from '@app/common/filters/rpc-translate/rpc-translate.filter';
 import { ValidationPipe } from '@nestjs/common';
+import * as express from 'express';
+import { NestExpressApplication } from '@nestjs/platform-express';
 
 async function bootstrap() {
-  const app = await NestFactory.create(WebsiteApiGatewayModule);
+  const app = await NestFactory.create<NestExpressApplication>(
+    WebsiteApiGatewayModule,
+  );
+
+  //serve the uploads folder
+  app.use(
+    '/uploads',
+    express.static('uploads', {
+      setHeaders: (res, path, stat) => {
+        // Crucial: This removes the header that forces a download
+        res.removeHeader('Content-Disposition');
+
+        // Ensures correct MIME type for streaming
+        if (path.endsWith('.mp4')) {
+          res.setHeader('Content-Type', 'video/mp4');
+        }
+      },
+    }),
+  );
+
   app.useGlobalFilters(new RpcTranslateFilter());
   app.useGlobalPipes(
     new ValidationPipe({
       transform: true,
     }),
   );
+
+  // CORS POLICY
+  const methods = ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'];
+  // origin: true -> allowed all the host to get the server
+  app.enableCors({
+    origin: true,
+    methods: methods,
+  });
+
   const config = new DocumentBuilder()
     .setTitle('Website API')
     .setDescription('API documentation for Website Gateway')
