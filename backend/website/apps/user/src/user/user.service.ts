@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   HttpException,
   HttpStatus,
   Injectable,
@@ -11,7 +12,7 @@ import {
   UpdateRestriction,
 } from '@app/contracts/shared-dto/user/update-user.dto';
 import { Repository } from './repository/repository';
-import { IUserService } from '@app/common/interfaces/user/IUserService';
+import { IUserService } from '@app/contracts/interfaces/user/IUserService';
 import { Ack } from '@app/contracts/shared-dto/ack.dto';
 import { mapToDto } from './utils/mapToDto';
 import { httpToRpc } from '@app/common/utils/httpToRpc';
@@ -26,6 +27,9 @@ export class UserService implements IUserService {
   constructor(private readonly repo: Repository) {}
 
   async create(dto: CreateUserDto): Promise<Ack> {
+    if (dto.area_id <= 0 || dto.area_id > 3)
+      throw httpToRpc(new BadRequestException());
+
     try {
       const hash = await bcrypt.hash(dto.password, 10);
       dto.password = hash;
@@ -45,9 +49,11 @@ export class UserService implements IUserService {
     }
   }
 
-  async findAll() {
+  async findAll(area_id: number) {
+    this.logger.log(area_id);
+    if (area_id <= 0 || area_id > 3) throw httpToRpc(new BadRequestException());
     try {
-      const users = await this.repo.findAll();
+      const users = await this.repo.findAll(area_id);
       if (!users) {
         throw httpToRpc(
           new HttpException('Error Fetching All Users', HttpStatus.NOT_FOUND),
@@ -217,8 +223,10 @@ export class UserService implements IUserService {
 
   async findByName(dto: NameRequest): Promise<CredentialRes> {
     try {
+      this.logger.log('dto raw:', dto);
+      this.logger.log('dto keys:', Object.keys(dto));
       this.logger.log(dto);
-      const result = await this.repo.findByName(dto.name);
+      const result = await this.repo.findByName(dto.name, dto.area_id);
       if (!result) {
         this.logger.warn('User not found by name');
         throw httpToRpc(

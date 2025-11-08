@@ -103,7 +103,8 @@ exports.Prisma.UserScalarFieldEnum = {
   total_reports: 'total_reports',
   content_visibilityPrivate: 'content_visibilityPrivate',
   pinned_visibilityPrivate: 'pinned_visibilityPrivate',
-  liked_visibilityPrivate: 'liked_visibilityPrivate'
+  liked_visibilityPrivate: 'liked_visibilityPrivate',
+  area_id: 'area_id'
 };
 
 exports.Prisma.SortOrder = {
@@ -151,7 +152,7 @@ const config = {
     "isCustomOutput": true
   },
   "relativeEnvPaths": {
-    "rootEnvPath": null,
+    "rootEnvPath": "../../../../.env",
     "schemaEnvPath": "../../.env"
   },
   "relativePath": "../..",
@@ -170,13 +171,13 @@ const config = {
       }
     }
   },
-  "inlineSchema": "// This is your Prisma schema file,\n// learn more about it in the docs: https://pris.ly/d/prisma-schema\n\n// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?\n// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init\n\ngenerator client {\n  provider = \"prisma-client-js\"\n  output   = \"../user/generated/user-client\"\n}\n\ndatasource db {\n  provider = \"mysql\"\n  url      = env(\"USER_DATABASE_URL\")\n}\n\nmodel User {\n  user_id                   Int     @id @default(autoincrement())\n  username                  String  @unique\n  password                  String\n  desc                      String\n  profile_picture           String\n  follower                  Int\n  total_like                Int\n  total_reports             Int\n  content_visibilityPrivate Boolean @default(false)\n  pinned_visibilityPrivate  Boolean @default(false)\n  liked_visibilityPrivate   Boolean @default(false)\n}\n",
-  "inlineSchemaHash": "0db829f54c3c462b2fe8884d8a8bd1d38dad6d9d1b4070f7c5c9c669879533c2",
+  "inlineSchema": "// This is your Prisma schema file,\n// learn more about it in the docs: https://pris.ly/d/prisma-schema\n\n// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?\n// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init\n\ngenerator client {\n  provider = \"prisma-client-js\"\n  output   = \"../user/generated/user-client\"\n}\n\ndatasource db {\n  provider = \"mysql\"\n  url      = env(\"USER_DATABASE_URL\")\n}\n\nmodel User {\n  user_id                   Int     @id @default(autoincrement())\n  username                  String\n  password                  String\n  desc                      String\n  profile_picture           String\n  follower                  Int\n  total_like                Int\n  total_reports             Int\n  content_visibilityPrivate Boolean @default(false)\n  pinned_visibilityPrivate  Boolean @default(false)\n  liked_visibilityPrivate   Boolean @default(false)\n\n  area_id Int\n\n  @@unique([username, area_id])\n}\n",
+  "inlineSchemaHash": "84ebbaf9365b10c570dd77f2ade84473e078bc8c75e4959e38f9356a1af301e4",
   "copyEngine": true
 }
 config.dirname = '/'
 
-config.runtimeDataModel = JSON.parse("{\"models\":{\"User\":{\"fields\":[{\"name\":\"user_id\",\"kind\":\"scalar\",\"type\":\"Int\"},{\"name\":\"username\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"password\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"desc\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"profile_picture\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"follower\",\"kind\":\"scalar\",\"type\":\"Int\"},{\"name\":\"total_like\",\"kind\":\"scalar\",\"type\":\"Int\"},{\"name\":\"total_reports\",\"kind\":\"scalar\",\"type\":\"Int\"},{\"name\":\"content_visibilityPrivate\",\"kind\":\"scalar\",\"type\":\"Boolean\"},{\"name\":\"pinned_visibilityPrivate\",\"kind\":\"scalar\",\"type\":\"Boolean\"},{\"name\":\"liked_visibilityPrivate\",\"kind\":\"scalar\",\"type\":\"Boolean\"}],\"dbName\":null}},\"enums\":{},\"types\":{}}")
+config.runtimeDataModel = JSON.parse("{\"models\":{\"User\":{\"fields\":[{\"name\":\"user_id\",\"kind\":\"scalar\",\"type\":\"Int\"},{\"name\":\"username\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"password\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"desc\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"profile_picture\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"follower\",\"kind\":\"scalar\",\"type\":\"Int\"},{\"name\":\"total_like\",\"kind\":\"scalar\",\"type\":\"Int\"},{\"name\":\"total_reports\",\"kind\":\"scalar\",\"type\":\"Int\"},{\"name\":\"content_visibilityPrivate\",\"kind\":\"scalar\",\"type\":\"Boolean\"},{\"name\":\"pinned_visibilityPrivate\",\"kind\":\"scalar\",\"type\":\"Boolean\"},{\"name\":\"liked_visibilityPrivate\",\"kind\":\"scalar\",\"type\":\"Boolean\"},{\"name\":\"area_id\",\"kind\":\"scalar\",\"type\":\"Int\"}],\"dbName\":null}},\"enums\":{},\"types\":{}}")
 defineDmmfProperty(exports.Prisma, config.runtimeDataModel)
 config.engineWasm = {
   getRuntime: async () => require('./query_engine_bg.js'),

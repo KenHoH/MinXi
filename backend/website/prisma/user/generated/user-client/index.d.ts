@@ -870,6 +870,7 @@ export namespace Prisma {
     follower: number | null
     total_like: number | null
     total_reports: number | null
+    area_id: number | null
   }
 
   export type UserSumAggregateOutputType = {
@@ -877,6 +878,7 @@ export namespace Prisma {
     follower: number | null
     total_like: number | null
     total_reports: number | null
+    area_id: number | null
   }
 
   export type UserMinAggregateOutputType = {
@@ -891,6 +893,7 @@ export namespace Prisma {
     content_visibilityPrivate: boolean | null
     pinned_visibilityPrivate: boolean | null
     liked_visibilityPrivate: boolean | null
+    area_id: number | null
   }
 
   export type UserMaxAggregateOutputType = {
@@ -905,6 +908,7 @@ export namespace Prisma {
     content_visibilityPrivate: boolean | null
     pinned_visibilityPrivate: boolean | null
     liked_visibilityPrivate: boolean | null
+    area_id: number | null
   }
 
   export type UserCountAggregateOutputType = {
@@ -919,6 +923,7 @@ export namespace Prisma {
     content_visibilityPrivate: number
     pinned_visibilityPrivate: number
     liked_visibilityPrivate: number
+    area_id: number
     _all: number
   }
 
@@ -928,6 +933,7 @@ export namespace Prisma {
     follower?: true
     total_like?: true
     total_reports?: true
+    area_id?: true
   }
 
   export type UserSumAggregateInputType = {
@@ -935,6 +941,7 @@ export namespace Prisma {
     follower?: true
     total_like?: true
     total_reports?: true
+    area_id?: true
   }
 
   export type UserMinAggregateInputType = {
@@ -949,6 +956,7 @@ export namespace Prisma {
     content_visibilityPrivate?: true
     pinned_visibilityPrivate?: true
     liked_visibilityPrivate?: true
+    area_id?: true
   }
 
   export type UserMaxAggregateInputType = {
@@ -963,6 +971,7 @@ export namespace Prisma {
     content_visibilityPrivate?: true
     pinned_visibilityPrivate?: true
     liked_visibilityPrivate?: true
+    area_id?: true
   }
 
   export type UserCountAggregateInputType = {
@@ -977,6 +986,7 @@ export namespace Prisma {
     content_visibilityPrivate?: true
     pinned_visibilityPrivate?: true
     liked_visibilityPrivate?: true
+    area_id?: true
     _all?: true
   }
 
@@ -1078,6 +1088,7 @@ export namespace Prisma {
     content_visibilityPrivate: boolean
     pinned_visibilityPrivate: boolean
     liked_visibilityPrivate: boolean
+    area_id: number
     _count: UserCountAggregateOutputType | null
     _avg: UserAvgAggregateOutputType | null
     _sum: UserSumAggregateOutputType | null
@@ -1111,6 +1122,7 @@ export namespace Prisma {
     content_visibilityPrivate?: boolean
     pinned_visibilityPrivate?: boolean
     liked_visibilityPrivate?: boolean
+    area_id?: boolean
   }, ExtArgs["result"]["user"]>
 
 
@@ -1127,9 +1139,10 @@ export namespace Prisma {
     content_visibilityPrivate?: boolean
     pinned_visibilityPrivate?: boolean
     liked_visibilityPrivate?: boolean
+    area_id?: boolean
   }
 
-  export type UserOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"user_id" | "username" | "password" | "desc" | "profile_picture" | "follower" | "total_like" | "total_reports" | "content_visibilityPrivate" | "pinned_visibilityPrivate" | "liked_visibilityPrivate", ExtArgs["result"]["user"]>
+  export type UserOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"user_id" | "username" | "password" | "desc" | "profile_picture" | "follower" | "total_like" | "total_reports" | "content_visibilityPrivate" | "pinned_visibilityPrivate" | "liked_visibilityPrivate" | "area_id", ExtArgs["result"]["user"]>
 
   export type $UserPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     name: "User"
@@ -1146,6 +1159,7 @@ export namespace Prisma {
       content_visibilityPrivate: boolean
       pinned_visibilityPrivate: boolean
       liked_visibilityPrivate: boolean
+      area_id: number
     }, ExtArgs["result"]["user"]>
     composites: {}
   }
@@ -1526,6 +1540,7 @@ export namespace Prisma {
     readonly content_visibilityPrivate: FieldRef<"User", 'Boolean'>
     readonly pinned_visibilityPrivate: FieldRef<"User", 'Boolean'>
     readonly liked_visibilityPrivate: FieldRef<"User", 'Boolean'>
+    readonly area_id: FieldRef<"User", 'Int'>
   }
     
 
@@ -1872,7 +1887,8 @@ export namespace Prisma {
     total_reports: 'total_reports',
     content_visibilityPrivate: 'content_visibilityPrivate',
     pinned_visibilityPrivate: 'pinned_visibilityPrivate',
-    liked_visibilityPrivate: 'liked_visibilityPrivate'
+    liked_visibilityPrivate: 'liked_visibilityPrivate',
+    area_id: 'area_id'
   };
 
   export type UserScalarFieldEnum = (typeof UserScalarFieldEnum)[keyof typeof UserScalarFieldEnum]
@@ -1947,6 +1963,7 @@ export namespace Prisma {
     content_visibilityPrivate?: BoolFilter<"User"> | boolean
     pinned_visibilityPrivate?: BoolFilter<"User"> | boolean
     liked_visibilityPrivate?: BoolFilter<"User"> | boolean
+    area_id?: IntFilter<"User"> | number
   }
 
   export type UserOrderByWithRelationInput = {
@@ -1961,15 +1978,17 @@ export namespace Prisma {
     content_visibilityPrivate?: SortOrder
     pinned_visibilityPrivate?: SortOrder
     liked_visibilityPrivate?: SortOrder
+    area_id?: SortOrder
     _relevance?: UserOrderByRelevanceInput
   }
 
   export type UserWhereUniqueInput = Prisma.AtLeast<{
     user_id?: number
-    username?: string
+    username_area_id?: UserUsernameArea_idCompoundUniqueInput
     AND?: UserWhereInput | UserWhereInput[]
     OR?: UserWhereInput[]
     NOT?: UserWhereInput | UserWhereInput[]
+    username?: StringFilter<"User"> | string
     password?: StringFilter<"User"> | string
     desc?: StringFilter<"User"> | string
     profile_picture?: StringFilter<"User"> | string
@@ -1979,7 +1998,8 @@ export namespace Prisma {
     content_visibilityPrivate?: BoolFilter<"User"> | boolean
     pinned_visibilityPrivate?: BoolFilter<"User"> | boolean
     liked_visibilityPrivate?: BoolFilter<"User"> | boolean
-  }, "user_id" | "username">
+    area_id?: IntFilter<"User"> | number
+  }, "user_id" | "username_area_id">
 
   export type UserOrderByWithAggregationInput = {
     user_id?: SortOrder
@@ -1993,6 +2013,7 @@ export namespace Prisma {
     content_visibilityPrivate?: SortOrder
     pinned_visibilityPrivate?: SortOrder
     liked_visibilityPrivate?: SortOrder
+    area_id?: SortOrder
     _count?: UserCountOrderByAggregateInput
     _avg?: UserAvgOrderByAggregateInput
     _max?: UserMaxOrderByAggregateInput
@@ -2015,6 +2036,7 @@ export namespace Prisma {
     content_visibilityPrivate?: BoolWithAggregatesFilter<"User"> | boolean
     pinned_visibilityPrivate?: BoolWithAggregatesFilter<"User"> | boolean
     liked_visibilityPrivate?: BoolWithAggregatesFilter<"User"> | boolean
+    area_id?: IntWithAggregatesFilter<"User"> | number
   }
 
   export type UserCreateInput = {
@@ -2028,6 +2050,7 @@ export namespace Prisma {
     content_visibilityPrivate?: boolean
     pinned_visibilityPrivate?: boolean
     liked_visibilityPrivate?: boolean
+    area_id: number
   }
 
   export type UserUncheckedCreateInput = {
@@ -2042,6 +2065,7 @@ export namespace Prisma {
     content_visibilityPrivate?: boolean
     pinned_visibilityPrivate?: boolean
     liked_visibilityPrivate?: boolean
+    area_id: number
   }
 
   export type UserUpdateInput = {
@@ -2055,6 +2079,7 @@ export namespace Prisma {
     content_visibilityPrivate?: BoolFieldUpdateOperationsInput | boolean
     pinned_visibilityPrivate?: BoolFieldUpdateOperationsInput | boolean
     liked_visibilityPrivate?: BoolFieldUpdateOperationsInput | boolean
+    area_id?: IntFieldUpdateOperationsInput | number
   }
 
   export type UserUncheckedUpdateInput = {
@@ -2069,6 +2094,7 @@ export namespace Prisma {
     content_visibilityPrivate?: BoolFieldUpdateOperationsInput | boolean
     pinned_visibilityPrivate?: BoolFieldUpdateOperationsInput | boolean
     liked_visibilityPrivate?: BoolFieldUpdateOperationsInput | boolean
+    area_id?: IntFieldUpdateOperationsInput | number
   }
 
   export type UserCreateManyInput = {
@@ -2083,6 +2109,7 @@ export namespace Prisma {
     content_visibilityPrivate?: boolean
     pinned_visibilityPrivate?: boolean
     liked_visibilityPrivate?: boolean
+    area_id: number
   }
 
   export type UserUpdateManyMutationInput = {
@@ -2096,6 +2123,7 @@ export namespace Prisma {
     content_visibilityPrivate?: BoolFieldUpdateOperationsInput | boolean
     pinned_visibilityPrivate?: BoolFieldUpdateOperationsInput | boolean
     liked_visibilityPrivate?: BoolFieldUpdateOperationsInput | boolean
+    area_id?: IntFieldUpdateOperationsInput | number
   }
 
   export type UserUncheckedUpdateManyInput = {
@@ -2110,6 +2138,7 @@ export namespace Prisma {
     content_visibilityPrivate?: BoolFieldUpdateOperationsInput | boolean
     pinned_visibilityPrivate?: BoolFieldUpdateOperationsInput | boolean
     liked_visibilityPrivate?: BoolFieldUpdateOperationsInput | boolean
+    area_id?: IntFieldUpdateOperationsInput | number
   }
 
   export type IntFilter<$PrismaModel = never> = {
@@ -2149,6 +2178,11 @@ export namespace Prisma {
     search: string
   }
 
+  export type UserUsernameArea_idCompoundUniqueInput = {
+    username: string
+    area_id: number
+  }
+
   export type UserCountOrderByAggregateInput = {
     user_id?: SortOrder
     username?: SortOrder
@@ -2161,6 +2195,7 @@ export namespace Prisma {
     content_visibilityPrivate?: SortOrder
     pinned_visibilityPrivate?: SortOrder
     liked_visibilityPrivate?: SortOrder
+    area_id?: SortOrder
   }
 
   export type UserAvgOrderByAggregateInput = {
@@ -2168,6 +2203,7 @@ export namespace Prisma {
     follower?: SortOrder
     total_like?: SortOrder
     total_reports?: SortOrder
+    area_id?: SortOrder
   }
 
   export type UserMaxOrderByAggregateInput = {
@@ -2182,6 +2218,7 @@ export namespace Prisma {
     content_visibilityPrivate?: SortOrder
     pinned_visibilityPrivate?: SortOrder
     liked_visibilityPrivate?: SortOrder
+    area_id?: SortOrder
   }
 
   export type UserMinOrderByAggregateInput = {
@@ -2196,6 +2233,7 @@ export namespace Prisma {
     content_visibilityPrivate?: SortOrder
     pinned_visibilityPrivate?: SortOrder
     liked_visibilityPrivate?: SortOrder
+    area_id?: SortOrder
   }
 
   export type UserSumOrderByAggregateInput = {
@@ -2203,6 +2241,7 @@ export namespace Prisma {
     follower?: SortOrder
     total_like?: SortOrder
     total_reports?: SortOrder
+    area_id?: SortOrder
   }
 
   export type IntWithAggregatesFilter<$PrismaModel = never> = {

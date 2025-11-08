@@ -131,7 +131,8 @@ exports.Prisma.UserScalarFieldEnum = {
   total_reports: 'total_reports',
   content_visibilityPrivate: 'content_visibilityPrivate',
   pinned_visibilityPrivate: 'pinned_visibilityPrivate',
-  liked_visibilityPrivate: 'liked_visibilityPrivate'
+  liked_visibilityPrivate: 'liked_visibilityPrivate',
+  area_id: 'area_id'
 };
 
 exports.Prisma.SortOrder = {

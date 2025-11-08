@@ -10,7 +10,7 @@ import { UserDto } from '@app/contracts/shared-dto/user/user.dto';
 
 export interface IUserService {
   create(createUserDto: CreateUserDto): Promise<Ack>;
-  findAll(): Promise<UserDto[]>;
+  findAll(area_id: number): Promise<UserDto[]>;
   findOne(id: number): Promise<UserDto>;
   updateProfile(
     id: number,

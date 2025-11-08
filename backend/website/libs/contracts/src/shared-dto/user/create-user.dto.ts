@@ -5,4 +5,6 @@ export class CreateUserDto {
   username: string;
   @ApiProperty()
   password: string;
+  @ApiProperty()
+  area_id: number;
 }

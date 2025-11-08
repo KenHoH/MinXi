@@ -1,5 +1,5 @@
 import { HttpException, HttpStatus, Injectable, Logger } from '@nestjs/common';
-import { ILogService } from '@app/common/interfaces/log/ILogService';
+import { ILogService } from '@app/contracts/interfaces/log/ILogService';
 import { UserLog } from './entities/log.entity';
 import { Ack } from '@app/contracts/shared-dto/ack.dto';
 import { LogReq } from '@app/contracts/shared-dto/log/request/log.req.dto';

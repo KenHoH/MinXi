@@ -19,8 +19,8 @@ export class UserController {
   }
 
   @MessagePattern(USER_MSG.findAll)
-  async findAll() {
-    return this.userService.findAll();
+  async findAll(@Payload() area_id: number) {
+    return this.userService.findAll(area_id);
   }
 
   @MessagePattern(USER_MSG.findOne)

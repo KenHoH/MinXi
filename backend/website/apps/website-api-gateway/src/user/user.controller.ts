@@ -40,9 +40,9 @@ export class UserController {
     return this.userService.create(createUserDto);
   }
 
-  @Get()
-  findAll() {
-    return this.userService.findAll();
+  @Get(':area')
+  findAll(@Param('area', ParseIntPipe) area: number) {
+    return this.userService.findAll(+area);
   }
 
   @Get(':id')
@@ -86,7 +86,7 @@ export class UserController {
     return this.userService.remove(+id);
   }
 
-  @Get('/name')
+  @Post('/name')
   findByName(@Payload() body: NameRequest) {
     return this.userService.findByName(body);
   }

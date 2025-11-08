@@ -16,7 +16,7 @@ datasource db {
 
 model User {
   user_id                   Int     @id @default(autoincrement())
-  username                  String  @unique
+  username                  String
   password                  String
   desc                      String
   profile_picture           String
@@ -26,4 +26,8 @@ model User {
   content_visibilityPrivate Boolean @default(false)
   pinned_visibilityPrivate  Boolean @default(false)
   liked_visibilityPrivate   Boolean @default(false)
+
+  area_id Int
+
+  @@unique([username, area_id])
 }

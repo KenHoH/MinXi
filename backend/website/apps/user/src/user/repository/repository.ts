@@ -28,12 +28,15 @@ export class Repository {
         liked_visibilityPrivate: false,
         pinned_visibilityPrivate: false,
         content_visibilityPrivate: false,
+        area_id: newUser.area_id,
       },
     });
   }
-  async findAll() {
+  async findAll(area_id: number) {
+    this.logger.log(typeof area_id);
     return await this.prisma.user.findMany({
       orderBy: { user_id: 'asc' },
+      where: { area_id: area_id },
     });
   }
 
@@ -115,11 +118,14 @@ export class Repository {
     });
   }
 
-  async findByName(name: string) {
+  async findByName(name: string, area_id: number) {
     this.logger.log(name);
     return await this.prisma.user.findUnique({
       where: {
-        username: name,
+        username_area_id: {
+          username: name,
+          area_id: area_id,
+        },
       },
     });
   }

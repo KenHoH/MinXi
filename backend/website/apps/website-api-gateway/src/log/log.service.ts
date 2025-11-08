@@ -1,7 +1,7 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { LOG_SERVICES } from '@app/common/constants/services';
 import { ClientProxy } from '@nestjs/microservices';
-import { ILogService } from '@app/common/interfaces/log/ILogService';
+import { ILogService } from '@app/contracts/interfaces/log/ILogService';
 import { Ack } from '@app/contracts/shared-dto/ack.dto';
 import { LogReq } from '@app/contracts/shared-dto/log/request/log.req.dto';
 import { firstValueFrom } from 'rxjs';

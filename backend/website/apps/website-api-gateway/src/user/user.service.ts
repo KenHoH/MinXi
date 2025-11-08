@@ -6,7 +6,7 @@ import {
 } from '@app/contracts/shared-dto/user/update-user.dto';
 import { ClientProxy, RpcException } from '@nestjs/microservices';
 import { USER_SERVICES } from '@app/common/constants/services';
-import { IUserService } from '@app/common/interfaces/user/IUserService';
+import { IUserService } from '@app/contracts/interfaces/user/IUserService';
 import { firstValueFrom, lastValueFrom } from 'rxjs';
 import { USER_MSG } from '@app/common/constants/messageEvent';
 import { Ack } from '@app/contracts/shared-dto/ack.dto';
@@ -23,8 +23,10 @@ export class UserService implements IUserService {
     );
   }
 
-  async findAll() {
-    return await firstValueFrom(this.userClient.send(USER_MSG.findAll, {}));
+  async findAll(area_id: number) {
+    return await firstValueFrom(
+      this.userClient.send(USER_MSG.findAll, area_id),
+    );
   }
 
   async findOne(id: number) {

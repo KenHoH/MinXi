@@ -4,7 +4,7 @@ import {
   Logger,
   UnauthorizedException,
 } from '@nestjs/common';
-import { IAuthService } from '@app/common/interfaces/auth/IAuthService';
+import { IAuthService } from '@app/contracts/interfaces/auth/IAuthService';
 import { LoginDto } from '@app/contracts/shared-dto/auth/request/login.dto';
 import { TokenResponseDto } from '@app/contracts/shared-dto/auth/response/refreshResponse.dto';
 import { RefreshTokenRequestDto } from '@app/contracts/shared-dto/auth/request/refreshRequest.dto';
@@ -19,6 +19,7 @@ import * as bcrypt from 'bcrypt';
 import { ConfigService } from '@nestjs/config';
 import { CACHE_MANAGER, Cache } from '@nestjs/cache-manager';
 import { httpToRpc } from '@app/common/utils/httpToRpc';
+import { NameRequest } from '@app/contracts/shared-dto/user/find.name.dto';
 
 @Injectable()
 export class AuthService implements IAuthService {
@@ -42,9 +43,14 @@ export class AuthService implements IAuthService {
   }
 
   async login(dto: LoginDto): Promise<TokenResponseDto> {
+    const nameRequest: NameRequest = {
+      name: dto.username,
+      area_id: dto.area_id,
+    };
     try {
+      this.logger.log(typeof dto.area_id);
       await firstValueFrom(
-        this.userClient.send(USER_MSG.findByName, { name: dto.username }),
+        this.userClient.send(USER_MSG.findByName, nameRequest),
       );
     } catch (error) {
       this.logger.fatal(error);
@@ -52,7 +58,7 @@ export class AuthService implements IAuthService {
     }
 
     const user = await firstValueFrom(
-      this.userClient.send(USER_MSG.findByName, { name: dto.username }),
+      this.userClient.send(USER_MSG.findByName, nameRequest),
     );
 
     if (!user) this.logger.fatal('User Not Found');

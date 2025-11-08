@@ -4,7 +4,7 @@ import {
   InternalServerErrorException,
   Logger,
 } from '@nestjs/common';
-import { IAuthService } from '@app/common/interfaces/auth/IAuthService';
+import { IAuthService } from '@app/contracts/interfaces/auth/IAuthService';
 import { LoginDto } from '@app/contracts/shared-dto/auth/request/login.dto';
 import { TokenResponseDto } from '@app/contracts/shared-dto/auth/response/refreshResponse.dto';
 import { RefreshTokenRequestDto } from '@app/contracts/shared-dto/auth/request/refreshRequest.dto';
