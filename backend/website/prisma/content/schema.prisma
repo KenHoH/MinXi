@@ -42,3 +42,12 @@ model File {
   @@unique([content_id, filepath])
   @@index([content_id, content_area_id]) 
 }
+model HistoryContent {
+  user_id             Int     @default(0) 
+  content_id          Int     @default(0)
+  reps                Int     @default(0)
+  liked               Boolean @default(false)
+  pinned              Boolean @default(false)
+ 
+  @@id([user_id, content_id]) 
+}

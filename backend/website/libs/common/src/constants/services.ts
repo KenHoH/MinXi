@@ -17,3 +17,8 @@ export const CONTENT_SERVICES = {
   CLIENT: 'CONTENT_CLIENT',
   PORT: 3006,
 };
+
+export const HISTORY_SERVICES = {
+  CLIENT: 'HISTORY_CLIENT',
+  PORT: 3007,
+};

@@ -42,6 +42,7 @@ export class ContentService implements IContentService {
       );
     }
   }
+  
 
   async createFile(dto: CreateFileDto): Promise<FileRes> {
     if (dto.area_id <= 0 || dto.area_id > 3)

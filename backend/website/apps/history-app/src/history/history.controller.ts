@@ -1,0 +1,19 @@
+import { Controller } from '@nestjs/common';
+import { MessagePattern, Payload } from '@nestjs/microservices';
+import { HistoryService } from './history.service';
+import { CreateHistoryDto } from '@app/contracts/shared-dto/content/req/CreateHistory.dto';
+import { HISTORY_MSG } from '@app/common/constants/messageEvent';
+
+@Controller()
+export class HistoryController {
+  constructor(private readonly historyService: HistoryService) {}
+
+  @MessagePattern(HISTORY_MSG.upsert)
+  upsert(@Payload() dto: CreateHistoryDto) {
+    return this.historyService.upsert(dto);
+  }
+  @MessagePattern(HISTORY_MSG.getByUser)
+  getByUser(@Payload() user_id: number) {
+    return this.historyService.getByUser(user_id);
+  }
+}

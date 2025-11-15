@@ -41,3 +41,8 @@ export const CONTENT_MSG = {
   getByUser: 'content.getByUser',
   remove: 'content.remove',
 };
+
+export const HISTORY_MSG = {
+  upsert: 'history.upsert',
+  getByUser: 'history.getByUser',
+};

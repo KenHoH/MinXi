@@ -118,6 +118,14 @@ exports.Prisma.FileScalarFieldEnum = {
   content_area_id: 'content_area_id'
 };
 
+exports.Prisma.HistoryContentScalarFieldEnum = {
+  user_id: 'user_id',
+  content_id: 'content_id',
+  reps: 'reps',
+  liked: 'liked',
+  pinned: 'pinned'
+};
+
 exports.Prisma.SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -142,7 +150,8 @@ exports.Prisma.FileOrderByRelevanceFieldEnum = {
 
 exports.Prisma.ModelName = {
   Content: 'Content',
-  File: 'File'
+  File: 'File',
+  HistoryContent: 'HistoryContent'
 };
 /**
  * Create the Client
@@ -183,6 +192,7 @@ const config = {
     "db"
   ],
   "activeProvider": "mysql",
+  "postinstall": false,
   "inlineDatasources": {
     "db": {
       "url": {
@@ -191,13 +201,13 @@ const config = {
       }
     }
   },
-  "inlineSchema": "// This is your Prisma schema file,\n// learn more about it in the docs: https://pris.ly/d/prisma-schema\n\n// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?\n// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init\n\ngenerator client {\n  provider = \"prisma-client-js\"\n  output   = \"../content/generated/content-client\"\n}\n\ndatasource db {\n  provider = \"mysql\"\n  url      = env(\"CONTENT_DATABASE_URL\")\n}\n\nmodel Content {\n  content_id        Int      @default(autoincrement())\n  creator_id        Int\n  parent_id         Int?\n  title             String\n  description       String\n  post_type         String\n  visibilityPrivate Boolean  @default(false)\n  views             Int      @default(0)\n  likes             Int      @default(0)\n  comments          Int      @default(0)\n  pins              Int      @default(0)\n  reports           Int      @default(0)\n  area_id           Int\n  created_at        DateTime @default(now())\n\n  @@id([content_id, area_id])\n}\n\nmodel File {\n  file_id   Int     @id @default(autoincrement())\n  filepath  String\n  thumbnail String?\n\n  content_id      Int\n  content_area_id Int\n\n  @@unique([content_id, filepath])\n  @@index([content_id, content_area_id])\n}\n",
-  "inlineSchemaHash": "678c48311fd800bc05ca27ff02a88792fb3f32b916fe46901d2f93d233fd411d",
+  "inlineSchema": "// This is your Prisma schema file,\n// learn more about it in the docs: https://pris.ly/d/prisma-schema\n\n// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?\n// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init\n\ngenerator client {\n  provider = \"prisma-client-js\"\n  output   = \"../content/generated/content-client\"\n}\n\ndatasource db {\n  provider = \"mysql\"\n  url      = env(\"CONTENT_DATABASE_URL\")\n}\n\nmodel Content {\n  content_id        Int      @default(autoincrement())\n  creator_id        Int\n  parent_id         Int?\n  title             String\n  description       String\n  post_type         String\n  visibilityPrivate Boolean  @default(false)\n  views             Int      @default(0)\n  likes             Int      @default(0)\n  comments          Int      @default(0)\n  pins              Int      @default(0)\n  reports           Int      @default(0)\n  area_id           Int\n  created_at        DateTime @default(now())\n\n  @@id([content_id, area_id])\n}\n\nmodel File {\n  file_id   Int     @id @default(autoincrement())\n  filepath  String\n  thumbnail String?\n\n  content_id      Int\n  content_area_id Int\n\n  @@unique([content_id, filepath])\n  @@index([content_id, content_area_id])\n}\n\nmodel HistoryContent {\n  user_id    Int     @default(0)\n  content_id Int     @default(0)\n  reps       Int     @default(0)\n  liked      Boolean @default(false)\n  pinned     Boolean @default(false)\n\n  @@id([user_id, content_id])\n}\n",
+  "inlineSchemaHash": "9011dbade65a2a6cdfdd4ea89d6a0f36fdc9cb38c0164c32a0a8baad1e0c40ab",
   "copyEngine": true
 }
 config.dirname = '/'
 
-config.runtimeDataModel = JSON.parse("{\"models\":{\"Content\":{\"fields\":[{\"name\":\"content_id\",\"kind\":\"scalar\",\"type\":\"Int\"},{\"name\":\"creator_id\",\"kind\":\"scalar\",\"type\":\"Int\"},{\"name\":\"parent_id\",\"kind\":\"scalar\",\"type\":\"Int\"},{\"name\":\"title\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"description\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"post_type\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"visibilityPrivate\",\"kind\":\"scalar\",\"type\":\"Boolean\"},{\"name\":\"views\",\"kind\":\"scalar\",\"type\":\"Int\"},{\"name\":\"likes\",\"kind\":\"scalar\",\"type\":\"Int\"},{\"name\":\"comments\",\"kind\":\"scalar\",\"type\":\"Int\"},{\"name\":\"pins\",\"kind\":\"scalar\",\"type\":\"Int\"},{\"name\":\"reports\",\"kind\":\"scalar\",\"type\":\"Int\"},{\"name\":\"area_id\",\"kind\":\"scalar\",\"type\":\"Int\"},{\"name\":\"created_at\",\"kind\":\"scalar\",\"type\":\"DateTime\"}],\"dbName\":null},\"File\":{\"fields\":[{\"name\":\"file_id\",\"kind\":\"scalar\",\"type\":\"Int\"},{\"name\":\"filepath\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"thumbnail\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"content_id\",\"kind\":\"scalar\",\"type\":\"Int\"},{\"name\":\"content_area_id\",\"kind\":\"scalar\",\"type\":\"Int\"}],\"dbName\":null}},\"enums\":{},\"types\":{}}")
+config.runtimeDataModel = JSON.parse("{\"models\":{\"Content\":{\"fields\":[{\"name\":\"content_id\",\"kind\":\"scalar\",\"type\":\"Int\"},{\"name\":\"creator_id\",\"kind\":\"scalar\",\"type\":\"Int\"},{\"name\":\"parent_id\",\"kind\":\"scalar\",\"type\":\"Int\"},{\"name\":\"title\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"description\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"post_type\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"visibilityPrivate\",\"kind\":\"scalar\",\"type\":\"Boolean\"},{\"name\":\"views\",\"kind\":\"scalar\",\"type\":\"Int\"},{\"name\":\"likes\",\"kind\":\"scalar\",\"type\":\"Int\"},{\"name\":\"comments\",\"kind\":\"scalar\",\"type\":\"Int\"},{\"name\":\"pins\",\"kind\":\"scalar\",\"type\":\"Int\"},{\"name\":\"reports\",\"kind\":\"scalar\",\"type\":\"Int\"},{\"name\":\"area_id\",\"kind\":\"scalar\",\"type\":\"Int\"},{\"name\":\"created_at\",\"kind\":\"scalar\",\"type\":\"DateTime\"}],\"dbName\":null},\"File\":{\"fields\":[{\"name\":\"file_id\",\"kind\":\"scalar\",\"type\":\"Int\"},{\"name\":\"filepath\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"thumbnail\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"content_id\",\"kind\":\"scalar\",\"type\":\"Int\"},{\"name\":\"content_area_id\",\"kind\":\"scalar\",\"type\":\"Int\"}],\"dbName\":null},\"HistoryContent\":{\"fields\":[{\"name\":\"user_id\",\"kind\":\"scalar\",\"type\":\"Int\"},{\"name\":\"content_id\",\"kind\":\"scalar\",\"type\":\"Int\"},{\"name\":\"reps\",\"kind\":\"scalar\",\"type\":\"Int\"},{\"name\":\"liked\",\"kind\":\"scalar\",\"type\":\"Boolean\"},{\"name\":\"pinned\",\"kind\":\"scalar\",\"type\":\"Boolean\"}],\"dbName\":null}},\"enums\":{},\"types\":{}}")
 defineDmmfProperty(exports.Prisma, config.runtimeDataModel)
 config.engineWasm = {
   getRuntime: async () => require('./query_engine_bg.js'),

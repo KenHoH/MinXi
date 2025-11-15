@@ -64,6 +64,15 @@
         "tsConfigPath": "libs/contracts/tsconfig.lib.json"
       }
     },
+    "history-app": {
+      "type": "application",
+      "root": "apps/history-app",
+      "entryFile": "main",
+      "sourceRoot": "apps/history-app/src",
+      "compilerOptions": {
+        "tsConfigPath": "apps/history-app/tsconfig.app.json"
+      }
+    },
     "log-app": {
       "type": "application",
       "root": "apps/log-app",

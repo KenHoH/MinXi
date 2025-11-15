@@ -146,6 +146,14 @@ exports.Prisma.FileScalarFieldEnum = {
   content_area_id: 'content_area_id'
 };
 
+exports.Prisma.HistoryContentScalarFieldEnum = {
+  user_id: 'user_id',
+  content_id: 'content_id',
+  reps: 'reps',
+  liked: 'liked',
+  pinned: 'pinned'
+};
+
 exports.Prisma.SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -170,7 +178,8 @@ exports.Prisma.FileOrderByRelevanceFieldEnum = {
 
 exports.Prisma.ModelName = {
   Content: 'Content',
-  File: 'File'
+  File: 'File',
+  HistoryContent: 'HistoryContent'
 };
 
 /**
