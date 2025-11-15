@@ -154,6 +154,24 @@ exports.Prisma.HistoryContentScalarFieldEnum = {
   pinned: 'pinned'
 };
 
+exports.Prisma.BoardScalarFieldEnum = {
+  board_id: 'board_id',
+  board_thumbnail: 'board_thumbnail',
+  creator_id: 'creator_id',
+  visibilityPrivate: 'visibilityPrivate',
+  title: 'title',
+  description: 'description',
+  created_at: 'created_at',
+  updated_at: 'updated_at'
+};
+
+exports.Prisma.BoardContentScalarFieldEnum = {
+  id: 'id',
+  board_id: 'board_id',
+  content_id: 'content_id',
+  created_at: 'created_at'
+};
+
 exports.Prisma.SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -175,11 +193,19 @@ exports.Prisma.FileOrderByRelevanceFieldEnum = {
   thumbnail: 'thumbnail'
 };
 
+exports.Prisma.BoardOrderByRelevanceFieldEnum = {
+  board_thumbnail: 'board_thumbnail',
+  title: 'title',
+  description: 'description'
+};
+
 
 exports.Prisma.ModelName = {
   Content: 'Content',
   File: 'File',
-  HistoryContent: 'HistoryContent'
+  HistoryContent: 'HistoryContent',
+  Board: 'Board',
+  BoardContent: 'BoardContent'
 };
 
 /**

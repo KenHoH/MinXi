@@ -22,3 +22,8 @@ export const HISTORY_SERVICES = {
   CLIENT: 'HISTORY_CLIENT',
   PORT: 3007,
 };
+
+export const BOARD_SERVICES = {
+  CLIENT: 'BOARD_CLIENT',
+  PORT: 3008,
+};

@@ -46,3 +46,14 @@ export const HISTORY_MSG = {
   upsert: 'history.upsert',
   getByUser: 'history.getByUser',
 };
+
+export const BOARD_MSG = {
+  create: 'board.create',
+  setPrivate: 'board.private',
+  setPublic: 'board.public',
+  addContent: 'board.addContent',
+  removeContent: 'board.removeContent',
+  updateContent: 'board.updateContent',
+  deleteBoard: 'board.delete',
+  getBoardByUser: 'board.getByUser',
+};

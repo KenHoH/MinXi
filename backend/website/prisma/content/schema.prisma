@@ -51,3 +51,26 @@ model HistoryContent {
  
   @@id([user_id, content_id]) 
 }
+
+model Board {
+  board_id           Int      @id @default(autoincrement())
+  board_thumbnail    String
+  creator_id         Int
+  visibilityPrivate  Boolean  @default(false)
+  title              String
+  description        String
+  contents           BoardContent[]
+  created_at         DateTime @default(now())
+  updated_at         DateTime @updatedAt
+}
+
+model BoardContent {
+  id                 Int      @id @default(autoincrement())
+  board_id           Int
+  board              Board    @relation(fields: [board_id], references: [board_id], onDelete: Cascade)
+  content_id         Int
+  created_at         DateTime @default(now())
+
+  @@unique([board_id, content_id])
+  @@index([board_id])
+}
