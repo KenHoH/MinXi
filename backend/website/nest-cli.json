@@ -46,6 +46,15 @@
         "tsConfigPath": "libs/common/tsconfig.lib.json"
       }
     },
+    "connection-app": {
+      "type": "application",
+      "root": "apps/connection-app",
+      "entryFile": "main",
+      "sourceRoot": "apps/connection-app/src",
+      "compilerOptions": {
+        "tsConfigPath": "apps/connection-app/tsconfig.app.json"
+      }
+    },
     "content-app": {
       "type": "application",
       "root": "apps/content-app",

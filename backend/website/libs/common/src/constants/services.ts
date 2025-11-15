@@ -27,3 +27,7 @@ export const BOARD_SERVICES = {
   CLIENT: 'BOARD_CLIENT',
   PORT: 3008,
 };
+export const CONNECT_SERVICES = {
+  CLIENT: 'CONNECT_CLIENT',
+  PORT: 3009,
+};

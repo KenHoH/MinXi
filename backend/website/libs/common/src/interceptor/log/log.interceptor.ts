@@ -67,8 +67,8 @@ export class LogInterceptor implements NestInterceptor {
         return next.handle().pipe(
           tap({
             next: () => {
-              logger.log(`Completed ${method} ${path} by user ${userId}`);
-              logger.log(dto);
+              // logger.log(`Completed ${method} ${path} by user ${userId}`);
+              // logger.log(dto);
               if (Math.random() < 0.2)
                 this.client.send(LOG_MSG.create, { userId, dto }).subscribe({
                   complete: () => logger.log('Success sending the message'),
@@ -86,7 +86,5 @@ export class LogInterceptor implements NestInterceptor {
         );
       }),
     );
-
-    return next.handle().pipe(tap(() => logger.log('after')));
   }
 }

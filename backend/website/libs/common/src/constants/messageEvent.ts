@@ -57,3 +57,16 @@ export const BOARD_MSG = {
   deleteBoard: 'board.delete',
   getBoardByUser: 'board.getByUser',
 };
+
+export const CONNECTION_MSG = {
+  createFollow: 'connection.createFollow',
+  createFriend: 'connection.createFriend',
+  checkFollow: 'connection.checkFollow',
+  checkFriend: 'connection.checkFriend',
+  checkFriendMutual: 'connection.checkFriendMutual',
+  getFollowersByCreator: 'connection.getFollowersByCreator',
+  getFriendsbyUser: 'connection.getFriendsbyUser',
+  getFollowingByUser: 'connection.getFollowingByUser',
+  deleteFriend: 'connection.deleteFriend',
+  deleteFollow: 'connection.deleteFollow',
+};

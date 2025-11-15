@@ -31,3 +31,21 @@ model User {
 
   @@unique([username, area_id])
 }
+
+model Follow {
+  id          Int @id @default(autoincrement())
+  creator_id  Int
+  follower_id Int
+
+  @@unique([creator_id, follower_id])
+  @@index([follower_id])
+}
+
+model Friend {
+  id        Int @id @default(autoincrement())
+  user_id   Int
+  friend_id Int
+
+  @@unique([user_id, friend_id])
+  @@index([friend_id])
+}
