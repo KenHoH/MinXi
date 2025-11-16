@@ -7,9 +7,10 @@ import { HistoryModule } from './history/history.module';
 import { BoardModule } from './board/board.module';
 import { ConnectionModule } from './connection/connection.module';
 import { ReportModule } from './report/report.module';
+import { AlgorithmModule } from './algorithm/algorithm.module';
 
 @Module({
-  imports: [UserModule, AuthModule, LogModule, ContentModule, HistoryModule, BoardModule, ConnectionModule, ReportModule],
+  imports: [UserModule, AuthModule, LogModule, ContentModule, HistoryModule, BoardModule, ConnectionModule, ReportModule, AlgorithmModule],
   controllers: [],
   providers: [],
 })

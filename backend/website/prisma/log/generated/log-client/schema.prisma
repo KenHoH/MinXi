@@ -22,3 +22,15 @@ model UserLog {
   meta      Json?
   createdAt DateTime @default(now())
 }
+
+model Report {
+  id        Int      @id @default(autoincrement())
+  creatorId Int
+  userId    Int
+  desc      String
+  type      String
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+
+  @@unique([creatorId, userId, type])
+}

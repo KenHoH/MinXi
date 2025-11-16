@@ -35,3 +35,7 @@ export const REPORT_SERVICES = {
   CLIENT: 'REPORT_CLIENT',
   PORT: 3010,
 };
+export const ALGO_SERVICES = {
+  CLIENT: 'ALGO_CLIENT',
+  PORT: 3011,
+};

@@ -39,6 +39,7 @@ export const CONTENT_MSG = {
   findOne: 'content.findOne',
   getStats: 'content.getStats',
   getByUser: 'content.getByUser',
+  getFile: 'content.getFile',
   remove: 'content.remove',
 };
 
@@ -78,4 +79,8 @@ export const REPORT_MSG = {
   activateReport: 'report.activateReport',
   deactivateReport: 'report.deactivateReport',
   deleteReport: 'report.deleteReport',
+};
+export const ALGO_MSG = {
+  findFYP: 'algo.findFYP',
+  searchContent: 'algo.searchContent',
 };

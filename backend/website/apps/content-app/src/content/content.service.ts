@@ -5,6 +5,7 @@ import { Ack } from '@app/contracts/shared-dto/ack.dto';
 import { CreateFileDto } from '@app/contracts/shared-dto/content/req/CreateFile.req.dto';
 import { CreatePostDto } from '@app/contracts/shared-dto/content/req/CreatePost.req.dto';
 import { FileRes } from '@app/contracts/shared-dto/content/res/file.res.dto';
+import { FileDto } from '@app/contracts/shared-dto/content/res/file.dto';
 import { FullContentDto } from '@app/contracts/shared-dto/content/res/full.content.dto';
 import { deltaDto } from '@app/contracts/shared-dto/user/delta.dto';
 import { HttpException, HttpStatus, Injectable, Logger } from '@nestjs/common';
@@ -14,14 +15,14 @@ import { mapToContent } from './utils/mapToContent';
 export class ContentService implements IContentService {
   private readonly logger = new Logger(ContentService.name);
   constructor(private readonly prisma: ContentDatabaseConnection) {}
-  async create(dto: CreatePostDto): Promise<Ack> {
+  async create(dto: CreatePostDto): Promise<FullContentDto> {
     if (dto.area_id <= 0 || dto.area_id > 3)
       throw httpToRpc(
         new HttpException('Invalid area ID', HttpStatus.BAD_REQUEST),
       );
 
     try {
-      await this.prisma.content.create({
+      const content = await this.prisma.content.create({
         data: {
           creator_id: dto.creator_id,
           parent_id: dto.parent_id ?? null,
@@ -31,7 +32,7 @@ export class ContentService implements IContentService {
           area_id: dto.area_id,
         },
       });
-      return { Valid: true, Msg: 'Content created successfully' };
+      return mapToContent(content);
     } catch (error) {
       this.logger.error('Failed to create content', error.message);
       throw httpToRpc(
@@ -42,7 +43,6 @@ export class ContentService implements IContentService {
       );
     }
   }
-  
 
   async createFile(dto: CreateFileDto): Promise<FileRes> {
     if (dto.area_id <= 0 || dto.area_id > 3)
@@ -348,6 +348,46 @@ export class ContentService implements IContentService {
       throw httpToRpc(
         new HttpException(
           'Failed to set content public',
+          HttpStatus.INTERNAL_SERVER_ERROR,
+        ),
+      );
+    }
+  }
+
+  async getFile(contentId: number, areaId: number): Promise<FileDto> {
+    if (areaId <= 0 || areaId > 3)
+      throw httpToRpc(
+        new HttpException('Invalid area ID', HttpStatus.BAD_REQUEST),
+      );
+    try {
+      const file = await this.prisma.file.findFirst({
+        where: {
+          content_id: contentId,
+          content_area_id: areaId,
+        },
+      });
+
+      if (!file) {
+        throw httpToRpc(
+          new HttpException('File not found', HttpStatus.NOT_FOUND),
+        );
+      }
+
+      return {
+        file_id: file.file_id,
+        filepath: file.filepath,
+        thumbnail: file.thumbnail ?? undefined,
+        content_id: file.content_id,
+        content_area_id: file.content_area_id,
+      };
+    } catch (error) {
+      if (error instanceof HttpException) {
+        throw error;
+      }
+      this.logger.error('Failed to fetch file', error.message);
+      throw httpToRpc(
+        new HttpException(
+          'Failed to fetch file',
           HttpStatus.INTERNAL_SERVER_ERROR,
         ),
       );

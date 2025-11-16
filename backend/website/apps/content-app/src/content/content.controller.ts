@@ -6,8 +6,10 @@ import { CreatePostDto } from '@app/contracts/shared-dto/content/req/CreatePost.
 import { Ack } from '@app/contracts/shared-dto/ack.dto';
 import { CreateFileDto } from '@app/contracts/shared-dto/content/req/CreateFile.req.dto';
 import { FileRes } from '@app/contracts/shared-dto/content/res/file.res.dto';
+import { FileDto } from '@app/contracts/shared-dto/content/res/file.dto';
 import { FullContentDto } from '@app/contracts/shared-dto/content/res/full.content.dto';
 import { deltaDto } from '@app/contracts/shared-dto/user/delta.dto';
+import { ValidationPipe } from '@nestjs/common';
 
 @Controller()
 export class ContentController {
@@ -16,7 +18,7 @@ export class ContentController {
   constructor(private readonly contentService: ContentService) {}
 
   @MessagePattern(CONTENT_MSG.create)
-  async create(@Payload() dto: CreatePostDto): Promise<Ack> {
+  async create(@Payload() dto: CreatePostDto): Promise<FullContentDto> {
     this.logger.log('Creating content...');
     return this.contentService.create(dto);
   }
@@ -154,5 +156,15 @@ export class ContentController {
   ): Promise<Ack> {
     this.logger.log(`Setting content ${payload.content_id} to public`);
     return this.contentService.setPublic(payload.content_id, payload.area_id);
+  }
+
+  @MessagePattern(CONTENT_MSG.getFile)
+  async getFile(
+    @Payload(ValidationPipe) payload: { contentId: number; areaId: number },
+  ): Promise<FileDto> {
+    this.logger.log(
+      `Fetching file for content ${payload.contentId} in area ${payload.areaId}`,
+    );
+    return this.contentService.getFile(payload.contentId, payload.areaId);
   }
 }

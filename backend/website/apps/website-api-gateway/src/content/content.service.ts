@@ -4,6 +4,7 @@ import { Ack } from '@app/contracts/shared-dto/ack.dto';
 import { CreateFileDto } from '@app/contracts/shared-dto/content/req/CreateFile.req.dto';
 import { CreatePostDto } from '@app/contracts/shared-dto/content/req/CreatePost.req.dto';
 import { FileRes } from '@app/contracts/shared-dto/content/res/file.res.dto';
+import { FileDto } from '@app/contracts/shared-dto/content/res/file.dto';
 import { FullContentDto } from '@app/contracts/shared-dto/content/res/full.content.dto';
 import { deltaDto } from '@app/contracts/shared-dto/user/delta.dto';
 import { Inject, Injectable } from '@nestjs/common';
@@ -16,9 +17,9 @@ export class ContentService {
     @Inject(CONTENT_SERVICES.CLIENT)
     private readonly contentClient: ClientProxy,
   ) {}
-  async create(dto: CreatePostDto): Promise<Ack> {
+  async create(dto: CreatePostDto): Promise<FullContentDto> {
     return await firstValueFrom(
-      this.contentClient.send(CONTENT_MSG.create, dto),
+      this.contentClient.send<FullContentDto>(CONTENT_MSG.create, dto),
     );
   }
 
@@ -131,6 +132,12 @@ export class ContentService {
   async setPublic(content_id: number, area_id: number): Promise<Ack> {
     return await firstValueFrom(
       this.contentClient.send(CONTENT_MSG.setPublic, { content_id, area_id }),
+    );
+  }
+
+  async getFile(contentId: number, areaId: number): Promise<FileDto> {
+    return await firstValueFrom(
+      this.contentClient.send(CONTENT_MSG.getFile, { contentId, areaId }),
     );
   }
 }
