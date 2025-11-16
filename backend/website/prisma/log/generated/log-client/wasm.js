@@ -102,6 +102,16 @@ exports.Prisma.UserLogScalarFieldEnum = {
   createdAt: 'createdAt'
 };
 
+exports.Prisma.ReportScalarFieldEnum = {
+  id: 'id',
+  creatorId: 'creatorId',
+  userId: 'userId',
+  desc: 'desc',
+  type: 'type',
+  isActive: 'isActive',
+  createdAt: 'createdAt'
+};
+
 exports.Prisma.SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -133,9 +143,15 @@ exports.Prisma.UserLogOrderByRelevanceFieldEnum = {
   path: 'path'
 };
 
+exports.Prisma.ReportOrderByRelevanceFieldEnum = {
+  desc: 'desc',
+  type: 'type'
+};
+
 
 exports.Prisma.ModelName = {
-  UserLog: 'UserLog'
+  UserLog: 'UserLog',
+  Report: 'Report'
 };
 /**
  * Create the Client
@@ -184,13 +200,13 @@ const config = {
       }
     }
   },
-  "inlineSchema": "// This is your Prisma schema file,\n// learn more about it in the docs: https://pris.ly/d/prisma-schema\n\n// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?\n// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init\n\ngenerator client {\n  provider = \"prisma-client-js\"\n  output   = \"../log/generated/log-client\"\n}\n\ndatasource db {\n  provider = \"mysql\"\n  url      = env(\"LOG_DATABASE_URL\")\n}\n\nmodel UserLog {\n  id        Int      @id @default(autoincrement())\n  userId    Int\n  method    String\n  path      String\n  meta      Json?\n  createdAt DateTime @default(now())\n}\n",
-  "inlineSchemaHash": "865d3ad9f4d04c86e56245f31f7da1df66b5b53947f0f59ac491aa1b5220bac9",
+  "inlineSchema": "// This is your Prisma schema file,\n// learn more about it in the docs: https://pris.ly/d/prisma-schema\n\n// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?\n// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init\n\ngenerator client {\n  provider = \"prisma-client-js\"\n  output   = \"../log/generated/log-client\"\n}\n\ndatasource db {\n  provider = \"mysql\"\n  url      = env(\"LOG_DATABASE_URL\")\n}\n\nmodel UserLog {\n  id        Int      @id @default(autoincrement())\n  userId    Int\n  method    String\n  path      String\n  meta      Json?\n  createdAt DateTime @default(now())\n}\n\nmodel Report {\n  id        Int      @id @default(autoincrement())\n  creatorId Int\n  userId    Int\n  desc      String\n  type      String\n  isActive  Boolean  @default(true)\n  createdAt DateTime @default(now())\n\n  @@unique([creatorId, userId, type])\n}\n",
+  "inlineSchemaHash": "406d2522aaf69219049e9775787b544b4a4bfc074ee51feae59cdf05f77c8756",
   "copyEngine": true
 }
 config.dirname = '/'
 
-config.runtimeDataModel = JSON.parse("{\"models\":{\"UserLog\":{\"fields\":[{\"name\":\"id\",\"kind\":\"scalar\",\"type\":\"Int\"},{\"name\":\"userId\",\"kind\":\"scalar\",\"type\":\"Int\"},{\"name\":\"method\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"path\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"meta\",\"kind\":\"scalar\",\"type\":\"Json\"},{\"name\":\"createdAt\",\"kind\":\"scalar\",\"type\":\"DateTime\"}],\"dbName\":null}},\"enums\":{},\"types\":{}}")
+config.runtimeDataModel = JSON.parse("{\"models\":{\"UserLog\":{\"fields\":[{\"name\":\"id\",\"kind\":\"scalar\",\"type\":\"Int\"},{\"name\":\"userId\",\"kind\":\"scalar\",\"type\":\"Int\"},{\"name\":\"method\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"path\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"meta\",\"kind\":\"scalar\",\"type\":\"Json\"},{\"name\":\"createdAt\",\"kind\":\"scalar\",\"type\":\"DateTime\"}],\"dbName\":null},\"Report\":{\"fields\":[{\"name\":\"id\",\"kind\":\"scalar\",\"type\":\"Int\"},{\"name\":\"creatorId\",\"kind\":\"scalar\",\"type\":\"Int\"},{\"name\":\"userId\",\"kind\":\"scalar\",\"type\":\"Int\"},{\"name\":\"desc\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"type\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"isActive\",\"kind\":\"scalar\",\"type\":\"Boolean\"},{\"name\":\"createdAt\",\"kind\":\"scalar\",\"type\":\"DateTime\"}],\"dbName\":null}},\"enums\":{},\"types\":{}}")
 defineDmmfProperty(exports.Prisma, config.runtimeDataModel)
 config.engineWasm = {
   getRuntime: async () => require('./query_engine_bg.js'),

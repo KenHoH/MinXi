@@ -6,9 +6,10 @@ import { ContentModule } from './content/content.module';
 import { HistoryModule } from './history/history.module';
 import { BoardModule } from './board/board.module';
 import { ConnectionModule } from './connection/connection.module';
+import { ReportModule } from './report/report.module';
 
 @Module({
-  imports: [UserModule, AuthModule, LogModule, ContentModule, HistoryModule, BoardModule, ConnectionModule],
+  imports: [UserModule, AuthModule, LogModule, ContentModule, HistoryModule, BoardModule, ConnectionModule, ReportModule],
   controllers: [],
   providers: [],
 })

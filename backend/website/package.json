@@ -18,7 +18,7 @@
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "test:e2e": "jest --config ./apps/website/test/jest-e2e.json",
-    "service": "concurrently \"nest start website-api-gateway --watch\" \"nest start user --watch\" \"nest start auth --watch\" \"nest start log-app --watch\" \"nest start content-app --watch\" \"nest start history-app --watch\" \"nest start board-app --watch\" \"nest start connection-app --watch\""
+    "service": "concurrently \"nest start website-api-gateway --watch\" \"nest start user --watch\" \"nest start auth --watch\" \"nest start log-app --watch\" \"nest start content-app --watch\" \"nest start history-app --watch\" \"nest start board-app --watch\" \"nest start connection-app --watch\" \"nest start report-app --watch\""
   },
   "dependencies": {
     "@nestjs/cache-manager": "^3.0.1",

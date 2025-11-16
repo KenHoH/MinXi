@@ -70,3 +70,12 @@ export const CONNECTION_MSG = {
   deleteFriend: 'connection.deleteFriend',
   deleteFollow: 'connection.deleteFollow',
 };
+
+export const REPORT_MSG = {
+  getAllReports: 'report.getAllReports',
+  getReportsByUser: 'report.getReportsByUser',
+  createReport: 'report.createReport',
+  activateReport: 'report.activateReport',
+  deactivateReport: 'report.deactivateReport',
+  deleteReport: 'report.deleteReport',
+};

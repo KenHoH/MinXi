@@ -31,3 +31,7 @@ export const CONNECT_SERVICES = {
   CLIENT: 'CONNECT_CLIENT',
   PORT: 3009,
 };
+export const REPORT_SERVICES = {
+  CLIENT: 'REPORT_CLIENT',
+  PORT: 3010,
+};
