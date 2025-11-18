@@ -8,9 +8,23 @@ import { BoardModule } from './board/board.module';
 import { ConnectionModule } from './connection/connection.module';
 import { ReportModule } from './report/report.module';
 import { AlgorithmModule } from './algorithm/algorithm.module';
+import { SseModule } from './sse/sse.module';
+import { SocialModule } from './social/social.module';
 
 @Module({
-  imports: [UserModule, AuthModule, LogModule, ContentModule, HistoryModule, BoardModule, ConnectionModule, ReportModule, AlgorithmModule],
+  imports: [
+    UserModule,
+    AuthModule,
+    LogModule,
+    ContentModule,
+    HistoryModule,
+    BoardModule,
+    ConnectionModule,
+    ReportModule,
+    AlgorithmModule,
+    SseModule,
+    SocialModule,
+  ],
   controllers: [],
   providers: [],
 })

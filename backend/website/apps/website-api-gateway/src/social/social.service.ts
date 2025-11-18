@@ -1,0 +1,82 @@
+import { SOCIAL_MSG } from '@app/common/constants/messageEvent';
+import { SOCIAL_SERVICES } from '@app/common/constants/services';
+import { ISocialService } from '@app/contracts/interfaces/app/ISocialService';
+import { AddUserToRoomDto } from '@app/contracts/shared-dto/social/request/addUserToRoomDTO';
+import { CreateRoomDto } from '@app/contracts/shared-dto/social/request/createRoomDTO';
+import { FindDmDto } from '@app/contracts/shared-dto/social/request/findDMDTO';
+import { GetAllRoomsDto } from '@app/contracts/shared-dto/social/request/getAllRoomDTO';
+import { GetMediaDto } from '@app/contracts/shared-dto/social/request/getMediaDTO';
+import { GetMessagesDto } from '@app/contracts/shared-dto/social/request/getMessageDTO';
+import { GetRoomInfoDto } from '@app/contracts/shared-dto/social/request/getRoomInfoDTO';
+import { GetTotalParticipantsDto } from '@app/contracts/shared-dto/social/request/getTotalParticipantDTO';
+import { RemoveUserFromRoomDto } from '@app/contracts/shared-dto/social/request/removeUserFromRoomDTO';
+import { SendMessageDto } from '@app/contracts/shared-dto/social/request/sendMessageDTO';
+import { UpdateParticipantRoleDto } from '@app/contracts/shared-dto/social/request/updateParticipantRoleDTO';
+import { MessageResponseDto } from '@app/contracts/shared-dto/social/response/messageResDTO';
+import { ParticipantResponseDto } from '@app/contracts/shared-dto/social/response/participantDTO';
+import { RoomResponseDto } from '@app/contracts/shared-dto/social/response/RoomResDTO';
+import { ParticipantTotalResDTO } from '@app/contracts/shared-dto/social/response/totalParticipantResDTO';
+import { Inject, Injectable, Logger } from '@nestjs/common';
+import { ClientProxy } from '@nestjs/microservices';
+import { firstValueFrom } from 'rxjs';
+@Injectable()
+export class SocialService implements ISocialService {
+  constructor(
+    @Inject(SOCIAL_SERVICES.CLIENT) private readonly client: ClientProxy,
+  ) {}
+  logger = new Logger(SocialService.name);
+  async createRoom(dto: CreateRoomDto): Promise<RoomResponseDto> {
+    this.logger.log(`Creating room with dto: ${JSON.stringify(dto)}`);
+    return firstValueFrom(this.client.send(SOCIAL_MSG.createRoom, dto));
+  }
+
+  async getRoomInfo(dto: GetRoomInfoDto): Promise<RoomResponseDto> {
+    return firstValueFrom(this.client.send(SOCIAL_MSG.getRoomInfo, dto));
+  }
+
+  async getAllRoomID(dto: GetAllRoomsDto): Promise<RoomResponseDto[]> {
+    return firstValueFrom(this.client.send(SOCIAL_MSG.getAllRoomID, dto));
+  }
+
+  async addUserToRoom(dto: AddUserToRoomDto): Promise<ParticipantResponseDto> {
+    return firstValueFrom(this.client.send(SOCIAL_MSG.addUserToRoom, dto));
+  }
+
+  async removeUserFromRoom(
+    dto: RemoveUserFromRoomDto,
+  ): Promise<ParticipantResponseDto> {
+    return firstValueFrom(this.client.send(SOCIAL_MSG.removeUserFromRoom, dto));
+  }
+
+  async updateParticipantRole(
+    dto: UpdateParticipantRoleDto,
+  ): Promise<ParticipantResponseDto> {
+    return firstValueFrom(
+      this.client.send(SOCIAL_MSG.updateParticipantRole, dto),
+    );
+  }
+
+  async getTotalParticipant(
+    dto: GetTotalParticipantsDto,
+  ): Promise<ParticipantTotalResDTO> {
+    return firstValueFrom(
+      this.client.send(SOCIAL_MSG.getTotalParticipants, dto),
+    );
+  }
+
+  async getMedia(dto: GetMediaDto): Promise<MessageResponseDto> {
+    return firstValueFrom(this.client.send(SOCIAL_MSG.getMedia, dto));
+  }
+
+  async sendMessage(dto: SendMessageDto): Promise<MessageResponseDto> {
+    return firstValueFrom(this.client.send(SOCIAL_MSG.sendMessage, dto));
+  }
+
+  async getMessage(dto: GetMessagesDto): Promise<MessageResponseDto[]> {
+    return firstValueFrom(this.client.send(SOCIAL_MSG.getMessage, dto));
+  }
+
+  async findDM(dto: FindDmDto): Promise<RoomResponseDto> {
+    return firstValueFrom(this.client.send(SOCIAL_MSG.findDM, dto));
+  }
+}

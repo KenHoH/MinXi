@@ -1,0 +1,47 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+enum RoomType {
+  DIRECT
+  GROUP
+  COMMUNITY
+}
+
+enum ParticipantRole {
+  OWNER
+  ADMIN
+  MEMBER
+}
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../social/generated/social-client"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("SOCIAL_DATABASE_URL")
+}
+
+model Room {
+  id        String   @id @default(uuid())
+  name      String?
+  type      RoomType
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Participant {
+  id       String          @id @default(uuid())
+  userId   Int
+  roomId   String
+  role     ParticipantRole @default(MEMBER)
+  joinedAt DateTime        @default(now())
+
+  @@unique([userId, roomId])
+  @@index([userId])
+  @@index([roomId])
+}

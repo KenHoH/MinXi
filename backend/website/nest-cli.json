@@ -109,6 +109,24 @@
         "tsConfigPath": "apps/report-app/tsconfig.app.json"
       }
     },
+    "social-app": {
+      "type": "application",
+      "root": "apps/social-app",
+      "entryFile": "main",
+      "sourceRoot": "apps/social-app/src",
+      "compilerOptions": {
+        "tsConfigPath": "apps/social-app/tsconfig.app.json"
+      }
+    },
+    "sse-app": {
+      "type": "application",
+      "root": "apps/sse-app",
+      "entryFile": "main",
+      "sourceRoot": "apps/sse-app/src",
+      "compilerOptions": {
+        "tsConfigPath": "apps/sse-app/tsconfig.app.json"
+      }
+    },
     "user": {
       "type": "application",
       "root": "apps/user",

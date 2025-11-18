@@ -24,7 +24,7 @@ import { ApiBearerAuth, ApiBody, ApiConsumes } from '@nestjs/swagger';
 import { MulterConfiguration } from '@app/common/config/multer.config';
 import { CreatePostDto } from '@app/contracts/shared-dto/content/req/CreatePost.req.dto';
 import { deltaDto } from '@app/contracts/shared-dto/user/delta.dto';
-import { fileFieldsSchema } from '@app/contracts/schema/fileFieldsSchema';
+import { fileFieldsSchema } from '@app/contracts/shared-dto/schema/fileFieldsSchema';
 import { CreateFileDto } from '@app/contracts/shared-dto/content/req/CreateFile.req.dto';
 import { JwtAuthGuard } from '@app/common/guard/jwt-auth-guard/jwt-auth.guard';
 import { LogInterceptor } from '@app/common/interceptor/log/log.interceptor';

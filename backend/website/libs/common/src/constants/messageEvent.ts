@@ -84,3 +84,25 @@ export const ALGO_MSG = {
   findFYP: 'algo.findFYP',
   searchContent: 'algo.searchContent',
 };
+export const SSE_MSG = {
+  sendBroadcast: 'sse.sendBroadcast',
+};
+export const SOCIAL_MSG = {
+  createRoom: 'social.createRoom',
+  getRoomInfo: 'social.getRoomInfo',
+  searchRooms: 'social.searchRooms',
+  getAllRoomID: 'social.getAllRoomID',
+
+  addUserToRoom: 'social.addUserToRoom',
+  removeUserFromRoom: 'social.removeUserFromRoom',
+  updateParticipantRole: 'social.updateParticipantRole',
+  getTotalParticipants: 'social.getTotalParticipants',
+
+  sendMessage: 'social.sendMessage',
+  getMessage: 'social.getMessage',
+
+  findDM: 'social.findDM',
+  getAllDM: 'social.getAllDM',
+
+  getMedia: 'social.getMedia',
+};
