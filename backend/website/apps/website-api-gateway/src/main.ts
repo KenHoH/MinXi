@@ -5,27 +5,26 @@ import { RpcTranslateFilter } from '@app/common/filters/rpc-translate/rpc-transl
 import { ValidationPipe } from '@nestjs/common';
 import * as express from 'express';
 import { NestExpressApplication } from '@nestjs/platform-express';
+import cookieParser from 'cookie-parser';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(
     WebsiteApiGatewayModule,
   );
 
-  //serve the uploads folder
   app.use(
     '/uploads',
     express.static('uploads', {
       setHeaders: (res, path, stat) => {
-        // Crucial: This removes the header that forces a download
         res.removeHeader('Content-Disposition');
 
-        // Ensures correct MIME type for streaming
         if (path.endsWith('.mp4')) {
           res.setHeader('Content-Type', 'video/mp4');
         }
       },
     }),
   );
+  app.use(cookieParser());
 
   app.useGlobalFilters(new RpcTranslateFilter());
   app.useGlobalPipes(
@@ -34,9 +33,7 @@ async function bootstrap() {
     }),
   );
 
-  // CORS POLICY
   const methods = ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'];
-  // origin: true -> allowed all the host to get the server
   app.enableCors({
     origin: true,
     methods: methods,
