@@ -1,5 +1,13 @@
-import { SOCIAL_MSG, SSE_MSG } from '@app/common/constants/messageEvent';
-import { SOCIAL_SERVICES, SSE_SERVICES } from '@app/common/constants/services';
+import {
+  NOTIF_MSG,
+  SOCIAL_MSG,
+  SSE_MSG,
+} from '@app/common/constants/messageEvent';
+import {
+  NOTIF_SERVICES,
+  SOCIAL_SERVICES,
+  SSE_SERVICES,
+} from '@app/common/constants/services';
 import { httpToRpc } from '@app/common/utils/httpToRpc';
 import { ISSEService } from '@app/contracts/interfaces/app/ISSEService';
 import { Ack } from '@app/contracts/shared-dto/ack.dto';
@@ -12,11 +20,15 @@ import { ClientProxy } from '@nestjs/microservices';
 import { Http2ServerRequest } from 'http2';
 import { firstValueFrom, map, Observable, Subject } from 'rxjs';
 import { buildMessageResponse } from './utils/buildMsgRes';
+import { BroadcastNotifReq } from '@app/contracts/shared-dto/sse/req/BroadcastNotifReq';
+import { NotificationReq } from '@app/contracts/shared-dto/notification/req/notificiationReq';
+import { buildNotifResponse } from './utils/buildNotifRes';
 
 @Injectable()
 export class SseService implements ISSEService {
   constructor(
     @Inject(SOCIAL_SERVICES.CLIENT) private readonly client: ClientProxy,
+    @Inject(NOTIF_SERVICES.CLIENT) private readonly notifClient: ClientProxy,
   ) {}
   private roomConnections = new Map<string, Subject<any>>();
 
@@ -60,6 +72,27 @@ export class SseService implements ISSEService {
     };
   }
 
+  async sendNotification(userId: number, dto: BroadcastNotifReq): Promise<Ack> {
+    const connection = this.roomConnections.get(userId.toString());
+
+    if (!connection) {
+      throw new HttpException('Connection not found', HttpStatus.NOT_FOUND);
+    }
+
+    const notification = buildNotifResponse(dto);
+
+    connection.next({
+      type: 'NEW_MESSAGE',
+      data: notification,
+    });
+
+    await this.forwardNotification(dto);
+    return {
+      Valid: true,
+      Msg: 'Successfully sent message',
+    };
+  }
+
   private async forwardMessage(dto: BroadcastMsgReq) {
     const payload: SendMessageDto = {
       authorId: dto.authorId,
@@ -73,6 +106,24 @@ export class SseService implements ISSEService {
     } catch (err) {
       throw new HttpException(
         'Failed to send message',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
+  private async forwardNotification(dto: BroadcastNotifReq) {
+    const payload: NotificationReq = {
+      userId: dto.userId,
+      title: dto.title,
+      description: dto.description,
+      isSeen: dto.isSeen,
+    };
+
+    try {
+      await firstValueFrom(this.notifClient.send(NOTIF_MSG.create, payload));
+    } catch (err) {
+      throw new HttpException(
+        'Failed to send notification',
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }

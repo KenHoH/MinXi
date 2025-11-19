@@ -51,3 +51,7 @@ export const COMMENT_SERVICES = {
   CLIENT: 'COMMENT_CLIENT',
   PORT: 3014,
 };
+export const NOTIF_SERVICES = {
+  CLIENT: 'NOTIF_CLIENT',
+  PORT: 3015,
+};

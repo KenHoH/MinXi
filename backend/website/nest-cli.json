@@ -109,6 +109,15 @@
         "tsConfigPath": "apps/log-app/tsconfig.app.json"
       }
     },
+    "notification-app": {
+      "type": "application",
+      "root": "apps/notification-app",
+      "entryFile": "main",
+      "sourceRoot": "apps/notification-app/src",
+      "compilerOptions": {
+        "tsConfigPath": "apps/notification-app/tsconfig.app.json"
+      }
+    },
     "report-app": {
       "type": "application",
       "root": "apps/report-app",

@@ -14,6 +14,7 @@ import { BroadcastMsgReq } from '@app/contracts/shared-dto/sse/req/BroadcastMsgR
 import { Observable } from 'rxjs';
 import { ApiBearerAuth } from '@nestjs/swagger';
 import { JwtAuthGuard } from '@app/common/guard/jwt-auth-guard/jwt-auth.guard';
+import { BroadcastNotifReq } from '@app/contracts/shared-dto/sse/req/BroadcastNotifReq';
 
 @Controller('sse')
 @ApiBearerAuth()
@@ -31,6 +32,11 @@ export class SseController {
   @Post('sendBroadcastToRoom')
   sendBroadcast(@Body() dto: BroadcastMsgReq) {
     return this.sseService.sendBroadcast(dto.roomId, dto);
+  }
+
+  @Post('sendNotificationToRoom')
+  sendNotification(@Body() dto: BroadcastNotifReq) {
+    return this.sseService.sendNotification(dto.userId, dto);
   }
 
   @Get('stats')

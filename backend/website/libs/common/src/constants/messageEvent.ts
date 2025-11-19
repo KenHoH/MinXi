@@ -112,3 +112,8 @@ export const COMMENT_MSG = {
   getComment: 'comment.getComment',
   deleteComment: 'comment.deleteComment',
 };
+export const NOTIF_MSG = {
+  create: 'notif.create',
+  getNotif: 'notif.getNotif',
+  deleteNotif: 'notif.deleteNotif',
+};

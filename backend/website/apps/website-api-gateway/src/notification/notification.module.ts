@@ -1,25 +1,14 @@
 import { Module } from '@nestjs/common';
-import { SseService } from './sse.service';
-import { SseController } from './sse.controller';
+import { NotificationService } from './notification.service';
+import { NotificationController } from './notification.controller';
 import { ClientsModule, Transport } from '@nestjs/microservices';
-import {
-  NOTIF_SERVICES,
-  SOCIAL_SERVICES,
-  SSE_SERVICES,
-} from '@app/common/constants/services';
+import { NOTIF_SERVICES } from '@app/common/constants/services';
 import { CommonModule } from '@app/common';
 import { JwtAuthGuard } from '@app/common/guard/jwt-auth-guard/jwt-auth.guard';
 
 @Module({
   imports: [
     ClientsModule.register([
-      {
-        name: SOCIAL_SERVICES.CLIENT,
-        transport: Transport.TCP,
-        options: {
-          port: SOCIAL_SERVICES.PORT,
-        },
-      },
       {
         name: NOTIF_SERVICES.CLIENT,
         transport: Transport.TCP,
@@ -30,7 +19,7 @@ import { JwtAuthGuard } from '@app/common/guard/jwt-auth-guard/jwt-auth.guard';
     ]),
     CommonModule,
   ],
-  controllers: [SseController],
-  providers: [SseService, JwtAuthGuard],
+  controllers: [NotificationController],
+  providers: [NotificationService, JwtAuthGuard],
 })
-export class SseModule {}
+export class NotificationModule {}

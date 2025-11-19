@@ -34,3 +34,12 @@ model Report {
 
   @@unique([creatorId, userId, type])
 }
+
+model Notification {
+  id  Int @id @default(autoincrement())
+  userId Int 
+  isSeen Boolean @default(false)
+  title String
+  description String
+  createdAt DateTime @default(now())
+}

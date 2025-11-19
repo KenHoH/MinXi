@@ -140,6 +140,15 @@ exports.Prisma.ReportScalarFieldEnum = {
   createdAt: 'createdAt'
 };
 
+exports.Prisma.NotificationScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  isSeen: 'isSeen',
+  title: 'title',
+  description: 'description',
+  createdAt: 'createdAt'
+};
+
 exports.Prisma.SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -176,10 +185,16 @@ exports.Prisma.ReportOrderByRelevanceFieldEnum = {
   type: 'type'
 };
 
+exports.Prisma.NotificationOrderByRelevanceFieldEnum = {
+  title: 'title',
+  description: 'description'
+};
+
 
 exports.Prisma.ModelName = {
   UserLog: 'UserLog',
-  Report: 'Report'
+  Report: 'Report',
+  Notification: 'Notification'
 };
 
 /**

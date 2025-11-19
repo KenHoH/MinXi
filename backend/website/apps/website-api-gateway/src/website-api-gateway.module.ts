@@ -11,6 +11,7 @@ import { AlgorithmModule } from './algorithm/algorithm.module';
 import { SseModule } from './sse/sse.module';
 import { SocialModule } from './social/social.module';
 import { CommentModule } from './comment/comment.module';
+import { NotificationModule } from './notification/notification.module';
 
 @Module({
   imports: [
@@ -26,6 +27,7 @@ import { CommentModule } from './comment/comment.module';
     SseModule,
     SocialModule,
     CommentModule,
+    NotificationModule,
   ],
   controllers: [],
   providers: [],
