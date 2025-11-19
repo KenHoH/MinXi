@@ -6,25 +6,35 @@ import {
   Patch,
   Param,
   Delete,
+  Sse,
+  UseGuards,
 } from '@nestjs/common';
 import { SseService } from './sse.service';
+import { BroadcastMsgReq } from '@app/contracts/shared-dto/sse/req/BroadcastMsgReq';
+import { Observable } from 'rxjs';
+import { ApiBearerAuth } from '@nestjs/swagger';
+import { JwtAuthGuard } from '@app/common/guard/jwt-auth-guard/jwt-auth.guard';
 
 @Controller('sse')
+@ApiBearerAuth()
+@UseGuards(JwtAuthGuard)
 export class SseController {
   constructor(private readonly sseService: SseService) {}
 
-  @Get()
-  findAll() {
-    return this.sseService.findAll();
+  @Sse('subscribe/rooms/:roomId')
+  subscribeToRoom(
+    @Param('roomId') roomId: string,
+  ): Promise<Observable<MessageEvent>> {
+    return this.sseService.subscribeToRoom(roomId);
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.sseService.findOne(+id);
+  @Post('sendBroadcastToRoom')
+  sendBroadcast(@Body() dto: BroadcastMsgReq) {
+    return this.sseService.sendBroadcast(dto.roomId, dto);
   }
 
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.sseService.remove(+id);
+  @Get('stats')
+  getStats() {
+    return this.sseService.getConnectionStats();
   }
 }
