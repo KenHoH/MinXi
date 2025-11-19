@@ -1,6 +1,7 @@
 import { ContentDatabaseConnection } from '@app/common/database/content-database-connection/content-database-connection';
 import { httpToRpc } from '@app/common/utils/httpToRpc';
 import { ICommentService } from '@app/contracts/interfaces/app/ICommentService';
+import { CommentReq } from '@app/contracts/shared-dto/comment/req/CommentReq';
 import { CommentRes } from '@app/contracts/shared-dto/comment/res/CommentRes';
 import { DeleteCommentRes } from '@app/contracts/shared-dto/comment/res/DeleteCommenRes';
 import { HttpException, HttpStatus, Injectable, Logger } from '@nestjs/common';
@@ -11,7 +12,7 @@ export class CommentService implements ICommentService {
 
   logger = new Logger(CommentService.name);
 
-  async create(dto: CommentRes): Promise<CommentRes> {
+  async create(dto: CommentReq): Promise<CommentRes> {
     try {
       const comment = this.prisma.comment.create({
         data: {

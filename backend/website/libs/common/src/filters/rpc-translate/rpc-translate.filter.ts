@@ -31,10 +31,11 @@ export class RpcTranslateFilter implements ExceptionFilter {
 
       this.logger.error(`HTTP Exception: ${message}`);
       this.logger.error(`HTTP Exception Status: ${status}`);
-
+      const errorMessage =
+        typeof message === 'string' ? message : message.message;
       return res.status(status).json({
         statusCode: status,
-        message,
+        errorMessage,
         timestamp: new Date().toISOString(),
       });
     }

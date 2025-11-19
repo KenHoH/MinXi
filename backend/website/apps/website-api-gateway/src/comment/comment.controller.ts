@@ -13,6 +13,7 @@ import { CommentService } from './comment.service';
 import { CommentRes } from '@app/contracts/shared-dto/comment/res/CommentRes';
 import { JwtAuthGuard } from '@app/common/guard/jwt-auth-guard/jwt-auth.guard';
 import { ApiBearerAuth } from '@nestjs/swagger';
+import { CommentReq } from '@app/contracts/shared-dto/comment/req/CommentReq';
 
 @Controller('comment')
 @UseGuards(JwtAuthGuard)
@@ -20,7 +21,7 @@ import { ApiBearerAuth } from '@nestjs/swagger';
 export class CommentController {
   constructor(private readonly commentService: CommentService) {}
   @Post()
-  create(@Body() dto: CommentRes) {
+  create(@Body() dto: CommentReq) {
     return this.commentService.create(dto);
   }
 

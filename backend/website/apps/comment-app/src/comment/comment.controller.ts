@@ -4,13 +4,14 @@ import { CommentService } from './comment.service';
 import { ICommentService } from '@app/contracts/interfaces/app/ICommentService';
 import { CommentRes } from '@app/contracts/shared-dto/comment/res/CommentRes';
 import { COMMENT_MSG } from '@app/common/constants/messageEvent';
+import { CommentReq } from '@app/contracts/shared-dto/comment/req/CommentReq';
 
 @Controller()
 export class CommentController {
   constructor(private readonly commentService: CommentService) {}
 
   @MessagePattern(COMMENT_MSG.create)
-  async create(@Payload() dto: CommentRes): Promise<CommentRes> {
+  async create(@Payload() dto: CommentReq): Promise<CommentRes> {
     return this.commentService.create(dto);
   }
 
