@@ -7,5 +7,6 @@ export function mapRoomToResponse(room: any): RoomResponseDto {
     type: room.type,
     createdAt: room.createdAt,
     updatedAt: room.updatedAt,
+    pictureUrl: room.pictureUrl,
   };
 }

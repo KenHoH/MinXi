@@ -43,4 +43,8 @@ export class CreateRoomDto {
   @IsOptional()
   @IsNumber()
   ownerId?: number;
+
+  @ApiProperty()
+  @IsString()
+  pictureUrl: string;
 }

@@ -54,6 +54,11 @@ export class SocialController {
     return this.socialService.getTotalParticipant(dto);
   }
 
+  @MessagePattern(SOCIAL_MSG.getParticipantDM)
+  getParticipant(@Payload() roomId: string) {
+    return this.socialService.getParticipant(roomId);
+  }
+
   @MessagePattern(SOCIAL_MSG.sendMessage)
   sendMessage(@Payload() dto: SendMessageDto) {
     return this.socialService.sendMessage(dto);

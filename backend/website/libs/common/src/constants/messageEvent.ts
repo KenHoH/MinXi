@@ -97,6 +97,7 @@ export const SOCIAL_MSG = {
   removeUserFromRoom: 'social.removeUserFromRoom',
   updateParticipantRole: 'social.updateParticipantRole',
   getTotalParticipants: 'social.getTotalParticipants',
+  getParticipantDM: 'social.getParticipantDM',
 
   sendMessage: 'social.sendMessage',
   getMessage: 'social.getMessage',

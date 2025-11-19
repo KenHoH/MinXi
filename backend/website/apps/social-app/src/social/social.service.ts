@@ -51,9 +51,10 @@ export class SocialService implements ISocialService {
 
         if (existingRoom) return existingRoom;
       }
-
+      let roomType: RoomType = dto.type;
+      if (dto.userIds.length <= 2) roomType = RoomType.DIRECT;
       const room = await this.socialClient.room.create({
-        data: { name: dto.name, type: dto.type },
+        data: { name: dto.name, type: roomType, pictureUrl: dto.pictureUrl },
       });
 
       if (dto.ownerId) {
@@ -229,6 +230,28 @@ export class SocialService implements ISocialService {
           'Failed to get total participants',
           HttpStatus.INTERNAL_SERVER_ERROR,
         ),
+      );
+    }
+  }
+
+  async getParticipant(roomId: string): Promise<ParticipantResponseDto> {
+    try {
+      const roomType = await this.socialClient.room.findFirst({
+        where: { id: roomId },
+      });
+
+      if (!roomType || roomType.type !== RoomType.DIRECT) {
+        throw new HttpException('Room not found', HttpStatus.NOT_FOUND);
+      }
+
+      const participant = await this.socialClient.participant.findFirst({
+        where: { roomId: roomId },
+      });
+      return mapParticipantToResponse(participant);
+    } catch (error) {
+      throw new HttpException(
+        'Failed to get participant',
+        HttpStatus.BAD_REQUEST,
       );
     }
   }

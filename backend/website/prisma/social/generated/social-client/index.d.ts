@@ -980,6 +980,7 @@ export namespace Prisma {
   export type RoomMinAggregateOutputType = {
     id: string | null
     name: string | null
+    pictureUrl: string | null
     type: $Enums.RoomType | null
     createdAt: Date | null
     updatedAt: Date | null
@@ -988,6 +989,7 @@ export namespace Prisma {
   export type RoomMaxAggregateOutputType = {
     id: string | null
     name: string | null
+    pictureUrl: string | null
     type: $Enums.RoomType | null
     createdAt: Date | null
     updatedAt: Date | null
@@ -996,6 +998,7 @@ export namespace Prisma {
   export type RoomCountAggregateOutputType = {
     id: number
     name: number
+    pictureUrl: number
     type: number
     createdAt: number
     updatedAt: number
@@ -1006,6 +1009,7 @@ export namespace Prisma {
   export type RoomMinAggregateInputType = {
     id?: true
     name?: true
+    pictureUrl?: true
     type?: true
     createdAt?: true
     updatedAt?: true
@@ -1014,6 +1018,7 @@ export namespace Prisma {
   export type RoomMaxAggregateInputType = {
     id?: true
     name?: true
+    pictureUrl?: true
     type?: true
     createdAt?: true
     updatedAt?: true
@@ -1022,6 +1027,7 @@ export namespace Prisma {
   export type RoomCountAggregateInputType = {
     id?: true
     name?: true
+    pictureUrl?: true
     type?: true
     createdAt?: true
     updatedAt?: true
@@ -1103,6 +1109,7 @@ export namespace Prisma {
   export type RoomGroupByOutputType = {
     id: string
     name: string | null
+    pictureUrl: string
     type: $Enums.RoomType
     createdAt: Date
     updatedAt: Date
@@ -1128,6 +1135,7 @@ export namespace Prisma {
   export type RoomSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
     id?: boolean
     name?: boolean
+    pictureUrl?: boolean
     type?: boolean
     createdAt?: boolean
     updatedAt?: boolean
@@ -1138,12 +1146,13 @@ export namespace Prisma {
   export type RoomSelectScalar = {
     id?: boolean
     name?: boolean
+    pictureUrl?: boolean
     type?: boolean
     createdAt?: boolean
     updatedAt?: boolean
   }
 
-  export type RoomOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "name" | "type" | "createdAt" | "updatedAt", ExtArgs["result"]["room"]>
+  export type RoomOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "name" | "pictureUrl" | "type" | "createdAt" | "updatedAt", ExtArgs["result"]["room"]>
 
   export type $RoomPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     name: "Room"
@@ -1151,6 +1160,7 @@ export namespace Prisma {
     scalars: $Extensions.GetPayloadResult<{
       id: string
       name: string | null
+      pictureUrl: string
       type: $Enums.RoomType
       createdAt: Date
       updatedAt: Date
@@ -1525,6 +1535,7 @@ export namespace Prisma {
   interface RoomFieldRefs {
     readonly id: FieldRef<"Room", 'String'>
     readonly name: FieldRef<"Room", 'String'>
+    readonly pictureUrl: FieldRef<"Room", 'String'>
     readonly type: FieldRef<"Room", 'RoomType'>
     readonly createdAt: FieldRef<"Room", 'DateTime'>
     readonly updatedAt: FieldRef<"Room", 'DateTime'>
@@ -2782,6 +2793,7 @@ export namespace Prisma {
   export const RoomScalarFieldEnum: {
     id: 'id',
     name: 'name',
+    pictureUrl: 'pictureUrl',
     type: 'type',
     createdAt: 'createdAt',
     updatedAt: 'updatedAt'
@@ -2819,7 +2831,8 @@ export namespace Prisma {
 
   export const RoomOrderByRelevanceFieldEnum: {
     id: 'id',
-    name: 'name'
+    name: 'name',
+    pictureUrl: 'pictureUrl'
   };
 
   export type RoomOrderByRelevanceFieldEnum = (typeof RoomOrderByRelevanceFieldEnum)[keyof typeof RoomOrderByRelevanceFieldEnum]
@@ -2889,6 +2902,7 @@ export namespace Prisma {
     NOT?: RoomWhereInput | RoomWhereInput[]
     id?: StringFilter<"Room"> | string
     name?: StringNullableFilter<"Room"> | string | null
+    pictureUrl?: StringFilter<"Room"> | string
     type?: EnumRoomTypeFilter<"Room"> | $Enums.RoomType
     createdAt?: DateTimeFilter<"Room"> | Date | string
     updatedAt?: DateTimeFilter<"Room"> | Date | string
@@ -2897,6 +2911,7 @@ export namespace Prisma {
   export type RoomOrderByWithRelationInput = {
     id?: SortOrder
     name?: SortOrderInput | SortOrder
+    pictureUrl?: SortOrder
     type?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
@@ -2909,6 +2924,7 @@ export namespace Prisma {
     OR?: RoomWhereInput[]
     NOT?: RoomWhereInput | RoomWhereInput[]
     name?: StringNullableFilter<"Room"> | string | null
+    pictureUrl?: StringFilter<"Room"> | string
     type?: EnumRoomTypeFilter<"Room"> | $Enums.RoomType
     createdAt?: DateTimeFilter<"Room"> | Date | string
     updatedAt?: DateTimeFilter<"Room"> | Date | string
@@ -2917,6 +2933,7 @@ export namespace Prisma {
   export type RoomOrderByWithAggregationInput = {
     id?: SortOrder
     name?: SortOrderInput | SortOrder
+    pictureUrl?: SortOrder
     type?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
@@ -2931,6 +2948,7 @@ export namespace Prisma {
     NOT?: RoomScalarWhereWithAggregatesInput | RoomScalarWhereWithAggregatesInput[]
     id?: StringWithAggregatesFilter<"Room"> | string
     name?: StringNullableWithAggregatesFilter<"Room"> | string | null
+    pictureUrl?: StringWithAggregatesFilter<"Room"> | string
     type?: EnumRoomTypeWithAggregatesFilter<"Room"> | $Enums.RoomType
     createdAt?: DateTimeWithAggregatesFilter<"Room"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"Room"> | Date | string
@@ -2995,6 +3013,7 @@ export namespace Prisma {
   export type RoomCreateInput = {
     id?: string
     name?: string | null
+    pictureUrl: string
     type: $Enums.RoomType
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -3003,6 +3022,7 @@ export namespace Prisma {
   export type RoomUncheckedCreateInput = {
     id?: string
     name?: string | null
+    pictureUrl: string
     type: $Enums.RoomType
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -3011,6 +3031,7 @@ export namespace Prisma {
   export type RoomUpdateInput = {
     id?: StringFieldUpdateOperationsInput | string
     name?: NullableStringFieldUpdateOperationsInput | string | null
+    pictureUrl?: StringFieldUpdateOperationsInput | string
     type?: EnumRoomTypeFieldUpdateOperationsInput | $Enums.RoomType
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -3019,6 +3040,7 @@ export namespace Prisma {
   export type RoomUncheckedUpdateInput = {
     id?: StringFieldUpdateOperationsInput | string
     name?: NullableStringFieldUpdateOperationsInput | string | null
+    pictureUrl?: StringFieldUpdateOperationsInput | string
     type?: EnumRoomTypeFieldUpdateOperationsInput | $Enums.RoomType
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -3027,6 +3049,7 @@ export namespace Prisma {
   export type RoomCreateManyInput = {
     id?: string
     name?: string | null
+    pictureUrl: string
     type: $Enums.RoomType
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -3035,6 +3058,7 @@ export namespace Prisma {
   export type RoomUpdateManyMutationInput = {
     id?: StringFieldUpdateOperationsInput | string
     name?: NullableStringFieldUpdateOperationsInput | string | null
+    pictureUrl?: StringFieldUpdateOperationsInput | string
     type?: EnumRoomTypeFieldUpdateOperationsInput | $Enums.RoomType
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -3043,6 +3067,7 @@ export namespace Prisma {
   export type RoomUncheckedUpdateManyInput = {
     id?: StringFieldUpdateOperationsInput | string
     name?: NullableStringFieldUpdateOperationsInput | string | null
+    pictureUrl?: StringFieldUpdateOperationsInput | string
     type?: EnumRoomTypeFieldUpdateOperationsInput | $Enums.RoomType
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -3166,6 +3191,7 @@ export namespace Prisma {
   export type RoomCountOrderByAggregateInput = {
     id?: SortOrder
     name?: SortOrder
+    pictureUrl?: SortOrder
     type?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
@@ -3174,6 +3200,7 @@ export namespace Prisma {
   export type RoomMaxOrderByAggregateInput = {
     id?: SortOrder
     name?: SortOrder
+    pictureUrl?: SortOrder
     type?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
@@ -3182,6 +3209,7 @@ export namespace Prisma {
   export type RoomMinOrderByAggregateInput = {
     id?: SortOrder
     name?: SortOrder
+    pictureUrl?: SortOrder
     type?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder

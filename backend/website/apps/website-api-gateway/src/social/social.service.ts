@@ -25,11 +25,16 @@ export class SocialService implements ISocialService {
     @Inject(SOCIAL_SERVICES.CLIENT) private readonly client: ClientProxy,
   ) {}
   logger = new Logger(SocialService.name);
+  getParticipant(roomId: string): Promise<ParticipantResponseDto> {
+    return firstValueFrom(
+      this.client.send(SOCIAL_MSG.getParticipantDM, roomId),
+    );
+  }
+
   async createRoom(dto: CreateRoomDto): Promise<RoomResponseDto> {
     this.logger.log(`Creating room with dto: ${JSON.stringify(dto)}`);
     return firstValueFrom(this.client.send(SOCIAL_MSG.createRoom, dto));
   }
-
   async getRoomInfo(dto: GetRoomInfoDto): Promise<RoomResponseDto> {
     return firstValueFrom(this.client.send(SOCIAL_MSG.getRoomInfo, dto));
   }

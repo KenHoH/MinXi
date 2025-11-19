@@ -30,6 +30,7 @@ datasource db {
 model Room {
   id        String   @id @default(uuid())
   name      String?
+  pictureUrl   String
   type      RoomType
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

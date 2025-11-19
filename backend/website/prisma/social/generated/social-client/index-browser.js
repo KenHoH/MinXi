@@ -124,6 +124,7 @@ exports.Prisma.TransactionIsolationLevel = makeStrictEnum({
 exports.Prisma.RoomScalarFieldEnum = {
   id: 'id',
   name: 'name',
+  pictureUrl: 'pictureUrl',
   type: 'type',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
@@ -149,7 +150,8 @@ exports.Prisma.NullsOrder = {
 
 exports.Prisma.RoomOrderByRelevanceFieldEnum = {
   id: 'id',
-  name: 'name'
+  name: 'name',
+  pictureUrl: 'pictureUrl'
 };
 
 exports.Prisma.ParticipantOrderByRelevanceFieldEnum = {

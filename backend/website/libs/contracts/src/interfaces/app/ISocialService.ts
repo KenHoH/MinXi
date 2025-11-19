@@ -31,6 +31,8 @@ export interface ISocialService {
   getTotalParticipant(
     dto: GetTotalParticipantsDto,
   ): Promise<ParticipantTotalResDTO>;
+  getParticipant(roomId: string): Promise<ParticipantResponseDto>;
+
   getMedia(dto: GetMediaDto): Promise<MessageResponseDto>;
   sendMessage(dto: SendMessageDto): Promise<MessageResponseDto>;
   getMessage(dto: GetMessagesDto): Promise<MessageResponseDto[]>;

@@ -60,6 +60,11 @@ export class SocialController {
     return this.socialService.getTotalParticipant({ roomId });
   }
 
+  @Get('room/:roomId/participantDM')
+  getParticipant(@Param('roomId') roomId: string) {
+    return this.socialService.getParticipant(roomId);
+  }
+
   @Get('room/:roomId/media')
   getMedia(@Param('roomId') roomId: string) {
     return this.socialService.getMedia({ roomId });
