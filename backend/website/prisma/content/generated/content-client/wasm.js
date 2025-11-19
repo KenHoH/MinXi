@@ -144,6 +144,14 @@ exports.Prisma.BoardContentScalarFieldEnum = {
   created_at: 'created_at'
 };
 
+exports.Prisma.CommentScalarFieldEnum = {
+  id: 'id',
+  content_id: 'content_id',
+  creator_id: 'creator_id',
+  text: 'text',
+  created_at: 'created_at'
+};
+
 exports.Prisma.SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -171,13 +179,18 @@ exports.Prisma.BoardOrderByRelevanceFieldEnum = {
   description: 'description'
 };
 
+exports.Prisma.CommentOrderByRelevanceFieldEnum = {
+  text: 'text'
+};
+
 
 exports.Prisma.ModelName = {
   Content: 'Content',
   File: 'File',
   HistoryContent: 'HistoryContent',
   Board: 'Board',
-  BoardContent: 'BoardContent'
+  BoardContent: 'BoardContent',
+  Comment: 'Comment'
 };
 /**
  * Create the Client
@@ -218,6 +231,7 @@ const config = {
     "db"
   ],
   "activeProvider": "mysql",
+  "postinstall": false,
   "inlineDatasources": {
     "db": {
       "url": {
@@ -226,13 +240,13 @@ const config = {
       }
     }
   },
-  "inlineSchema": "// This is your Prisma schema file,\n// learn more about it in the docs: https://pris.ly/d/prisma-schema\n\n// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?\n// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init\n\ngenerator client {\n  provider = \"prisma-client-js\"\n  output   = \"../content/generated/content-client\"\n}\n\ndatasource db {\n  provider = \"mysql\"\n  url      = env(\"CONTENT_DATABASE_URL\")\n}\n\nmodel Content {\n  content_id        Int      @default(autoincrement())\n  creator_id        Int\n  parent_id         Int?\n  title             String\n  description       String\n  post_type         String\n  visibilityPrivate Boolean  @default(false)\n  views             Int      @default(0)\n  likes             Int      @default(0)\n  comments          Int      @default(0)\n  pins              Int      @default(0)\n  reports           Int      @default(0)\n  area_id           Int\n  created_at        DateTime @default(now())\n\n  @@id([content_id, area_id])\n}\n\nmodel File {\n  file_id   Int     @id @default(autoincrement())\n  filepath  String\n  thumbnail String?\n\n  content_id      Int\n  content_area_id Int\n\n  @@unique([content_id, filepath])\n  @@index([content_id, content_area_id])\n}\n\nmodel HistoryContent {\n  user_id    Int     @default(0)\n  content_id Int     @default(0)\n  reps       Int     @default(0)\n  liked      Boolean @default(false)\n  pinned     Boolean @default(false)\n\n  @@id([user_id, content_id])\n}\n\nmodel Board {\n  board_id          Int            @id @default(autoincrement())\n  board_thumbnail   String\n  creator_id        Int\n  visibilityPrivate Boolean        @default(false)\n  title             String\n  description       String\n  contents          BoardContent[]\n  created_at        DateTime       @default(now())\n  updated_at        DateTime       @updatedAt\n}\n\nmodel BoardContent {\n  id         Int      @id @default(autoincrement())\n  board_id   Int\n  board      Board    @relation(fields: [board_id], references: [board_id], onDelete: Cascade)\n  content_id Int\n  created_at DateTime @default(now())\n\n  @@unique([board_id, content_id])\n  @@index([board_id])\n}\n",
-  "inlineSchemaHash": "40f73de16a1588d551f845665d96c83adb258e4bce1a3887bd5a05d991453c40",
+  "inlineSchema": "// This is your Prisma schema file,\n// learn more about it in the docs: https://pris.ly/d/prisma-schema\n\n// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?\n// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init\n\ngenerator client {\n  provider = \"prisma-client-js\"\n  output   = \"../content/generated/content-client\"\n}\n\ndatasource db {\n  provider = \"mysql\"\n  url      = env(\"CONTENT_DATABASE_URL\")\n}\n\nmodel Content {\n  content_id        Int      @default(autoincrement())\n  creator_id        Int\n  parent_id         Int?\n  title             String\n  description       String\n  post_type         String\n  visibilityPrivate Boolean  @default(false)\n  views             Int      @default(0)\n  likes             Int      @default(0)\n  comments          Int      @default(0)\n  pins              Int      @default(0)\n  reports           Int      @default(0)\n  area_id           Int\n  created_at        DateTime @default(now())\n\n  @@id([content_id, area_id])\n}\n\nmodel File {\n  file_id   Int     @id @default(autoincrement())\n  filepath  String\n  thumbnail String?\n\n  content_id      Int\n  content_area_id Int\n\n  @@unique([content_id, filepath])\n  @@index([content_id, content_area_id])\n}\n\nmodel HistoryContent {\n  user_id    Int     @default(0)\n  content_id Int     @default(0)\n  reps       Int     @default(0)\n  liked      Boolean @default(false)\n  pinned     Boolean @default(false)\n\n  @@id([user_id, content_id])\n}\n\nmodel Board {\n  board_id          Int            @id @default(autoincrement())\n  board_thumbnail   String\n  creator_id        Int\n  visibilityPrivate Boolean        @default(false)\n  title             String\n  description       String\n  contents          BoardContent[]\n  created_at        DateTime       @default(now())\n  updated_at        DateTime       @updatedAt\n}\n\nmodel BoardContent {\n  id         Int      @id @default(autoincrement())\n  board_id   Int\n  board      Board    @relation(fields: [board_id], references: [board_id], onDelete: Cascade)\n  content_id Int\n  created_at DateTime @default(now())\n\n  @@unique([board_id, content_id])\n  @@index([board_id])\n}\n\nmodel Comment {\n  id         Int      @id @default(autoincrement())\n  content_id Int\n  creator_id Int\n  text       String\n  created_at DateTime @default(now())\n}\n",
+  "inlineSchemaHash": "e36ad2232fe34fa477e677c31ba7c41d3f7b685ae548c3b79faac8bbcd875935",
   "copyEngine": true
 }
 config.dirname = '/'
 
-config.runtimeDataModel = JSON.parse("{\"models\":{\"Content\":{\"fields\":[{\"name\":\"content_id\",\"kind\":\"scalar\",\"type\":\"Int\"},{\"name\":\"creator_id\",\"kind\":\"scalar\",\"type\":\"Int\"},{\"name\":\"parent_id\",\"kind\":\"scalar\",\"type\":\"Int\"},{\"name\":\"title\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"description\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"post_type\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"visibilityPrivate\",\"kind\":\"scalar\",\"type\":\"Boolean\"},{\"name\":\"views\",\"kind\":\"scalar\",\"type\":\"Int\"},{\"name\":\"likes\",\"kind\":\"scalar\",\"type\":\"Int\"},{\"name\":\"comments\",\"kind\":\"scalar\",\"type\":\"Int\"},{\"name\":\"pins\",\"kind\":\"scalar\",\"type\":\"Int\"},{\"name\":\"reports\",\"kind\":\"scalar\",\"type\":\"Int\"},{\"name\":\"area_id\",\"kind\":\"scalar\",\"type\":\"Int\"},{\"name\":\"created_at\",\"kind\":\"scalar\",\"type\":\"DateTime\"}],\"dbName\":null},\"File\":{\"fields\":[{\"name\":\"file_id\",\"kind\":\"scalar\",\"type\":\"Int\"},{\"name\":\"filepath\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"thumbnail\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"content_id\",\"kind\":\"scalar\",\"type\":\"Int\"},{\"name\":\"content_area_id\",\"kind\":\"scalar\",\"type\":\"Int\"}],\"dbName\":null},\"HistoryContent\":{\"fields\":[{\"name\":\"user_id\",\"kind\":\"scalar\",\"type\":\"Int\"},{\"name\":\"content_id\",\"kind\":\"scalar\",\"type\":\"Int\"},{\"name\":\"reps\",\"kind\":\"scalar\",\"type\":\"Int\"},{\"name\":\"liked\",\"kind\":\"scalar\",\"type\":\"Boolean\"},{\"name\":\"pinned\",\"kind\":\"scalar\",\"type\":\"Boolean\"}],\"dbName\":null},\"Board\":{\"fields\":[{\"name\":\"board_id\",\"kind\":\"scalar\",\"type\":\"Int\"},{\"name\":\"board_thumbnail\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"creator_id\",\"kind\":\"scalar\",\"type\":\"Int\"},{\"name\":\"visibilityPrivate\",\"kind\":\"scalar\",\"type\":\"Boolean\"},{\"name\":\"title\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"description\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"contents\",\"kind\":\"object\",\"type\":\"BoardContent\",\"relationName\":\"BoardToBoardContent\"},{\"name\":\"created_at\",\"kind\":\"scalar\",\"type\":\"DateTime\"},{\"name\":\"updated_at\",\"kind\":\"scalar\",\"type\":\"DateTime\"}],\"dbName\":null},\"BoardContent\":{\"fields\":[{\"name\":\"id\",\"kind\":\"scalar\",\"type\":\"Int\"},{\"name\":\"board_id\",\"kind\":\"scalar\",\"type\":\"Int\"},{\"name\":\"board\",\"kind\":\"object\",\"type\":\"Board\",\"relationName\":\"BoardToBoardContent\"},{\"name\":\"content_id\",\"kind\":\"scalar\",\"type\":\"Int\"},{\"name\":\"created_at\",\"kind\":\"scalar\",\"type\":\"DateTime\"}],\"dbName\":null}},\"enums\":{},\"types\":{}}")
+config.runtimeDataModel = JSON.parse("{\"models\":{\"Content\":{\"fields\":[{\"name\":\"content_id\",\"kind\":\"scalar\",\"type\":\"Int\"},{\"name\":\"creator_id\",\"kind\":\"scalar\",\"type\":\"Int\"},{\"name\":\"parent_id\",\"kind\":\"scalar\",\"type\":\"Int\"},{\"name\":\"title\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"description\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"post_type\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"visibilityPrivate\",\"kind\":\"scalar\",\"type\":\"Boolean\"},{\"name\":\"views\",\"kind\":\"scalar\",\"type\":\"Int\"},{\"name\":\"likes\",\"kind\":\"scalar\",\"type\":\"Int\"},{\"name\":\"comments\",\"kind\":\"scalar\",\"type\":\"Int\"},{\"name\":\"pins\",\"kind\":\"scalar\",\"type\":\"Int\"},{\"name\":\"reports\",\"kind\":\"scalar\",\"type\":\"Int\"},{\"name\":\"area_id\",\"kind\":\"scalar\",\"type\":\"Int\"},{\"name\":\"created_at\",\"kind\":\"scalar\",\"type\":\"DateTime\"}],\"dbName\":null},\"File\":{\"fields\":[{\"name\":\"file_id\",\"kind\":\"scalar\",\"type\":\"Int\"},{\"name\":\"filepath\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"thumbnail\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"content_id\",\"kind\":\"scalar\",\"type\":\"Int\"},{\"name\":\"content_area_id\",\"kind\":\"scalar\",\"type\":\"Int\"}],\"dbName\":null},\"HistoryContent\":{\"fields\":[{\"name\":\"user_id\",\"kind\":\"scalar\",\"type\":\"Int\"},{\"name\":\"content_id\",\"kind\":\"scalar\",\"type\":\"Int\"},{\"name\":\"reps\",\"kind\":\"scalar\",\"type\":\"Int\"},{\"name\":\"liked\",\"kind\":\"scalar\",\"type\":\"Boolean\"},{\"name\":\"pinned\",\"kind\":\"scalar\",\"type\":\"Boolean\"}],\"dbName\":null},\"Board\":{\"fields\":[{\"name\":\"board_id\",\"kind\":\"scalar\",\"type\":\"Int\"},{\"name\":\"board_thumbnail\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"creator_id\",\"kind\":\"scalar\",\"type\":\"Int\"},{\"name\":\"visibilityPrivate\",\"kind\":\"scalar\",\"type\":\"Boolean\"},{\"name\":\"title\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"description\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"contents\",\"kind\":\"object\",\"type\":\"BoardContent\",\"relationName\":\"BoardToBoardContent\"},{\"name\":\"created_at\",\"kind\":\"scalar\",\"type\":\"DateTime\"},{\"name\":\"updated_at\",\"kind\":\"scalar\",\"type\":\"DateTime\"}],\"dbName\":null},\"BoardContent\":{\"fields\":[{\"name\":\"id\",\"kind\":\"scalar\",\"type\":\"Int\"},{\"name\":\"board_id\",\"kind\":\"scalar\",\"type\":\"Int\"},{\"name\":\"board\",\"kind\":\"object\",\"type\":\"Board\",\"relationName\":\"BoardToBoardContent\"},{\"name\":\"content_id\",\"kind\":\"scalar\",\"type\":\"Int\"},{\"name\":\"created_at\",\"kind\":\"scalar\",\"type\":\"DateTime\"}],\"dbName\":null},\"Comment\":{\"fields\":[{\"name\":\"id\",\"kind\":\"scalar\",\"type\":\"Int\"},{\"name\":\"content_id\",\"kind\":\"scalar\",\"type\":\"Int\"},{\"name\":\"creator_id\",\"kind\":\"scalar\",\"type\":\"Int\"},{\"name\":\"text\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"created_at\",\"kind\":\"scalar\",\"type\":\"DateTime\"}],\"dbName\":null}},\"enums\":{},\"types\":{}}")
 defineDmmfProperty(exports.Prisma, config.runtimeDataModel)
 config.engineWasm = {
   getRuntime: async () => require('./query_engine_bg.js'),

@@ -1,0 +1,26 @@
+import { Controller } from '@nestjs/common';
+import { MessagePattern, Payload } from '@nestjs/microservices';
+import { CommentService } from './comment.service';
+import { ICommentService } from '@app/contracts/interfaces/app/ICommentService';
+import { CommentRes } from '@app/contracts/shared-dto/comment/res/CommentRes';
+import { COMMENT_MSG } from '@app/common/constants/messageEvent';
+
+@Controller()
+export class CommentController {
+  constructor(private readonly commentService: CommentService) {}
+
+  @MessagePattern(COMMENT_MSG.create)
+  async create(@Payload() dto: CommentRes): Promise<CommentRes> {
+    return this.commentService.create(dto);
+  }
+
+  @MessagePattern(COMMENT_MSG.getComment)
+  async getComment(@Payload() contentId: number): Promise<CommentRes[]> {
+    return this.commentService.getComment(contentId);
+  }
+
+  @MessagePattern(COMMENT_MSG.deleteComment)
+  async deleteComment(@Payload() commentId: number): Promise<any> {
+    return this.commentService.deleteComment(commentId);
+  }
+}

@@ -106,3 +106,8 @@ export const SOCIAL_MSG = {
 
   getMedia: 'social.getMedia',
 };
+export const COMMENT_MSG = {
+  create: 'comment.create',
+  getComment: 'comment.getComment',
+  deleteComment: 'comment.deleteComment',
+};

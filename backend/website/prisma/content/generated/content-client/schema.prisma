@@ -77,3 +77,11 @@ model BoardContent {
   @@unique([board_id, content_id])
   @@index([board_id])
 }
+
+model Comment {
+  id         Int      @id @default(autoincrement())
+  content_id Int
+  creator_id Int
+  text       String
+  created_at DateTime @default(now())
+}

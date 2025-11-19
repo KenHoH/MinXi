@@ -172,6 +172,14 @@ exports.Prisma.BoardContentScalarFieldEnum = {
   created_at: 'created_at'
 };
 
+exports.Prisma.CommentScalarFieldEnum = {
+  id: 'id',
+  content_id: 'content_id',
+  creator_id: 'creator_id',
+  text: 'text',
+  created_at: 'created_at'
+};
+
 exports.Prisma.SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -199,13 +207,18 @@ exports.Prisma.BoardOrderByRelevanceFieldEnum = {
   description: 'description'
 };
 
+exports.Prisma.CommentOrderByRelevanceFieldEnum = {
+  text: 'text'
+};
+
 
 exports.Prisma.ModelName = {
   Content: 'Content',
   File: 'File',
   HistoryContent: 'HistoryContent',
   Board: 'Board',
-  BoardContent: 'BoardContent'
+  BoardContent: 'BoardContent',
+  Comment: 'Comment'
 };
 
 /**

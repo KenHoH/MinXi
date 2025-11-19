@@ -47,3 +47,7 @@ export const SOCIAL_SERVICES = {
   CLIENT: 'SOCIAL_CLIENT',
   PORT: 3013,
 };
+export const COMMENT_SERVICES = {
+  CLIENT: 'COMMENT_CLIENT',
+  PORT: 3014,
+};

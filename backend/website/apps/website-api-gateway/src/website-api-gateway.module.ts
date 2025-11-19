@@ -10,6 +10,7 @@ import { ReportModule } from './report/report.module';
 import { AlgorithmModule } from './algorithm/algorithm.module';
 import { SseModule } from './sse/sse.module';
 import { SocialModule } from './social/social.module';
+import { CommentModule } from './comment/comment.module';
 
 @Module({
   imports: [
@@ -24,6 +25,7 @@ import { SocialModule } from './social/social.module';
     AlgorithmModule,
     SseModule,
     SocialModule,
+    CommentModule,
   ],
   controllers: [],
   providers: [],

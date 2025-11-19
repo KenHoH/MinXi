@@ -46,6 +46,15 @@
         "tsConfigPath": "apps/board-app/tsconfig.app.json"
       }
     },
+    "comment-app": {
+      "type": "application",
+      "root": "apps/comment-app",
+      "entryFile": "main",
+      "sourceRoot": "apps/comment-app/src",
+      "compilerOptions": {
+        "tsConfigPath": "apps/comment-app/tsconfig.app.json"
+      }
+    },
     "common": {
       "type": "library",
       "root": "libs/common",
