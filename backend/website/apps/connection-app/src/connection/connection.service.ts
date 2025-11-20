@@ -47,11 +47,17 @@ export class ConnectionService implements IConnectionService {
         creator_id,
       );
 
-      this.logger.log(existingFollow);
-      this.logger.log(mutualFollowExists);
       if (mutualFollowExists) {
-        this.logger.log("It's a mutual follow, creating friendship");
-        await this.createFriend(creator_id, follower_id);
+        this.logger.log(
+          `Mutual follow detected between ${creator_id} and ${follower_id}, creating friendship`,
+        );
+        try {
+          await this.createFriend(creator_id, follower_id);
+        } catch (friendError) {
+          this.logger.warn(
+            `Friendship already exists between ${creator_id} and ${follower_id}`,
+          );
+        }
       }
 
       return { Valid: true, Msg: 'Follow created successfully' };
@@ -90,18 +96,20 @@ export class ConnectionService implements IConnectionService {
         );
       }
 
-      await this.prisma.friend.create({
-        data: {
-          user_id,
-          friend_id,
-        },
-      });
+      await this.prisma.$transaction(async (tx) => {
+        await tx.friend.create({
+          data: {
+            user_id,
+            friend_id,
+          },
+        });
 
-      await this.prisma.friend.create({
-        data: {
-          user_id: friend_id,
-          friend_id: user_id,
-        },
+        await tx.friend.create({
+          data: {
+            user_id: friend_id,
+            friend_id: user_id,
+          },
+        });
       });
 
       return { Valid: true, Msg: 'Friend added successfully' };
@@ -250,11 +258,11 @@ export class ConnectionService implements IConnectionService {
     }
   }
 
-  async deleteFriend(creator_id: number, user_id: number): Promise<Ack> {
+  async deleteFriend(user_a_id: number, user_b_id: number): Promise<Ack> {
     try {
       const friendshipExists = await this.checkFriendMutual(
-        creator_id,
-        user_id,
+        user_a_id,
+        user_b_id,
       );
       if (!friendshipExists) {
         throw httpToRpc(
@@ -262,18 +270,20 @@ export class ConnectionService implements IConnectionService {
         );
       }
 
-      await this.prisma.friend.deleteMany({
-        where: {
-          user_id: creator_id,
-          friend_id: user_id,
-        },
-      });
+      await this.prisma.$transaction(async (tx) => {
+        await tx.friend.deleteMany({
+          where: {
+            user_id: user_a_id,
+            friend_id: user_b_id,
+          },
+        });
 
-      await this.prisma.friend.deleteMany({
-        where: {
-          user_id,
-          friend_id: creator_id,
-        },
+        await tx.friend.deleteMany({
+          where: {
+            user_id: user_b_id,
+            friend_id: user_a_id,
+          },
+        });
       });
 
       return { Valid: true, Msg: 'Friend removed successfully' };
@@ -291,9 +301,9 @@ export class ConnectionService implements IConnectionService {
     }
   }
 
-  async deleteFollow(creator_id: number, user_id: number): Promise<Ack> {
+  async deleteFollow(creator_id: number, follower_id: number): Promise<Ack> {
     try {
-      const followExists = await this.checkFollow(creator_id, user_id);
+      const followExists = await this.checkFollow(creator_id, follower_id);
       if (!followExists) {
         throw httpToRpc(
           new HttpException('Follow not found', HttpStatus.NOT_FOUND),
@@ -303,26 +313,31 @@ export class ConnectionService implements IConnectionService {
       await this.prisma.follow.deleteMany({
         where: {
           creator_id,
-          follower_id: user_id,
+          follower_id,
         },
       });
 
-      const isFriend = await this.checkFriendMutual(creator_id, user_id);
-      const stillMutualFollow = await this.checkFollow(user_id, creator_id);
+      const isFriend = await this.checkFriendMutual(creator_id, follower_id);
+      const stillMutualFollow = await this.checkFollow(follower_id, creator_id);
 
       if (isFriend && !stillMutualFollow) {
-        await this.prisma.friend.deleteMany({
-          where: {
-            user_id: creator_id,
-            friend_id: user_id,
-          },
-        });
+        this.logger.log(
+          `Mutual follow no longer exists between ${creator_id} and ${follower_id}, removing friendship`,
+        );
+        await this.prisma.$transaction(async (tx) => {
+          await tx.friend.deleteMany({
+            where: {
+              user_id: creator_id,
+              friend_id: follower_id,
+            },
+          });
 
-        await this.prisma.friend.deleteMany({
-          where: {
-            user_id,
-            friend_id: creator_id,
-          },
+          await tx.friend.deleteMany({
+            where: {
+              user_id: follower_id,
+              friend_id: creator_id,
+            },
+          });
         });
       }
 

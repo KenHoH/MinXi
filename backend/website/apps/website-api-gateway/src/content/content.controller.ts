@@ -94,6 +94,18 @@ export class ContentController {
     return this.contentService.getByUser(creator_id);
   }
 
+  @Get('user/:userId/following')
+  getFollowingContent(@Param('userId', ParseIntPipe) userId: number) {
+    this.logger.log(typeof userId);
+    return this.contentService.getFollowingContent(userId);
+  }
+
+  @Get('user/:userId/friends')
+  getFriendContent(@Param('userId', ParseIntPipe) userId: number) {
+    this.logger.log(typeof userId);
+    return this.contentService.getFriendContent(userId);
+  }
+
   @Get(':area_id')
   findAll(@Param('area_id', ParseIntPipe) area_id: number) {
     return this.contentService.findAll(area_id);

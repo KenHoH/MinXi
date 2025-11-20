@@ -17,6 +17,20 @@ export class ContentController {
 
   constructor(private readonly contentService: ContentService) {}
 
+  @MessagePattern(CONTENT_MSG.getFollowingContent)
+  async getFollowingContent(
+    @Payload() userId: number,
+  ): Promise<FullContentDto[]> {
+    this.logger.log(`Fetching Following content by user ID ${userId}`);
+    return this.contentService.getFollowingContent(userId);
+  }
+
+  @MessagePattern(CONTENT_MSG.getFriendContent)
+  async getFriendContent(@Payload() userId: number): Promise<FullContentDto[]> {
+    this.logger.log(`Fetching Friend content by user ID ${userId}`);
+    return this.contentService.getFriendContent(userId);
+  }
+
   @MessagePattern(CONTENT_MSG.create)
   async create(@Payload() dto: CreatePostDto): Promise<FullContentDto> {
     this.logger.log('Creating content...');

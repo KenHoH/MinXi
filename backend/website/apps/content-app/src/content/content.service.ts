@@ -8,13 +8,75 @@ import { FileRes } from '@app/contracts/shared-dto/content/res/file.res.dto';
 import { FileDto } from '@app/contracts/shared-dto/content/res/file.dto';
 import { FullContentDto } from '@app/contracts/shared-dto/content/res/full.content.dto';
 import { deltaDto } from '@app/contracts/shared-dto/user/delta.dto';
-import { HttpException, HttpStatus, Injectable, Logger } from '@nestjs/common';
+import {
+  HttpException,
+  HttpStatus,
+  Inject,
+  Injectable,
+  Logger,
+} from '@nestjs/common';
 import { mapToContent } from './utils/mapToContent';
+import { CONNECT_SERVICES } from '@app/common/constants/services';
+import { ClientProxy } from '@nestjs/microservices';
+import { firstValueFrom } from 'rxjs';
+import { CONNECTION_MSG } from '@app/common/constants/messageEvent';
 
 @Injectable()
 export class ContentService implements IContentService {
   private readonly logger = new Logger(ContentService.name);
-  constructor(private readonly prisma: ContentDatabaseConnection) {}
+  constructor(
+    private readonly prisma: ContentDatabaseConnection,
+    @Inject(CONNECT_SERVICES.CLIENT)
+    private readonly connectionClient: ClientProxy,
+  ) {}
+
+  async getFollowingContent(userId: number): Promise<FullContentDto[]> {
+    this.logger.log(`User ${userId} is following`);
+    try {
+      const followings = await firstValueFrom(
+        this.connectionClient.send(CONNECTION_MSG.getFollowingByUser, {
+          id: userId,
+        }),
+      );
+      this.logger.log(`User ${userId} is following ${followings.length} users`);
+      const followingIds = followings.map((f) => f.follower_id);
+      const contents = await this.prisma.content.findMany({
+        where: { creator_id: { in: followingIds } },
+        orderBy: { created_at: 'desc' },
+      });
+      return contents.map(mapToContent);
+    } catch (error) {
+      throw httpToRpc(
+        new HttpException(
+          'Failed to fetch following contents',
+          HttpStatus.NOT_FOUND,
+        ),
+      );
+    }
+  }
+  async getFriendContent(userId: number): Promise<FullContentDto[]> {
+    try {
+      const friends = await firstValueFrom(
+        this.connectionClient.send(CONNECTION_MSG.getFriendsbyUser, {
+          id: userId,
+        }),
+      );
+      const friendIds = friends.map((f) => f.friend_id);
+      const contents = await this.prisma.content.findMany({
+        where: { creator_id: { in: friendIds } },
+        orderBy: { created_at: 'desc' },
+      });
+      return contents.map(mapToContent);
+    } catch (error) {
+      throw httpToRpc(
+        new HttpException(
+          'Failed to fetch friend contents',
+          HttpStatus.NOT_FOUND,
+        ),
+      );
+    }
+  }
+
   async create(dto: CreatePostDto): Promise<FullContentDto> {
     if (dto.area_id <= 0 || dto.area_id > 3)
       throw httpToRpc(

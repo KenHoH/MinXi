@@ -3,9 +3,22 @@ import { ContentService } from './content.service';
 import { ContentController } from './content.controller';
 import { CommonModule } from '@app/common';
 import { ContentDatabaseConnection } from '@app/common/database/content-database-connection/content-database-connection';
+import { ClientsModule, Transport } from '@nestjs/microservices';
+import { CONNECT_SERVICES } from '@app/common/constants/services';
 
 @Module({
-  imports: [CommonModule],
+  imports: [
+    CommonModule,
+    ClientsModule.register([
+      {
+        name: CONNECT_SERVICES.CLIENT,
+        transport: Transport.TCP,
+        options: {
+          port: CONNECT_SERVICES.PORT,
+        },
+      },
+    ]),
+  ],
   controllers: [ContentController],
   providers: [ContentService, ContentDatabaseConnection],
 })

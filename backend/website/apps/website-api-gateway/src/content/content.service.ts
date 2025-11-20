@@ -10,13 +10,24 @@ import { deltaDto } from '@app/contracts/shared-dto/user/delta.dto';
 import { Inject, Injectable } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
 import { firstValueFrom } from 'rxjs';
+import { IContentService } from '@app/contracts/interfaces/content/IContentService';
 
 @Injectable()
-export class ContentService {
+export class ContentService implements IContentService {
   constructor(
     @Inject(CONTENT_SERVICES.CLIENT)
     private readonly contentClient: ClientProxy,
   ) {}
+  async getFollowingContent(userId: number): Promise<FullContentDto[]> {
+    return await firstValueFrom(
+      this.contentClient.send(CONTENT_MSG.getFollowingContent, userId),
+    );
+  }
+  async getFriendContent(userId: number): Promise<FullContentDto[]> {
+    return await firstValueFrom(
+      this.contentClient.send(CONTENT_MSG.getFriendContent, userId),
+    );
+  }
   async create(dto: CreatePostDto): Promise<FullContentDto> {
     return await firstValueFrom(
       this.contentClient.send<FullContentDto>(CONTENT_MSG.create, dto),
