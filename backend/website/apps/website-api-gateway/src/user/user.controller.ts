@@ -25,6 +25,7 @@ import { JwtAuthGuard } from '@app/common/guard/jwt-auth-guard/jwt-auth.guard';
 import { AdminGuard } from '@app/common/guard/admin/admin.guard';
 import { LogInterceptor } from '@app/common/interceptor/log/log.interceptor';
 import { ApiBearerAuth } from '@nestjs/swagger';
+import { Public } from '@app/common';
 
 @Controller('user')
 @UseFilters(RpcTranslateFilter)
@@ -34,18 +35,20 @@ import { ApiBearerAuth } from '@nestjs/swagger';
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
-  @UseGuards(AdminGuard)
   @Post()
+  @Public()
   create(@Body() createUserDto: CreateUserDto) {
     return this.userService.create(createUserDto);
   }
 
   @Get(':area')
+  @Public()
   findAll(@Param('area', ParseIntPipe) area: number) {
     return this.userService.findAll(+area);
   }
 
   @Get(':id')
+  @Public()
   findOne(@Param('id', ParseIntPipe) id: number) {
     return this.userService.findOne(+id);
   }
@@ -87,6 +90,7 @@ export class UserController {
   }
 
   @Post('/name')
+  @Public()
   findByName(@Payload() body: NameRequest) {
     return this.userService.findByName(body);
   }
