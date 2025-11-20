@@ -29,12 +29,19 @@ http.interceptors.response.use(
         .split("; ")
         .find((row) => row.startsWith("refreshToken="))
         ?.split("=")[1];
-      if (!refreshToken) return Promise.reject(error);
 
-      await AuthService.authControllerRefresh({
-        refreshToken: refreshToken,
-      });
-      return http(original);
+      if (!refreshToken) {
+        return Promise.reject(error);
+      }
+
+      try {
+        await AuthService.authControllerRefresh({
+          refreshToken: refreshToken,
+        });
+        return http(original);
+      } catch (refreshError) {
+        return Promise.reject(error);
+      }
     }
 
     return Promise.reject(error);

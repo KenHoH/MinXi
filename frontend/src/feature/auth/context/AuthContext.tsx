@@ -32,9 +32,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           name: dto.username,
         });
       setUser(userData);
-    } catch (error) {
+      showToast("Login successful!");
+    } catch (error: any) {
       setUser(null);
-      showToast("Login failed. Please try again.");
+      const errorMessage =
+        error?.body?.errorMessage || "Login failed. Please try again.";
+      showToast(errorMessage);
     } finally {
       hideLoading();
     }
@@ -45,8 +48,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     try {
       await AuthService.authControllerLogout(dto);
       setUser(null);
-    } catch (error) {
-      showToast("Logout failed. Please try again.");
+      showToast("Logout successful!");
+    } catch (error: any) {
+      const errorMessage =
+        error?.body?.errorMessage || "Logout failed. Please try again.";
+      showToast(errorMessage);
     } finally {
       hideLoading();
     }
