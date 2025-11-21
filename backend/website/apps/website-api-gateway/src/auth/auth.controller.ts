@@ -32,14 +32,14 @@ export class AuthController {
     const token = await this.authService.login(dto);
     response.cookie('accessToken', token.accessToken, {
       httpOnly: false,
-      secure: false,
+      secure: true,
       sameSite: 'none',
       maxAge: 15 * 60 * 1000,
     });
 
     response.cookie('refreshToken', token.refreshToken, {
       httpOnly: false,
-      secure: false,
+      secure: true,
       sameSite: 'none',
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
@@ -56,14 +56,14 @@ export class AuthController {
     const token = await this.authService.refresh(dto);
     response.cookie('accessToken', token.accessToken, {
       httpOnly: false,
-      secure: false,
+      secure: true,
       sameSite: 'none',
       maxAge: 15 * 60 * 1000,
     });
 
     response.cookie('refreshToken', token.refreshToken, {
       httpOnly: false,
-      secure: false,
+      secure: true,
       sameSite: 'none',
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
