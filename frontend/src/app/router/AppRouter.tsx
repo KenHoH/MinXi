@@ -7,6 +7,7 @@ import { AuthProvider } from "../../feature/auth/context/AuthContext";
 import { LoadingProvider } from "../../shared/context/LoadingContext";
 import LoginPage from "@/feature/auth/page/LoginPage";
 import RegisterPage from "@/feature/auth/page/RegisterPage";
+import FeedPage from "@/feature/feed/pages/FeedPage";
 
 export default function AppRouter() {
   return (
@@ -22,9 +23,10 @@ export default function AppRouter() {
               </Route>
               <Route element={<ProtectedRoute />}>
                 {/* Protected routes go here */}
-                <Route path="/profile/:id" element={<NotFoundPage />} />
-                <Route path="/chat" element={<NotFoundPage />} />
-                <Route path="/add" element={<NotFoundPage />} />
+                <Route path="/profile/:user" element={<NotFoundPage />} />
+                <Route path="/chat/:user" element={<NotFoundPage />} />
+                <Route path="/create" element={<NotFoundPage />} />
+                <Route path="/feed/*" element={<FeedPage />}></Route>
               </Route>
               <Route path="*" element={<NotFoundPage />} />
             </Routes>

@@ -30,11 +30,18 @@ export class AuthController {
     @Res({ passthrough: true }) response: Response,
   ) {
     const token = await this.authService.login(dto);
-    response.cookie('token', token, {
-      httpOnly: true,
-      secure: true,
-      sameSite: 'strict',
+    response.cookie('accessToken', token.accessToken, {
+      httpOnly: false,
+      secure: false,
+      sameSite: 'none',
       maxAge: 15 * 60 * 1000,
+    });
+
+    response.cookie('refreshToken', token.refreshToken, {
+      httpOnly: false,
+      secure: false,
+      sameSite: 'none',
+      maxAge: 7 * 24 * 60 * 60 * 1000,
     });
     return token;
   }
@@ -47,11 +54,18 @@ export class AuthController {
     @Res({ passthrough: true }) response: Response,
   ) {
     const token = await this.authService.refresh(dto);
-    response.cookie('token', token, {
-      httpOnly: true,
-      secure: true,
-      sameSite: 'strict',
+    response.cookie('accessToken', token.accessToken, {
+      httpOnly: false,
+      secure: false,
+      sameSite: 'none',
       maxAge: 15 * 60 * 1000,
+    });
+
+    response.cookie('refreshToken', token.refreshToken, {
+      httpOnly: false,
+      secure: false,
+      sameSite: 'none',
+      maxAge: 7 * 24 * 60 * 60 * 1000,
     });
     return token;
   }

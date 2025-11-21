@@ -10,6 +10,7 @@ import {
   UseFilters,
   UseGuards,
   UseInterceptors,
+  Res,
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import { CreateUserDto } from '@app/contracts/shared-dto/user/create-user.dto';
@@ -26,6 +27,7 @@ import { AdminGuard } from '@app/common/guard/admin/admin.guard';
 import { LogInterceptor } from '@app/common/interceptor/log/log.interceptor';
 import { ApiBearerAuth } from '@nestjs/swagger';
 import { Public } from '@app/common';
+import type { Response } from 'express';
 
 @Controller('user')
 @UseFilters(RpcTranslateFilter)
@@ -91,7 +93,21 @@ export class UserController {
 
   @Post('/name')
   @Public()
-  findByName(@Payload() body: NameRequest) {
-    return this.userService.findByName(body);
+  findByName(
+    @Payload() body: NameRequest,
+    @Res({ passthrough: true }) response: Response,
+  ) {
+    const userData = this.userService.findByName(body);
+
+    userData.then((user) => {
+      response.cookie('user', JSON.stringify(user), {
+        httpOnly: false,
+        secure: false,
+        sameSite: 'none',
+        maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+      });
+    });
+
+    return userData;
   }
 }

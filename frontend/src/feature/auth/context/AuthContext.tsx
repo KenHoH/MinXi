@@ -1,4 +1,4 @@
-import { createContext, useContext, useState } from "react";
+import { createContext, useContext, useState, useEffect } from "react";
 import {
   AuthService,
   UserService,
@@ -21,6 +21,26 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<CredentialRes | null>(null);
   const { showToast } = useToast();
   const { showLoading, hideLoading } = useLoading();
+
+  useEffect(() => {
+    try {
+      const userDataCookie = document.cookie
+        .split("; ")
+        .find((row) => row.startsWith("user="))
+        ?.split("=")[1];
+
+      if (userDataCookie) {
+        console.log("the user data cookie ", userDataCookie);
+        const userData: CredentialRes = JSON.parse(
+          decodeURIComponent(userDataCookie)
+        );
+        setUser(userData);
+      }
+    } catch (error) {
+      console.error("Failed to restore user from cookie:", error);
+      setUser(null);
+    }
+  }, []);
 
   const login = async (dto: LoginDto) => {
     showLoading();
