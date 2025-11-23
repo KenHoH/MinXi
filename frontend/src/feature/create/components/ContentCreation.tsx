@@ -6,7 +6,6 @@ import { ContentComponent } from "@/feature/content/components/ContentComponent/
 import { CreateContentModal } from "@/feature/content/components/CreateContentModal";
 import type Content from "@/feature/content/object/PublicContent";
 import { useAuthContext } from "@/feature/auth/context/AuthContext";
-import { Navigate } from "react-router";
 
 interface ContentCreationProps {
   items: Content[];

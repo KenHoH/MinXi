@@ -28,7 +28,7 @@ export class SseService {
     }
     /**
      * @param requestBody
-     * @returns Ack
+     * @returns Ack Broadcast message sent
      * @throws ApiError
      */
     public static sseControllerSendBroadcast(
@@ -43,7 +43,7 @@ export class SseService {
     }
     /**
      * @param requestBody
-     * @returns Ack
+     * @returns Ack Notification sent
      * @throws ApiError
      */
     public static sseControllerSendNotification(
@@ -57,7 +57,7 @@ export class SseService {
         });
     }
     /**
-     * @returns ConnectionStatsRes
+     * @returns ConnectionStatsRes Connection statistics
      * @throws ApiError
      */
     public static sseControllerGetStats(): CancelablePromise<ConnectionStatsRes> {

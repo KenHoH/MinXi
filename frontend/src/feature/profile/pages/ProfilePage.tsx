@@ -7,6 +7,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { ContentComponent } from "@/feature/content/components/ContentComponent/ContentComponent";
 import { PostComponent } from "@/feature/content/components/PostComponent/PostComponent";
 import { BoardModal } from "@/feature/create/components/BoardModal";
+import type Content from "@/feature/content/object/PublicContent";
 
 const dummyUserInfo = {
   username: "Ken Neth",
@@ -84,13 +85,13 @@ const mockContent: (ContentItem | PostItem)[] = [
 ];
 
 // Mock data for saved content (pinned by user)
-const mockSavedContent: (ContentItem | PostItem)[] = [
+const mockSavedContent: Content[] = [
   {
     content_id: 7,
     creator_id: 5,
     title: "My Favorite Sunset",
     post_type: "image",
-    thumbnail:
+    thumbnail_url:
       "http://localhost:3000/uploads/thumbnail/1763296139023-929553449.jpg",
     likes: 30,
     comments: 7,
@@ -119,7 +120,7 @@ const mockSavedContent: (ContentItem | PostItem)[] = [
 ];
 
 // Mock data for liked content
-const mockLikedContent: (ContentItem | PostItem)[] = [
+const mockLikedContent: Content[] = [
   {
     content_id: 10,
     creator_id: 5,
@@ -175,7 +176,7 @@ const mockBoards: BoardItem[] = [
     description: "All my favorite travel photos",
     visibilityPrivate: false,
     created_at: "2025-11-23",
-    contents: mockContent.slice(0, 3) as ContentItem[],
+    contents: mockContent.slice(0, 3) as Content[],
   },
   {
     board_id: 2,
@@ -186,7 +187,7 @@ const mockBoards: BoardItem[] = [
     description: "Best practices and tutorials",
     visibilityPrivate: false,
     created_at: "2025-11-23",
-    contents: mockContent.slice(3, 6) as ContentItem[],
+    contents: mockContent.slice(3, 6) as Content[],
   },
   {
     board_id: 3,
@@ -197,7 +198,7 @@ const mockBoards: BoardItem[] = [
     description: "Random creative inspiration",
     visibilityPrivate: true,
     created_at: "2025-11-23",
-    contents: mockLikedContent.slice(0, 2) as ContentItem[],
+    contents: mockLikedContent.slice(0, 2) as Content[],
   },
 ];
 
@@ -207,29 +208,6 @@ const tabs = [
   { id: "liked", label: "Liked" },
   { id: "boards", label: "Boards" },
 ];
-
-interface ContentItem {
-  content_id: number;
-  creator_id: number;
-  title: string;
-  post_type: "image" | "video";
-  thumbnail: string;
-  likes: number;
-  comments: number;
-  views: number;
-}
-
-interface PostItem {
-  content_id: number;
-  creator_id: number;
-  title: string;
-  post_type: "post";
-  description: string;
-  likes: number;
-  comments: number;
-}
-
-type FeedItem = ContentItem | PostItem;
 
 interface BoardItem {
   board_id: number;

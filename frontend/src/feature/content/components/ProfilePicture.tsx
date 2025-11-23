@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { X } from "lucide-react";
 import useUserService from "@/shared/hooks/useUserService";
 import type { CredentialRes } from "@/services/api";
@@ -16,16 +16,23 @@ export function ProfilePicture({
 }: ProfilePictureProps) {
   const [showProfileModal, setShowProfileModal] = useState(false);
   const { userData, findUserById } = useUserService();
+  const lastFetchedIdRef = useRef<number | null>(null);
+
   useEffect(() => {
+    if (lastFetchedIdRef.current === creator_id) {
+      return;
+    }
+
     async function fetchUser() {
       try {
+        lastFetchedIdRef.current = creator_id;
         await findUserById(creator_id);
       } catch (error) {
         console.error("Failed to fetch user data:", error);
       }
     }
     fetchUser();
-  }, [creator_id, findUserById, userData]);
+  }, [creator_id, findUserById]);
 
   const sizeClasses = {
     sm: "w-8 h-8",
@@ -36,7 +43,10 @@ export function ProfilePicture({
   return (
     <>
       <img
-        src={}
+        src={
+          userData?.profile_picture ||
+          "http://localhost:3000/uploads/profile/1763906830326-69740177.png"
+        }
         alt={`Creator ${creator_id}`}
         className={`${sizeClasses[size]} rounded-full ${
           clickable ? "cursor-pointer hover:opacity-80 transition-opacity" : ""

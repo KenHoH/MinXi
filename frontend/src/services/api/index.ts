@@ -53,6 +53,7 @@ export type { UpdateContentDto } from './models/UpdateContentDto';
 export { UpdateParticipantRoleDto } from './models/UpdateParticipantRoleDto';
 export type { UpdateProfileUserDto } from './models/UpdateProfileUserDto';
 export type { UpdateRestriction } from './models/UpdateRestriction';
+export type { UserDto } from './models/UserDto';
 export type { UserLog } from './models/UserLog';
 
 export { AlgorithmService } from './services/AlgorithmService';
