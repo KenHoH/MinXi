@@ -4,16 +4,9 @@ import { Button } from "@/components/ui/button";
 import { Masonry } from "@/shared/components/Masonry";
 import { ContentComponent } from "@/feature/content/components/ContentComponent/ContentComponent";
 import { CreateContentModal } from "@/feature/content/components/CreateContentModal";
-
-interface Content {
-  content_id: number;
-  creator_id: number;
-  title: string;
-  post_type: "image" | "video";
-  likes: number;
-  comments: number;
-  views: number;
-}
+import type Content from "@/feature/content/object/PublicContent";
+import { useAuthContext } from "@/feature/auth/context/AuthContext";
+import { Navigate } from "react-router";
 
 interface ContentCreationProps {
   items: Content[];
@@ -22,7 +15,8 @@ interface ContentCreationProps {
 
 export function ContentCreation({ items, onDelete }: ContentCreationProps) {
   const [showCreateModal, setShowCreateModal] = useState(false);
-  const currentUserId = 5; // TODO: Get from auth context
+  const { user } = useAuthContext();
+  const currentUserId = user?.user_id || 0;
 
   return (
     <div className="space-y-6">

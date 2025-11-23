@@ -1,6 +1,6 @@
 import type Metadata from "./Metadata";
 
-export default interface PublicContent {
+export default interface Content {
   content_id: number;
   creator_id: number;
   parent_id: number | null;

@@ -7,16 +7,7 @@ import { HeaderContentComponent } from "./HeaderContentComponent";
 import { InputContentCommentComponent } from "./InputContentCommentComponent";
 import { FooterContentComponent } from "./FooterContentComponent";
 import { ContentMediaGallery } from "./ContentMediaGallery";
-
-interface Content {
-  content_id: number;
-  creator_id: number;
-  title: string;
-  post_type: "image" | "video";
-  likes: number;
-  comments: number;
-  views: number;
-}
+import type Content from "../../object/PublicContent";
 
 interface MediaItem {
   type: "image" | "video";

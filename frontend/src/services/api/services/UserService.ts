@@ -38,7 +38,7 @@ export class UserService {
   ): CancelablePromise<Record<string, any>> {
     return __request(OpenAPI, {
       method: "GET",
-      url: "/user/{area}",
+      url: "/user/area/{area}",
       path: {
         area: area,
       },

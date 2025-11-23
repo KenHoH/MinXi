@@ -2,16 +2,7 @@ import { useState } from "react";
 import { ContentHeaderInfo } from "./ContentHeaderInfo";
 import { ContentDetailInfo } from "./ContentDetailInfo";
 import { ContentDetailComponent } from "./ContentDetail";
-
-interface Content {
-  content_id: number;
-  creator_id: number;
-  title: string;
-  post_type: "image" | "video";
-  likes: number;
-  comments: number;
-  views: number;
-}
+import type Content from "../../object/PublicContent";
 
 interface ContentComponentProps {
   content: Content;

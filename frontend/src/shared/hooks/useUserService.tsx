@@ -7,13 +7,16 @@ import {
   type deltaDto,
   type NameRequest,
   type CredentialRes,
+  type Ack,
 } from "@/services/api";
 import { useToast } from "../context/ToastContext";
 import { useLoading } from "../context/LoadingContext";
 
 interface UseUserServiceReturn {
-  // State
-  data: unknown | null;
+  // State - typed DTOs
+  userData: CredentialRes | null;
+  userListData: Record<string, any>[] | null;
+  ackData: Ack | null;
   error: string | null;
   isLoading: boolean;
 
@@ -35,7 +38,11 @@ export default function useUserService(): UseUserServiceReturn {
   const { showToast } = useToast();
   const { showLoading, hideLoading } = useLoading();
 
-  const [data, setData] = useState<unknown | null>(null);
+  const [userData, setUserData] = useState<CredentialRes | null>(null);
+  const [userListData, setUserListData] = useState<
+    Record<string, any>[] | null
+  >(null);
+  const [ackData, setAckData] = useState<Ack | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -57,7 +64,7 @@ export default function useUserService(): UseUserServiceReturn {
       resetError();
       try {
         const result = await UserService.userControllerCreate(dto);
-        setData(result);
+        setUserListData([result]);
         showToast("User created successfully");
       } catch (err) {
         handleError(err, "User registration failed. Please try again.");
@@ -76,7 +83,7 @@ export default function useUserService(): UseUserServiceReturn {
       resetError();
       try {
         const result = await UserService.userControllerFindAll(area);
-        setData(result);
+        setUserListData(Array.isArray(result) ? result : [result]);
       } catch (err) {
         handleError(err, "Failed to fetch users. Please try again.");
       } finally {
@@ -94,7 +101,7 @@ export default function useUserService(): UseUserServiceReturn {
       resetError();
       try {
         const result = await UserService.userControllerFindOne(id);
-        setData(result);
+        setUserListData([result]);
       } catch (err) {
         handleError(err, "Failed to fetch user. Please try again.");
       } finally {
@@ -112,7 +119,7 @@ export default function useUserService(): UseUserServiceReturn {
       resetError();
       try {
         const result = await UserService.userControllerUpdate(id, dto);
-        setData(result);
+        setUserListData([result]);
         showToast("Profile updated successfully");
       } catch (err) {
         handleError(err, "Failed to update profile. Please try again.");
@@ -130,7 +137,7 @@ export default function useUserService(): UseUserServiceReturn {
       resetError();
       try {
         const result = await UserService.userControllerUpdateLike(id, dto);
-        setData(result);
+        setAckData(result);
         showToast("Like updated");
       } catch (err) {
         handleError(err, "Failed to update like. Please try again.");
@@ -147,7 +154,7 @@ export default function useUserService(): UseUserServiceReturn {
       resetError();
       try {
         const result = await UserService.userControllerUpdateFollow(id, dto);
-        setData(result);
+        setAckData(result);
         showToast("Follow updated");
       } catch (err) {
         handleError(err, "Failed to update follow. Please try again.");
@@ -164,7 +171,7 @@ export default function useUserService(): UseUserServiceReturn {
       resetError();
       try {
         const result = await UserService.userControllerUpdateReport(id, dto);
-        setData(result);
+        setAckData(result);
         showToast("Report submitted");
       } catch (err) {
         handleError(err, "Failed to submit report. Please try again.");
@@ -185,7 +192,7 @@ export default function useUserService(): UseUserServiceReturn {
           id,
           dto
         );
-        setData(result);
+        setUserListData([result]);
         showToast("Restriction updated");
       } catch (err) {
         handleError(err, "Failed to update restriction. Please try again.");
@@ -204,7 +211,7 @@ export default function useUserService(): UseUserServiceReturn {
       resetError();
       try {
         const result = await UserService.userControllerFindByName(dto);
-        setData(result);
+        setUserData(result);
         return result;
       } catch (err) {
         handleError(err, "Failed to find user. Please try again.");
@@ -224,7 +231,7 @@ export default function useUserService(): UseUserServiceReturn {
       resetError();
       try {
         const result = await UserService.userControllerRemove(id);
-        setData(result);
+        setUserListData([result]);
         showToast("User removed successfully");
       } catch (err) {
         handleError(err, "Failed to remove user. Please try again.");
@@ -237,7 +244,9 @@ export default function useUserService(): UseUserServiceReturn {
   );
 
   return {
-    data,
+    userData,
+    userListData,
+    ackData,
     error,
     isLoading,
     createUser,

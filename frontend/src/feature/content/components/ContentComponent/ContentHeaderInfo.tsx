@@ -1,7 +1,7 @@
 import { Play } from "lucide-react";
 
 interface ContentHeaderInfoProps {
-  post_type: "image" | "video";
+  post_type: "image" | "video" | "post";
   content_id: number;
 }
 
