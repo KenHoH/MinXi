@@ -13,6 +13,7 @@ interface AuthContextType {
   user: CredentialRes | null;
   login: (dto: LoginDto) => Promise<void>;
   logout: (dto: LogoutRequest) => Promise<void>;
+  isLoading: boolean;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -20,9 +21,10 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<CredentialRes | null>(null);
   const { showToast } = useToast();
+  const [isLoading, setIsLoading] = useState(true);
   const { showLoading, hideLoading } = useLoading();
 
-  useEffect(() => {
+  const getUserData = () => {
     try {
       const userDataCookie = document.cookie
         .split("; ")
@@ -34,12 +36,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         const userData: CredentialRes = JSON.parse(
           decodeURIComponent(userDataCookie)
         );
+        console.log(userData);
         setUser(userData);
       }
     } catch (error) {
       console.error("Failed to restore user from cookie:", error);
       setUser(null);
+    } finally {
+      setIsLoading(false);
     }
+  };
+
+  useEffect(() => {
+    getUserData();
   }, []);
 
   const login = async (dto: LoginDto) => {
@@ -79,7 +88,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   return (
-    <AuthContext.Provider value={{ user, login, logout }}>
+    <AuthContext.Provider value={{ user, login, logout, isLoading }}>
       {children}
     </AuthContext.Provider>
   );

@@ -1,5 +1,5 @@
+import { Sidebar } from "@/shared/components/Sidebar";
 import type React from "react";
-import { Sidebar } from "lucide-react";
 
 export default function RootLayout({
   children,
@@ -7,13 +7,9 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en">
-      <body>
-        <div className="flex">
-          <Sidebar />
-          <main className="ml-20 w-full min-h-screen">{children}</main>
-        </div>
-      </body>
-    </html>
+    <div className="flex h-screen bg-dark-900">
+      <Sidebar />
+      <main className="ml-20 flex-1 overflow-auto">{children}</main>
+    </div>
   );
 }
