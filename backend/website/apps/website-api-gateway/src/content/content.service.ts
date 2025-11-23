@@ -151,4 +151,10 @@ export class ContentService implements IContentService {
       this.contentClient.send(CONTENT_MSG.getFile, { contentId, areaId }),
     );
   }
+
+  async getFiles(contentId: number, areaId: number): Promise<FileDto[]> {
+    return await firstValueFrom(
+      this.contentClient.send(CONTENT_MSG.getFiles, { contentId, areaId }),
+    );
+  }
 }

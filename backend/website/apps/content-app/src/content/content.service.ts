@@ -455,4 +455,35 @@ export class ContentService implements IContentService {
       );
     }
   }
+
+  async getFiles(contentId: number, areaId: number): Promise<FileDto[]> {
+    if (areaId <= 0 || areaId > 3)
+      throw httpToRpc(
+        new HttpException('Invalid area ID', HttpStatus.BAD_REQUEST),
+      );
+    try {
+      const files = await this.prisma.file.findMany({
+        where: {
+          content_id: contentId,
+          content_area_id: areaId,
+        },
+      });
+
+      return files.map((file) => ({
+        file_id: file.file_id,
+        filepath: file.filepath,
+        thumbnail: file.thumbnail ?? undefined,
+        content_id: file.content_id,
+        content_area_id: file.content_area_id,
+      }));
+    } catch (error) {
+      this.logger.error('Failed to fetch files', error.message);
+      throw httpToRpc(
+        new HttpException(
+          'Failed to fetch files',
+          HttpStatus.INTERNAL_SERVER_ERROR,
+        ),
+      );
+    }
+  }
 }

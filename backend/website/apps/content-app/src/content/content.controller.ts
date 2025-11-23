@@ -181,4 +181,14 @@ export class ContentController {
     );
     return this.contentService.getFile(payload.contentId, payload.areaId);
   }
+
+  @MessagePattern(CONTENT_MSG.getFiles)
+  async getFiles(
+    @Payload(ValidationPipe) payload: { contentId: number; areaId: number },
+  ): Promise<FileDto[]> {
+    this.logger.log(
+      `Fetching all files for content ${payload.contentId} in area ${payload.areaId}`,
+    );
+    return this.contentService.getFiles(payload.contentId, payload.areaId);
+  }
 }

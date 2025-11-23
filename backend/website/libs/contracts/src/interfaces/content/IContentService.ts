@@ -28,6 +28,7 @@ export interface IContentService {
   findOne(content_id: number, area_id: number): Promise<FullContentDto>;
   getByUser(creator_id: number): Promise<FullContentDto[]>;
   getFile(contentId: number, areaId: number): Promise<FileDto>;
+  getFiles(contentId: number, areaId: number): Promise<FileDto[]>;
 
   getFollowingContent(userId: number): Promise<FullContentDto[]>;
   getFriendContent(userId: number): Promise<FullContentDto[]>;

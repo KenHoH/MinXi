@@ -40,6 +40,7 @@ export const CONTENT_MSG = {
   getStats: 'content.getStats',
   getByUser: 'content.getByUser',
   getFile: 'content.getFile',
+  getFiles: 'content.getFiles',
   getFollowingContent: 'content.getFollowingContent',
   getFriendContent: 'content.getFriendContent',
   remove: 'content.remove',

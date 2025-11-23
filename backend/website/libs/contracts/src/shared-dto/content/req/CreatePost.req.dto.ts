@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsInt, IsString } from 'class-validator';
+import { IsInt, IsString, IsOptional } from 'class-validator';
 
 export class CreatePostDto {
   @ApiProperty()
@@ -14,7 +14,8 @@ export class CreatePostDto {
   @IsString()
   post_type: string;
 
-  @ApiProperty()
+  @ApiProperty({ required: false })
+  @IsOptional()
   @IsInt()
   parent_id?: number;
 

@@ -36,6 +36,7 @@ import { fileFieldsSchema } from '@app/contracts/shared-dto/schema/fileFieldsSch
 import { CreateFileDto } from '@app/contracts/shared-dto/content/req/CreateFile.req.dto';
 import { FullContentDto } from '@app/contracts/shared-dto/content/res/full.content.dto';
 import { FileRes } from '@app/contracts/shared-dto/content/res/file.res.dto';
+import { FileDto } from '@app/contracts/shared-dto/content/res/file.dto';
 import { Ack } from '@app/contracts/shared-dto/ack.dto';
 import { JwtAuthGuard } from '@app/common/guard/jwt-auth-guard/jwt-auth.guard';
 import { LogInterceptor } from '@app/common/interceptor/log/log.interceptor';
@@ -329,5 +330,13 @@ export class ContentController {
     @Param('area_id', ParseIntPipe) area_id: number,
   ): Promise<Ack> {
     return this.contentService.remove(content_id, area_id);
+  }
+
+  @Get('files/:content_id/:area_id')
+  getFiles(
+    @Param('content_id', ParseIntPipe) content_id: number,
+    @Param('area_id', ParseIntPipe) area_id: number,
+  ): Promise<FileDto[]> {
+    return this.contentService.getFiles(content_id, area_id);
   }
 }
