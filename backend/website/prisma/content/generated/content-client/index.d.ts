@@ -2373,6 +2373,7 @@ export namespace Prisma {
     file_id: number | null
     filepath: string | null
     thumbnail: string | null
+    type: string | null
     content_id: number | null
     content_area_id: number | null
   }
@@ -2381,6 +2382,7 @@ export namespace Prisma {
     file_id: number | null
     filepath: string | null
     thumbnail: string | null
+    type: string | null
     content_id: number | null
     content_area_id: number | null
   }
@@ -2389,6 +2391,7 @@ export namespace Prisma {
     file_id: number
     filepath: number
     thumbnail: number
+    type: number
     content_id: number
     content_area_id: number
     _all: number
@@ -2411,6 +2414,7 @@ export namespace Prisma {
     file_id?: true
     filepath?: true
     thumbnail?: true
+    type?: true
     content_id?: true
     content_area_id?: true
   }
@@ -2419,6 +2423,7 @@ export namespace Prisma {
     file_id?: true
     filepath?: true
     thumbnail?: true
+    type?: true
     content_id?: true
     content_area_id?: true
   }
@@ -2427,6 +2432,7 @@ export namespace Prisma {
     file_id?: true
     filepath?: true
     thumbnail?: true
+    type?: true
     content_id?: true
     content_area_id?: true
     _all?: true
@@ -2522,6 +2528,7 @@ export namespace Prisma {
     file_id: number
     filepath: string
     thumbnail: string | null
+    type: string | null
     content_id: number
     content_area_id: number
     _count: FileCountAggregateOutputType | null
@@ -2549,6 +2556,7 @@ export namespace Prisma {
     file_id?: boolean
     filepath?: boolean
     thumbnail?: boolean
+    type?: boolean
     content_id?: boolean
     content_area_id?: boolean
   }, ExtArgs["result"]["file"]>
@@ -2559,11 +2567,12 @@ export namespace Prisma {
     file_id?: boolean
     filepath?: boolean
     thumbnail?: boolean
+    type?: boolean
     content_id?: boolean
     content_area_id?: boolean
   }
 
-  export type FileOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"file_id" | "filepath" | "thumbnail" | "content_id" | "content_area_id", ExtArgs["result"]["file"]>
+  export type FileOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"file_id" | "filepath" | "thumbnail" | "type" | "content_id" | "content_area_id", ExtArgs["result"]["file"]>
 
   export type $FilePayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     name: "File"
@@ -2572,6 +2581,7 @@ export namespace Prisma {
       file_id: number
       filepath: string
       thumbnail: string | null
+      type: string | null
       content_id: number
       content_area_id: number
     }, ExtArgs["result"]["file"]>
@@ -2946,6 +2956,7 @@ export namespace Prisma {
     readonly file_id: FieldRef<"File", 'Int'>
     readonly filepath: FieldRef<"File", 'String'>
     readonly thumbnail: FieldRef<"File", 'String'>
+    readonly type: FieldRef<"File", 'String'>
     readonly content_id: FieldRef<"File", 'Int'>
     readonly content_area_id: FieldRef<"File", 'Int'>
   }
@@ -7141,6 +7152,7 @@ export namespace Prisma {
     file_id: 'file_id',
     filepath: 'filepath',
     thumbnail: 'thumbnail',
+    type: 'type',
     content_id: 'content_id',
     content_area_id: 'content_area_id'
   };
@@ -7221,7 +7233,8 @@ export namespace Prisma {
 
   export const FileOrderByRelevanceFieldEnum: {
     filepath: 'filepath',
-    thumbnail: 'thumbnail'
+    thumbnail: 'thumbnail',
+    type: 'type'
   };
 
   export type FileOrderByRelevanceFieldEnum = (typeof FileOrderByRelevanceFieldEnum)[keyof typeof FileOrderByRelevanceFieldEnum]
@@ -7394,6 +7407,7 @@ export namespace Prisma {
     file_id?: IntFilter<"File"> | number
     filepath?: StringFilter<"File"> | string
     thumbnail?: StringNullableFilter<"File"> | string | null
+    type?: StringNullableFilter<"File"> | string | null
     content_id?: IntFilter<"File"> | number
     content_area_id?: IntFilter<"File"> | number
   }
@@ -7402,6 +7416,7 @@ export namespace Prisma {
     file_id?: SortOrder
     filepath?: SortOrder
     thumbnail?: SortOrderInput | SortOrder
+    type?: SortOrderInput | SortOrder
     content_id?: SortOrder
     content_area_id?: SortOrder
     _relevance?: FileOrderByRelevanceInput
@@ -7415,6 +7430,7 @@ export namespace Prisma {
     NOT?: FileWhereInput | FileWhereInput[]
     filepath?: StringFilter<"File"> | string
     thumbnail?: StringNullableFilter<"File"> | string | null
+    type?: StringNullableFilter<"File"> | string | null
     content_id?: IntFilter<"File"> | number
     content_area_id?: IntFilter<"File"> | number
   }, "file_id" | "content_id_filepath">
@@ -7423,6 +7439,7 @@ export namespace Prisma {
     file_id?: SortOrder
     filepath?: SortOrder
     thumbnail?: SortOrderInput | SortOrder
+    type?: SortOrderInput | SortOrder
     content_id?: SortOrder
     content_area_id?: SortOrder
     _count?: FileCountOrderByAggregateInput
@@ -7439,6 +7456,7 @@ export namespace Prisma {
     file_id?: IntWithAggregatesFilter<"File"> | number
     filepath?: StringWithAggregatesFilter<"File"> | string
     thumbnail?: StringNullableWithAggregatesFilter<"File"> | string | null
+    type?: StringNullableWithAggregatesFilter<"File"> | string | null
     content_id?: IntWithAggregatesFilter<"File"> | number
     content_area_id?: IntWithAggregatesFilter<"File"> | number
   }
@@ -7801,6 +7819,7 @@ export namespace Prisma {
   export type FileCreateInput = {
     filepath: string
     thumbnail?: string | null
+    type?: string | null
     content_id: number
     content_area_id: number
   }
@@ -7809,6 +7828,7 @@ export namespace Prisma {
     file_id?: number
     filepath: string
     thumbnail?: string | null
+    type?: string | null
     content_id: number
     content_area_id: number
   }
@@ -7816,6 +7836,7 @@ export namespace Prisma {
   export type FileUpdateInput = {
     filepath?: StringFieldUpdateOperationsInput | string
     thumbnail?: NullableStringFieldUpdateOperationsInput | string | null
+    type?: NullableStringFieldUpdateOperationsInput | string | null
     content_id?: IntFieldUpdateOperationsInput | number
     content_area_id?: IntFieldUpdateOperationsInput | number
   }
@@ -7824,6 +7845,7 @@ export namespace Prisma {
     file_id?: IntFieldUpdateOperationsInput | number
     filepath?: StringFieldUpdateOperationsInput | string
     thumbnail?: NullableStringFieldUpdateOperationsInput | string | null
+    type?: NullableStringFieldUpdateOperationsInput | string | null
     content_id?: IntFieldUpdateOperationsInput | number
     content_area_id?: IntFieldUpdateOperationsInput | number
   }
@@ -7832,6 +7854,7 @@ export namespace Prisma {
     file_id?: number
     filepath: string
     thumbnail?: string | null
+    type?: string | null
     content_id: number
     content_area_id: number
   }
@@ -7839,6 +7862,7 @@ export namespace Prisma {
   export type FileUpdateManyMutationInput = {
     filepath?: StringFieldUpdateOperationsInput | string
     thumbnail?: NullableStringFieldUpdateOperationsInput | string | null
+    type?: NullableStringFieldUpdateOperationsInput | string | null
     content_id?: IntFieldUpdateOperationsInput | number
     content_area_id?: IntFieldUpdateOperationsInput | number
   }
@@ -7847,6 +7871,7 @@ export namespace Prisma {
     file_id?: IntFieldUpdateOperationsInput | number
     filepath?: StringFieldUpdateOperationsInput | string
     thumbnail?: NullableStringFieldUpdateOperationsInput | string | null
+    type?: NullableStringFieldUpdateOperationsInput | string | null
     content_id?: IntFieldUpdateOperationsInput | number
     content_area_id?: IntFieldUpdateOperationsInput | number
   }
@@ -8329,6 +8354,7 @@ export namespace Prisma {
     file_id?: SortOrder
     filepath?: SortOrder
     thumbnail?: SortOrder
+    type?: SortOrder
     content_id?: SortOrder
     content_area_id?: SortOrder
   }
@@ -8343,6 +8369,7 @@ export namespace Prisma {
     file_id?: SortOrder
     filepath?: SortOrder
     thumbnail?: SortOrder
+    type?: SortOrder
     content_id?: SortOrder
     content_area_id?: SortOrder
   }
@@ -8351,6 +8378,7 @@ export namespace Prisma {
     file_id?: SortOrder
     filepath?: SortOrder
     thumbnail?: SortOrder
+    type?: SortOrder
     content_id?: SortOrder
     content_area_id?: SortOrder
   }

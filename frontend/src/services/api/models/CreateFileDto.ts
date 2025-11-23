@@ -7,5 +7,6 @@ export type CreateFileDto = {
     content_id: number;
     area_id: number;
     thumbnail: string;
+    type?: string;
 };
 

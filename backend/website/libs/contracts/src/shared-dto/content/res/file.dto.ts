@@ -22,4 +22,9 @@ export class FileDto {
   @ApiProperty()
   @IsInt()
   content_area_id: number;
+
+  @ApiProperty({ required: false })
+  @IsOptional()
+  @IsString()
+  type?: string;
 }

@@ -37,6 +37,7 @@ model File {
   file_id   Int     @id @default(autoincrement())
   filepath  String
   thumbnail String?
+  type      String?
 
   content_id      Int
   content_area_id Int

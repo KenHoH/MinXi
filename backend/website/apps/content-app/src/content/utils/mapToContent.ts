@@ -14,4 +14,5 @@ export const mapToContent = (content: any): FullContentDto => ({
   pins: Number(content.pins ?? 0),
   reports: Number(content.reports ?? 0),
   area_id: content.area_id,
+  
 });

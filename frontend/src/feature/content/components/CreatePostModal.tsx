@@ -6,19 +6,11 @@ import { CreatePostUserInfo } from "./CreatePost/CreatePostUserInfo";
 import { UploadImages } from "./CreatePost/UploadImages";
 import { UploadVideos } from "./CreatePost/UploadVideos";
 import { FileGallery } from "./CreatePost/FileGallery";
-
-interface MediaItem {
-  id: string;
-  file: File;
-  preview: string;
-  type: "image" | "video";
-}
-
-interface FileItem {
-  id: string;
-  name: string;
-  type: "image" | "video";
-}
+import type FileItem from "../object/FileItem";
+import type MediaItem from "../object/MediaItem";
+import { useToast } from "@/shared/context/ToastContext";
+import useContentService from "@/shared/hooks/useContentService";
+import { UserService } from "@/services/api";
 
 interface CreatePostModalProps {
   isOpen: boolean;
@@ -37,10 +29,14 @@ export function CreatePostModal({
   const [description, setDescription] = useState("");
   const [media, setMedia] = useState<MediaItem[]>([]);
 
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const { showToast } = useToast();
+  const { create, createFile, uploadMultipleFiles, uploadContentImages } =
+    useContentService();
   if (!isOpen) {
     return null;
   }
-
   const handleMediaFilesSelected = (files: File[], type: "image" | "video") => {
     files.forEach((file) => {
       const reader = new FileReader();
@@ -70,8 +66,11 @@ export function CreatePostModal({
     type: item.type,
   }));
 
-  const handleSubmit = () => {
-    // TODO: Submit post with media to backend
+  const handleSubmit = async () => {
+    if (!title || !description || media.length === 0) {
+      showToast("Please fill in all fields and add at least one media file.");
+      return;
+    }
     console.log({
       title,
       description,
@@ -79,11 +78,98 @@ export function CreatePostModal({
       parentPostId,
       creator_id: currentUserId,
     });
+
+    try {
+      const userResponse = await UserService.userControllerFindOne(
+        currentUserId
+      );
+      if (!userResponse || !userResponse.user_id || !userResponse.area_id) {
+        showToast("Invalid user data.");
+        console.error("Invalid user data:", userResponse);
+        return;
+      }
+      if (!title.trim() || !description.trim() || media.length === 0) {
+        showToast("Please fill in all required fields.");
+        return;
+      }
+
+      const contentData = await create({
+        title: title.trim(),
+        description: description.trim(),
+        creator_id: userResponse.user_id,
+        area_id: userResponse.area_id,
+        post_type: "post",
+        parent_id: parentPostId,
+      });
+
+      if (!contentData || !contentData.content_id) {
+        showToast("Failed to create post. Please try again.");
+        return;
+      }
+
+      for (const contentFile of media) {
+        try {
+          if (contentFile.type === "image") {
+            const result = await uploadContentImages({
+              thumbnail: contentFile.file,
+              contentImage: contentFile.file,
+            });
+            if (!result || !result.mainImagePath || !result.optionalMediaPath) {
+              showToast("Failed to upload files. Please try again.");
+              return;
+            }
+
+            await createFile({
+              content_id: contentData.content_id,
+              file_path: result.optionalMediaPath,
+              thumbnail: result.mainImagePath,
+              area_id: userResponse.area_id,
+              type: "image",
+            });
+          } else {
+            const result = await uploadMultipleFiles({
+              image: contentFile.file,
+              video: contentFile.file,
+            });
+            if (!result || !result.mainImagePath || !result.optionalMediaPath) {
+              showToast("Failed to upload files. Please try again.");
+              return;
+            }
+
+            await createFile({
+              content_id: contentData.content_id,
+              file_path: result.optionalMediaPath,
+              thumbnail: result.mainImagePath,
+              area_id: userResponse.area_id,
+              type: "video",
+            });
+          }
+        } catch (fileErr) {
+          console.error("Failed to process file:", fileErr);
+          showToast(
+            `Warning: Could not process one of your files. Some content may not be saved.`
+          );
+        }
+      }
+
+      showToast("Content created successfully!");
+    } catch (error) {
+      const errorMessage =
+        error instanceof Error
+          ? error.message
+          : "Failed to create content. Please try again.";
+      showToast(errorMessage);
+      console.error("Content creation error:", error);
+      return;
+    } finally {
+      setIsSubmitting(false);
+      setTitle("");
+      setDescription("");
+      setMedia([]);
+      onClose();
+    }
+
     // Reset and close
-    setTitle("");
-    setDescription("");
-    setMedia([]);
-    onClose();
   };
 
   return (
@@ -161,10 +247,10 @@ export function CreatePostModal({
             </button>
             <button
               onClick={handleSubmit}
-              disabled={!title.trim()}
+              disabled={!title.trim() || isSubmitting}
               className="flex-1 px-4 py-2 bg-burgundy-600 text-white rounded-lg hover:bg-burgundy-700 transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {parentPostId ? "Reply" : "Post"}
+              {isSubmitting ? "Posting..." : parentPostId ? "Reply" : "Post"}
             </button>
           </div>
         </div>

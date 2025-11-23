@@ -13,6 +13,7 @@ export default interface Content {
   views: number;
   pins: number;
   reports: number;
+  area_id: number;
 
   metadata: Metadata[];
 

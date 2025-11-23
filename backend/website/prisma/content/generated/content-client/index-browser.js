@@ -142,6 +142,7 @@ exports.Prisma.FileScalarFieldEnum = {
   file_id: 'file_id',
   filepath: 'filepath',
   thumbnail: 'thumbnail',
+  type: 'type',
   content_id: 'content_id',
   content_area_id: 'content_area_id'
 };
@@ -198,7 +199,8 @@ exports.Prisma.ContentOrderByRelevanceFieldEnum = {
 
 exports.Prisma.FileOrderByRelevanceFieldEnum = {
   filepath: 'filepath',
-  thumbnail: 'thumbnail'
+  thumbnail: 'thumbnail',
+  type: 'type'
 };
 
 exports.Prisma.BoardOrderByRelevanceFieldEnum = {

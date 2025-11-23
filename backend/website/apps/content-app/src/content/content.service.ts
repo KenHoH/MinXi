@@ -118,6 +118,7 @@ export class ContentService implements IContentService {
           content_id: dto.content_id,
           filepath: dto.file_path,
           thumbnail: dto.thumbnail,
+          type: dto.type,
         },
       });
       return {
@@ -475,6 +476,7 @@ export class ContentService implements IContentService {
         thumbnail: file.thumbnail ?? undefined,
         content_id: file.content_id,
         content_area_id: file.content_area_id,
+        type: file.type ?? undefined,
       }));
     } catch (error) {
       this.logger.error('Failed to fetch files', error.message);

@@ -1,162 +1,15 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { ContentCreation } from "../components/ContentCreation";
 import { PostCreation } from "../components/PostCreation";
 import { BoardCreation } from "../components/BoardCreation";
 import RootLayout from "@/app/LayoutPage";
-
-// Dummy data
-const dummyUserContent = [
-  {
-    content_id: 1,
-    creator_id: 5,
-    parent_id: null,
-    title: "My First Photo",
-    description: "A beautiful first photo from my collection",
-    post_type: "image" as const,
-    likes: 120,
-    comments: 15,
-    views: 1200,
-    pins: 5,
-    reports: 0,
-    visibilityPrivate: false,
-    metadata: [
-      {
-        file_id: 1,
-        content_id: 1,
-        content_area_id: 1,
-        thumbnail_url:
-          "http://localhost:3000/uploads/thumbnail/1763296139023-929553449.jpg",
-        file_url:
-          "http://localhost:3000/uploads/content/1763296139023-929553449.jpg",
-      },
-    ],
-  },
-  {
-    content_id: 2,
-    creator_id: 6,
-    parent_id: null,
-    title: "Travel Vlog",
-    description: "Amazing travel vlog from my recent trip",
-    post_type: "video" as const,
-    likes: 340,
-    comments: 45,
-    views: 5600,
-    pins: 12,
-    reports: 0,
-    visibilityPrivate: false,
-    metadata: [
-      {
-        file_id: 2,
-        content_id: 2,
-        content_area_id: 1,
-        thumbnail_url:
-          "http://localhost:3000/uploads/thumbnail/1763296139023-929553449.jpg",
-        file_url: "http://localhost:3000/uploads/content/travel-vlog.mp4",
-      },
-    ],
-  },
-  {
-    content_id: 3,
-    creator_id: 7,
-    parent_id: null,
-    title: "Sunset Shots",
-    description: "Beautiful sunset photography series",
-    post_type: "image" as const,
-    likes: 200,
-    comments: 28,
-    views: 2100,
-    pins: 8,
-    reports: 0,
-    visibilityPrivate: false,
-    metadata: [
-      {
-        file_id: 3,
-        content_id: 3,
-        content_area_id: 1,
-        thumbnail_url:
-          "http://localhost:3000/uploads/thumbnail/1763296139023-929553449.jpg",
-        file_url: "http://localhost:3000/uploads/content/sunset.jpg",
-      },
-    ],
-  },
-  {
-    content_id: 4,
-    creator_id: 8,
-    parent_id: null,
-    title: "City Walk",
-    description: "Urban exploration video",
-    post_type: "video" as const,
-    likes: 150,
-    comments: 22,
-    views: 1800,
-    pins: 3,
-    reports: 0,
-    visibilityPrivate: false,
-    metadata: [
-      {
-        file_id: 4,
-        content_id: 4,
-        content_area_id: 1,
-        thumbnail_url:
-          "http://localhost:3000/uploads/thumbnail/1763296139023-929553449.jpg",
-        file_url: "http://localhost:3000/uploads/content/city-walk.mp4",
-      },
-    ],
-  },
-];
-
-const dummyUserPosts = [
-  {
-    content_id: 1,
-    creator_id: 5,
-    parent_id: null,
-    title: "My Journey",
-    description:
-      "Starting my creative journey today. Excited to share my thoughts and ideas...",
-    likes: 250,
-    comments: 35,
-    post_type: "post" as const,
-    views: 1500,
-    pins: 2,
-    reports: 0,
-    visibilityPrivate: false,
-    metadata: [],
-  },
-  {
-    content_id: 2,
-    creator_id: 6,
-    parent_id: null,
-    title: "Design Tips",
-    description:
-      "Here are some design tips I've learned over the years that might help you...",
-    likes: 420,
-    comments: 52,
-    post_type: "post" as const,
-    views: 2800,
-    pins: 6,
-    reports: 0,
-    visibilityPrivate: false,
-    metadata: [],
-  },
-  {
-    content_id: 3,
-    creator_id: 7,
-    parent_id: null,
-    title: "Photography Basics",
-    description:
-      "Understanding lighting is crucial for better photography. Let me explain...",
-    likes: 310,
-    comments: 41,
-    post_type: "post" as const,
-    views: 2100,
-    pins: 4,
-    reports: 0,
-    visibilityPrivate: false,
-    metadata: [],
-  },
-];
+import useContentService from "@/shared/hooks/useContentService";
+import { useToast } from "@/shared/context/ToastContext";
+import type Content from "@/feature/content/object/PublicContent";
+import type Metadata from "@/feature/content/object/Metadata";
+import { useAuthContext } from "@/feature/auth/context/AuthContext";
 
 const dummyUserBoards = [
   {
@@ -286,16 +139,133 @@ export default function CreatePage() {
   const [activeTab, setActiveTab] = useState<"content" | "post" | "board">(
     "content"
   );
-  const [contentItems, setContentItems] = useState(dummyUserContent);
-  const [postItems, setPostItems] = useState(dummyUserPosts);
+  const [contentItems, setContentItems] = useState<Content[]>([]);
+  const [postItems, setPostItems] = useState<Content[]>([]);
   const [boardItems, setBoardItems] = useState(dummyUserBoards);
+  const { getByUser, getFiles } = useContentService();
+  const { showToast } = useToast();
+  const { user } = useAuthContext();
+
+  const getContentByUser = async (userId: number) => {
+    try {
+      const res = await getByUser(userId);
+      console.log("Fetched content by user:", res);
+
+      const contentItems: Content[] = [];
+      const content = res.filter(
+        (item) => item.post_type === "image" || item.post_type === "video"
+      );
+
+      for (const item of content) {
+        const files = await getFiles(item.content_id, item.area_id);
+
+        console.log("Fetched files for content:", files);
+        const metadata: Metadata[] = files.map((file) => ({
+          file_id: file.file_id,
+          content_id: file.content_id,
+          content_area_id: file.content_area_id,
+          thumbnail_url: file.thumbnail || "",
+          file_url: file.filepath,
+          type: file.type || "",
+        }));
+
+        console.log(metadata);
+        const contentItem: Content = {
+          content_id: item.content_id,
+          creator_id: item.creator_id,
+          parent_id: null,
+          thumbnail_url: metadata[0]?.thumbnail_url || "",
+          title: item.title,
+          description: item.description,
+          post_type: item.post_type as "image" | "video",
+          likes: item.likes || 0,
+          comments: item.comments || 0,
+          views: item.views || 0,
+          pins: item.pins || 0,
+          reports: item.reports || 0,
+          visibilityPrivate: item.visibilityPrivate || false,
+          area_id: item.area_id,
+          metadata,
+        };
+
+        contentItems.push(contentItem);
+      }
+
+      setContentItems(contentItems);
+    } catch (error) {
+      showToast("Failed to fetch user content.");
+      console.error("Error fetching content:", error);
+    }
+  };
+
+  const getPostByUser = async (userId: number) => {
+    try {
+      const res = await getByUser(userId);
+
+      const postItems: Content[] = [];
+      const posts = res.filter((item) => item.post_type === "post");
+
+      for (const item of posts) {
+        let metadata: Metadata[] = [];
+        try {
+          const files = await getFiles(item.content_id, item.area_id);
+          metadata = files.map((file) => ({
+            file_id: file.file_id,
+            content_id: file.content_id,
+            content_area_id: file.content_area_id,
+            thumbnail_url: file.thumbnail || "",
+            file_url: file.filepath,
+            type: file.type || "",
+          }));
+        } catch (err) {
+          console.error("Error fetching files for post:", err);
+        }
+
+        const postItem: Content = {
+          content_id: item.content_id,
+          creator_id: item.creator_id,
+          parent_id: item.parent_id ?? null,
+          thumbnail_url: "",
+          title: item.title,
+          description: item.description,
+          post_type: "post" as const,
+          likes: item.likes || 0,
+          comments: item.comments || 0,
+          views: item.views || 0,
+          pins: item.pins || 0,
+          reports: item.reports || 0,
+          visibilityPrivate: item.visibilityPrivate || false,
+          area_id: item.area_id,
+          metadata,
+        };
+
+        postItems.push(postItem);
+      }
+
+      setPostItems(postItems);
+    } catch (error) {
+      showToast("Failed to fetch user posts.");
+      console.error("Error fetching posts:", error);
+    }
+  };
+
+  useEffect(() => {
+    if (!user || !user.user_id) {
+      showToast("User not logged in.");
+      return;
+    }
+    getContentByUser(user.user_id);
+    getPostByUser(user.user_id);
+  }, [user]);
 
   const handleDeleteContent = (id: number) => {
-    setContentItems(contentItems.filter((item) => item.content_id !== id));
+    setContentItems(
+      contentItems.filter((item: Content) => item.content_id !== id)
+    );
   };
 
   const handleDeletePost = (id: number) => {
-    setPostItems(postItems.filter((item) => item.content_id !== id));
+    setPostItems(postItems.filter((item: Content) => item.content_id !== id));
   };
 
   const handleDeleteBoard = (id: number) => {
@@ -326,7 +296,6 @@ export default function CreatePage() {
               ))}
             </div>
 
-            {/* Content Creation */}
             {activeTab === "content" && (
               <ContentCreation
                 items={contentItems}
@@ -334,12 +303,13 @@ export default function CreatePage() {
               />
             )}
 
-            {/* Post Creation */}
             {activeTab === "post" && (
-              <PostCreation items={postItems} onDelete={handleDeletePost} />
+              <PostCreation
+                items={postItems as any}
+                onDelete={handleDeletePost}
+              />
             )}
 
-            {/* Board Creation */}
             {activeTab === "board" && (
               <BoardCreation items={boardItems} onDelete={handleDeleteBoard} />
             )}

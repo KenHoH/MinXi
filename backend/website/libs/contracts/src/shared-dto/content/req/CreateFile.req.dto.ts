@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsInt, IsString } from 'class-validator';
+import { IsInt, IsString, IsOptional } from 'class-validator';
 
 export class CreateFileDto {
   @ApiProperty()
@@ -17,4 +17,9 @@ export class CreateFileDto {
   @ApiProperty()
   @IsString()
   thumbnail: string;
+
+  @ApiProperty({ required: false })
+  @IsOptional()
+  @IsString()
+  type?: string;
 }

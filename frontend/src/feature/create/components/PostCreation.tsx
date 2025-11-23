@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Masonry } from "@/shared/components/Masonry";
 import { PostComponent } from "@/feature/content/components/PostComponent/PostComponent";
 import { CreatePostModal } from "@/feature/content/components/CreatePostModal";
+import { useAuthContext } from "@/feature/auth/context/AuthContext";
 
 interface Post {
   content_id: number;
@@ -22,7 +23,8 @@ interface PostCreationProps {
 
 export function PostCreation({ items, onDelete }: PostCreationProps) {
   const [showCreateModal, setShowCreateModal] = useState(false);
-  const currentUserId = 5; // TODO: Get from auth context
+  const { user } = useAuthContext();
+  const currentUserId = user?.user_id || 0;
 
   return (
     <div className="space-y-6">

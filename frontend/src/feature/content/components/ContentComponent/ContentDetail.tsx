@@ -2,17 +2,12 @@
 
 import type React from "react";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { HeaderContentComponent } from "./HeaderContentComponent";
 import { InputContentCommentComponent } from "./InputContentCommentComponent";
 import { FooterContentComponent } from "./FooterContentComponent";
 import { ContentMediaGallery } from "./ContentMediaGallery";
 import type Content from "../../object/PublicContent";
-
-interface MediaItem {
-  type: "image" | "video";
-  src: string;
-}
 
 interface ContentDetailComponentProps {
   content: Content;
@@ -28,38 +23,15 @@ export function ContentDetailComponent({
   const [currentMediaIndex, setCurrentMediaIndex] = useState(0);
   const [commentText, setCommentText] = useState("");
 
-  const mediaItems: MediaItem[] =
-    content.post_type === "video"
-      ? [
-          {
-            type: "video",
-            src: "http://localhost:3000/uploads/content/1763296139026-969061576.mp4",
-          },
-        ]
-      : [
-          {
-            type: "image",
-            src: `http://localhost:3000/uploads/thumbnail/1763296139023-929553449.jpg`,
-          },
-          {
-            type: "image",
-            src: `http://localhost:3000/uploads/thumbnail/1763296139023-929553449.jpg`,
-          },
-          {
-            type: "image",
-            src: `http://localhost:3000/uploads/thumbnail/1763296139023-929553449.jpg`,
-          },
-        ];
-
   const handlePrevMedia = () => {
     setCurrentMediaIndex((prev) =>
-      prev === 0 ? mediaItems.length - 1 : prev - 1
+      prev === 0 ? content.metadata.length - 1 : prev - 1
     );
   };
 
   const handleNextMedia = () => {
     setCurrentMediaIndex((prev) =>
-      prev === mediaItems.length - 1 ? 0 : prev + 1
+      prev === content.metadata.length - 1 ? 0 : prev + 1
     );
   };
 
@@ -77,7 +49,7 @@ export function ContentDetailComponent({
     >
       <div className="flex gap-6 w-full max-w-5xl h-[85vh] bg-dark-800 rounded-lg overflow-hidden">
         <ContentMediaGallery
-          mediaItems={mediaItems}
+          mediaItems={content.metadata}
           currentMediaIndex={currentMediaIndex}
           onPrevMedia={handlePrevMedia}
           onNextMedia={handleNextMedia}
