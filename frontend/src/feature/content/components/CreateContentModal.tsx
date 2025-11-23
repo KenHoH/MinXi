@@ -35,8 +35,14 @@ export function CreateContentModal({
   const [contentFiles, setContentFiles] = useState<ContentFile[]>([]);
   const [thumbnail, setThumbnail] = useState<ThumbnailFile | null>(null);
   const { showToast } = useToast();
-  const { create, uploadMultipleFiles, createFile, uploadContentImages } =
-    useContentService();
+  const {
+    uploadedFilesData,
+    contentData,
+    create,
+    uploadMultipleFiles,
+    createFile,
+    uploadContentImages,
+  } = useContentService();
   const { userData, findUserById } = useUserService();
 
   if (!isOpen) {
@@ -93,27 +99,95 @@ export function CreateContentModal({
       showToast("Please fill in all required fields.");
       return;
     }
-    console.log({
-      title,
-      description,
-      contentType,
-      contentFiles,
-      thumbnail,
-      creator_id: currentUserId,
-    });
 
     try {
       await findUserById(currentUserId);
-      // await create({
-      //   area_id: userData.
-      // })
-    } catch (error) {}
+      if (!userData || !userData.user_id || !userData.area_id) {
+        showToast("Invalid user data.");
+        console.error("Invalid user data:", userData);
+        return;
+      }
 
-    setDescription("");
-    setContentType(null);
-    setContentFiles([]);
-    setThumbnail(null);
-    onClose();
+      if (
+        !title.trim() ||
+        !description.trim() ||
+        contentFiles.length === 0 ||
+        !thumbnail
+      ) {
+        showToast("Please fill in all required fields.");
+        return;
+      }
+
+      const contentTypeString = contentType === "image" ? "image" : "video";
+
+      await create({
+        title: title.trim(),
+        description: description.trim(),
+        creator_id: userData.user_id,
+        area_id: userData.area_id,
+        post_type: contentTypeString,
+        parent_id: undefined,
+      });
+
+      if (!contentData || !contentData.content_id) {
+        showToast("Failed to create content. Please try again.");
+        return;
+      }
+
+      for (const contentFile of contentFiles) {
+        try {
+          if (contentData.post_type === "image") {
+            await uploadContentImages({
+              thumbnail: thumbnail.file,
+              contentImage: contentFile.file,
+            });
+          } else {
+            await uploadMultipleFiles({
+              image: thumbnail.file,
+              video: contentFile.file,
+            });
+          }
+
+          if (
+            !uploadedFilesData ||
+            !uploadedFilesData.mainImagePath ||
+            !uploadedFilesData.optionalMediaPath
+          ) {
+            showToast("Failed to upload files. Please try again.");
+            return;
+          }
+
+          await createFile({
+            content_id: contentData.content_id,
+            file_path: uploadedFilesData.optionalMediaPath,
+            thumbnail: uploadedFilesData.mainImagePath,
+            area_id: userData.area_id,
+          });
+        } catch (fileErr) {
+          console.error("Failed to process file:", fileErr);
+          showToast(
+            `Warning: Could not process one of your files. Some content may not be saved.`
+          );
+        }
+      }
+
+      showToast("Content created successfully!");
+    } catch (error) {
+      const errorMessage =
+        error instanceof Error
+          ? error.message
+          : "Failed to create content. Please try again.";
+      showToast(errorMessage);
+      console.error("Content creation error:", error);
+      return;
+    } finally {
+      setTitle("");
+      setDescription("");
+      setContentType(null);
+      setContentFiles([]);
+      setThumbnail(null);
+      onClose();
+    }
   };
 
   const isFormValid =

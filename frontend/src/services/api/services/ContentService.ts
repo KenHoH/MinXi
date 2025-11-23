@@ -8,6 +8,9 @@ import type { CreatePostDto } from '../models/CreatePostDto';
 import type { deltaDto } from '../models/deltaDto';
 import type { FileRes } from '../models/FileRes';
 import type { FullContentDto } from '../models/FullContentDto';
+import type { UploadFilesResDto } from '../models/UploadFilesResDto';
+import type { UploadImageContentResDto } from '../models/UploadImageContentResDto';
+import type { UploadProfileResDto } from '../models/UploadProfileResDto';
 import type { CancelablePromise } from '../core/CancelablePromise';
 import { OpenAPI } from '../core/OpenAPI';
 import { request as __request } from '../core/request';
@@ -44,7 +47,7 @@ export class ContentService {
     }
     /**
      * @param formData Uploads a mandatory image and an optional second image or video.
-     * @returns any
+     * @returns UploadFilesResDto Files uploaded successfully
      * @throws ApiError
      */
     public static contentControllerUploadMultipleFiles(
@@ -58,7 +61,7 @@ export class ContentService {
              */
             video: Blob;
         },
-    ): CancelablePromise<any> {
+    ): CancelablePromise<UploadFilesResDto> {
         return __request(OpenAPI, {
             method: 'POST',
             url: '/content/files',
@@ -68,7 +71,7 @@ export class ContentService {
     }
     /**
      * @param formData Uploads a single image file for profile picture.
-     * @returns any
+     * @returns UploadProfileResDto Profile picture uploaded successfully
      * @throws ApiError
      */
     public static contentControllerUploadProfile(
@@ -78,7 +81,7 @@ export class ContentService {
              */
             profilePicture: Blob;
         },
-    ): CancelablePromise<Record<string, any>> {
+    ): CancelablePromise<UploadProfileResDto> {
         return __request(OpenAPI, {
             method: 'POST',
             url: '/content/profile',
@@ -88,7 +91,7 @@ export class ContentService {
     }
     /**
      * @param formData Uploads a thumbnail image and a content image. Both must be image files.
-     * @returns any
+     * @returns UploadImageContentResDto Images uploaded successfully
      * @throws ApiError
      */
     public static contentControllerUploadImageContent(
@@ -102,7 +105,7 @@ export class ContentService {
              */
             contentImage: Blob;
         },
-    ): CancelablePromise<Record<string, any>> {
+    ): CancelablePromise<UploadImageContentResDto> {
         return __request(OpenAPI, {
             method: 'POST',
             url: '/content/image-content',

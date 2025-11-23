@@ -9,18 +9,19 @@ import type { deltaDto } from '../models/deltaDto';
 import type { NameRequest } from '../models/NameRequest';
 import type { UpdateProfileUserDto } from '../models/UpdateProfileUserDto';
 import type { UpdateRestriction } from '../models/UpdateRestriction';
+import type { UserDto } from '../models/UserDto';
 import type { CancelablePromise } from '../core/CancelablePromise';
 import { OpenAPI } from '../core/OpenAPI';
 import { request as __request } from '../core/request';
 export class UserService {
     /**
      * @param requestBody
-     * @returns any
+     * @returns Ack
      * @throws ApiError
      */
     public static userControllerCreate(
         requestBody: CreateUserDto,
-    ): CancelablePromise<Record<string, any>> {
+    ): CancelablePromise<Ack> {
         return __request(OpenAPI, {
             method: 'POST',
             url: '/user',
@@ -30,15 +31,15 @@ export class UserService {
     }
     /**
      * @param area
-     * @returns any
+     * @returns UserDto
      * @throws ApiError
      */
     public static userControllerFindAll(
         area: number,
-    ): CancelablePromise<Record<string, any>> {
+    ): CancelablePromise<Array<UserDto>> {
         return __request(OpenAPI, {
             method: 'GET',
-            url: '/user/{area}',
+            url: '/user/area/{area}',
             path: {
                 'area': area,
             },
@@ -46,15 +47,15 @@ export class UserService {
     }
     /**
      * @param id
-     * @returns any
+     * @returns UserDto
      * @throws ApiError
      */
     public static userControllerFindOne(
         id: number,
-    ): CancelablePromise<Record<string, any>> {
+    ): CancelablePromise<UserDto> {
         return __request(OpenAPI, {
             method: 'GET',
-            url: '/user/{id}',
+            url: '/user/user/{id}',
             path: {
                 'id': id,
             },
@@ -62,12 +63,12 @@ export class UserService {
     }
     /**
      * @param id
-     * @returns any
+     * @returns Ack
      * @throws ApiError
      */
     public static userControllerRemove(
         id: number,
-    ): CancelablePromise<Record<string, any>> {
+    ): CancelablePromise<Ack> {
         return __request(OpenAPI, {
             method: 'DELETE',
             url: '/user/{id}',
@@ -79,13 +80,13 @@ export class UserService {
     /**
      * @param id
      * @param requestBody
-     * @returns any
+     * @returns UserDto
      * @throws ApiError
      */
     public static userControllerUpdate(
         id: number,
         requestBody: UpdateProfileUserDto,
-    ): CancelablePromise<Record<string, any>> {
+    ): CancelablePromise<UserDto> {
         return __request(OpenAPI, {
             method: 'PATCH',
             url: '/user/{id}/profile',
@@ -159,13 +160,13 @@ export class UserService {
     /**
      * @param id
      * @param requestBody
-     * @returns any
+     * @returns Ack
      * @throws ApiError
      */
     public static userControllerUpdateRestriction(
         id: number,
         requestBody: UpdateRestriction,
-    ): CancelablePromise<Record<string, any>> {
+    ): CancelablePromise<Ack> {
         return __request(OpenAPI, {
             method: 'PATCH',
             url: '/user/{id}/restriction',

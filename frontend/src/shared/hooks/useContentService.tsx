@@ -7,16 +7,16 @@ import {
   type FileRes,
   type Ack,
   type deltaDto,
+  type UploadFilesResDto,
 } from "@/services/api";
 import { useToast } from "../context/ToastContext";
 import { useLoading } from "../context/LoadingContext";
-
 interface UseContentServiceReturn {
   // State - typed DTOs
   contentData: FullContentDto | null;
   contentsData: FullContentDto[] | null;
   fileResData: FileRes | null;
-  uploadedFilesData: any | null;
+  uploadedFilesData: UploadFilesResDto | null;
   ackData: Ack | null;
   error: string | null;
   isLoading: boolean;
@@ -29,8 +29,8 @@ interface UseContentServiceReturn {
     video: Blob;
   }) => Promise<void>;
   uploadContentImages: (formData: {
-    image: Blob;
-    secondImage: Blob;
+    thumbnail: Blob;
+    contentImage: Blob;
   }) => Promise<void>;
   uploadProfilePicture: (formData: { profileImage: Blob }) => Promise<void>;
   getByUser: (creatorId: number) => Promise<void>;
@@ -148,12 +148,13 @@ export default function useContentService(): UseContentServiceReturn {
   );
 
   const uploadContentImages = useCallback(
-    async (formData: { image: Blob; secondImage: Blob }) => {
+    async (formData: { thumbnail: Blob; contentImage: Blob }) => {
       setIsLoading(true);
       resetError();
       try {
-        const result =
-          await ContentService.contentControllerUploadContentImages(formData);
+        const result = await ContentService.contentControllerUploadImageContent(
+          formData
+        );
         setUploadedFilesData(result);
         showToast("Content images uploaded successfully");
       } catch (err) {
@@ -170,8 +171,9 @@ export default function useContentService(): UseContentServiceReturn {
       setIsLoading(true);
       resetError();
       try {
-        const result =
-          await ContentService.contentControllerUploadProfilePicture(formData);
+        const result = await ContentService.contentControllerUploadProfile(
+          formData as any
+        );
         setUploadedFilesData(result);
         showToast("Profile picture uploaded successfully");
       } catch (err) {

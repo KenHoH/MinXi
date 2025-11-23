@@ -53,6 +53,10 @@ export type { UpdateContentDto } from './models/UpdateContentDto';
 export { UpdateParticipantRoleDto } from './models/UpdateParticipantRoleDto';
 export type { UpdateProfileUserDto } from './models/UpdateProfileUserDto';
 export type { UpdateRestriction } from './models/UpdateRestriction';
+export type { UploadFilesResDto } from './models/UploadFilesResDto';
+export type { UploadImageContentResDto } from './models/UploadImageContentResDto';
+export type { UploadProfileResDto } from './models/UploadProfileResDto';
+export type { UserDto } from './models/UserDto';
 export type { UserLog } from './models/UserLog';
 
 export { AlgorithmService } from './services/AlgorithmService';
