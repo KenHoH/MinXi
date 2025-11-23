@@ -12,28 +12,32 @@ import { USER_MSG } from '@app/common/constants/messageEvent';
 import { Ack } from '@app/contracts/shared-dto/ack.dto';
 import { NameRequest } from '@app/contracts/shared-dto/user/find.name.dto';
 import { CredentialRes } from '@app/contracts/shared-dto/user/Creds.dto';
+import { UserDto } from '@app/contracts/shared-dto/user/user.dto';
 
 @Injectable()
 export class UserService implements IUserService {
   private readonly logger = new Logger(UserService.name);
   constructor(@Inject(USER_SERVICES.CLIENT) private userClient: ClientProxy) {}
-  async create(createUserDto: CreateUserDto) {
+  async create(createUserDto: CreateUserDto): Promise<Ack> {
     return await firstValueFrom(
       this.userClient.send(USER_MSG.create, createUserDto),
     );
   }
 
-  async findAll(area_id: number) {
+  async findAll(area_id: number): Promise<UserDto[]> {
     return await firstValueFrom(
       this.userClient.send(USER_MSG.findAll, area_id),
     );
   }
 
-  async findOne(id: number) {
+  async findOne(id: number): Promise<UserDto> {
     return await firstValueFrom(this.userClient.send(USER_MSG.findOne, id));
   }
 
-  async updateProfile(id: number, updateProfileUserDto: UpdateProfileUserDto) {
+  async updateProfile(
+    id: number,
+    updateProfileUserDto: UpdateProfileUserDto,
+  ): Promise<UserDto> {
     return firstValueFrom(
       this.userClient.send(USER_MSG.updateProfile, {
         id: id,
@@ -42,7 +46,7 @@ export class UserService implements IUserService {
     );
   }
 
-  async remove(id: number) {
+  async remove(id: number): Promise<Ack> {
     return firstValueFrom(this.userClient.send(USER_MSG.remove, id));
   }
   async updateLike(id: number, delta: number): Promise<Ack> {
@@ -63,7 +67,10 @@ export class UserService implements IUserService {
     );
   }
 
-  async updateRestriction(id: number, updateRestriction: UpdateRestriction) {
+  async updateRestriction(
+    id: number,
+    updateRestriction: UpdateRestriction,
+  ): Promise<Ack> {
     return firstValueFrom(
       this.userClient.send(USER_MSG.updateRestriction, {
         id,

@@ -28,6 +28,9 @@ import { LogInterceptor } from '@app/common/interceptor/log/log.interceptor';
 import { ApiBearerAuth } from '@nestjs/swagger';
 import { Public } from '@app/common/decorators/public.decorator';
 import type { Response } from 'express';
+import { Ack } from '@app/contracts/shared-dto/ack.dto';
+import { UserDto } from '@app/contracts/shared-dto/user/user.dto';
+import { CredentialRes } from '@app/contracts/shared-dto/user/Creds.dto';
 
 @Controller('user')
 @UseFilters(RpcTranslateFilter)
@@ -39,19 +42,19 @@ export class UserController {
 
   @Post()
   @Public()
-  create(@Body() createUserDto: CreateUserDto) {
+  create(@Body() createUserDto: CreateUserDto): Promise<Ack> {
     return this.userService.create(createUserDto);
   }
 
   @Get(':area')
   @Public()
-  findAll(@Param('area', ParseIntPipe) area: number) {
+  findAll(@Param('area', ParseIntPipe) area: number): Promise<UserDto[]> {
     return this.userService.findAll(+area);
   }
 
   @Get(':id')
   @Public()
-  findOne(@Param('id', ParseIntPipe) id: number) {
+  findOne(@Param('id', ParseIntPipe) id: number): Promise<UserDto> {
     return this.userService.findOne(+id);
   }
 
@@ -59,22 +62,31 @@ export class UserController {
   update(
     @Param('id', ParseIntPipe) id: number,
     @Body() body: UpdateProfileUserDto,
-  ) {
+  ): Promise<UserDto> {
     return this.userService.updateProfile(+id, body);
   }
 
   @Patch(':id/like')
-  updateLike(@Param('id', ParseIntPipe) id: number, @Body() body: deltaDto) {
+  updateLike(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() body: deltaDto,
+  ): Promise<Ack> {
     return this.userService.updateLike(id, body.delta);
   }
 
   @Patch(':id/follow')
-  updateFollow(@Param('id', ParseIntPipe) id: number, @Body() body: deltaDto) {
+  updateFollow(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() body: deltaDto,
+  ): Promise<Ack> {
     return this.userService.updateFollow(id, body.delta);
   }
 
   @Patch(':id/report')
-  updateReport(@Param('id', ParseIntPipe) id: number, @Body() body: deltaDto) {
+  updateReport(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() body: deltaDto,
+  ): Promise<Ack> {
     return this.userService.updateReport(id, body.delta);
   }
 
@@ -82,12 +94,12 @@ export class UserController {
   updateRestriction(
     @Param('id', ParseIntPipe) id: number,
     @Body() dto: UpdateRestriction,
-  ) {
+  ): Promise<Ack> {
     return this.userService.updateRestriction(id, dto);
   }
 
   @Delete(':id')
-  remove(@Param('id', ParseIntPipe) id: number) {
+  remove(@Param('id', ParseIntPipe) id: number): Promise<Ack> {
     return this.userService.remove(+id);
   }
 
@@ -96,7 +108,7 @@ export class UserController {
   findByName(
     @Payload() body: NameRequest,
     @Res({ passthrough: true }) response: Response,
-  ) {
+  ): Promise<CredentialRes> {
     const userData = this.userService.findByName(body);
 
     userData.then((user) => {

@@ -20,12 +20,23 @@ import {
   FileFieldsInterceptor,
   FileInterceptor,
 } from '@nestjs/platform-express';
-import { ApiBearerAuth, ApiBody, ApiConsumes } from '@nestjs/swagger';
+import {
+  ApiBearerAuth,
+  ApiBody,
+  ApiConsumes,
+  ApiResponse,
+} from '@nestjs/swagger';
 import { MulterConfiguration } from '@app/common/config/multer.config';
+import { UploadFilesResDto } from '@app/contracts/shared-dto/content/res/upload-files.res.dto';
+import { UploadProfileResDto } from '@app/contracts/shared-dto/content/res/upload-profile.res.dto';
+import { UploadImageContentResDto } from '@app/contracts/shared-dto/content/res/upload-image-content.res.dto';
 import { CreatePostDto } from '@app/contracts/shared-dto/content/req/CreatePost.req.dto';
 import { deltaDto } from '@app/contracts/shared-dto/user/delta.dto';
 import { fileFieldsSchema } from '@app/contracts/shared-dto/schema/fileFieldsSchema';
 import { CreateFileDto } from '@app/contracts/shared-dto/content/req/CreateFile.req.dto';
+import { FullContentDto } from '@app/contracts/shared-dto/content/res/full.content.dto';
+import { FileRes } from '@app/contracts/shared-dto/content/res/file.res.dto';
+import { Ack } from '@app/contracts/shared-dto/ack.dto';
 import { JwtAuthGuard } from '@app/common/guard/jwt-auth-guard/jwt-auth.guard';
 import { LogInterceptor } from '@app/common/interceptor/log/log.interceptor';
 import { Public } from '@app/common/decorators/public.decorator';
@@ -40,12 +51,12 @@ export class ContentController {
   private readonly logger = new Logger(ContentController.name);
 
   @Post()
-  create(@Body() dto: CreatePostDto) {
+  create(@Body() dto: CreatePostDto): Promise<FullContentDto> {
     return this.contentService.create(dto);
   }
 
   @Post('createFile')
-  createFile(@Body() dto: CreateFileDto) {
+  createFile(@Body() dto: CreateFileDto): Promise<FileRes> {
     return this.contentService.createFile(dto);
   }
 
@@ -55,6 +66,11 @@ export class ContentController {
     description:
       'Uploads a mandatory image and an optional second image or video.',
     schema: fileFieldsSchema,
+  })
+  @ApiResponse({
+    status: 201,
+    description: 'Files uploaded successfully',
+    type: UploadFilesResDto,
   })
   @UseInterceptors(
     FileFieldsInterceptor(
@@ -71,7 +87,7 @@ export class ContentController {
       image?: Express.Multer.File[];
       video?: Express.Multer.File[];
     },
-  ) {
+  ): UploadFilesResDto {
     const imageFile = files.image ? files.image[0] : null;
     const videoFile = files.video ? files.video[0] : null;
 
@@ -105,11 +121,16 @@ export class ContentController {
       required: ['profilePicture'],
     },
   })
+  @ApiResponse({
+    status: 201,
+    description: 'Profile picture uploaded successfully',
+    type: UploadProfileResDto,
+  })
   @UseInterceptors(FileInterceptor('profilePicture', MulterConfiguration))
   uploadProfile(
     @UploadedFile()
     file: Express.Multer.File,
-  ) {
+  ): UploadProfileResDto {
     if (!file) {
       return { profilePicturePath: null };
     }
@@ -143,6 +164,11 @@ export class ContentController {
       required: ['thumbnail', 'contentImage'],
     },
   })
+  @ApiResponse({
+    status: 201,
+    description: 'Images uploaded successfully',
+    type: UploadImageContentResDto,
+  })
   @UseInterceptors(
     FileFieldsInterceptor(
       [
@@ -158,7 +184,7 @@ export class ContentController {
       thumbnail?: Express.Multer.File[];
       contentImage?: Express.Multer.File[];
     },
-  ) {
+  ): UploadImageContentResDto {
     const thumbnailFile = files.thumbnail ? files.thumbnail[0] : null;
     const contentImageFile = files.contentImage ? files.contentImage[0] : null;
 
@@ -194,28 +220,36 @@ export class ContentController {
 
   @Public()
   @Get('user/:creator_id')
-  getByUser(@Param('creator_id', ParseIntPipe) creator_id: number) {
+  getByUser(
+    @Param('creator_id', ParseIntPipe) creator_id: number,
+  ): Promise<FullContentDto[]> {
     this.logger.log(typeof creator_id);
     return this.contentService.getByUser(creator_id);
   }
 
   @Public()
   @Get('user/:userId/following')
-  getFollowingContent(@Param('userId', ParseIntPipe) userId: number) {
+  getFollowingContent(
+    @Param('userId', ParseIntPipe) userId: number,
+  ): Promise<FullContentDto[]> {
     this.logger.log(typeof userId);
     return this.contentService.getFollowingContent(userId);
   }
 
   @Public()
   @Get('user/:userId/friends')
-  getFriendContent(@Param('userId', ParseIntPipe) userId: number) {
+  getFriendContent(
+    @Param('userId', ParseIntPipe) userId: number,
+  ): Promise<FullContentDto[]> {
     this.logger.log(typeof userId);
     return this.contentService.getFriendContent(userId);
   }
 
   @Public()
   @Get(':area_id')
-  findAll(@Param('area_id', ParseIntPipe) area_id: number) {
+  findAll(
+    @Param('area_id', ParseIntPipe) area_id: number,
+  ): Promise<FullContentDto[]> {
     return this.contentService.findAll(area_id);
   }
 
@@ -224,7 +258,7 @@ export class ContentController {
   findOne(
     @Param('content_id', ParseIntPipe) content_id: number,
     @Param('area_id', ParseIntPipe) area_id: number,
-  ) {
+  ): Promise<FullContentDto> {
     return this.contentService.findOne(content_id, area_id);
   }
 
@@ -233,7 +267,7 @@ export class ContentController {
     @Param('content_id', ParseIntPipe) content_id: number,
     @Param('area_id', ParseIntPipe) area_id: number,
     @Body() dto: deltaDto,
-  ) {
+  ): Promise<Ack> {
     return this.contentService.updateView(content_id, area_id, dto);
   }
 
@@ -242,7 +276,7 @@ export class ContentController {
     @Param('content_id', ParseIntPipe) content_id: number,
     @Param('area_id', ParseIntPipe) area_id: number,
     @Body() dto: deltaDto,
-  ) {
+  ): Promise<Ack> {
     return this.contentService.updateLike(content_id, area_id, dto);
   }
 
@@ -251,7 +285,7 @@ export class ContentController {
     @Param('content_id', ParseIntPipe) content_id: number,
     @Param('area_id', ParseIntPipe) area_id: number,
     @Body() dto: deltaDto,
-  ) {
+  ): Promise<Ack> {
     return this.contentService.updatePin(content_id, area_id, dto);
   }
 
@@ -260,7 +294,7 @@ export class ContentController {
     @Param('content_id', ParseIntPipe) content_id: number,
     @Param('area_id', ParseIntPipe) area_id: number,
     @Body() dto: deltaDto,
-  ) {
+  ): Promise<Ack> {
     return this.contentService.updateComment(content_id, area_id, dto);
   }
 
@@ -269,7 +303,7 @@ export class ContentController {
     @Param('content_id', ParseIntPipe) content_id: number,
     @Param('area_id', ParseIntPipe) area_id: number,
     @Body() dto: deltaDto,
-  ) {
+  ): Promise<Ack> {
     return this.contentService.updateReport(content_id, area_id, dto);
   }
 
@@ -277,7 +311,7 @@ export class ContentController {
   setPrivate(
     @Param('content_id', ParseIntPipe) content_id: number,
     @Param('area_id', ParseIntPipe) area_id: number,
-  ) {
+  ): Promise<Ack> {
     return this.contentService.setPrivate(content_id, area_id);
   }
 
@@ -285,7 +319,7 @@ export class ContentController {
   setPublic(
     @Param('content_id', ParseIntPipe) content_id: number,
     @Param('area_id', ParseIntPipe) area_id: number,
-  ) {
+  ): Promise<Ack> {
     return this.contentService.setPublic(content_id, area_id);
   }
 
@@ -293,7 +327,7 @@ export class ContentController {
   remove(
     @Param('content_id', ParseIntPipe) content_id: number,
     @Param('area_id', ParseIntPipe) area_id: number,
-  ) {
+  ): Promise<Ack> {
     return this.contentService.remove(content_id, area_id);
   }
 }

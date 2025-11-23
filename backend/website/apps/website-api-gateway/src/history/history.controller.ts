@@ -25,12 +25,14 @@ export class HistoryController {
   constructor(private readonly historyService: HistoryService) {}
 
   @Patch()
-  upsert(@Body() dto: CreateHistoryDto) {
+  upsert(@Body() dto: CreateHistoryDto): Promise<CreateHistoryDto> {
     return this.historyService.upsert(dto);
   }
   @Public()
   @Get(':user_id')
-  getByUser(@Param('user_id', ParseIntPipe) user_id: number) {
+  getByUser(
+    @Param('user_id', ParseIntPipe) user_id: number,
+  ): Promise<CreateHistoryDto[]> {
     return this.historyService.getByUser(user_id);
   }
 }

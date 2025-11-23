@@ -20,6 +20,10 @@ import { FindDmDto } from '@app/contracts/shared-dto/social/request/findDMDTO';
 import { ApiBearerAuth } from '@nestjs/swagger';
 import { JwtAuthGuard } from '@app/common/guard/jwt-auth-guard/jwt-auth.guard';
 import { Public } from '@app/common/decorators/public.decorator';
+import { RoomResponseDto } from '@app/contracts/shared-dto/social/response/RoomResDTO';
+import { ParticipantResponseDto } from '@app/contracts/shared-dto/social/response/participantDTO';
+import { ParticipantTotalResDTO } from '@app/contracts/shared-dto/social/response/totalParticipantResDTO';
+import { MessageResponseDto } from '@app/contracts/shared-dto/social/response/messageResDTO';
 
 @Controller('social')
 @UseGuards(JwtAuthGuard)
@@ -27,63 +31,78 @@ import { Public } from '@app/common/decorators/public.decorator';
 export class SocialController {
   constructor(private readonly socialService: SocialService) {}
   @Post('room')
-  createRoom(@Body() dto: CreateRoomDto) {
+  createRoom(@Body() dto: CreateRoomDto): Promise<RoomResponseDto> {
     return this.socialService.createRoom(dto);
   }
 
   @Public()
   @Get('room/:roomId')
-  getRoomInfo(@Param('roomId') roomId: string) {
+  getRoomInfo(@Param('roomId') roomId: string): Promise<RoomResponseDto> {
     return this.socialService.getRoomInfo({ roomId });
   }
 
   @Public()
   @Get('rooms/user/:userId')
-  getAllRoomID(@Param('userId', ParseIntPipe) userId: number) {
+  getAllRoomID(
+    @Param('userId', ParseIntPipe) userId: number,
+  ): Promise<RoomResponseDto[]> {
     return this.socialService.getAllRoomID({ userId });
   }
 
   @Post('room/add-user')
-  addUserToRoom(@Body() dto: AddUserToRoomDto) {
+  addUserToRoom(
+    @Body() dto: AddUserToRoomDto,
+  ): Promise<ParticipantResponseDto> {
     return this.socialService.addUserToRoom(dto);
   }
 
   @Delete('room/remove-user')
-  removeUserFromRoom(@Body() dto: RemoveUserFromRoomDto) {
+  removeUserFromRoom(
+    @Body() dto: RemoveUserFromRoomDto,
+  ): Promise<ParticipantResponseDto> {
     return this.socialService.removeUserFromRoom(dto);
   }
 
   @Patch('room/update-role')
-  updateParticipantRole(@Body() dto: UpdateParticipantRoleDto) {
+  updateParticipantRole(
+    @Body() dto: UpdateParticipantRoleDto,
+  ): Promise<ParticipantResponseDto> {
     return this.socialService.updateParticipantRole(dto);
   }
 
   @Public()
   @Get('room/:roomId/participants')
-  getTotalParticipants(@Param('roomId') roomId: string) {
+  getTotalParticipants(
+    @Param('roomId') roomId: string,
+  ): Promise<ParticipantTotalResDTO> {
     return this.socialService.getTotalParticipant({ roomId });
   }
 
   @Public()
   @Get('room/:roomId/participantDM')
-  getParticipant(@Param('roomId') roomId: string) {
+  getParticipant(
+    @Param('roomId') roomId: string,
+  ): Promise<ParticipantResponseDto> {
     return this.socialService.getParticipant(roomId);
   }
 
   @Public()
   @Get('room/:roomId/media')
-  getMedia(@Param('roomId') roomId: string) {
+  getMedia(@Param('roomId') roomId: string): Promise<MessageResponseDto> {
     return this.socialService.getMedia({ roomId });
   }
 
   @Post('message')
-  sendMessage(@Body() dto: SendMessageDto) {
+  sendMessage(@Body() dto: SendMessageDto): Promise<MessageResponseDto> {
     return this.socialService.sendMessage(dto);
   }
 
   @Public()
   @Get('room/:roomId/messages')
-  getMessage(@Param('roomId') roomId: string, @Query('limit') limit?: number) {
+  getMessage(
+    @Param('roomId') roomId: string,
+    @Query('limit') limit?: number,
+  ): Promise<MessageResponseDto[]> {
     return this.socialService.getMessage({
       roomId,
       limit: limit ? Number(limit) : 50,
@@ -91,7 +110,7 @@ export class SocialController {
   }
 
   @Post('dm/find')
-  findDM(@Body() dto: FindDmDto) {
+  findDM(@Body() dto: FindDmDto): Promise<RoomResponseDto> {
     return this.socialService.findDM(dto);
   }
 }
