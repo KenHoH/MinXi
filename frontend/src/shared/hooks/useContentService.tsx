@@ -5,6 +5,7 @@ import {
   type CreateFileDto,
   type FullContentDto,
   type FileRes,
+  type FileDto,
   type Ack,
   type deltaDto,
   type UploadFilesResDto,
@@ -22,50 +23,47 @@ interface UseContentServiceReturn {
   isLoading: boolean;
 
   // Methods
-  create: (dto: CreatePostDto) => Promise<void>;
-  createFile: (dto: CreateFileDto) => Promise<void>;
+  create: (dto: CreatePostDto) => Promise<FullContentDto>;
+  createFile: (dto: CreateFileDto) => Promise<FileRes>;
   uploadMultipleFiles: (formData: {
     image: Blob;
     video: Blob;
-  }) => Promise<void>;
+  }) => Promise<UploadFilesResDto>;
   uploadContentImages: (formData: {
     thumbnail: Blob;
     contentImage: Blob;
-  }) => Promise<void>;
-  uploadProfilePicture: (formData: { profileImage: Blob }) => Promise<void>;
-  getByUser: (creatorId: number) => Promise<void>;
-  getFollowingContent: (userId: number) => Promise<void>;
-  getFriendContent: (userId: number) => Promise<void>;
-  findAll: (areaId: number) => Promise<void>;
-  findOne: (contentId: number, areaId: number) => Promise<void>;
-  remove: (contentId: number, areaId: number) => Promise<void>;
+  }) => Promise<UploadFilesResDto>;
+  uploadProfilePicture: (formData: { profileImage: Blob }) => Promise<any>;
+  getByUser: (creatorId: number) => Promise<FullContentDto[]>;
+  getFollowingContent: (userId: number) => Promise<FullContentDto[]>;
+  getFriendContent: (userId: number) => Promise<FullContentDto[]>;
+  findAll: (areaId: number) => Promise<FullContentDto[]>;
+  findOne: (contentId: number, areaId: number) => Promise<FullContentDto>;
+  getFiles: (contentId: number, areaId: number) => Promise<FileDto[]>;
+  remove: (contentId: number, areaId: number) => Promise<Ack>;
   updateView: (
     contentId: number,
     areaId: number,
     dto: deltaDto
-  ) => Promise<void>;
+  ) => Promise<Ack>;
   updateLike: (
     contentId: number,
     areaId: number,
     dto: deltaDto
-  ) => Promise<void>;
-  updatePin: (
-    contentId: number,
-    areaId: number,
-    dto: deltaDto
-  ) => Promise<void>;
+  ) => Promise<Ack>;
+  updatePin: (contentId: number, areaId: number, dto: deltaDto) => Promise<Ack>;
   updateComment: (
     contentId: number,
     areaId: number,
     dto: deltaDto
-  ) => Promise<void>;
+  ) => Promise<Ack>;
   updateReport: (
     contentId: number,
     areaId: number,
     dto: deltaDto
-  ) => Promise<void>;
-  setPrivate: (contentId: number, areaId: number) => Promise<void>;
-  setPublic: (contentId: number, areaId: number) => Promise<void>;
+  ) => Promise<Ack>;
+  setPrivate: (contentId: number, areaId: number) => Promise<Ack>;
+  setPublic: (contentId: number, areaId: number) => Promise<Ack>;
   resetError: () => void;
 }
 
@@ -95,7 +93,7 @@ export default function useContentService(): UseContentServiceReturn {
   );
 
   const create = useCallback(
-    async (dto: CreatePostDto) => {
+    async (dto: CreatePostDto): Promise<FullContentDto> => {
       setIsLoading(true);
       showLoading();
       resetError();
@@ -103,8 +101,10 @@ export default function useContentService(): UseContentServiceReturn {
         const result = await ContentService.contentControllerCreate(dto);
         setContentData(result);
         showToast("Content created successfully");
+        return result;
       } catch (err) {
         handleError(err, "Failed to create content. Please try again.");
+        throw err;
       } finally {
         setIsLoading(false);
         hideLoading();
@@ -114,14 +114,16 @@ export default function useContentService(): UseContentServiceReturn {
   );
 
   const createFile = useCallback(
-    async (dto: CreateFileDto) => {
+    async (dto: CreateFileDto): Promise<FileRes> => {
       setIsLoading(true);
       resetError();
       try {
         const result = await ContentService.contentControllerCreateFile(dto);
         setFileResData(result);
+        return result;
       } catch (err) {
         handleError(err, "Failed to create file. Please try again.");
+        throw err;
       } finally {
         setIsLoading(false);
       }
@@ -130,7 +132,10 @@ export default function useContentService(): UseContentServiceReturn {
   );
 
   const uploadMultipleFiles = useCallback(
-    async (formData: { image: Blob; video: Blob }) => {
+    async (formData: {
+      image: Blob;
+      video: Blob;
+    }): Promise<UploadFilesResDto> => {
       setIsLoading(true);
       resetError();
       try {
@@ -138,8 +143,10 @@ export default function useContentService(): UseContentServiceReturn {
           await ContentService.contentControllerUploadMultipleFiles(formData);
         setUploadedFilesData(result);
         showToast("Files uploaded successfully");
+        return result;
       } catch (err) {
         handleError(err, "Failed to upload files. Please try again.");
+        throw err;
       } finally {
         setIsLoading(false);
       }
@@ -148,7 +155,10 @@ export default function useContentService(): UseContentServiceReturn {
   );
 
   const uploadContentImages = useCallback(
-    async (formData: { thumbnail: Blob; contentImage: Blob }) => {
+    async (formData: {
+      thumbnail: Blob;
+      contentImage: Blob;
+    }): Promise<UploadFilesResDto> => {
       setIsLoading(true);
       resetError();
       try {
@@ -157,8 +167,13 @@ export default function useContentService(): UseContentServiceReturn {
         );
         setUploadedFilesData(result);
         showToast("Content images uploaded successfully");
+        return {
+          mainImagePath: result.thumbnailPath,
+          optionalMediaPath: result.contentImagePath,
+        };
       } catch (err) {
         handleError(err, "Failed to upload content images. Please try again.");
+        throw err;
       } finally {
         setIsLoading(false);
       }
@@ -167,7 +182,7 @@ export default function useContentService(): UseContentServiceReturn {
   );
 
   const uploadProfilePicture = useCallback(
-    async (formData: { profileImage: Blob }) => {
+    async (formData: { profileImage: Blob }): Promise<any> => {
       setIsLoading(true);
       resetError();
       try {
@@ -176,8 +191,10 @@ export default function useContentService(): UseContentServiceReturn {
         );
         setUploadedFilesData(result);
         showToast("Profile picture uploaded successfully");
+        return result;
       } catch (err) {
         handleError(err, "Failed to upload profile picture. Please try again.");
+        throw err;
       } finally {
         setIsLoading(false);
       }
@@ -186,7 +203,7 @@ export default function useContentService(): UseContentServiceReturn {
   );
 
   const getByUser = useCallback(
-    async (creatorId: number) => {
+    async (creatorId: number): Promise<FullContentDto[]> => {
       setIsLoading(true);
       showLoading();
       resetError();
@@ -195,8 +212,10 @@ export default function useContentService(): UseContentServiceReturn {
           creatorId
         );
         setContentsData(result);
+        return result;
       } catch (err) {
         handleError(err, "Failed to fetch user content. Please try again.");
+        throw err;
       } finally {
         setIsLoading(false);
         hideLoading();
@@ -206,7 +225,7 @@ export default function useContentService(): UseContentServiceReturn {
   );
 
   const getFollowingContent = useCallback(
-    async (userId: number) => {
+    async (userId: number): Promise<FullContentDto[]> => {
       setIsLoading(true);
       showLoading();
       resetError();
@@ -214,11 +233,13 @@ export default function useContentService(): UseContentServiceReturn {
         const result =
           await ContentService.contentControllerGetFollowingContent(userId);
         setContentsData(result);
+        return result;
       } catch (err) {
         handleError(
           err,
           "Failed to fetch following content. Please try again."
         );
+        throw err;
       } finally {
         setIsLoading(false);
         hideLoading();
@@ -228,7 +249,7 @@ export default function useContentService(): UseContentServiceReturn {
   );
 
   const getFriendContent = useCallback(
-    async (userId: number) => {
+    async (userId: number): Promise<FullContentDto[]> => {
       setIsLoading(true);
       showLoading();
       resetError();
@@ -237,8 +258,10 @@ export default function useContentService(): UseContentServiceReturn {
           userId
         );
         setContentsData(result);
+        return result;
       } catch (err) {
         handleError(err, "Failed to fetch friend content. Please try again.");
+        throw err;
       } finally {
         setIsLoading(false);
         hideLoading();
@@ -248,15 +271,17 @@ export default function useContentService(): UseContentServiceReturn {
   );
 
   const findAll = useCallback(
-    async (areaId: number) => {
+    async (areaId: number): Promise<FullContentDto[]> => {
       setIsLoading(true);
       showLoading();
       resetError();
       try {
         const result = await ContentService.contentControllerFindAll(areaId);
         setContentsData(result);
+        return result;
       } catch (err) {
         handleError(err, "Failed to fetch content. Please try again.");
+        throw err;
       } finally {
         setIsLoading(false);
         hideLoading();
@@ -266,7 +291,7 @@ export default function useContentService(): UseContentServiceReturn {
   );
 
   const findOne = useCallback(
-    async (contentId: number, areaId: number) => {
+    async (contentId: number, areaId: number): Promise<FullContentDto> => {
       setIsLoading(true);
       showLoading();
       resetError();
@@ -276,8 +301,32 @@ export default function useContentService(): UseContentServiceReturn {
           areaId
         );
         setContentData(result);
+        return result;
       } catch (err) {
         handleError(err, "Failed to fetch content. Please try again.");
+        throw err;
+      } finally {
+        setIsLoading(false);
+        hideLoading();
+      }
+    },
+    [showLoading, hideLoading, resetError, handleError]
+  );
+
+  const getFiles = useCallback(
+    async (contentId: number, areaId: number): Promise<FileDto[]> => {
+      setIsLoading(true);
+      showLoading();
+      resetError();
+      try {
+        const result = await ContentService.contentControllerGetFiles(
+          contentId,
+          areaId
+        );
+        return result;
+      } catch (err) {
+        handleError(err, "Failed to fetch files. Please try again.");
+        throw err;
       } finally {
         setIsLoading(false);
         hideLoading();
@@ -287,7 +336,7 @@ export default function useContentService(): UseContentServiceReturn {
   );
 
   const remove = useCallback(
-    async (contentId: number, areaId: number) => {
+    async (contentId: number, areaId: number): Promise<Ack> => {
       setIsLoading(true);
       showLoading();
       resetError();
@@ -298,8 +347,10 @@ export default function useContentService(): UseContentServiceReturn {
         );
         setAckData(result);
         showToast("Content deleted successfully");
+        return result;
       } catch (err) {
         handleError(err, "Failed to delete content. Please try again.");
+        throw err;
       } finally {
         setIsLoading(false);
         hideLoading();
@@ -309,7 +360,7 @@ export default function useContentService(): UseContentServiceReturn {
   );
 
   const updateView = useCallback(
-    async (contentId: number, areaId: number, dto: deltaDto) => {
+    async (contentId: number, areaId: number, dto: deltaDto): Promise<Ack> => {
       setIsLoading(true);
       resetError();
       try {
@@ -319,8 +370,10 @@ export default function useContentService(): UseContentServiceReturn {
           dto
         );
         setAckData(result);
+        return result;
       } catch (err) {
         handleError(err, "Failed to update view. Please try again.");
+        throw err;
       } finally {
         setIsLoading(false);
       }
@@ -329,7 +382,7 @@ export default function useContentService(): UseContentServiceReturn {
   );
 
   const updateLike = useCallback(
-    async (contentId: number, areaId: number, dto: deltaDto) => {
+    async (contentId: number, areaId: number, dto: deltaDto): Promise<Ack> => {
       setIsLoading(true);
       resetError();
       try {
@@ -340,8 +393,10 @@ export default function useContentService(): UseContentServiceReturn {
         );
         setAckData(result);
         showToast("Like updated");
+        return result;
       } catch (err) {
         handleError(err, "Failed to update like. Please try again.");
+        throw err;
       } finally {
         setIsLoading(false);
       }
@@ -350,7 +405,7 @@ export default function useContentService(): UseContentServiceReturn {
   );
 
   const updatePin = useCallback(
-    async (contentId: number, areaId: number, dto: deltaDto) => {
+    async (contentId: number, areaId: number, dto: deltaDto): Promise<Ack> => {
       setIsLoading(true);
       resetError();
       try {
@@ -361,8 +416,10 @@ export default function useContentService(): UseContentServiceReturn {
         );
         setAckData(result);
         showToast("Pin updated");
+        return result;
       } catch (err) {
         handleError(err, "Failed to update pin. Please try again.");
+        throw err;
       } finally {
         setIsLoading(false);
       }
@@ -371,7 +428,7 @@ export default function useContentService(): UseContentServiceReturn {
   );
 
   const updateComment = useCallback(
-    async (contentId: number, areaId: number, dto: deltaDto) => {
+    async (contentId: number, areaId: number, dto: deltaDto): Promise<Ack> => {
       setIsLoading(true);
       resetError();
       try {
@@ -381,8 +438,10 @@ export default function useContentService(): UseContentServiceReturn {
           dto
         );
         setAckData(result);
+        return result;
       } catch (err) {
         handleError(err, "Failed to update comment. Please try again.");
+        throw err;
       } finally {
         setIsLoading(false);
       }
@@ -391,7 +450,7 @@ export default function useContentService(): UseContentServiceReturn {
   );
 
   const updateReport = useCallback(
-    async (contentId: number, areaId: number, dto: deltaDto) => {
+    async (contentId: number, areaId: number, dto: deltaDto): Promise<Ack> => {
       setIsLoading(true);
       resetError();
       try {
@@ -401,8 +460,10 @@ export default function useContentService(): UseContentServiceReturn {
           dto
         );
         setAckData(result);
+        return result;
       } catch (err) {
         handleError(err, "Failed to update report. Please try again.");
+        throw err;
       } finally {
         setIsLoading(false);
       }
@@ -411,7 +472,7 @@ export default function useContentService(): UseContentServiceReturn {
   );
 
   const setPrivate = useCallback(
-    async (contentId: number, areaId: number) => {
+    async (contentId: number, areaId: number): Promise<Ack> => {
       setIsLoading(true);
       showLoading();
       resetError();
@@ -422,8 +483,10 @@ export default function useContentService(): UseContentServiceReturn {
         );
         setAckData(result);
         showToast("Content set to private");
+        return result;
       } catch (err) {
         handleError(err, "Failed to set content as private. Please try again.");
+        throw err;
       } finally {
         setIsLoading(false);
         hideLoading();
@@ -433,7 +496,7 @@ export default function useContentService(): UseContentServiceReturn {
   );
 
   const setPublic = useCallback(
-    async (contentId: number, areaId: number) => {
+    async (contentId: number, areaId: number): Promise<Ack> => {
       setIsLoading(true);
       showLoading();
       resetError();
@@ -444,8 +507,10 @@ export default function useContentService(): UseContentServiceReturn {
         );
         setAckData(result);
         showToast("Content set to public");
+        return result;
       } catch (err) {
         handleError(err, "Failed to set content as public. Please try again.");
+        throw err;
       } finally {
         setIsLoading(false);
         hideLoading();
@@ -472,6 +537,7 @@ export default function useContentService(): UseContentServiceReturn {
     getFriendContent,
     findAll,
     findOne,
+    getFiles,
     remove,
     updateView,
     updateLike,

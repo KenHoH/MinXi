@@ -11,8 +11,8 @@ interface UseHistoryServiceReturn {
   isLoading: boolean;
 
   // Methods
-  upsertHistory: (dto: CreateHistoryDto) => Promise<void>;
-  getHistoryByUser: (userId: number) => Promise<void>;
+  upsertHistory: (dto: CreateHistoryDto) => Promise<CreateHistoryDto>;
+  getHistoryByUser: (userId: number) => Promise<CreateHistoryDto[]>;
   resetError: () => void;
 }
 
@@ -39,14 +39,16 @@ export default function useHistoryService(): UseHistoryServiceReturn {
   );
 
   const upsertHistory = useCallback(
-    async (dto: CreateHistoryDto) => {
+    async (dto: CreateHistoryDto): Promise<CreateHistoryDto> => {
       setIsLoading(true);
       resetError();
       try {
         const result = await HistoryService.historyControllerUpsert(dto);
         setHistoryData(result);
+        return result;
       } catch (err) {
         handleError(err, "Failed to update history. Please try again.");
+        throw err;
       } finally {
         setIsLoading(false);
       }
@@ -55,15 +57,17 @@ export default function useHistoryService(): UseHistoryServiceReturn {
   );
 
   const getHistoryByUser = useCallback(
-    async (userId: number) => {
+    async (userId: number): Promise<CreateHistoryDto[]> => {
       setIsLoading(true);
       showLoading();
       resetError();
       try {
         const result = await HistoryService.historyControllerGetByUser(userId);
         setHistoriesData(result);
+        return result;
       } catch (err) {
         handleError(err, "Failed to fetch history. Please try again.");
+        throw err;
       } finally {
         setIsLoading(false);
         hideLoading();

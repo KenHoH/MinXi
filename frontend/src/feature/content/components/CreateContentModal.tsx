@@ -13,8 +13,8 @@ import type ThumbnailFile from "../object/ThumbnailFile";
 import type FileItem from "../object/FileItem";
 import { useToast } from "@/shared/context/ToastContext";
 import useContentService from "@/shared/hooks/useContentService";
-import { useAuthContext } from "@/feature/auth/context/AuthContext";
 import useUserService from "@/shared/hooks/useUserService";
+import { UserService, type UploadFilesResDto } from "@/services/api";
 
 interface CreateContentModalProps {
   isOpen: boolean;
@@ -34,16 +34,17 @@ export function CreateContentModal({
   );
   const [contentFiles, setContentFiles] = useState<ContentFile[]>([]);
   const [thumbnail, setThumbnail] = useState<ThumbnailFile | null>(null);
+  const [uploadedFilesData, setUploadedFilesData] =
+    useState<UploadFilesResDto | null>(null);
   const { showToast } = useToast();
   const {
-    uploadedFilesData,
-    contentData,
     create,
     uploadMultipleFiles,
     createFile,
     uploadContentImages,
+    getFiles,
   } = useContentService();
-  const { userData, findUserById } = useUserService();
+  const {} = useUserService();
 
   if (!isOpen) {
     return null;
@@ -101,10 +102,12 @@ export function CreateContentModal({
     }
 
     try {
-      await findUserById(currentUserId);
-      if (!userData || !userData.user_id || !userData.area_id) {
+      const userResponse = await UserService.userControllerFindOne(
+        currentUserId
+      );
+      if (!userResponse || !userResponse.user_id || !userResponse.area_id) {
         showToast("Invalid user data.");
-        console.error("Invalid user data:", userData);
+        console.error("Invalid user data:", userResponse);
         return;
       }
 
@@ -120,13 +123,12 @@ export function CreateContentModal({
 
       const contentTypeString = contentType === "image" ? "image" : "video";
 
-      await create({
+      const contentData = await create({
         title: title.trim(),
         description: description.trim(),
-        creator_id: userData.user_id,
-        area_id: userData.area_id,
+        creator_id: userResponse.user_id,
+        area_id: userResponse.area_id,
         post_type: contentTypeString,
-        parent_id: undefined,
       });
 
       if (!contentData || !contentData.content_id) {
@@ -137,32 +139,38 @@ export function CreateContentModal({
       for (const contentFile of contentFiles) {
         try {
           if (contentData.post_type === "image") {
-            await uploadContentImages({
+            const result = await uploadContentImages({
               thumbnail: thumbnail.file,
               contentImage: contentFile.file,
             });
+            if (!result || !result.mainImagePath || !result.optionalMediaPath) {
+              showToast("Failed to upload files. Please try again.");
+              return;
+            }
+
+            await createFile({
+              content_id: contentData.content_id,
+              file_path: result.optionalMediaPath,
+              thumbnail: result.mainImagePath,
+              area_id: userResponse.area_id,
+            });
           } else {
-            await uploadMultipleFiles({
+            const result = await uploadMultipleFiles({
               image: thumbnail.file,
               video: contentFile.file,
             });
-          }
+            if (!result || !result.mainImagePath || !result.optionalMediaPath) {
+              showToast("Failed to upload files. Please try again.");
+              return;
+            }
 
-          if (
-            !uploadedFilesData ||
-            !uploadedFilesData.mainImagePath ||
-            !uploadedFilesData.optionalMediaPath
-          ) {
-            showToast("Failed to upload files. Please try again.");
-            return;
+            await createFile({
+              content_id: contentData.content_id,
+              file_path: result.optionalMediaPath,
+              thumbnail: result.mainImagePath,
+              area_id: userResponse.area_id,
+            });
           }
-
-          await createFile({
-            content_id: contentData.content_id,
-            file_path: uploadedFilesData.optionalMediaPath,
-            thumbnail: uploadedFilesData.mainImagePath,
-            area_id: userData.area_id,
-          });
         } catch (fileErr) {
           console.error("Failed to process file:", fileErr);
           showToast(
@@ -188,6 +196,11 @@ export function CreateContentModal({
       setThumbnail(null);
       onClose();
     }
+  };
+
+  const testing = async () => {
+    const result = await getFiles(9, 1);
+    console.log("GET FILES RESULT:", result);
   };
 
   const isFormValid =
@@ -295,7 +308,7 @@ export function CreateContentModal({
               Cancel
             </button>
             <button
-              onClick={handleSubmit}
+              onClick={testing}
               disabled={!isFormValid}
               className="flex-1 px-4 py-2 bg-burgundy-600 text-white rounded-lg hover:bg-burgundy-700 transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed"
             >

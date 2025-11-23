@@ -25,18 +25,22 @@ interface UseSocialServiceReturn {
   error: string | null;
   isLoading: boolean;
 
-  createRoom: (dto: CreateRoomDto) => Promise<void>;
-  getRoomInfo: (roomId: string) => Promise<void>;
-  getAllRooms: (userId: number) => Promise<void>;
-  addUserToRoom: (dto: AddUserToRoomDto) => Promise<void>;
-  removeUserFromRoom: (dto: RemoveUserFromRoomDto) => Promise<void>;
-  updateParticipantRole: (dto: UpdateParticipantRoleDto) => Promise<void>;
-  getTotalParticipants: (roomId: string) => Promise<void>;
-  getParticipant: (roomId: string) => Promise<void>;
-  getMedia: (roomId: string) => Promise<void>;
-  sendMessage: (dto: SendMessageDto) => Promise<void>;
-  getMessages: (roomId: string, limit: number) => Promise<void>;
-  findDm: (dto: FindDmDto) => Promise<void>;
+  createRoom: (dto: CreateRoomDto) => Promise<RoomResponseDto>;
+  getRoomInfo: (roomId: string) => Promise<RoomResponseDto>;
+  getAllRooms: (userId: number) => Promise<RoomResponseDto[]>;
+  addUserToRoom: (dto: AddUserToRoomDto) => Promise<ParticipantResponseDto>;
+  removeUserFromRoom: (
+    dto: RemoveUserFromRoomDto
+  ) => Promise<ParticipantResponseDto>;
+  updateParticipantRole: (
+    dto: UpdateParticipantRoleDto
+  ) => Promise<ParticipantResponseDto>;
+  getTotalParticipants: (roomId: string) => Promise<ParticipantTotalResDTO>;
+  getParticipant: (roomId: string) => Promise<ParticipantResponseDto>;
+  getMedia: (roomId: string) => Promise<MessageResponseDto>;
+  sendMessage: (dto: SendMessageDto) => Promise<MessageResponseDto>;
+  getMessages: (roomId: string, limit: number) => Promise<MessageResponseDto[]>;
+  findDm: (dto: FindDmDto) => Promise<RoomResponseDto>;
   resetError: () => void;
 }
 
@@ -71,7 +75,7 @@ export default function useSocialService(): UseSocialServiceReturn {
   );
 
   const createRoom = useCallback(
-    async (dto: CreateRoomDto) => {
+    async (dto: CreateRoomDto): Promise<RoomResponseDto> => {
       setIsLoading(true);
       showLoading();
       resetError();
@@ -79,8 +83,10 @@ export default function useSocialService(): UseSocialServiceReturn {
         const result = await SocialService.socialControllerCreateRoom(dto);
         setRoomData(result);
         showToast("Room created successfully");
+        return result;
       } catch (err) {
         handleError(err, "Failed to create room. Please try again.");
+        throw err;
       } finally {
         setIsLoading(false);
         hideLoading();
@@ -90,15 +96,17 @@ export default function useSocialService(): UseSocialServiceReturn {
   );
 
   const getRoomInfo = useCallback(
-    async (roomId: string) => {
+    async (roomId: string): Promise<RoomResponseDto> => {
       setIsLoading(true);
       showLoading();
       resetError();
       try {
         const result = await SocialService.socialControllerGetRoomInfo(roomId);
         setRoomData(result);
+        return result;
       } catch (err) {
         handleError(err, "Failed to fetch room information. Please try again.");
+        throw err;
       } finally {
         setIsLoading(false);
         hideLoading();
@@ -108,15 +116,17 @@ export default function useSocialService(): UseSocialServiceReturn {
   );
 
   const getAllRooms = useCallback(
-    async (userId: number) => {
+    async (userId: number): Promise<RoomResponseDto[]> => {
       setIsLoading(true);
       showLoading();
       resetError();
       try {
         const result = await SocialService.socialControllerGetAllRoomId(userId);
         setRoomsData(result);
+        return result;
       } catch (err) {
         handleError(err, "Failed to fetch rooms. Please try again.");
+        throw err;
       } finally {
         setIsLoading(false);
         hideLoading();
@@ -126,15 +136,17 @@ export default function useSocialService(): UseSocialServiceReturn {
   );
 
   const addUserToRoom = useCallback(
-    async (dto: AddUserToRoomDto) => {
+    async (dto: AddUserToRoomDto): Promise<ParticipantResponseDto> => {
       setIsLoading(true);
       resetError();
       try {
         const result = await SocialService.socialControllerAddUserToRoom(dto);
         setParticipantData(result);
         showToast("User added to room");
+        return result;
       } catch (err) {
         handleError(err, "Failed to add user to room. Please try again.");
+        throw err;
       } finally {
         setIsLoading(false);
       }
@@ -143,7 +155,7 @@ export default function useSocialService(): UseSocialServiceReturn {
   );
 
   const removeUserFromRoom = useCallback(
-    async (dto: RemoveUserFromRoomDto) => {
+    async (dto: RemoveUserFromRoomDto): Promise<ParticipantResponseDto> => {
       setIsLoading(true);
       resetError();
       try {
@@ -152,8 +164,10 @@ export default function useSocialService(): UseSocialServiceReturn {
         );
         setParticipantData(result);
         showToast("User removed from room");
+        return result;
       } catch (err) {
         handleError(err, "Failed to remove user from room. Please try again.");
+        throw err;
       } finally {
         setIsLoading(false);
       }
@@ -162,7 +176,7 @@ export default function useSocialService(): UseSocialServiceReturn {
   );
 
   const updateParticipantRole = useCallback(
-    async (dto: UpdateParticipantRoleDto) => {
+    async (dto: UpdateParticipantRoleDto): Promise<ParticipantResponseDto> => {
       setIsLoading(true);
       resetError();
       try {
@@ -170,11 +184,13 @@ export default function useSocialService(): UseSocialServiceReturn {
           await SocialService.socialControllerUpdateParticipantRole(dto);
         setParticipantData(result);
         showToast("Participant role updated");
+        return result;
       } catch (err) {
         handleError(
           err,
           "Failed to update participant role. Please try again."
         );
+        throw err;
       } finally {
         setIsLoading(false);
       }
@@ -183,7 +199,7 @@ export default function useSocialService(): UseSocialServiceReturn {
   );
 
   const getTotalParticipants = useCallback(
-    async (roomId: string) => {
+    async (roomId: string): Promise<ParticipantTotalResDTO> => {
       setIsLoading(true);
       resetError();
       try {
@@ -191,11 +207,13 @@ export default function useSocialService(): UseSocialServiceReturn {
           roomId
         );
         setParticipantTotalData(result);
+        return result;
       } catch (err) {
         handleError(
           err,
           "Failed to fetch participant total. Please try again."
         );
+        throw err;
       } finally {
         setIsLoading(false);
       }
@@ -204,7 +222,7 @@ export default function useSocialService(): UseSocialServiceReturn {
   );
 
   const getParticipant = useCallback(
-    async (roomId: string) => {
+    async (roomId: string): Promise<ParticipantResponseDto> => {
       setIsLoading(true);
       showLoading();
       resetError();
@@ -213,8 +231,10 @@ export default function useSocialService(): UseSocialServiceReturn {
           roomId
         );
         setParticipantData(result);
+        return result;
       } catch (err) {
         handleError(err, "Failed to fetch participant. Please try again.");
+        throw err;
       } finally {
         setIsLoading(false);
         hideLoading();
@@ -224,15 +244,17 @@ export default function useSocialService(): UseSocialServiceReturn {
   );
 
   const getMedia = useCallback(
-    async (roomId: string) => {
+    async (roomId: string): Promise<MessageResponseDto> => {
       setIsLoading(true);
       showLoading();
       resetError();
       try {
         const result = await SocialService.socialControllerGetMedia(roomId);
         setMessageData(result);
+        return result;
       } catch (err) {
         handleError(err, "Failed to fetch media. Please try again.");
+        throw err;
       } finally {
         setIsLoading(false);
         hideLoading();
@@ -242,14 +264,16 @@ export default function useSocialService(): UseSocialServiceReturn {
   );
 
   const sendMessage = useCallback(
-    async (dto: SendMessageDto) => {
+    async (dto: SendMessageDto): Promise<MessageResponseDto> => {
       setIsLoading(true);
       resetError();
       try {
         const result = await SocialService.socialControllerSendMessage(dto);
         setMessageData(result);
+        return result;
       } catch (err) {
         handleError(err, "Failed to send message. Please try again.");
+        throw err;
       } finally {
         setIsLoading(false);
       }
@@ -258,7 +282,7 @@ export default function useSocialService(): UseSocialServiceReturn {
   );
 
   const getMessages = useCallback(
-    async (roomId: string, limit: number) => {
+    async (roomId: string, limit: number): Promise<MessageResponseDto[]> => {
       setIsLoading(true);
       showLoading();
       resetError();
@@ -268,8 +292,10 @@ export default function useSocialService(): UseSocialServiceReturn {
           limit
         );
         setMessagesData(result);
+        return result;
       } catch (err) {
         handleError(err, "Failed to fetch messages. Please try again.");
+        throw err;
       } finally {
         setIsLoading(false);
         hideLoading();
@@ -279,15 +305,17 @@ export default function useSocialService(): UseSocialServiceReturn {
   );
 
   const findDm = useCallback(
-    async (dto: FindDmDto) => {
+    async (dto: FindDmDto): Promise<RoomResponseDto> => {
       setIsLoading(true);
       showLoading();
       resetError();
       try {
         const result = await SocialService.socialControllerFindDm(dto);
         setRoomData(result);
+        return result;
       } catch (err) {
         handleError(err, "Failed to find DM. Please try again.");
+        throw err;
       } finally {
         setIsLoading(false);
         hideLoading();

@@ -21,16 +21,19 @@ interface UseUserServiceReturn {
   error: string | null;
   isLoading: boolean;
 
-  createUser: (dto: CreateUserDto) => Promise<void>;
-  findAllUsers: (area: number) => Promise<void>;
-  findUserById: (id: number) => Promise<void>;
-  updateUserProfile: (id: number, dto: UpdateProfileUserDto) => Promise<void>;
-  updateUserLike: (id: number, dto: deltaDto) => Promise<void>;
-  updateUserFollow: (id: number, dto: deltaDto) => Promise<void>;
-  updateUserReport: (id: number, dto: deltaDto) => Promise<void>;
-  updateUserRestriction: (id: number, dto: UpdateRestriction) => Promise<void>;
+  createUser: (dto: CreateUserDto) => Promise<Ack>;
+  findAllUsers: (area: number) => Promise<UserDto[]>;
+  findUserById: (id: number) => Promise<UserDto>;
+  updateUserProfile: (
+    id: number,
+    dto: UpdateProfileUserDto
+  ) => Promise<UserDto>;
+  updateUserLike: (id: number, dto: deltaDto) => Promise<Ack>;
+  updateUserFollow: (id: number, dto: deltaDto) => Promise<Ack>;
+  updateUserReport: (id: number, dto: deltaDto) => Promise<Ack>;
+  updateUserRestriction: (id: number, dto: UpdateRestriction) => Promise<Ack>;
   findUserByName: (dto: NameRequest) => Promise<CredentialRes | null>;
-  removeUser: (id: number) => Promise<void>;
+  removeUser: (id: number) => Promise<Ack>;
   resetError: () => void;
 }
 
@@ -58,7 +61,7 @@ export default function useUserService(): UseUserServiceReturn {
   );
 
   const createUser = useCallback(
-    async (dto: CreateUserDto) => {
+    async (dto: CreateUserDto): Promise<Ack> => {
       setIsLoading(true);
       showLoading();
       resetError();
@@ -66,8 +69,10 @@ export default function useUserService(): UseUserServiceReturn {
         const result = await UserService.userControllerCreate(dto);
         setAckData(result);
         showToast("User created successfully");
+        return result;
       } catch (err) {
         handleError(err, "User registration failed. Please try again.");
+        throw err;
       } finally {
         setIsLoading(false);
         hideLoading();
@@ -77,15 +82,17 @@ export default function useUserService(): UseUserServiceReturn {
   );
 
   const findAllUsers = useCallback(
-    async (area: number) => {
+    async (area: number): Promise<UserDto[]> => {
       setIsLoading(true);
       showLoading();
       resetError();
       try {
         const result = await UserService.userControllerFindAll(area);
         setUserListData(Array.isArray(result) ? result : [result]);
+        return Array.isArray(result) ? result : [result];
       } catch (err) {
         handleError(err, "Failed to fetch users. Please try again.");
+        throw err;
       } finally {
         setIsLoading(false);
         hideLoading();
@@ -95,15 +102,17 @@ export default function useUserService(): UseUserServiceReturn {
   );
 
   const findUserById = useCallback(
-    async (id: number) => {
+    async (id: number): Promise<UserDto> => {
       setIsLoading(true);
       showLoading();
       resetError();
       try {
         const result = await UserService.userControllerFindOne(id);
         setUserData(result);
+        return result;
       } catch (err) {
         handleError(err, "Failed to fetch user. Please try again.");
+        throw err;
       } finally {
         setIsLoading(false);
         hideLoading();
@@ -113,7 +122,7 @@ export default function useUserService(): UseUserServiceReturn {
   );
 
   const updateUserProfile = useCallback(
-    async (id: number, dto: UpdateProfileUserDto) => {
+    async (id: number, dto: UpdateProfileUserDto): Promise<UserDto> => {
       setIsLoading(true);
       showLoading();
       resetError();
@@ -121,8 +130,10 @@ export default function useUserService(): UseUserServiceReturn {
         const result = await UserService.userControllerUpdate(id, dto);
         setUserData(result);
         showToast("Profile updated successfully");
+        return result;
       } catch (err) {
         handleError(err, "Failed to update profile. Please try again.");
+        throw err;
       } finally {
         setIsLoading(false);
         hideLoading();
@@ -132,15 +143,17 @@ export default function useUserService(): UseUserServiceReturn {
   );
 
   const updateUserLike = useCallback(
-    async (id: number, dto: deltaDto) => {
+    async (id: number, dto: deltaDto): Promise<Ack> => {
       setIsLoading(true);
       resetError();
       try {
         const result = await UserService.userControllerUpdateLike(id, dto);
         setAckData(result);
         showToast("Like updated");
+        return result;
       } catch (err) {
         handleError(err, "Failed to update like. Please try again.");
+        throw err;
       } finally {
         setIsLoading(false);
       }
@@ -149,15 +162,17 @@ export default function useUserService(): UseUserServiceReturn {
   );
 
   const updateUserFollow = useCallback(
-    async (id: number, dto: deltaDto) => {
+    async (id: number, dto: deltaDto): Promise<Ack> => {
       setIsLoading(true);
       resetError();
       try {
         const result = await UserService.userControllerUpdateFollow(id, dto);
         setAckData(result);
         showToast("Follow updated");
+        return result;
       } catch (err) {
         handleError(err, "Failed to update follow. Please try again.");
+        throw err;
       } finally {
         setIsLoading(false);
       }
@@ -166,15 +181,17 @@ export default function useUserService(): UseUserServiceReturn {
   );
 
   const updateUserReport = useCallback(
-    async (id: number, dto: deltaDto) => {
+    async (id: number, dto: deltaDto): Promise<Ack> => {
       setIsLoading(true);
       resetError();
       try {
         const result = await UserService.userControllerUpdateReport(id, dto);
         setAckData(result);
         showToast("Report submitted");
+        return result;
       } catch (err) {
         handleError(err, "Failed to submit report. Please try again.");
+        throw err;
       } finally {
         setIsLoading(false);
       }
@@ -183,7 +200,7 @@ export default function useUserService(): UseUserServiceReturn {
   );
 
   const updateUserRestriction = useCallback(
-    async (id: number, dto: UpdateRestriction) => {
+    async (id: number, dto: UpdateRestriction): Promise<Ack> => {
       setIsLoading(true);
       showLoading();
       resetError();
@@ -194,8 +211,10 @@ export default function useUserService(): UseUserServiceReturn {
         );
         setAckData(result);
         showToast("Restriction updated");
+        return result;
       } catch (err) {
         handleError(err, "Failed to update restriction. Please try again.");
+        throw err;
       } finally {
         setIsLoading(false);
         hideLoading();
@@ -225,15 +244,17 @@ export default function useUserService(): UseUserServiceReturn {
   );
 
   const removeUser = useCallback(
-    async (id: number) => {
+    async (id: number): Promise<Ack> => {
       setIsLoading(true);
       showLoading();
       resetError();
       try {
-        await UserService.userControllerRemove(id);
+        const result = await UserService.userControllerRemove(id);
         showToast("User removed successfully");
+        return result;
       } catch (err) {
         handleError(err, "Failed to remove user. Please try again.");
+        throw err;
       } finally {
         setIsLoading(false);
         hideLoading();

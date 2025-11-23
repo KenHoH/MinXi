@@ -20,13 +20,13 @@ interface UseBoardServiceReturn {
   isLoading: boolean;
 
   // Methods
-  createBoard: (dto: CreateBoardDto) => Promise<void>;
-  setPrivate: (id: number) => Promise<void>;
-  setPublic: (id: number) => Promise<void>;
-  addContent: (boardId: number, dto: AddContentDto) => Promise<void>;
-  removeContent: (boardId: number, dto: RemoveContentDto) => Promise<void>;
-  updateContent: (boardId: number, dto: UpdateContentDto) => Promise<void>;
-  getBoardsByUser: (userId: number) => Promise<void>;
+  createBoard: (dto: CreateBoardDto) => Promise<BoardDto>;
+  setPrivate: (id: number) => Promise<Ack>;
+  setPublic: (id: number) => Promise<Ack>;
+  addContent: (boardId: number, dto: AddContentDto) => Promise<Ack>;
+  removeContent: (boardId: number, dto: RemoveContentDto) => Promise<Ack>;
+  updateContent: (boardId: number, dto: UpdateContentDto) => Promise<BoardDto>;
+  getBoardsByUser: (userId: number) => Promise<BoardDto[]>;
   resetError: () => void;
 }
 
@@ -52,7 +52,7 @@ export default function useBoardService(): UseBoardServiceReturn {
   );
 
   const createBoard = useCallback(
-    async (dto: CreateBoardDto) => {
+    async (dto: CreateBoardDto): Promise<BoardDto> => {
       setIsLoading(true);
       showLoading();
       resetError();
@@ -60,8 +60,10 @@ export default function useBoardService(): UseBoardServiceReturn {
         const result = await BoardService.boardControllerCreate(dto);
         setBoardData(result);
         showToast("Board created successfully");
+        return result;
       } catch (err) {
         handleError(err, "Failed to create board. Please try again.");
+        throw err;
       } finally {
         setIsLoading(false);
         hideLoading();
@@ -71,7 +73,7 @@ export default function useBoardService(): UseBoardServiceReturn {
   );
 
   const setPrivate = useCallback(
-    async (id: number) => {
+    async (id: number): Promise<Ack> => {
       setIsLoading(true);
       showLoading();
       resetError();
@@ -79,8 +81,10 @@ export default function useBoardService(): UseBoardServiceReturn {
         const result = await BoardService.boardControllerSetPrivate(id);
         setAckData(result);
         showToast("Board set to private");
+        return result;
       } catch (err) {
         handleError(err, "Failed to set board as private. Please try again.");
+        throw err;
       } finally {
         setIsLoading(false);
         hideLoading();
@@ -90,7 +94,7 @@ export default function useBoardService(): UseBoardServiceReturn {
   );
 
   const setPublic = useCallback(
-    async (id: number) => {
+    async (id: number): Promise<Ack> => {
       setIsLoading(true);
       showLoading();
       resetError();
@@ -98,8 +102,10 @@ export default function useBoardService(): UseBoardServiceReturn {
         const result = await BoardService.boardControllerSetPublic(id);
         setAckData(result);
         showToast("Board set to public");
+        return result;
       } catch (err) {
         handleError(err, "Failed to set board as public. Please try again.");
+        throw err;
       } finally {
         setIsLoading(false);
         hideLoading();
@@ -109,7 +115,7 @@ export default function useBoardService(): UseBoardServiceReturn {
   );
 
   const addContent = useCallback(
-    async (boardId: number, dto: AddContentDto) => {
+    async (boardId: number, dto: AddContentDto): Promise<Ack> => {
       setIsLoading(true);
       resetError();
       try {
@@ -119,8 +125,10 @@ export default function useBoardService(): UseBoardServiceReturn {
         );
         setAckData(result);
         showToast("Content added to board");
+        return result;
       } catch (err) {
         handleError(err, "Failed to add content to board. Please try again.");
+        throw err;
       } finally {
         setIsLoading(false);
       }
@@ -129,7 +137,7 @@ export default function useBoardService(): UseBoardServiceReturn {
   );
 
   const removeContent = useCallback(
-    async (boardId: number, dto: RemoveContentDto) => {
+    async (boardId: number, dto: RemoveContentDto): Promise<Ack> => {
       setIsLoading(true);
       resetError();
       try {
@@ -139,11 +147,13 @@ export default function useBoardService(): UseBoardServiceReturn {
         );
         setAckData(result);
         showToast("Content removed from board");
+        return result;
       } catch (err) {
         handleError(
           err,
           "Failed to remove content from board. Please try again."
         );
+        throw err;
       } finally {
         setIsLoading(false);
       }
@@ -152,7 +162,7 @@ export default function useBoardService(): UseBoardServiceReturn {
   );
 
   const updateContent = useCallback(
-    async (boardId: number, dto: UpdateContentDto) => {
+    async (boardId: number, dto: UpdateContentDto): Promise<BoardDto> => {
       setIsLoading(true);
       resetError();
       try {
@@ -162,8 +172,10 @@ export default function useBoardService(): UseBoardServiceReturn {
         );
         setBoardData(result);
         showToast("Content updated");
+        return result;
       } catch (err) {
         handleError(err, "Failed to update content. Please try again.");
+        throw err;
       } finally {
         setIsLoading(false);
       }
@@ -172,15 +184,17 @@ export default function useBoardService(): UseBoardServiceReturn {
   );
 
   const getBoardsByUser = useCallback(
-    async (userId: number) => {
+    async (userId: number): Promise<BoardDto[]> => {
       setIsLoading(true);
       showLoading();
       resetError();
       try {
         const result = await BoardService.boardControllerGetBoardByUser(userId);
         setBoardsData(result);
+        return result;
       } catch (err) {
         handleError(err, "Failed to fetch user boards. Please try again.");
+        throw err;
       } finally {
         setIsLoading(false);
         hideLoading();

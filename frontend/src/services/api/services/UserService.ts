@@ -63,22 +63,6 @@ export class UserService {
     }
     /**
      * @param id
-     * @returns Ack
-     * @throws ApiError
-     */
-    public static userControllerRemove(
-        id: number,
-    ): CancelablePromise<Ack> {
-        return __request(OpenAPI, {
-            method: 'DELETE',
-            url: '/user/{id}',
-            path: {
-                'id': id,
-            },
-        });
-    }
-    /**
-     * @param id
      * @param requestBody
      * @returns UserDto
      * @throws ApiError
@@ -175,6 +159,22 @@ export class UserService {
             },
             body: requestBody,
             mediaType: 'application/json',
+        });
+    }
+    /**
+     * @param id
+     * @returns Ack
+     * @throws ApiError
+     */
+    public static userControllerRemove(
+        id: number,
+    ): CancelablePromise<Ack> {
+        return __request(OpenAPI, {
+            method: 'DELETE',
+            url: '/user/{id}',
+            path: {
+                'id': id,
+            },
         });
     }
     /**

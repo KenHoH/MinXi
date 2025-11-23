@@ -17,9 +17,9 @@ interface UseCommentServiceReturn {
   isLoading: boolean;
 
   // Methods
-  createComment: (dto: CommentReq) => Promise<void>;
-  getComments: (contentId: number) => Promise<void>;
-  deleteComment: (commentId: number) => Promise<void>;
+  createComment: (dto: CommentReq) => Promise<CommentRes>;
+  getComments: (contentId: number) => Promise<CommentRes[]>;
+  deleteComment: (commentId: number) => Promise<DeleteCommentRes>;
   resetError: () => void;
 }
 
@@ -46,15 +46,17 @@ export default function useCommentService(): UseCommentServiceReturn {
   );
 
   const createComment = useCallback(
-    async (dto: CommentReq) => {
+    async (dto: CommentReq): Promise<CommentRes> => {
       setIsLoading(true);
       resetError();
       try {
         const result = await CommentService.commentControllerCreate(dto);
         setCommentData(result);
         showToast("Comment posted successfully");
+        return result;
       } catch (err) {
         handleError(err, "Failed to post comment. Please try again.");
+        throw err;
       } finally {
         setIsLoading(false);
       }
@@ -63,7 +65,7 @@ export default function useCommentService(): UseCommentServiceReturn {
   );
 
   const getComments = useCallback(
-    async (contentId: number) => {
+    async (contentId: number): Promise<CommentRes[]> => {
       setIsLoading(true);
       showLoading();
       resetError();
@@ -72,8 +74,10 @@ export default function useCommentService(): UseCommentServiceReturn {
           contentId
         );
         setCommentsData(result);
+        return result;
       } catch (err) {
         handleError(err, "Failed to fetch comments. Please try again.");
+        throw err;
       } finally {
         setIsLoading(false);
         hideLoading();
@@ -83,7 +87,7 @@ export default function useCommentService(): UseCommentServiceReturn {
   );
 
   const deleteComment = useCallback(
-    async (commentId: number) => {
+    async (commentId: number): Promise<DeleteCommentRes> => {
       setIsLoading(true);
       resetError();
       try {
@@ -92,8 +96,10 @@ export default function useCommentService(): UseCommentServiceReturn {
         );
         setDeleteCommentData(result);
         showToast("Comment deleted successfully");
+        return result;
       } catch (err) {
         handleError(err, "Failed to delete comment. Please try again.");
+        throw err;
       } finally {
         setIsLoading(false);
       }

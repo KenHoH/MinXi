@@ -22,7 +22,7 @@ http.interceptors.response.use(
   async (error) => {
     const original = error.config;
 
-    if (error.response?.status === 401 && !original._retry) {
+    if (error.response?.status === 403 && !original._retry) {
       original._retry = true;
 
       const refreshToken = document.cookie
@@ -35,9 +35,16 @@ http.interceptors.response.use(
       }
 
       try {
-        await AuthService.authControllerRefresh({
-          refreshToken: refreshToken,
+        const refreshHttp = axios.create({
+          baseURL: "http://localhost:3000",
+          withCredentials: true,
         });
+        await refreshHttp.post(
+          "/auth/refresh",
+          { refreshToken: refreshToken },
+          { headers: { Authorization: `Bearer ${refreshToken}` } }
+        );
+
         return http(original);
       } catch (refreshError) {
         return Promise.reject(error);

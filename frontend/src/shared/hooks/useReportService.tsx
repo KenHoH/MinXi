@@ -16,12 +16,12 @@ interface UseReportServiceReturn {
   isLoading: boolean;
 
   // Methods
-  getAllReports: () => Promise<void>;
-  createReport: (dto: CreateReportDto) => Promise<void>;
-  getReportsByUser: (userId: number) => Promise<void>;
-  activateReport: (id: number) => Promise<void>;
-  deactivateReport: (id: number) => Promise<void>;
-  deleteReport: (id: number) => Promise<void>;
+  getAllReports: () => Promise<ReportDto[]>;
+  createReport: (dto: CreateReportDto) => Promise<Ack>;
+  getReportsByUser: (userId: number) => Promise<ReportDto[]>;
+  activateReport: (id: number) => Promise<Ack>;
+  deactivateReport: (id: number) => Promise<Ack>;
+  deleteReport: (id: number) => Promise<Ack>;
   resetError: () => void;
 }
 
@@ -45,15 +45,17 @@ export default function useReportService(): UseReportServiceReturn {
     [showToast]
   );
 
-  const getAllReports = useCallback(async () => {
+  const getAllReports = useCallback(async (): Promise<ReportDto[]> => {
     setIsLoading(true);
     showLoading();
     resetError();
     try {
       const result = await ReportService.reportControllerGetAllReports();
       setReportsData(result);
+      return result;
     } catch (err) {
       handleError(err, "Failed to fetch reports. Please try again.");
+      throw err;
     } finally {
       setIsLoading(false);
       hideLoading();
@@ -61,15 +63,17 @@ export default function useReportService(): UseReportServiceReturn {
   }, [showLoading, hideLoading, resetError, handleError]);
 
   const createReport = useCallback(
-    async (dto: CreateReportDto) => {
+    async (dto: CreateReportDto): Promise<Ack> => {
       setIsLoading(true);
       resetError();
       try {
         const result = await ReportService.reportControllerCreateReport(dto);
         setAckData(result);
         showToast("Report created successfully");
+        return result;
       } catch (err) {
         handleError(err, "Failed to create report. Please try again.");
+        throw err;
       } finally {
         setIsLoading(false);
       }
@@ -78,7 +82,7 @@ export default function useReportService(): UseReportServiceReturn {
   );
 
   const getReportsByUser = useCallback(
-    async (userId: number) => {
+    async (userId: number): Promise<ReportDto[]> => {
       setIsLoading(true);
       showLoading();
       resetError();
@@ -87,8 +91,10 @@ export default function useReportService(): UseReportServiceReturn {
           userId
         );
         setReportsData(result);
+        return result;
       } catch (err) {
         handleError(err, "Failed to fetch user reports. Please try again.");
+        throw err;
       } finally {
         setIsLoading(false);
         hideLoading();
@@ -98,15 +104,17 @@ export default function useReportService(): UseReportServiceReturn {
   );
 
   const activateReport = useCallback(
-    async (id: number) => {
+    async (id: number): Promise<Ack> => {
       setIsLoading(true);
       resetError();
       try {
         const result = await ReportService.reportControllerActivateReport(id);
         setAckData(result);
         showToast("Report activated");
+        return result;
       } catch (err) {
         handleError(err, "Failed to activate report. Please try again.");
+        throw err;
       } finally {
         setIsLoading(false);
       }
@@ -115,15 +123,17 @@ export default function useReportService(): UseReportServiceReturn {
   );
 
   const deactivateReport = useCallback(
-    async (id: number) => {
+    async (id: number): Promise<Ack> => {
       setIsLoading(true);
       resetError();
       try {
         const result = await ReportService.reportControllerDeactivateReport(id);
         setAckData(result);
         showToast("Report deactivated");
+        return result;
       } catch (err) {
         handleError(err, "Failed to deactivate report. Please try again.");
+        throw err;
       } finally {
         setIsLoading(false);
       }
@@ -132,15 +142,17 @@ export default function useReportService(): UseReportServiceReturn {
   );
 
   const deleteReport = useCallback(
-    async (id: number) => {
+    async (id: number): Promise<Ack> => {
       setIsLoading(true);
       resetError();
       try {
         const result = await ReportService.reportControllerDeleteReport(id);
         setAckData(result);
         showToast("Report deleted successfully");
+        return result;
       } catch (err) {
         handleError(err, "Failed to delete report. Please try again.");
+        throw err;
       } finally {
         setIsLoading(false);
       }

@@ -17,9 +17,11 @@ interface UseNotificationServiceReturn {
   isLoading: boolean;
 
   // Methods
-  createNotification: (dto: NotificationReq) => Promise<void>;
-  getNotifications: (userId: number) => Promise<void>;
-  removeNotification: (notificationId: number) => Promise<void>;
+  createNotification: (dto: NotificationReq) => Promise<NotificationRes>;
+  getNotifications: (userId: number) => Promise<NotificationRes[]>;
+  removeNotification: (
+    notificationId: number
+  ) => Promise<DeleteNotificationRes>;
   resetError: () => void;
 }
 
@@ -49,7 +51,7 @@ export default function useNotificationService(): UseNotificationServiceReturn {
   );
 
   const createNotification = useCallback(
-    async (dto: NotificationReq) => {
+    async (dto: NotificationReq): Promise<NotificationRes> => {
       setIsLoading(true);
       resetError();
       try {
@@ -57,8 +59,10 @@ export default function useNotificationService(): UseNotificationServiceReturn {
           dto
         );
         setNotificationData(result);
+        return result;
       } catch (err) {
         handleError(err, "Failed to create notification. Please try again.");
+        throw err;
       } finally {
         setIsLoading(false);
       }
@@ -67,7 +71,7 @@ export default function useNotificationService(): UseNotificationServiceReturn {
   );
 
   const getNotifications = useCallback(
-    async (userId: number) => {
+    async (userId: number): Promise<NotificationRes[]> => {
       setIsLoading(true);
       showLoading();
       resetError();
@@ -76,8 +80,10 @@ export default function useNotificationService(): UseNotificationServiceReturn {
           userId
         );
         setNotificationsData(result);
+        return result;
       } catch (err) {
         handleError(err, "Failed to fetch notifications. Please try again.");
+        throw err;
       } finally {
         setIsLoading(false);
         hideLoading();
@@ -87,7 +93,7 @@ export default function useNotificationService(): UseNotificationServiceReturn {
   );
 
   const removeNotification = useCallback(
-    async (notificationId: number) => {
+    async (notificationId: number): Promise<DeleteNotificationRes> => {
       setIsLoading(true);
       resetError();
       try {
@@ -96,8 +102,10 @@ export default function useNotificationService(): UseNotificationServiceReturn {
         );
         setDeleteNotificationData(result);
         showToast("Notification removed");
+        return result;
       } catch (err) {
         handleError(err, "Failed to remove notification. Please try again.");
+        throw err;
       } finally {
         setIsLoading(false);
       }
