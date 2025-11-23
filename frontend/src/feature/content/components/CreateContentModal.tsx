@@ -8,26 +8,13 @@ import { UploadContentFiles } from "./CreateContent/UploadContentFiles";
 import { UploadThumbnail } from "./CreateContent/UploadThumbnail";
 import { FileGalleryContent } from "./CreateContent/FileGalleryContent";
 import { ThumbnailGallery } from "./CreateContent/ThumbnailGallery";
-
-interface ContentFile {
-  id: string;
-  file: File;
-  name: string;
-  type: "image" | "video";
-}
-
-interface ThumbnailFile {
-  id: string;
-  file: File;
-  preview: string;
-  name: string;
-}
-
-interface FileItem {
-  id: string;
-  name: string;
-  type: "image" | "video";
-}
+import type ContentFile from "../object/ContenFile";
+import type ThumbnailFile from "../object/ThumbnailFile";
+import type FileItem from "../object/FileItem";
+import { useToast } from "@/shared/context/ToastContext";
+import useContentService from "@/shared/hooks/useContentService";
+import { useAuthContext } from "@/feature/auth/context/AuthContext";
+import useUserService from "@/shared/hooks/useUserService";
 
 interface CreateContentModalProps {
   isOpen: boolean;
@@ -47,6 +34,10 @@ export function CreateContentModal({
   );
   const [contentFiles, setContentFiles] = useState<ContentFile[]>([]);
   const [thumbnail, setThumbnail] = useState<ThumbnailFile | null>(null);
+  const { showToast } = useToast();
+  const { create, uploadMultipleFiles, createFile, uploadContentImages } =
+    useContentService();
+  const { userData, findUserById } = useUserService();
 
   if (!isOpen) {
     return null;
@@ -66,7 +57,7 @@ export function CreateContentModal({
 
   const handleTypeChange = (type: "image" | "video") => {
     setContentType(type);
-    setContentFiles([]); // Clear files when type changes
+    setContentFiles([]);
   };
 
   const handleThumbnailSelected = (file: File) => {
@@ -97,8 +88,11 @@ export function CreateContentModal({
     type: item.type,
   }));
 
-  const handleSubmit = () => {
-    // TODO: Submit content to backend
+  const handleSubmit = async () => {
+    if (!title || !contentType || !thumbnail) {
+      showToast("Please fill in all required fields.");
+      return;
+    }
     console.log({
       title,
       description,
@@ -107,8 +101,14 @@ export function CreateContentModal({
       thumbnail,
       creator_id: currentUserId,
     });
-    // Reset and close
-    setTitle("");
+
+    try {
+      await findUserById(currentUserId);
+      await create({
+        area_id: userData.
+      })
+    } catch (error) {}
+
     setDescription("");
     setContentType(null);
     setContentFiles([]);
