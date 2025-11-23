@@ -13,6 +13,5 @@ export type UserDto = {
     content_visibilityPrivate: boolean;
     pinned_visibilityPrivate: boolean;
     liked_visibilityPrivate: boolean;
-    area_id: number;
 };
 

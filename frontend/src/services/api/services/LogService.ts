@@ -10,7 +10,7 @@ import { request as __request } from '../core/request';
 export class LogService {
     /**
      * @param date
-     * @returns UserLog Logs by date
+     * @returns UserLog
      * @throws ApiError
      */
     public static logControllerFindByDate(
@@ -27,13 +27,13 @@ export class LogService {
     /**
      * @param id
      * @param requestBody
-     * @returns UserLog Log created
+     * @returns any
      * @throws ApiError
      */
     public static logControllerCreate(
         id: number,
         requestBody: LogReq,
-    ): CancelablePromise<UserLog> {
+    ): CancelablePromise<Record<string, any>> {
         return __request(OpenAPI, {
             method: 'POST',
             url: '/log/{id}',
@@ -46,7 +46,7 @@ export class LogService {
     }
     /**
      * @param id
-     * @returns UserLog Logs by user id
+     * @returns UserLog
      * @throws ApiError
      */
     public static logControllerFindOne(
@@ -61,7 +61,7 @@ export class LogService {
         });
     }
     /**
-     * @returns UserLog All logs
+     * @returns UserLog
      * @throws ApiError
      */
     public static logControllerFindAll(): CancelablePromise<Array<UserLog>> {
@@ -72,7 +72,7 @@ export class LogService {
     }
     /**
      * @param date
-     * @returns number Logs removed
+     * @returns number
      * @throws ApiError
      */
     public static logControllerRemoveBefore(

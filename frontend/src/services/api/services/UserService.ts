@@ -16,7 +16,7 @@ import { request as __request } from '../core/request';
 export class UserService {
     /**
      * @param requestBody
-     * @returns Ack User created
+     * @returns Ack
      * @throws ApiError
      */
     public static userControllerCreate(
@@ -31,7 +31,7 @@ export class UserService {
     }
     /**
      * @param area
-     * @returns UserDto List of users
+     * @returns UserDto
      * @throws ApiError
      */
     public static userControllerFindAll(
@@ -39,7 +39,7 @@ export class UserService {
     ): CancelablePromise<Array<UserDto>> {
         return __request(OpenAPI, {
             method: 'GET',
-            url: '/user/area/{area}',
+            url: '/user/{area}',
             path: {
                 'area': area,
             },
@@ -47,7 +47,7 @@ export class UserService {
     }
     /**
      * @param id
-     * @returns UserDto User found
+     * @returns UserDto
      * @throws ApiError
      */
     public static userControllerFindOne(
@@ -63,12 +63,12 @@ export class UserService {
     }
     /**
      * @param id
-     * @returns Ack User deleted
+     * @returns any
      * @throws ApiError
      */
     public static userControllerRemove(
         id: number,
-    ): CancelablePromise<Ack> {
+    ): CancelablePromise<Record<string, any>> {
         return __request(OpenAPI, {
             method: 'DELETE',
             url: '/user/{id}',
@@ -80,7 +80,7 @@ export class UserService {
     /**
      * @param id
      * @param requestBody
-     * @returns UserDto User profile updated
+     * @returns UserDto
      * @throws ApiError
      */
     public static userControllerUpdate(
@@ -100,7 +100,7 @@ export class UserService {
     /**
      * @param id
      * @param requestBody
-     * @returns Ack User like updated
+     * @returns Ack
      * @throws ApiError
      */
     public static userControllerUpdateLike(
@@ -120,7 +120,7 @@ export class UserService {
     /**
      * @param id
      * @param requestBody
-     * @returns Ack User follow updated
+     * @returns Ack
      * @throws ApiError
      */
     public static userControllerUpdateFollow(
@@ -140,7 +140,7 @@ export class UserService {
     /**
      * @param id
      * @param requestBody
-     * @returns Ack User report updated
+     * @returns Ack
      * @throws ApiError
      */
     public static userControllerUpdateReport(
@@ -160,7 +160,7 @@ export class UserService {
     /**
      * @param id
      * @param requestBody
-     * @returns Ack User restriction updated
+     * @returns Ack
      * @throws ApiError
      */
     public static userControllerUpdateRestriction(
@@ -179,7 +179,7 @@ export class UserService {
     }
     /**
      * @param requestBody
-     * @returns CredentialRes User found by name
+     * @returns CredentialRes
      * @throws ApiError
      */
     public static userControllerFindByName(

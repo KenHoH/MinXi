@@ -104,9 +104,9 @@ export function CreateContentModal({
 
     try {
       await findUserById(currentUserId);
-      await create({
-        area_id: userData.
-      })
+      // await create({
+      //   area_id: userData.
+      // })
     } catch (error) {}
 
     setDescription("");
