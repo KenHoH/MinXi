@@ -4,12 +4,20 @@ import { extname } from 'path';
 export const MulterConfiguration = {
   storage: diskStorage({
     destination: (req, file, callback) => {
-      let destPath = './uploads/'; 
+      let destPath = './uploads/';
 
       if (file.fieldname === 'image') {
-        destPath += 'thumbnail'; 
+        destPath += 'thumbnail';
       } else if (file.fieldname === 'video') {
-        destPath += 'content'; 
+        destPath += 'content';
+      } else if (file.fieldname === 'profilePicture') {
+        destPath += 'profile';
+      } else if (
+        file.fieldname === 'thumbnail' ||
+        file.fieldname === 'contentImage'
+      ) {
+        // For uploadImageContent: thumbnail goes to thumbnail folder, contentImage goes to content folder
+        destPath += file.fieldname === 'thumbnail' ? 'thumbnail' : 'content';
       }
 
       callback(null, destPath);

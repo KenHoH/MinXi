@@ -19,6 +19,7 @@ import {
   FriendDto,
   FollowingDto,
 } from '@app/contracts/shared-dto/connection/response';
+import { Public } from '@app/common/decorators/public.decorator';
 
 @Controller('connection')
 @UseGuards(JwtAuthGuard)
@@ -45,6 +46,7 @@ export class ConnectionController {
     return this.connectionService.createFriend(user_id, friend_id);
   }
 
+  @Public()
   @Get('check-follow/:creator_id/:follower_id')
   async checkFollow(
     @Param('creator_id', ParseIntPipe) creator_id: number,
@@ -53,6 +55,7 @@ export class ConnectionController {
     return this.connectionService.checkFollow(creator_id, follower_id);
   }
 
+  @Public()
   @Get('check-friend/:user_id/:friend_id')
   async checkFriend(
     @Param('user_id', ParseIntPipe) user_id: number,
@@ -61,6 +64,7 @@ export class ConnectionController {
     return this.connectionService.checkFriend(user_id, friend_id);
   }
 
+  @Public()
   @Get('check-mutual/:user_id/:friend_id')
   async checkFriendMutual(
     @Param('user_id', ParseIntPipe) user_id: number,
@@ -69,6 +73,7 @@ export class ConnectionController {
     return this.connectionService.checkFriendMutual(user_id, friend_id);
   }
 
+  @Public()
   @Get('followers/:creator_id')
   async getFollowersByCreator(
     @Param('creator_id', ParseIntPipe) creator_id: number,
@@ -76,6 +81,7 @@ export class ConnectionController {
     return this.connectionService.getFollowersByCreator(creator_id);
   }
 
+  @Public()
   @Get('friends/:user_id')
   async getFriendsbyUser(
     @Param('user_id', ParseIntPipe) user_id: number,
@@ -83,6 +89,7 @@ export class ConnectionController {
     return this.connectionService.getFriendsbyUser(user_id);
   }
 
+  @Public()
   @Get('following/:user_id')
   async getFollowingByUser(
     @Param('user_id', ParseIntPipe) user_id: number,

@@ -19,6 +19,7 @@ import { CreateBoardDto } from '@app/contracts/shared-dto/board/request/create-b
 import { AddContentDto } from '@app/contracts/shared-dto/board/request/add-content.dto';
 import { RemoveContentDto } from '@app/contracts/shared-dto/board/request/remove-content.dto';
 import { UpdateContentDto } from '@app/contracts/shared-dto/board/request/update-content.dto';
+import { Public } from '@app/common/decorators/public.decorator';
 
 @Controller('board')
 @UseGuards(JwtAuthGuard)
@@ -73,6 +74,7 @@ export class BoardController {
     return this.boardService.deleteBoard(id);
   }
 
+  @Public()
   @Get('user/:userId')
   getBoardByUser(@Param('userId', ParseIntPipe) userId: number) {
     return this.boardService.getBoardByUser(userId);

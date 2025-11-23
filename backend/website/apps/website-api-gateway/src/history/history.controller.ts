@@ -15,6 +15,7 @@ import { CreateHistoryDto } from '@app/contracts/shared-dto/content/req/CreateHi
 import { JwtAuthGuard } from '@app/common/guard/jwt-auth-guard/jwt-auth.guard';
 import { LogInterceptor } from '@app/common/interceptor/log/log.interceptor';
 import { ApiBearerAuth } from '@nestjs/swagger';
+import { Public } from '@app/common/decorators/public.decorator';
 
 @Controller('history')
 @ApiBearerAuth()
@@ -27,6 +28,7 @@ export class HistoryController {
   upsert(@Body() dto: CreateHistoryDto) {
     return this.historyService.upsert(dto);
   }
+  @Public()
   @Get(':user_id')
   getByUser(@Param('user_id', ParseIntPipe) user_id: number) {
     return this.historyService.getByUser(user_id);

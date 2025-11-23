@@ -67,6 +67,50 @@ export class ContentService {
         });
     }
     /**
+     * @param formData Uploads a single image file for profile picture.
+     * @returns any
+     * @throws ApiError
+     */
+    public static contentControllerUploadProfile(
+        formData: {
+            /**
+             * The profile picture image file
+             */
+            profilePicture: Blob;
+        },
+    ): CancelablePromise<Record<string, any>> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/content/profile',
+            formData: formData,
+            mediaType: 'multipart/form-data',
+        });
+    }
+    /**
+     * @param formData Uploads a thumbnail image and a content image. Both must be image files.
+     * @returns any
+     * @throws ApiError
+     */
+    public static contentControllerUploadImageContent(
+        formData: {
+            /**
+             * The thumbnail image file
+             */
+            thumbnail: Blob;
+            /**
+             * The content image file
+             */
+            contentImage: Blob;
+        },
+    ): CancelablePromise<Record<string, any>> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/content/image-content',
+            formData: formData,
+            mediaType: 'multipart/form-data',
+        });
+    }
+    /**
      * @param creatorId
      * @returns FullContentDto
      * @throws ApiError

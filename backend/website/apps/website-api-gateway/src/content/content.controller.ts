@@ -28,6 +28,7 @@ import { fileFieldsSchema } from '@app/contracts/shared-dto/schema/fileFieldsSch
 import { CreateFileDto } from '@app/contracts/shared-dto/content/req/CreateFile.req.dto';
 import { JwtAuthGuard } from '@app/common/guard/jwt-auth-guard/jwt-auth.guard';
 import { LogInterceptor } from '@app/common/interceptor/log/log.interceptor';
+import { Public } from '@app/common/decorators/public.decorator';
 
 @Controller('content')
 @UseGuards(JwtAuthGuard)
@@ -88,29 +89,137 @@ export class ContentController {
     };
   }
 
+  @Post('profile')
+  @ApiConsumes('multipart/form-data')
+  @ApiBody({
+    description: 'Uploads a single image file for profile picture.',
+    schema: {
+      type: 'object',
+      properties: {
+        profilePicture: {
+          type: 'string',
+          format: 'binary',
+          description: 'The profile picture image file',
+        },
+      },
+      required: ['profilePicture'],
+    },
+  })
+  @UseInterceptors(FileInterceptor('profilePicture', MulterConfiguration))
+  uploadProfile(
+    @UploadedFile()
+    file: Express.Multer.File,
+  ) {
+    if (!file) {
+      return { profilePicturePath: null };
+    }
+
+    const profilePicturePath = `http://localhost:3000/uploads/profile/${file.filename}`;
+
+    return {
+      profilePicturePath: profilePicturePath,
+    };
+  }
+
+  @Post('image-content')
+  @ApiConsumes('multipart/form-data')
+  @ApiBody({
+    description:
+      'Uploads a thumbnail image and a content image. Both must be image files.',
+    schema: {
+      type: 'object',
+      properties: {
+        thumbnail: {
+          type: 'string',
+          format: 'binary',
+          description: 'The thumbnail image file',
+        },
+        contentImage: {
+          type: 'string',
+          format: 'binary',
+          description: 'The content image file',
+        },
+      },
+      required: ['thumbnail', 'contentImage'],
+    },
+  })
+  @UseInterceptors(
+    FileFieldsInterceptor(
+      [
+        { name: 'thumbnail', maxCount: 1 },
+        { name: 'contentImage', maxCount: 1 },
+      ],
+      MulterConfiguration,
+    ),
+  )
+  uploadImageContent(
+    @UploadedFiles()
+    files: {
+      thumbnail?: Express.Multer.File[];
+      contentImage?: Express.Multer.File[];
+    },
+  ) {
+    const thumbnailFile = files.thumbnail ? files.thumbnail[0] : null;
+    const contentImageFile = files.contentImage ? files.contentImage[0] : null;
+
+    if (!thumbnailFile || !contentImageFile) {
+      return {
+        thumbnailPath: null,
+        contentImagePath: null,
+        error: 'Both thumbnail and contentImage files are required',
+      };
+    }
+
+    // Validate that both files are images
+    const imageTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+    const isThumbnailImage = imageTypes.includes(thumbnailFile.mimetype);
+    const isContentImageImage = imageTypes.includes(contentImageFile.mimetype);
+
+    if (!isThumbnailImage || !isContentImageImage) {
+      return {
+        thumbnailPath: null,
+        contentImagePath: null,
+        error: 'Both files must be image files',
+      };
+    }
+
+    const thumbnailPath = `http://localhost:3000/uploads/thumbnail/${thumbnailFile.filename}`;
+    const contentImagePath = `http://localhost:3000/uploads/content/${contentImageFile.filename}`;
+
+    return {
+      thumbnailPath: thumbnailPath,
+      contentImagePath: contentImagePath,
+    };
+  }
+
+  @Public()
   @Get('user/:creator_id')
   getByUser(@Param('creator_id', ParseIntPipe) creator_id: number) {
     this.logger.log(typeof creator_id);
     return this.contentService.getByUser(creator_id);
   }
 
+  @Public()
   @Get('user/:userId/following')
   getFollowingContent(@Param('userId', ParseIntPipe) userId: number) {
     this.logger.log(typeof userId);
     return this.contentService.getFollowingContent(userId);
   }
 
+  @Public()
   @Get('user/:userId/friends')
   getFriendContent(@Param('userId', ParseIntPipe) userId: number) {
     this.logger.log(typeof userId);
     return this.contentService.getFriendContent(userId);
   }
 
+  @Public()
   @Get(':area_id')
   findAll(@Param('area_id', ParseIntPipe) area_id: number) {
     return this.contentService.findAll(area_id);
   }
 
+  @Public()
   @Get(':content_id/:area_id')
   findOne(
     @Param('content_id', ParseIntPipe) content_id: number,

@@ -13,6 +13,7 @@ import { CommentService } from './comment.service';
 import { CommentRes } from '@app/contracts/shared-dto/comment/res/CommentRes';
 import { JwtAuthGuard } from '@app/common/guard/jwt-auth-guard/jwt-auth.guard';
 import { ApiBearerAuth } from '@nestjs/swagger';
+import { Public } from '@app/common/decorators/public.decorator';
 import { CommentReq } from '@app/contracts/shared-dto/comment/req/CommentReq';
 
 @Controller('comment')
@@ -25,6 +26,7 @@ export class CommentController {
     return this.commentService.create(dto);
   }
 
+  @Public()
   @Get(':contentId')
   getComment(@Param('contentId', ParseIntPipe) contentId: number) {
     return this.commentService.getComment(contentId);

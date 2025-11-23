@@ -19,6 +19,7 @@ import { SendMessageDto } from '@app/contracts/shared-dto/social/request/sendMes
 import { FindDmDto } from '@app/contracts/shared-dto/social/request/findDMDTO';
 import { ApiBearerAuth } from '@nestjs/swagger';
 import { JwtAuthGuard } from '@app/common/guard/jwt-auth-guard/jwt-auth.guard';
+import { Public } from '@app/common/decorators/public.decorator';
 
 @Controller('social')
 @UseGuards(JwtAuthGuard)
@@ -30,11 +31,13 @@ export class SocialController {
     return this.socialService.createRoom(dto);
   }
 
+  @Public()
   @Get('room/:roomId')
   getRoomInfo(@Param('roomId') roomId: string) {
     return this.socialService.getRoomInfo({ roomId });
   }
 
+  @Public()
   @Get('rooms/user/:userId')
   getAllRoomID(@Param('userId', ParseIntPipe) userId: number) {
     return this.socialService.getAllRoomID({ userId });
@@ -55,16 +58,19 @@ export class SocialController {
     return this.socialService.updateParticipantRole(dto);
   }
 
+  @Public()
   @Get('room/:roomId/participants')
   getTotalParticipants(@Param('roomId') roomId: string) {
     return this.socialService.getTotalParticipant({ roomId });
   }
 
+  @Public()
   @Get('room/:roomId/participantDM')
   getParticipant(@Param('roomId') roomId: string) {
     return this.socialService.getParticipant(roomId);
   }
 
+  @Public()
   @Get('room/:roomId/media')
   getMedia(@Param('roomId') roomId: string) {
     return this.socialService.getMedia({ roomId });
@@ -75,6 +81,7 @@ export class SocialController {
     return this.socialService.sendMessage(dto);
   }
 
+  @Public()
   @Get('room/:roomId/messages')
   getMessage(@Param('roomId') roomId: string, @Query('limit') limit?: number) {
     return this.socialService.getMessage({

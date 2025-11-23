@@ -15,6 +15,7 @@ import { Observable } from 'rxjs';
 import { ApiBearerAuth } from '@nestjs/swagger';
 import { JwtAuthGuard } from '@app/common/guard/jwt-auth-guard/jwt-auth.guard';
 import { BroadcastNotifReq } from '@app/contracts/shared-dto/sse/req/BroadcastNotifReq';
+import { Public } from '@app/common/decorators/public.decorator';
 
 @Controller('sse')
 @ApiBearerAuth()
@@ -39,6 +40,7 @@ export class SseController {
     return this.sseService.sendNotification(dto.userId, dto);
   }
 
+  @Public()
   @Get('stats')
   getStats() {
     return this.sseService.getConnectionStats();

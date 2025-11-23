@@ -12,6 +12,7 @@ import { NotificationService } from './notification.service';
 import { NotificationReq } from '@app/contracts/shared-dto/notification/req/notificiationReq';
 import { JwtAuthGuard } from '@app/common/guard/jwt-auth-guard/jwt-auth.guard';
 import { ApiBearerAuth } from '@nestjs/swagger';
+import { Public } from '@app/common/decorators/public.decorator';
 
 @Controller('notification')
 @UseGuards(JwtAuthGuard)
@@ -24,6 +25,7 @@ export class NotificationController {
     return this.notificationService.create(dto);
   }
 
+  @Public()
   @Get(':userId')
   getNotif(@Param('userId') userId: number) {
     return this.notificationService.getNotification(userId);
