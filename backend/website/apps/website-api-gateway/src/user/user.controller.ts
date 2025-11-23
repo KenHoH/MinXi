@@ -46,13 +46,13 @@ export class UserController {
     return this.userService.create(createUserDto);
   }
 
-  @Get(':area')
+  @Get('/area/:area')
   @Public()
   findAll(@Param('area', ParseIntPipe) area: number): Promise<UserDto[]> {
     return this.userService.findAll(+area);
   }
 
-  @Get(':id')
+  @Get('/user/:id')
   @Public()
   findOne(@Param('id', ParseIntPipe) id: number): Promise<UserDto> {
     return this.userService.findOne(+id);
