@@ -60,6 +60,7 @@ export const BOARD_MSG = {
   updateContent: 'board.updateContent',
   deleteBoard: 'board.delete',
   getBoardByUser: 'board.getByUser',
+  getContentIdsByBoardId: 'board.getContentIdsByBoardId',
 };
 
 export const CONNECTION_MSG = {

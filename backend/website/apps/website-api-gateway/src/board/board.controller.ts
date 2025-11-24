@@ -22,6 +22,7 @@ import { UpdateContentDto } from '@app/contracts/shared-dto/board/request/update
 import { Public } from '@app/common/decorators/public.decorator';
 import { BoardDto } from '@app/contracts/shared-dto/board/response/board.dto';
 import { Ack } from '@app/contracts/shared-dto/ack.dto';
+import { ContentIdsResDto } from '@app/contracts/shared-dto/content/res/content-ids.res.dto';
 
 @Controller('board')
 @UseGuards(JwtAuthGuard)
@@ -82,5 +83,13 @@ export class BoardController {
     @Param('userId', ParseIntPipe) userId: number,
   ): Promise<BoardDto[]> {
     return this.boardService.getBoardByUser(userId);
+  }
+
+  @Public()
+  @Get(':boardId/content-ids')
+  getContentIdsByBoardId(
+    @Param('boardId', ParseIntPipe) boardId: number,
+  ): Promise<ContentIdsResDto> {
+    return this.boardService.getContentIdsByBoardId(boardId);
   }
 }

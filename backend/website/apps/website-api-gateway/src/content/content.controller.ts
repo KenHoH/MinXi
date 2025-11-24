@@ -332,6 +332,7 @@ export class ContentController {
     return this.contentService.remove(content_id, area_id);
   }
 
+  @Public()
   @Get('files/:content_id/:area_id')
   getFiles(
     @Param('content_id', ParseIntPipe) content_id: number,
