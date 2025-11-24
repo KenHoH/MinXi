@@ -7,6 +7,7 @@ import {
   type UpdateContentDto,
   type BoardDto,
   type Ack,
+  type ContentIdsResDto,
 } from "@/services/api";
 import { useToast } from "../context/ToastContext";
 import { useLoading } from "../context/LoadingContext";
@@ -16,6 +17,7 @@ interface UseBoardServiceReturn {
   boardData: BoardDto | null;
   boardsData: BoardDto[] | null;
   ackData: Ack | null;
+  contentIdsData: ContentIdsResDto | null;
   error: string | null;
   isLoading: boolean;
 
@@ -27,6 +29,7 @@ interface UseBoardServiceReturn {
   removeContent: (boardId: number, dto: RemoveContentDto) => Promise<Ack>;
   updateContent: (boardId: number, dto: UpdateContentDto) => Promise<BoardDto>;
   getBoardsByUser: (userId: number) => Promise<BoardDto[]>;
+  getContentIdsByBoardId: (boardId: number) => Promise<ContentIdsResDto>;
   resetError: () => void;
 }
 
@@ -37,6 +40,9 @@ export default function useBoardService(): UseBoardServiceReturn {
   const [boardData, setBoardData] = useState<BoardDto | null>(null);
   const [boardsData, setBoardsData] = useState<BoardDto[] | null>(null);
   const [ackData, setAckData] = useState<Ack | null>(null);
+  const [contentIdsData, setContentIdsData] = useState<ContentIdsResDto | null>(
+    null
+  );
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -203,10 +209,31 @@ export default function useBoardService(): UseBoardServiceReturn {
     [showLoading, hideLoading, resetError, handleError]
   );
 
+  const getContentIdsByBoardId = useCallback(
+    async (boardId: number): Promise<ContentIdsResDto> => {
+      setIsLoading(true);
+      resetError();
+      try {
+        const result = await BoardService.boardControllerGetContentIdsByBoardId(
+          boardId
+        );
+        setContentIdsData(result);
+        return result;
+      } catch (err) {
+        handleError(err, "Failed to fetch content IDs. Please try again.");
+        throw err;
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    [resetError, handleError]
+  );
+
   return {
     boardData,
     boardsData,
     ackData,
+    contentIdsData,
     error,
     isLoading,
     createBoard,
@@ -216,6 +243,7 @@ export default function useBoardService(): UseBoardServiceReturn {
     removeContent,
     updateContent,
     getBoardsByUser,
+    getContentIdsByBoardId,
     resetError,
   };
 }

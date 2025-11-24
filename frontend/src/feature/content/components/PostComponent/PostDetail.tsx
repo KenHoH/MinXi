@@ -10,22 +10,13 @@ import { PostDetailHeader } from "./PostDetailHeader";
 import { PostDetailMain } from "./PostDetailMain";
 import { ReplyChain } from "./ReplyChain";
 import { PostMediaGallery } from "./PostMediaGallery";
-
-interface Post {
-  content_id: number;
-  creator_id: number;
-  title: string;
-  description: string;
-  likes: number;
-  comments: number;
-  post_type: "post";
-  parent_id?: number;
-}
+import type Content from "../../object/PublicContent";
+import type { Connect } from "vite";
 
 interface PostDetailComponentProps {
-  post: Post;
+  post: Content;
   onClose: () => void;
-  allPosts?: Record<number, Post>; // All posts for recursive lookup
+  allPosts?: Record<number, Content>; // All posts for recursive lookup
 }
 
 export function PostDetailComponent({
@@ -38,69 +29,70 @@ export function PostDetailComponent({
   const [showCreatePost, setShowCreatePost] = useState(false);
   const [currentMediaIndex, setCurrentMediaIndex] = useState(0);
 
-  // Mock posts with reply chains for testing
-  const mockPosts: Record<number, Post> = {
-    1: {
-      content_id: 1,
-      creator_id: 5,
-      title: "Original thought about design",
-      description: "Design is important for user experience",
-      likes: 1200,
-      comments: 45,
-      post_type: "post",
-    },
-    2: {
-      content_id: 2,
-      creator_id: 12,
-      title: "I completely agree with this",
-      description:
-        "Design really makes a difference in how users perceive your product",
-      likes: 850,
-      comments: 32,
-      post_type: "post",
-      parent_id: 1,
-    },
-    3: {
-      content_id: 3,
-      creator_id: 18,
-      title: "Great discussion everyone",
-      description:
-        "This thread has some excellent insights about design principles",
-      likes: 450,
-      comments: 15,
-      post_type: "post",
-      parent_id: 2,
-    },
-  };
+  // // Mock posts with reply chains for testing
+  // const mockPosts: Record<number, Connect> = {
+  //   1: {
+  //     content_id: 1,
+  //     creator_id: 5,
+  //     title: "Original thought about design",
+  //     description: "Design is important for user experience",
+  //     likes: 1200,
+  //     comments: 45,
+  //     post_type: "post",
+  //   },
+  //   2: {
+  //     content_id: 2,
+  //     creator_id: 12,
+  //     title: "I completely agree with this",
+  //     description:
+  //       "Design really makes a difference in how users perceive your product",
+  //     likes: 850,
+  //     comments: 32,
+  //     post_type: "post",
+  //     parent_id: 1,
+  //   },
+  //   3: {
+  //     content_id: 3,
+  //     creator_id: 18,
+  //     title: "Great discussion everyone",
+  //     description:
+  //       "This thread has some excellent insights about design principles",
+  //     likes: 450,
+  //     comments: 15,
+  //     post_type: "post",
+  //     parent_id: 2,
+  //   },
+  // };
 
-  // Merge provided allPosts with mock posts
-  const allPostsWithMock = { ...mockPosts, ...allPosts };
+  // // Merge provided allPosts with mock posts
+  // const allPostsWithMock = { ...mockPosts, ...allPosts };
 
-  const mediaItems = [
-    {
-      type: "image" as const,
-      src: `http://localhost:3000/uploads/thumbnail/1763296139023-929553449.jpg`,
-    },
-    {
-      type: "video" as const,
-      src: "http://localhost:3000/uploads/content/1763296139026-969061576.mp4",
-    },
-    {
-      type: "image" as const,
-      src: `http://localhost:3000/uploads/thumbnail/1763296139023-929553449.jpg`,
-    },
-  ];
+  // const mediaItems = [
+  //   {
+  //     type: "image" as const,
+  //     src: `http://localhost:3000/uploads/thumbnail/1763296139023-929553449.jpg`,
+  //   },
+  //   {
+  //     type: "video" as const,
+  //     src: "http://localhost:3000/uploads/content/1763296139026-969061576.mp4",
+  //   },
+  //   {
+  //     type: "image" as const,
+  //     src: `http://localhost:3000/uploads/thumbnail/1763296139023-929553449.jpg`,
+  //   },
+  // ];
 
   const handlePrevMedia = () => {
-    setCurrentMediaIndex((prev) =>
-      prev === 0 ? mediaItems.length - 1 : prev - 1
-    );
+    // setCurrentMediaIndex((prev) =>
+    //   // prev === 0 ? mediaItems.length - 1 : prev - 1
+    // );
   };
 
   const handleNextMedia = () => {
-    setCurrentMediaIndex((prev) =>
-      prev === mediaItems.length - 1 ? 0 : prev + 1
-    );
+    // setCurrentMediaIndex((prev) =>
+    //   // prev === mediaItems.length - 1 ? 0 : prev + 1
+    //   console.log("next media")
+    // );
   };
 
   const handleClickOutside = (e: React.MouseEvent) => {
@@ -125,12 +117,12 @@ export function PostDetailComponent({
         </button>
 
         <div className="p-6 space-y-4">
-          {post.parent_id && (
+          {/* {post.parent_id && (
             <ReplyChain parentId={post.parent_id} allPosts={allPostsWithMock} />
-          )}
+          )} */}
 
           <PostMediaGallery
-            mediaItems={mediaItems}
+            mediaItems={post.metadata}
             currentMediaIndex={currentMediaIndex}
             onPrevMedia={handlePrevMedia}
             onNextMedia={handleNextMedia}

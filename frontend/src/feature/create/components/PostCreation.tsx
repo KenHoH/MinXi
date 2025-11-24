@@ -5,16 +5,7 @@ import { Masonry } from "@/shared/components/Masonry";
 import { PostComponent } from "@/feature/content/components/PostComponent/PostComponent";
 import { CreatePostModal } from "@/feature/content/components/CreatePostModal";
 import { useAuthContext } from "@/feature/auth/context/AuthContext";
-
-interface Post {
-  content_id: number;
-  creator_id: number;
-  title: string;
-  description: string;
-  likes: number;
-  comments: number;
-  post_type: "post";
-}
+import type Post from "@/feature/content/object/Post";
 
 interface PostCreationProps {
   items: Post[];

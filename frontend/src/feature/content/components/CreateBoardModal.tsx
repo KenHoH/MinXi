@@ -1,12 +1,18 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { X } from "lucide-react";
 import { ProfilePicture } from "./ProfilePicture";
 import { ThumbnailPreview } from "./CreateBoardContent/ThumbnailPreview";
 import { UploadBoardThumbnail } from "./CreateBoardContent/UploadBoardThumbnail";
 import { MasonrySelector } from "./CreateBoardContent/MasonrySelector";
 import { SelectedItemsPreview } from "./CreateBoardContent/SelectedItemsPreview";
+import { useAuthContext } from "@/feature/auth/context/AuthContext";
+import type Content from "../object/PublicContent";
+import { useToast } from "@/shared/context/ToastContext";
+import { UserService } from "@/services/api";
+import useBoardService from "@/shared/hooks/useBoardService";
+import useContentService from "@/shared/hooks/useContentService";
 
 interface ContentGalleryItem {
   content_id: number;
@@ -35,67 +41,18 @@ interface SelectedItem {
 
 interface CreateBoardModalProps {
   isOpen: boolean;
+  contents: Content[];
   onClose: () => void;
   currentUserId: number;
 }
 
-// Mock data for all items (posts + content combined)
 type GalleryItem = (ContentGalleryItem | PostGalleryItem) & {
   type?: "image" | "video" | "post";
 };
 
-const mockAllItems: GalleryItem[] = [
-  { content_id: 1, title: "My Amazing Journey Through Europe", type: "post" },
-  { content_id: 2, title: "Tips for Better Photography", type: "post" },
-  {
-    content_id: 101,
-    title: "Sunset at the Beach",
-    type: "image",
-    thumbnail:
-      "http://localhost:3000/uploads/thumbnail/1763296139023-929553449.jpg",
-  },
-  {
-    content_id: 102,
-    title: "City Walk Vlog",
-    type: "video",
-    thumbnail:
-      "http://localhost:3000/uploads/thumbnail/1763296139023-929553449.jpg",
-  },
-  { content_id: 3, title: "Design Principles I Live By", type: "post" },
-  { content_id: 4, title: "Travel on a Budget", type: "post" },
-  {
-    content_id: 103,
-    title: "Mountain Peak Views",
-    type: "image",
-    thumbnail:
-      "http://localhost:3000/uploads/thumbnail/1763296139023-929553449.jpg",
-  },
-  {
-    content_id: 104,
-    title: "Cooking Tutorial",
-    type: "video",
-    thumbnail:
-      "http://localhost:3000/uploads/thumbnail/1763296139023-929553449.jpg",
-  },
-  { content_id: 5, title: "Understanding Color Theory", type: "post" },
-  {
-    content_id: 105,
-    title: "Urban Photography",
-    type: "image",
-    thumbnail:
-      "http://localhost:3000/uploads/thumbnail/1763296139023-929553449.jpg",
-  },
-  {
-    content_id: 106,
-    title: "Travel Montage",
-    type: "video",
-    thumbnail:
-      "http://localhost:3000/uploads/thumbnail/1763296139023-929553449.jpg",
-  },
-];
-
 export function CreateBoardModal({
   isOpen,
+  contents,
   onClose,
   currentUserId,
 }: CreateBoardModalProps) {
@@ -104,6 +61,24 @@ export function CreateBoardModal({
   const [isPrivate, setIsPrivate] = useState(false);
   const [thumbnail, setThumbnail] = useState<ThumbnailFile | null>(null);
   const [selectedIds, setSelectedIds] = useState<number[]>([]);
+  const [mockAllItems, setMockAllItems] = useState<GalleryItem[]>([]);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const { showToast } = useToast();
+
+  const { user } = useAuthContext();
+  const { createBoard } = useBoardService();
+  const { uploadContentImages } = useContentService();
+
+  useEffect(() => {
+    console.log(contents);
+    const mappedContents = contents.map((item) => ({
+      content_id: item.content_id,
+      title: item.title,
+      type: item.post_type as "image" | "video" | "post",
+      thumbnail: item.thumbnail_url,
+    }));
+    setMockAllItems(mappedContents);
+  }, [contents]);
 
   if (!isOpen) {
     return null;
@@ -146,23 +121,76 @@ export function CreateBoardModal({
       thumbnail: (item as ContentGalleryItem).thumbnail,
     })) as SelectedItem[];
 
-  const handleSubmit = () => {
-    // TODO: Submit board to backend
-    console.log({
-      title,
-      description,
-      isPrivate,
-      thumbnail,
-      selectedItems: selectedIds,
-      creator_id: currentUserId,
-    });
-    // Reset and close
+  // Validation helper
+  const validateForm = (): boolean => {
+    const trimmedTitle = title.trim();
+    const trimmedDesc = description.trim();
+
+    if (
+      !trimmedTitle ||
+      !trimmedDesc ||
+      !thumbnail ||
+      selectedIds.length === 0
+    ) {
+      showToast("Please fill in all required fields.");
+      return false;
+    }
+    return true;
+  };
+
+  // Reset form state
+  const resetForm = () => {
     setTitle("");
     setDescription("");
     setIsPrivate(false);
     setThumbnail(null);
     setSelectedIds([]);
-    onClose();
+  };
+
+  const handleSubmit = async () => {
+    if (isSubmitting) return;
+    if (!validateForm()) return;
+
+    setIsSubmitting(true);
+
+    try {
+      const userResponse = await UserService.userControllerFindOne(
+        currentUserId
+      );
+      if (!userResponse?.user_id || !userResponse?.area_id) {
+        showToast("Invalid user data. Please try again.");
+        console.error("Invalid user data:", userResponse);
+        return;
+      }
+
+      const uploadResult = await uploadContentImages({
+        thumbnail: thumbnail!.file,
+        contentImage: thumbnail!.file,
+      });
+
+      if (!uploadResult?.mainImagePath) {
+        showToast("Failed to upload thumbnail. Please try again.");
+        return;
+      }
+
+      await createBoard({
+        title: title.trim(),
+        description: description.trim(),
+        creator_id: userResponse.user_id,
+        board_thumbnail: uploadResult.mainImagePath,
+        contents: selectedIds,
+        visibilityPrivate: isPrivate,
+      });
+
+      showToast("Board created successfully!");
+      resetForm();
+      onClose();
+    } catch (error) {
+      console.error("Error creating board:", error);
+      showToast("Failed to create board. Please try again.");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const isFormValid = title.trim() && thumbnail && selectedItems.length > 0;
@@ -176,7 +204,7 @@ export function CreateBoardModal({
       <div className="fixed inset-0 flex items-center justify-center z-50 p-4">
         <div className="bg-black rounded-lg max-w-3xl w-full max-h-[90vh] overflow-hidden flex flex-col">
           {/* Header */}
-          <div className="flex items-center justify-between p-6 border-b border-gray-700 bg-black z-10 flex-shrink-0">
+          <div className="flex items-center justify-between p-6 border-b border-gray-700 bg-black z-10 shrink-0">
             <h2 className="text-xl font-bold text-gray-100">Create Board</h2>
             <button
               onClick={onClose}
@@ -197,7 +225,7 @@ export function CreateBoardModal({
               />
               <div>
                 <p className="font-semibold text-gray-100">
-                  @creator{currentUserId}
+                  @{user?.username || "User"}
                 </p>
               </div>
             </div>
@@ -293,16 +321,17 @@ export function CreateBoardModal({
           <div className="flex gap-3 p-6 border-t border-gray-700 bg-black z-10 shrink-0">
             <button
               onClick={onClose}
-              className="flex-1 px-4 py-2 bg-gray-900 text-gray-300 rounded-lg hover:bg-gray-800 transition-colors font-medium"
+              disabled={isSubmitting}
+              className="flex-1 px-4 py-2 bg-gray-900 text-gray-300 rounded-lg hover:bg-gray-800 transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed"
             >
               Cancel
             </button>
             <button
               onClick={handleSubmit}
-              disabled={!isFormValid}
+              disabled={!isFormValid || isSubmitting}
               className="flex-1 px-4 py-2 bg-burgundy-600 text-white rounded-lg hover:bg-burgundy-700 transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              Create Board
+              {isSubmitting ? "Creating..." : "Create Board"}
             </button>
           </div>
         </div>

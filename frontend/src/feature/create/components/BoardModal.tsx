@@ -4,39 +4,7 @@ import { Masonry } from "@/shared/components/Masonry";
 import { ContentComponent } from "@/feature/content/components/ContentComponent/ContentComponent";
 import { PostComponent } from "@/feature/content/components/PostComponent/PostComponent";
 import { useState } from "react";
-
-interface Content {
-  content_id: number;
-  creator_id: number;
-  title: string;
-  post_type: "image" | "video";
-  likes: number;
-  comments: number;
-  views: number;
-}
-
-interface Post {
-  content_id: number;
-  creator_id: number;
-  title: string;
-  description: string;
-  likes: number;
-  comments: number;
-  post_type: "post";
-}
-
-type BoardItem = Content | Post;
-
-interface Board {
-  board_id: number;
-  board_thumbnail: string;
-  creator_id: number;
-  title: string;
-  description: string;
-  visibilityPrivate: boolean;
-  created_at: string;
-  contents: BoardItem[];
-}
+import type Board from "@/feature/content/object/Board";
 
 interface BoardModalProps {
   board: Board;
@@ -106,9 +74,9 @@ export function BoardModal({
               {contents.map((item) => (
                 <div key={item.content_id} className="relative group">
                   {item.post_type === "post" ? (
-                    <PostComponent post={item as Post} />
+                    <PostComponent post={item} />
                   ) : (
-                    <ContentComponent content={item as Content} />
+                    <ContentComponent content={item} />
                   )}
                   <button
                     onClick={() => handleRemoveItem(item.content_id)}

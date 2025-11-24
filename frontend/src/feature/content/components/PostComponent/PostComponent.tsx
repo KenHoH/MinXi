@@ -5,19 +5,10 @@ import { useState } from "react";
 import { PostFooterInfo } from "./PostFooterInfo";
 import { PostHeaderInfo } from "./PostHeaderInfo";
 import { PostDetailComponent } from "./PostDetail";
-
-interface Post {
-  content_id: number;
-  creator_id: number;
-  title: string;
-  description: string;
-  likes: number;
-  comments: number;
-  post_type: "post";
-}
+import type Content from "../../object/PublicContent";
 
 interface PostComponentProps {
-  post: Post;
+  post: Content;
 }
 
 export function PostComponent({ post }: PostComponentProps) {

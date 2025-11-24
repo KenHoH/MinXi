@@ -10,6 +10,8 @@ import { useToast } from "@/shared/context/ToastContext";
 import type Content from "@/feature/content/object/PublicContent";
 import type Metadata from "@/feature/content/object/Metadata";
 import { useAuthContext } from "@/feature/auth/context/AuthContext";
+import useBoardService from "@/shared/hooks/useBoardService";
+import type Board from "@/feature/content/object/Board";
 
 const dummyUserBoards = [
   {
@@ -140,11 +142,131 @@ export default function CreatePage() {
     "content"
   );
   const [contentItems, setContentItems] = useState<Content[]>([]);
+  const [contentAll, setContentAll] = useState<Content[]>([]);
   const [postItems, setPostItems] = useState<Content[]>([]);
-  const [boardItems, setBoardItems] = useState(dummyUserBoards);
+  const [boardItems, setBoardItems] = useState<Board[]>([]);
   const { getByUser, getFiles } = useContentService();
+  const { getBoardsByUser, getContentIdsByBoardId } = useBoardService();
   const { showToast } = useToast();
   const { user } = useAuthContext();
+
+  const getBoardByUser = async (userId: number) => {
+    console.log("Starting to fetch boards and content for user:", userId);
+    const boardList: Board[] = [];
+    try {
+      console.log("Fetching all content items for user...");
+      const contentRes = await getByUser(userId);
+      const allContentItems = contentRes.map((item) => ({
+        content_id: item.content_id,
+        creator_id: item.creator_id,
+        parent_id: item.parent_id ?? null,
+        thumbnail_url: "",
+        title: item.title,
+        description: item.description,
+        post_type: item.post_type as "image" | "video" | "post",
+        likes: item.likes || 0,
+        comments: item.comments || 0,
+        views: item.views || 0,
+        pins: item.pins || 0,
+        reports: item.reports || 0,
+        visibilityPrivate: item.visibilityPrivate || false,
+        area_id: item.area_id,
+        metadata: [],
+      }));
+      console.log("Fetched all content items:", allContentItems);
+
+      console.log("Fetching boards for user...");
+      const boards = await getBoardsByUser(userId);
+      console.log("Fetched boards:", boards);
+
+      for (const board of boards) {
+        console.log(`Processing board ${board.board_id}...`);
+        const contentIdsRes = await getContentIdsByBoardId(board.board_id);
+        console.log(
+          `Fetched content IDs for board ${board.board_id}:`,
+          contentIdsRes.data
+        );
+
+        const boardContents = contentIdsRes.data
+          .map((contentId) =>
+            allContentItems.find((content) => content.content_id === contentId)
+          )
+          .filter((content) => content !== undefined) as Content[];
+
+        console.log(
+          `Mapped contents for board ${board.board_id}:`,
+          boardContents
+        );
+
+        boardList.push({
+          board_id: board.board_id,
+          thumbnail_url: board.board_thumbnail,
+          creator_id: board.creator_id,
+          title: board.title,
+          description: board.description,
+          visibilityPrivate: board.visibilityPrivate,
+          created_at: board.created_at,
+          contents: boardContents,
+        });
+      }
+
+      console.log("Setting board items:", boardList);
+      setBoardItems(boardList);
+    } catch (error) {
+      showToast("Failed to fetch user boards.");
+      console.error("Error fetching boards:", error);
+    }
+  };
+
+  const getAllItemsByUser = async (userId: number) => {
+    try {
+      const res = await getByUser(userId);
+      console.log("Fetched content by user:", res);
+
+      const contentItems: Content[] = [];
+      const content = res;
+
+      for (const item of content) {
+        const files = await getFiles(item.content_id, item.area_id);
+
+        console.log("Fetched files for content:", files);
+        const metadata: Metadata[] = files.map((file) => ({
+          file_id: file.file_id,
+          content_id: file.content_id,
+          content_area_id: file.content_area_id,
+          thumbnail_url: file.thumbnail || "",
+          file_url: file.filepath,
+          type: file.type || "",
+        }));
+
+        console.log(metadata);
+        const contentItem: Content = {
+          content_id: item.content_id,
+          creator_id: item.creator_id,
+          parent_id: null,
+          thumbnail_url: metadata[0]?.thumbnail_url || "",
+          title: item.title,
+          description: item.description,
+          post_type: item.post_type as "image" | "video" | "post",
+          likes: item.likes || 0,
+          comments: item.comments || 0,
+          views: item.views || 0,
+          pins: item.pins || 0,
+          reports: item.reports || 0,
+          visibilityPrivate: item.visibilityPrivate || false,
+          area_id: item.area_id,
+          metadata,
+        };
+
+        contentItems.push(contentItem);
+      }
+
+      setContentAll(contentItems);
+    } catch (error) {
+      showToast("Failed to fetch user content.");
+      console.error("Error fetching content:", error);
+    }
+  };
 
   const getContentByUser = async (userId: number) => {
     try {
@@ -256,6 +378,8 @@ export default function CreatePage() {
     }
     getContentByUser(user.user_id);
     getPostByUser(user.user_id);
+    getBoardByUser(user.user_id);
+    getAllItemsByUser(user.user_id);
   }, [user]);
 
   const handleDeleteContent = (id: number) => {
@@ -311,7 +435,11 @@ export default function CreatePage() {
             )}
 
             {activeTab === "board" && (
-              <BoardCreation items={boardItems} onDelete={handleDeleteBoard} />
+              <BoardCreation
+                items={boardItems}
+                contents={contentAll}
+                onDelete={handleDeleteBoard}
+              />
             )}
           </div>
         </div>

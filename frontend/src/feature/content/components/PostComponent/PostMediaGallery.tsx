@@ -1,14 +1,10 @@
 "use client";
 
 import { ChevronLeft, ChevronRight } from "lucide-react";
-
-interface MediaItem {
-  type: "image" | "video";
-  src: string;
-}
+import type Metadata from "../../object/Metadata";
 
 interface PostMediaGalleryProps {
-  mediaItems: MediaItem[];
+  mediaItems: Metadata[];
   currentMediaIndex: number;
   onPrevMedia: () => void;
   onNextMedia: () => void;
@@ -31,14 +27,14 @@ export function PostMediaGallery({
       {mediaItems[currentMediaIndex].type === "video" ? (
         <video
           key={`video-${currentMediaIndex}`}
-          src={mediaItems[currentMediaIndex].src}
+          src={mediaItems[currentMediaIndex].file_url}
           controls
           className="w-full h-full object-cover"
         />
       ) : (
         <img
           key={`image-${currentMediaIndex}`}
-          src={mediaItems[currentMediaIndex].src}
+          src={mediaItems[currentMediaIndex].file_url}
           alt={`${title} - ${currentMediaIndex + 1}`}
           className="w-full h-full object-cover"
         />
