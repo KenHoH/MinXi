@@ -34,7 +34,7 @@ export class AuthController {
       httpOnly: false,
       secure: true,
       sameSite: 'none',
-      maxAge: 1 * 60 * 60 * 1000,
+      maxAge: 3 * 60 * 60 * 1000,
     });
 
     response.cookie('refreshToken', token.refreshToken, {
@@ -58,7 +58,7 @@ export class AuthController {
       httpOnly: false,
       secure: true,
       sameSite: 'none',
-      maxAge: 1 * 60 * 60 * 1000,
+      maxAge: 3 * 60 * 60 * 1000,
     });
 
     response.cookie('refreshToken', token.refreshToken, {

@@ -2372,7 +2372,6 @@ export namespace Prisma {
   export type FileMinAggregateOutputType = {
     file_id: number | null
     filepath: string | null
-    thumbnail: string | null
     type: string | null
     content_id: number | null
     content_area_id: number | null
@@ -2381,7 +2380,6 @@ export namespace Prisma {
   export type FileMaxAggregateOutputType = {
     file_id: number | null
     filepath: string | null
-    thumbnail: string | null
     type: string | null
     content_id: number | null
     content_area_id: number | null
@@ -2390,7 +2388,6 @@ export namespace Prisma {
   export type FileCountAggregateOutputType = {
     file_id: number
     filepath: number
-    thumbnail: number
     type: number
     content_id: number
     content_area_id: number
@@ -2413,7 +2410,6 @@ export namespace Prisma {
   export type FileMinAggregateInputType = {
     file_id?: true
     filepath?: true
-    thumbnail?: true
     type?: true
     content_id?: true
     content_area_id?: true
@@ -2422,7 +2418,6 @@ export namespace Prisma {
   export type FileMaxAggregateInputType = {
     file_id?: true
     filepath?: true
-    thumbnail?: true
     type?: true
     content_id?: true
     content_area_id?: true
@@ -2431,7 +2426,6 @@ export namespace Prisma {
   export type FileCountAggregateInputType = {
     file_id?: true
     filepath?: true
-    thumbnail?: true
     type?: true
     content_id?: true
     content_area_id?: true
@@ -2527,8 +2521,7 @@ export namespace Prisma {
   export type FileGroupByOutputType = {
     file_id: number
     filepath: string
-    thumbnail: string | null
-    type: string | null
+    type: string
     content_id: number
     content_area_id: number
     _count: FileCountAggregateOutputType | null
@@ -2555,7 +2548,6 @@ export namespace Prisma {
   export type FileSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
     file_id?: boolean
     filepath?: boolean
-    thumbnail?: boolean
     type?: boolean
     content_id?: boolean
     content_area_id?: boolean
@@ -2566,13 +2558,12 @@ export namespace Prisma {
   export type FileSelectScalar = {
     file_id?: boolean
     filepath?: boolean
-    thumbnail?: boolean
     type?: boolean
     content_id?: boolean
     content_area_id?: boolean
   }
 
-  export type FileOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"file_id" | "filepath" | "thumbnail" | "type" | "content_id" | "content_area_id", ExtArgs["result"]["file"]>
+  export type FileOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"file_id" | "filepath" | "type" | "content_id" | "content_area_id", ExtArgs["result"]["file"]>
 
   export type $FilePayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     name: "File"
@@ -2580,8 +2571,7 @@ export namespace Prisma {
     scalars: $Extensions.GetPayloadResult<{
       file_id: number
       filepath: string
-      thumbnail: string | null
-      type: string | null
+      type: string
       content_id: number
       content_area_id: number
     }, ExtArgs["result"]["file"]>
@@ -2955,7 +2945,6 @@ export namespace Prisma {
   interface FileFieldRefs {
     readonly file_id: FieldRef<"File", 'Int'>
     readonly filepath: FieldRef<"File", 'String'>
-    readonly thumbnail: FieldRef<"File", 'String'>
     readonly type: FieldRef<"File", 'String'>
     readonly content_id: FieldRef<"File", 'Int'>
     readonly content_area_id: FieldRef<"File", 'Int'>
@@ -7151,7 +7140,6 @@ export namespace Prisma {
   export const FileScalarFieldEnum: {
     file_id: 'file_id',
     filepath: 'filepath',
-    thumbnail: 'thumbnail',
     type: 'type',
     content_id: 'content_id',
     content_area_id: 'content_area_id'
@@ -7233,7 +7221,6 @@ export namespace Prisma {
 
   export const FileOrderByRelevanceFieldEnum: {
     filepath: 'filepath',
-    thumbnail: 'thumbnail',
     type: 'type'
   };
 
@@ -7406,8 +7393,7 @@ export namespace Prisma {
     NOT?: FileWhereInput | FileWhereInput[]
     file_id?: IntFilter<"File"> | number
     filepath?: StringFilter<"File"> | string
-    thumbnail?: StringNullableFilter<"File"> | string | null
-    type?: StringNullableFilter<"File"> | string | null
+    type?: StringFilter<"File"> | string
     content_id?: IntFilter<"File"> | number
     content_area_id?: IntFilter<"File"> | number
   }
@@ -7415,8 +7401,7 @@ export namespace Prisma {
   export type FileOrderByWithRelationInput = {
     file_id?: SortOrder
     filepath?: SortOrder
-    thumbnail?: SortOrderInput | SortOrder
-    type?: SortOrderInput | SortOrder
+    type?: SortOrder
     content_id?: SortOrder
     content_area_id?: SortOrder
     _relevance?: FileOrderByRelevanceInput
@@ -7429,8 +7414,7 @@ export namespace Prisma {
     OR?: FileWhereInput[]
     NOT?: FileWhereInput | FileWhereInput[]
     filepath?: StringFilter<"File"> | string
-    thumbnail?: StringNullableFilter<"File"> | string | null
-    type?: StringNullableFilter<"File"> | string | null
+    type?: StringFilter<"File"> | string
     content_id?: IntFilter<"File"> | number
     content_area_id?: IntFilter<"File"> | number
   }, "file_id" | "content_id_filepath">
@@ -7438,8 +7422,7 @@ export namespace Prisma {
   export type FileOrderByWithAggregationInput = {
     file_id?: SortOrder
     filepath?: SortOrder
-    thumbnail?: SortOrderInput | SortOrder
-    type?: SortOrderInput | SortOrder
+    type?: SortOrder
     content_id?: SortOrder
     content_area_id?: SortOrder
     _count?: FileCountOrderByAggregateInput
@@ -7455,8 +7438,7 @@ export namespace Prisma {
     NOT?: FileScalarWhereWithAggregatesInput | FileScalarWhereWithAggregatesInput[]
     file_id?: IntWithAggregatesFilter<"File"> | number
     filepath?: StringWithAggregatesFilter<"File"> | string
-    thumbnail?: StringNullableWithAggregatesFilter<"File"> | string | null
-    type?: StringNullableWithAggregatesFilter<"File"> | string | null
+    type?: StringWithAggregatesFilter<"File"> | string
     content_id?: IntWithAggregatesFilter<"File"> | number
     content_area_id?: IntWithAggregatesFilter<"File"> | number
   }
@@ -7818,8 +7800,7 @@ export namespace Prisma {
 
   export type FileCreateInput = {
     filepath: string
-    thumbnail?: string | null
-    type?: string | null
+    type?: string
     content_id: number
     content_area_id: number
   }
@@ -7827,16 +7808,14 @@ export namespace Prisma {
   export type FileUncheckedCreateInput = {
     file_id?: number
     filepath: string
-    thumbnail?: string | null
-    type?: string | null
+    type?: string
     content_id: number
     content_area_id: number
   }
 
   export type FileUpdateInput = {
     filepath?: StringFieldUpdateOperationsInput | string
-    thumbnail?: NullableStringFieldUpdateOperationsInput | string | null
-    type?: NullableStringFieldUpdateOperationsInput | string | null
+    type?: StringFieldUpdateOperationsInput | string
     content_id?: IntFieldUpdateOperationsInput | number
     content_area_id?: IntFieldUpdateOperationsInput | number
   }
@@ -7844,8 +7823,7 @@ export namespace Prisma {
   export type FileUncheckedUpdateInput = {
     file_id?: IntFieldUpdateOperationsInput | number
     filepath?: StringFieldUpdateOperationsInput | string
-    thumbnail?: NullableStringFieldUpdateOperationsInput | string | null
-    type?: NullableStringFieldUpdateOperationsInput | string | null
+    type?: StringFieldUpdateOperationsInput | string
     content_id?: IntFieldUpdateOperationsInput | number
     content_area_id?: IntFieldUpdateOperationsInput | number
   }
@@ -7853,16 +7831,14 @@ export namespace Prisma {
   export type FileCreateManyInput = {
     file_id?: number
     filepath: string
-    thumbnail?: string | null
-    type?: string | null
+    type?: string
     content_id: number
     content_area_id: number
   }
 
   export type FileUpdateManyMutationInput = {
     filepath?: StringFieldUpdateOperationsInput | string
-    thumbnail?: NullableStringFieldUpdateOperationsInput | string | null
-    type?: NullableStringFieldUpdateOperationsInput | string | null
+    type?: StringFieldUpdateOperationsInput | string
     content_id?: IntFieldUpdateOperationsInput | number
     content_area_id?: IntFieldUpdateOperationsInput | number
   }
@@ -7870,8 +7846,7 @@ export namespace Prisma {
   export type FileUncheckedUpdateManyInput = {
     file_id?: IntFieldUpdateOperationsInput | number
     filepath?: StringFieldUpdateOperationsInput | string
-    thumbnail?: NullableStringFieldUpdateOperationsInput | string | null
-    type?: NullableStringFieldUpdateOperationsInput | string | null
+    type?: StringFieldUpdateOperationsInput | string
     content_id?: IntFieldUpdateOperationsInput | number
     content_area_id?: IntFieldUpdateOperationsInput | number
   }
@@ -8324,21 +8299,6 @@ export namespace Prisma {
     _max?: NestedDateTimeFilter<$PrismaModel>
   }
 
-  export type StringNullableFilter<$PrismaModel = never> = {
-    equals?: string | StringFieldRefInput<$PrismaModel> | null
-    in?: string[] | null
-    notIn?: string[] | null
-    lt?: string | StringFieldRefInput<$PrismaModel>
-    lte?: string | StringFieldRefInput<$PrismaModel>
-    gt?: string | StringFieldRefInput<$PrismaModel>
-    gte?: string | StringFieldRefInput<$PrismaModel>
-    contains?: string | StringFieldRefInput<$PrismaModel>
-    startsWith?: string | StringFieldRefInput<$PrismaModel>
-    endsWith?: string | StringFieldRefInput<$PrismaModel>
-    search?: string
-    not?: NestedStringNullableFilter<$PrismaModel> | string | null
-  }
-
   export type FileOrderByRelevanceInput = {
     fields: FileOrderByRelevanceFieldEnum | FileOrderByRelevanceFieldEnum[]
     sort: SortOrder
@@ -8353,7 +8313,6 @@ export namespace Prisma {
   export type FileCountOrderByAggregateInput = {
     file_id?: SortOrder
     filepath?: SortOrder
-    thumbnail?: SortOrder
     type?: SortOrder
     content_id?: SortOrder
     content_area_id?: SortOrder
@@ -8368,7 +8327,6 @@ export namespace Prisma {
   export type FileMaxOrderByAggregateInput = {
     file_id?: SortOrder
     filepath?: SortOrder
-    thumbnail?: SortOrder
     type?: SortOrder
     content_id?: SortOrder
     content_area_id?: SortOrder
@@ -8377,7 +8335,6 @@ export namespace Prisma {
   export type FileMinOrderByAggregateInput = {
     file_id?: SortOrder
     filepath?: SortOrder
-    thumbnail?: SortOrder
     type?: SortOrder
     content_id?: SortOrder
     content_area_id?: SortOrder
@@ -8387,24 +8344,6 @@ export namespace Prisma {
     file_id?: SortOrder
     content_id?: SortOrder
     content_area_id?: SortOrder
-  }
-
-  export type StringNullableWithAggregatesFilter<$PrismaModel = never> = {
-    equals?: string | StringFieldRefInput<$PrismaModel> | null
-    in?: string[] | null
-    notIn?: string[] | null
-    lt?: string | StringFieldRefInput<$PrismaModel>
-    lte?: string | StringFieldRefInput<$PrismaModel>
-    gt?: string | StringFieldRefInput<$PrismaModel>
-    gte?: string | StringFieldRefInput<$PrismaModel>
-    contains?: string | StringFieldRefInput<$PrismaModel>
-    startsWith?: string | StringFieldRefInput<$PrismaModel>
-    endsWith?: string | StringFieldRefInput<$PrismaModel>
-    search?: string
-    not?: NestedStringNullableWithAggregatesFilter<$PrismaModel> | string | null
-    _count?: NestedIntNullableFilter<$PrismaModel>
-    _min?: NestedStringNullableFilter<$PrismaModel>
-    _max?: NestedStringNullableFilter<$PrismaModel>
   }
 
   export type HistoryContentUser_idContent_idCompoundUniqueInput = {
@@ -8620,10 +8559,6 @@ export namespace Prisma {
     set?: Date | string
   }
 
-  export type NullableStringFieldUpdateOperationsInput = {
-    set?: string | null
-  }
-
   export type BoardContentCreateNestedManyWithoutBoardInput = {
     create?: XOR<BoardContentCreateWithoutBoardInput, BoardContentUncheckedCreateWithoutBoardInput> | BoardContentCreateWithoutBoardInput[] | BoardContentUncheckedCreateWithoutBoardInput[]
     connectOrCreate?: BoardContentCreateOrConnectWithoutBoardInput | BoardContentCreateOrConnectWithoutBoardInput[]
@@ -8825,39 +8760,6 @@ export namespace Prisma {
     _count?: NestedIntFilter<$PrismaModel>
     _min?: NestedDateTimeFilter<$PrismaModel>
     _max?: NestedDateTimeFilter<$PrismaModel>
-  }
-
-  export type NestedStringNullableFilter<$PrismaModel = never> = {
-    equals?: string | StringFieldRefInput<$PrismaModel> | null
-    in?: string[] | null
-    notIn?: string[] | null
-    lt?: string | StringFieldRefInput<$PrismaModel>
-    lte?: string | StringFieldRefInput<$PrismaModel>
-    gt?: string | StringFieldRefInput<$PrismaModel>
-    gte?: string | StringFieldRefInput<$PrismaModel>
-    contains?: string | StringFieldRefInput<$PrismaModel>
-    startsWith?: string | StringFieldRefInput<$PrismaModel>
-    endsWith?: string | StringFieldRefInput<$PrismaModel>
-    search?: string
-    not?: NestedStringNullableFilter<$PrismaModel> | string | null
-  }
-
-  export type NestedStringNullableWithAggregatesFilter<$PrismaModel = never> = {
-    equals?: string | StringFieldRefInput<$PrismaModel> | null
-    in?: string[] | null
-    notIn?: string[] | null
-    lt?: string | StringFieldRefInput<$PrismaModel>
-    lte?: string | StringFieldRefInput<$PrismaModel>
-    gt?: string | StringFieldRefInput<$PrismaModel>
-    gte?: string | StringFieldRefInput<$PrismaModel>
-    contains?: string | StringFieldRefInput<$PrismaModel>
-    startsWith?: string | StringFieldRefInput<$PrismaModel>
-    endsWith?: string | StringFieldRefInput<$PrismaModel>
-    search?: string
-    not?: NestedStringNullableWithAggregatesFilter<$PrismaModel> | string | null
-    _count?: NestedIntNullableFilter<$PrismaModel>
-    _min?: NestedStringNullableFilter<$PrismaModel>
-    _max?: NestedStringNullableFilter<$PrismaModel>
   }
 
   export type BoardContentCreateWithoutBoardInput = {

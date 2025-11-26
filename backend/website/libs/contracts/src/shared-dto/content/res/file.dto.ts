@@ -10,11 +10,6 @@ export class FileDto {
   @IsString()
   filepath: string;
 
-  @ApiProperty({ required: false })
-  @IsOptional()
-  @IsString()
-  thumbnail?: string;
-
   @ApiProperty()
   @IsInt()
   content_id: number;
@@ -23,8 +18,8 @@ export class FileDto {
   @IsInt()
   content_area_id: number;
 
-  @ApiProperty({ required: false })
+  @ApiProperty()
   @IsOptional()
   @IsString()
-  type?: string;
+  type: string;
 }

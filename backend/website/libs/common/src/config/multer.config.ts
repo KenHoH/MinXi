@@ -6,18 +6,12 @@ export const MulterConfiguration = {
     destination: (req, file, callback) => {
       let destPath = './uploads/';
 
-      if (file.fieldname === 'image') {
+      if (file.fieldname === 'thumbnail') {
         destPath += 'thumbnail';
-      } else if (file.fieldname === 'video') {
+      } else if (file.fieldname === 'contents') {
         destPath += 'content';
-      } else if (file.fieldname === 'profilePicture') {
+      } else if (file.mimetype === 'profile') {
         destPath += 'profile';
-      } else if (
-        file.fieldname === 'thumbnail' ||
-        file.fieldname === 'contentImage'
-      ) {
-        // For uploadImageContent: thumbnail goes to thumbnail folder, contentImage goes to content folder
-        destPath += file.fieldname === 'thumbnail' ? 'thumbnail' : 'content';
       }
 
       callback(null, destPath);

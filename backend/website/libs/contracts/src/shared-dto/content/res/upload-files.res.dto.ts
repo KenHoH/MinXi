@@ -1,4 +1,4 @@
 export class UploadFilesResDto {
-  mainImagePath: string | null;
+  thumbnail: string | null;
   optionalMediaPath: string | null;
 }

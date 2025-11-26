@@ -6,14 +6,12 @@ import {
   Patch,
   Param,
   Delete,
-  UploadedFile,
   UseInterceptors,
-  ParseFilePipeBuilder,
-  HttpStatus,
   ParseIntPipe,
   UploadedFiles,
   Logger,
   UseGuards,
+  BadRequestException,
 } from '@nestjs/common';
 import { ContentService } from './content.service';
 import {
@@ -27,20 +25,16 @@ import {
   ApiResponse,
 } from '@nestjs/swagger';
 import { MulterConfiguration } from '@app/common/config/multer.config';
-import { UploadFilesResDto } from '@app/contracts/shared-dto/content/res/upload-files.res.dto';
-import { UploadProfileResDto } from '@app/contracts/shared-dto/content/res/upload-profile.res.dto';
-import { UploadImageContentResDto } from '@app/contracts/shared-dto/content/res/upload-image-content.res.dto';
 import { CreatePostDto } from '@app/contracts/shared-dto/content/req/CreatePost.req.dto';
 import { deltaDto } from '@app/contracts/shared-dto/user/delta.dto';
-import { fileFieldsSchema } from '@app/contracts/shared-dto/schema/fileFieldsSchema';
-import { CreateFileDto } from '@app/contracts/shared-dto/content/req/CreateFile.req.dto';
 import { FullContentDto } from '@app/contracts/shared-dto/content/res/full.content.dto';
-import { FileRes } from '@app/contracts/shared-dto/content/res/file.res.dto';
-import { FileDto } from '@app/contracts/shared-dto/content/res/file.dto';
+import { createContentSchema } from './schemas/create-content.schema';
 import { Ack } from '@app/contracts/shared-dto/ack.dto';
 import { JwtAuthGuard } from '@app/common/guard/jwt-auth-guard/jwt-auth.guard';
 import { LogInterceptor } from '@app/common/interceptor/log/log.interceptor';
 import { Public } from '@app/common/decorators/public.decorator';
+import { FileDtoReq } from '@app/contracts/shared-dto/content/req/FIleDto.req';
+import { FileDto } from '@app/contracts/shared-dto/content/res/file.dto';
 
 @Controller('content')
 @UseGuards(JwtAuthGuard)
@@ -52,171 +46,91 @@ export class ContentController {
   private readonly logger = new Logger(ContentController.name);
 
   @Post()
-  create(@Body() dto: CreatePostDto): Promise<FullContentDto> {
-    return this.contentService.create(dto);
-  }
-
-  @Post('createFile')
-  createFile(@Body() dto: CreateFileDto): Promise<FileRes> {
-    return this.contentService.createFile(dto);
-  }
-
-  @Post('files')
+  @Public()
   @ApiConsumes('multipart/form-data')
   @ApiBody({
-    description:
-      'Uploads a mandatory image and an optional second image or video.',
-    schema: fileFieldsSchema,
+    description: 'Create content with thumbnail and file uploads',
+    required: true,
+    schema: createContentSchema,
   })
   @ApiResponse({
     status: 201,
-    description: 'Files uploaded successfully',
-    type: UploadFilesResDto,
-  })
-  @UseInterceptors(
-    FileFieldsInterceptor(
-      [
-        { name: 'image', maxCount: 1 },
-        { name: 'video', maxCount: 1 },
-      ],
-      MulterConfiguration,
-    ),
-  )
-  uploadMultipleFiles(
-    @UploadedFiles()
-    files: {
-      image?: Express.Multer.File[];
-      video?: Express.Multer.File[];
-    },
-  ): UploadFilesResDto {
-    const imageFile = files.image ? files.image[0] : null;
-    const videoFile = files.video ? files.video[0] : null;
-
-    const mainImagePath = imageFile
-      ? `http://localhost:3000/uploads/thumbnail/${imageFile.filename}`
-      : null;
-
-    const optionalMediaPath = videoFile
-      ? `http://localhost:3000/uploads/content/${videoFile.filename}`
-      : null;
-
-    return {
-      mainImagePath: mainImagePath,
-      optionalMediaPath: optionalMediaPath,
-    };
-  }
-
-  @Post('profile')
-  @ApiConsumes('multipart/form-data')
-  @ApiBody({
-    description: 'Uploads a single image file for profile picture.',
-    schema: {
-      type: 'object',
-      properties: {
-        profilePicture: {
-          type: 'string',
-          format: 'binary',
-          description: 'The profile picture image file',
-        },
-      },
-      required: ['profilePicture'],
-    },
+    description: 'Content created successfully',
+    type: FullContentDto,
   })
   @ApiResponse({
-    status: 201,
-    description: 'Profile picture uploaded successfully',
-    type: UploadProfileResDto,
-  })
-  @UseInterceptors(FileInterceptor('profilePicture', MulterConfiguration))
-  uploadProfile(
-    @UploadedFile()
-    file: Express.Multer.File,
-  ): UploadProfileResDto {
-    if (!file) {
-      return { profilePicturePath: null };
-    }
-
-    const profilePicturePath = `http://localhost:3000/uploads/profile/${file.filename}`;
-
-    return {
-      profilePicturePath: profilePicturePath,
-    };
-  }
-
-  @Post('image-content')
-  @ApiConsumes('multipart/form-data')
-  @ApiBody({
-    description:
-      'Uploads a thumbnail image and a content image. Both must be image files.',
-    schema: {
-      type: 'object',
-      properties: {
-        thumbnail: {
-          type: 'string',
-          format: 'binary',
-          description: 'The thumbnail image file',
-        },
-        contentImage: {
-          type: 'string',
-          format: 'binary',
-          description: 'The content image file',
-        },
-      },
-      required: ['thumbnail', 'contentImage'],
-    },
-  })
-  @ApiResponse({
-    status: 201,
-    description: 'Images uploaded successfully',
-    type: UploadImageContentResDto,
+    status: 400,
+    description: 'Bad request - missing required files or fields',
   })
   @UseInterceptors(
     FileFieldsInterceptor(
       [
         { name: 'thumbnail', maxCount: 1 },
-        { name: 'contentImage', maxCount: 1 },
+        { name: 'contents', maxCount: 5 },
       ],
       MulterConfiguration,
     ),
   )
-  uploadImageContent(
+  async create(
     @UploadedFiles()
     files: {
       thumbnail?: Express.Multer.File[];
-      contentImage?: Express.Multer.File[];
+      contents?: Express.Multer.File[];
     },
-  ): UploadImageContentResDto {
-    const thumbnailFile = files.thumbnail ? files.thumbnail[0] : null;
-    const contentImageFile = files.contentImage ? files.contentImage[0] : null;
+    @Body() body: any,
+  ): Promise<FullContentDto> {
+    // Extract form fields from body
+    const creator_id = parseInt(body.creator_id, 10);
+    const area_id = parseInt(body.area_id, 10);
+    const parent_id = body.parent_id ? parseInt(body.parent_id, 10) : undefined;
+    const title = body.title;
+    const description = body.description;
+    const post_type = body.post_type;
 
-    if (!thumbnailFile || !contentImageFile) {
-      return {
-        thumbnailPath: null,
-        contentImagePath: null,
-        error: 'Both thumbnail and contentImage files are required',
-      };
+    // Validate required fields
+    if (isNaN(creator_id) || isNaN(area_id)) {
+      throw new BadRequestException(
+        'creator_id and area_id must be valid numbers',
+      );
     }
 
-    // Validate that both files are images
-    const imageTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
-    const isThumbnailImage = imageTypes.includes(thumbnailFile.mimetype);
-    const isContentImageImage = imageTypes.includes(contentImageFile.mimetype);
+    if (!title || !description || !post_type) {
+      throw new BadRequestException(
+        'title, description, and post_type are required',
+      );
+    }
 
-    if (!isThumbnailImage || !isContentImageImage) {
-      return {
-        thumbnailPath: null,
-        contentImagePath: null,
-        error: 'Both files must be image files',
-      };
+    const thumbnailFile = files.thumbnail ? files.thumbnail[0] : null;
+
+    if (!thumbnailFile) {
+      throw new BadRequestException('Thumbnail file is required');
     }
 
     const thumbnailPath = `http://localhost:3000/uploads/thumbnail/${thumbnailFile.filename}`;
-    const contentImagePath = `http://localhost:3000/uploads/content/${contentImageFile.filename}`;
 
-    return {
-      thumbnailPath: thumbnailPath,
-      contentImagePath: contentImagePath,
+    const posts: FileDtoReq[] =
+      files.contents?.map((file) => ({
+        content_area_id: area_id,
+        type: file.mimetype.startsWith('image/') ? 'image' : 'video',
+        filepath: `http://localhost:3000/uploads/content/${file.filename}`,
+      })) || [];
+
+    if (posts.length === 0) {
+      throw new BadRequestException('At least one content file is required');
+    }
+
+    const createDto: CreatePostDto = {
+      creator_id,
+      area_id,
+      parent_id,
+      thumbnail: thumbnailPath,
+      contents: posts as FileDto[],
+      title,
+      description,
+      post_type,
     };
+
+    return await this.contentService.create(createDto);
   }
 
   @Public()
@@ -330,14 +244,5 @@ export class ContentController {
     @Param('area_id', ParseIntPipe) area_id: number,
   ): Promise<Ack> {
     return this.contentService.remove(content_id, area_id);
-  }
-
-  @Public()
-  @Get('files/:content_id/:area_id')
-  getFiles(
-    @Param('content_id', ParseIntPipe) content_id: number,
-    @Param('area_id', ParseIntPipe) area_id: number,
-  ): Promise<FileDto[]> {
-    return this.contentService.getFiles(content_id, area_id);
   }
 }

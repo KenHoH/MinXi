@@ -1,17 +1,16 @@
 export const fileFieldsSchema = {
   type: 'object',
   properties: {
-    image: {
+    thumbnail: {
       type: 'string',
       format: 'binary',
-      description: 'The primary image file.',
+      description: 'The Thumbnail file must be image',
     },
     video: {
       type: 'string',
       format: 'binary',
-      description: 'The associated video file.',
+      description: 'The video content',
     },
-
   },
-  required: ['image', 'video'], 
+  required: ['thumbnail', 'video'],
 };

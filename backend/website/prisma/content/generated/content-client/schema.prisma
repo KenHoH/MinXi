@@ -34,10 +34,9 @@ model Content {
 }
 
 model File {
-  file_id   Int     @id @default(autoincrement())
-  filepath  String
-  thumbnail String?
-  type      String?
+  file_id  Int    @id @default(autoincrement())
+  filepath String
+  type     String @default("thumbnail")
 
   content_id      Int
   content_area_id Int
