@@ -16,6 +16,11 @@ export class CommentReq {
   creator_id: number;
 
   @ApiProperty()
+  @IsOptional()
+  @IsInt()
+  parent_id?: number;
+
+  @ApiProperty()
   @IsString()
   text: string;
 }

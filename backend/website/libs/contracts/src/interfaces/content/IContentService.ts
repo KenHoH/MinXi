@@ -30,6 +30,7 @@ export interface IContentService {
   getFile(contentId: number, areaId: number): Promise<FileDto>;
   getFiles(contentId: number, areaId: number): Promise<FileDto[]>;
 
+  getFullPost(contentId: number, areaId: number): Promise<FullContentDto>;
   getFollowingContent(userId: number): Promise<FullContentDto[]>;
   getFriendContent(userId: number): Promise<FullContentDto[]>;
   getLikedByUser(userId: number): Promise<FullContentDto[]>;

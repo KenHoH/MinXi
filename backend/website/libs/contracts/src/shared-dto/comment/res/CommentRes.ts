@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsInt, IsOptional, IsString } from 'class-validator';
+import { IsArray, IsInt, IsOptional, IsString } from 'class-validator';
 
 export class CommentRes {
   @ApiProperty()
@@ -16,8 +16,17 @@ export class CommentRes {
   creator_id: number;
 
   @ApiProperty()
+  @IsOptional()
+  @IsInt()
+  parent_id?: number;
+
+  @ApiProperty()
   @IsString()
   text: string;
+
+  @ApiProperty()
+  @IsArray()
+  replies: CommentRes[];
 
   @ApiProperty()
   @IsInt()
