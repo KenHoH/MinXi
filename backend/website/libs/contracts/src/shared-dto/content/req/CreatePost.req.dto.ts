@@ -39,4 +39,8 @@ export class CreatePostDto {
   @ApiProperty({ type: [FileDto], isArray: true })
   @IsArray()
   contents: FileDto[];
+
+  @ApiProperty()
+  @IsString()
+  published_at: string;
 }

@@ -191,4 +191,15 @@ export class ContentController {
     this.logger.log(`Fetching Friend content by user ID ${userId}`);
     return this.contentService.getFriendContent(userId);
   }
+  @MessagePattern(CONTENT_MSG.getLikedByUser)
+  async getLikedByUser(@Payload() userId: number): Promise<FullContentDto[]> {
+    this.logger.log(`Fetching Liked content by user ID ${userId}`);
+    return this.contentService.getLikedByUser(userId);
+  }
+
+  @MessagePattern(CONTENT_MSG.getPinnedByUser)
+  async getPinnedByUser(@Payload() userId: number): Promise<FullContentDto[]> {
+    this.logger.log(`Fetching Pinned content by user ID ${userId}`);
+    return this.contentService.getPinnedByUser(userId);
+  }
 }

@@ -157,4 +157,16 @@ export class ContentService implements IContentService {
       this.contentClient.send(CONTENT_MSG.getFiles, { contentId, areaId }),
     );
   }
+
+  async getLikedByUser(userId: number): Promise<FullContentDto[]> {
+    return firstValueFrom(
+      this.contentClient.send(CONTENT_MSG.getLikedByUser, userId),
+    );
+  }
+
+  async getPinnedByUser(userId: number): Promise<FullContentDto[]> {
+    return firstValueFrom(
+      this.contentClient.send(CONTENT_MSG.getPinnedByUser, userId),
+    );
+  }
 }

@@ -15,10 +15,16 @@ import {
   Injectable,
   Logger,
 } from '@nestjs/common';
-import { CONNECT_SERVICES } from '@app/common/constants/services';
+import {
+  CONNECT_SERVICES,
+  HISTORY_SERVICES,
+} from '@app/common/constants/services';
 import { ClientProxy } from '@nestjs/microservices';
 import { firstValueFrom } from 'rxjs';
-import { CONNECTION_MSG } from '@app/common/constants/messageEvent';
+import {
+  CONNECTION_MSG,
+  HISTORY_MSG,
+} from '@app/common/constants/messageEvent';
 import { mapToContent } from './utils/mapToContent';
 
 @Injectable()
@@ -28,6 +34,8 @@ export class ContentService implements IContentService {
     private readonly prisma: ContentDatabaseConnection,
     @Inject(CONNECT_SERVICES.CLIENT)
     private readonly connectionClient: ClientProxy,
+    @Inject(HISTORY_SERVICES.CLIENT)
+    private readonly historyClient: ClientProxy,
   ) {}
 
   async create(dto: CreatePostDto): Promise<FullContentDto> {
@@ -64,6 +72,7 @@ export class ContentService implements IContentService {
                 description: dto.description,
                 post_type: dto.post_type,
                 area_id: dto.area_id,
+                published_at: new Date(dto.published_at),
               },
             })
             .catch((error) => {
@@ -222,7 +231,7 @@ export class ContentService implements IContentService {
         .$transaction(async (tx) => {
           const contents = await tx.content
             .findMany({
-              where: { area_id },
+              where: { area_id, published_at: { lte: new Date() } },
               orderBy: { content_id: 'asc' },
             })
             .catch((error) => {
@@ -457,7 +466,7 @@ export class ContentService implements IContentService {
         .$transaction(async (tx) => {
           const contents = await tx.content
             .findMany({
-              where: { creator_id },
+              where: { creator_id, published_at: { lte: new Date() } },
               orderBy: { created_at: 'desc' },
             })
             .catch((error) => {
@@ -877,7 +886,10 @@ export class ContentService implements IContentService {
 
           const contents = await tx.content
             .findMany({
-              where: { creator_id: { in: followingIds } },
+              where: {
+                creator_id: { in: followingIds },
+                published_at: { lte: new Date() },
+              },
               orderBy: { created_at: 'desc' },
             })
             .catch((error) => {
@@ -1009,7 +1021,10 @@ export class ContentService implements IContentService {
 
           const contents = await tx.content
             .findMany({
-              where: { creator_id: { in: friendIds } },
+              where: {
+                creator_id: { in: friendIds },
+                published_at: { lte: new Date() },
+              },
               orderBy: { created_at: 'desc' },
             })
             .catch((error) => {
@@ -1117,6 +1132,271 @@ export class ContentService implements IContentService {
           HttpStatus.NOT_FOUND,
         ),
       );
+    }
+  }
+
+  async getLikedByUser(userId: number): Promise<FullContentDto[]> {
+    try {
+      const result = await this.prisma
+        .$transaction(async (tx) => {
+          const histories = await firstValueFrom(
+            this.historyClient.send(HISTORY_MSG.getByUser, userId),
+          ).catch((error) => {
+            this.logger.error('Failed to fetch history records', error.message);
+            throw httpToRpc(
+              new HttpException(
+                'Failed to fetch history records',
+                HttpStatus.NOT_FOUND,
+              ),
+            );
+          });
+
+          this.logger.log(
+            `User ${userId} has ${histories.length} history records`,
+          );
+
+          const liked = histories.filter((h) => h.liked === true);
+          const likedIds = liked.map((f) => f.content_id);
+
+          const contents = await tx.content
+            .findMany({
+              where: {
+                content_id: { in: likedIds },
+                published_at: { lte: new Date() },
+              },
+              orderBy: { created_at: 'desc' },
+            })
+            .catch((error) => {
+              this.logger.error(
+                'Failed to fetch liked contents',
+                error.message,
+              );
+              throw httpToRpc(
+                new HttpException(
+                  'Failed to fetch liked contents',
+                  HttpStatus.INTERNAL_SERVER_ERROR,
+                ),
+              );
+            });
+
+          const allContents: FullContentDto[] = [];
+
+          for (const content of contents) {
+            try {
+              const files = await tx.file.findMany({
+                where: {
+                  content_id: content.content_id,
+                  content_area_id: content.area_id,
+                },
+              });
+
+              const thumbnail = files.find((file) => file.type === 'thumbnail');
+              if (!thumbnail) {
+                this.logger.warn(
+                  `Content ${content.content_id} missing thumbnail`,
+                );
+                continue;
+              }
+
+              const mappedFiles: FileDto[] = files
+                .filter((file) => file.type !== 'thumbnail')
+                .map((file) => ({
+                  file_id: file.file_id,
+                  filepath: file.filepath,
+                  content_id: file.content_id,
+                  content_area_id: file.content_area_id,
+                  type: file.type,
+                }));
+
+              allContents.push({
+                content_id: content.content_id,
+                creator_id: content.creator_id,
+                parent_id: content.parent_id ?? undefined,
+                area_id: content.area_id,
+                title: content.title,
+                description: content.description,
+                post_type: content.post_type,
+                visibilityPrivate: content.visibilityPrivate,
+                views: content.views,
+                likes: content.likes,
+                comments: content.comments,
+                pins: content.pins,
+                reports: content.reports,
+                thumbnail: {
+                  file_id: thumbnail.file_id,
+                  filepath: thumbnail.filepath,
+                  content_id: thumbnail.content_id,
+                  content_area_id: thumbnail.content_area_id,
+                  type: thumbnail.type,
+                },
+                contents: mappedFiles,
+              });
+            } catch (error) {
+              this.logger.error(
+                `Failed to fetch files for content ${content.content_id}`,
+                error.message,
+              );
+              throw httpToRpc(
+                new HttpException(
+                  `Failed to fetch files for content ${content.content_id}`,
+                  HttpStatus.INTERNAL_SERVER_ERROR,
+                ),
+              );
+            }
+          }
+
+          return allContents;
+        })
+        .catch((error) => {
+          if (error.status) {
+            throw error;
+          }
+          this.logger.error('Transaction failed', error.message);
+          throw httpToRpc(
+            new HttpException(
+              'Failed to fetch liked contents - transaction rolled back',
+              HttpStatus.INTERNAL_SERVER_ERROR,
+            ),
+          );
+        });
+
+      return result;
+    } catch (error) {
+      if (error.status) {
+        throw error;
+      }
+      this.logger.warn('No liked contents found or error occurred');
+      return [];
+    }
+  }
+  async getPinnedByUser(userId: number): Promise<FullContentDto[]> {
+    try {
+      const result = await this.prisma
+        .$transaction(async (tx) => {
+          const histories = await firstValueFrom(
+            this.historyClient.send(HISTORY_MSG.getByUser, userId),
+          ).catch((error) => {
+            this.logger.error('Failed to fetch friend list', error.message);
+            throw httpToRpc(
+              new HttpException(
+                'Failed to fetch friend list',
+                HttpStatus.NOT_FOUND,
+              ),
+            );
+          });
+
+          const pinned = histories.filter((h) => h.pinned === true);
+          const pinnedIds = pinned.map((f) => f.content_id);
+
+          const contents = await tx.content
+            .findMany({
+              where: {
+                content_id: { in: pinnedIds },
+                published_at: { lte: new Date() },
+              },
+              orderBy: { created_at: 'desc' },
+            })
+            .catch((error) => {
+              this.logger.error(
+                'Failed to fetch pinned contents',
+                error.message,
+              );
+              throw httpToRpc(
+                new HttpException(
+                  'Failed to fetch pinned contents',
+                  HttpStatus.INTERNAL_SERVER_ERROR,
+                ),
+              );
+            });
+
+          const allContents: FullContentDto[] = [];
+
+          for (const content of contents) {
+            try {
+              const files = await tx.file.findMany({
+                where: {
+                  content_id: content.content_id,
+                  content_area_id: content.area_id,
+                },
+              });
+
+              const thumbnail = files.find((file) => file.type === 'thumbnail');
+              if (!thumbnail) {
+                this.logger.warn(
+                  `Content ${content.content_id} missing thumbnail`,
+                );
+                continue;
+              }
+
+              const mappedFiles: FileDto[] = files
+                .filter((file) => file.type !== 'thumbnail')
+                .map((file) => ({
+                  file_id: file.file_id,
+                  filepath: file.filepath,
+                  content_id: file.content_id,
+                  content_area_id: file.content_area_id,
+                  type: file.type,
+                }));
+
+              allContents.push({
+                content_id: content.content_id,
+                creator_id: content.creator_id,
+                parent_id: content.parent_id ?? undefined,
+                area_id: content.area_id,
+                title: content.title,
+                description: content.description,
+                post_type: content.post_type,
+                visibilityPrivate: content.visibilityPrivate,
+                views: content.views,
+                likes: content.likes,
+                comments: content.comments,
+                pins: content.pins,
+                reports: content.reports,
+                thumbnail: {
+                  file_id: thumbnail.file_id,
+                  filepath: thumbnail.filepath,
+                  content_id: thumbnail.content_id,
+                  content_area_id: thumbnail.content_area_id,
+                  type: thumbnail.type,
+                },
+                contents: mappedFiles,
+              });
+            } catch (error) {
+              this.logger.error(
+                `Failed to fetch files for content ${content.content_id}`,
+                error.message,
+              );
+              throw httpToRpc(
+                new HttpException(
+                  `Failed to fetch files for content ${content.content_id}`,
+                  HttpStatus.INTERNAL_SERVER_ERROR,
+                ),
+              );
+            }
+          }
+
+          return allContents;
+        })
+        .catch((error) => {
+          if (error.status) {
+            throw error;
+          }
+          this.logger.error('Transaction failed', error.message);
+          throw httpToRpc(
+            new HttpException(
+              'Failed to fetch pinned contents - transaction rolled back',
+              HttpStatus.INTERNAL_SERVER_ERROR,
+            ),
+          );
+        });
+
+      return result;
+    } catch (error) {
+      if (error.status) {
+        throw error;
+      }
+      this.logger.warn('No pinned contents found or error occurred');
+      return [];
     }
   }
 }

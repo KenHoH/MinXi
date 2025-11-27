@@ -79,15 +79,14 @@ export class ContentController {
     },
     @Body() body: any,
   ): Promise<FullContentDto> {
-    // Extract form fields from body
     const creator_id = parseInt(body.creator_id, 10);
     const area_id = parseInt(body.area_id, 10);
     const parent_id = body.parent_id ? parseInt(body.parent_id, 10) : undefined;
     const title = body.title;
     const description = body.description;
     const post_type = body.post_type;
+    const published_at = body.published_at;
 
-    // Validate required fields
     if (isNaN(creator_id) || isNaN(area_id)) {
       throw new BadRequestException(
         'creator_id and area_id must be valid numbers',
@@ -97,6 +96,17 @@ export class ContentController {
     if (!title || !description || !post_type) {
       throw new BadRequestException(
         'title, description, and post_type are required',
+      );
+    }
+
+    if (!published_at) {
+      throw new BadRequestException('published_at is required');
+    }
+
+    const publishedDate = new Date(published_at);
+    if (isNaN(publishedDate.getTime())) {
+      throw new BadRequestException(
+        'published_at must be a valid date in ISO 8601 format (e.g., 2024-01-01T00:00:00Z)',
       );
     }
 
@@ -128,6 +138,7 @@ export class ContentController {
       title,
       description,
       post_type,
+      published_at: body.published_at,
     };
 
     return await this.contentService.create(createDto);
@@ -158,6 +169,24 @@ export class ContentController {
   ): Promise<FullContentDto[]> {
     this.logger.log(typeof userId);
     return this.contentService.getFriendContent(userId);
+  }
+
+  @Public()
+  @Get('user/:userId/liked')
+  getLikedByUser(
+    @Param('userId', ParseIntPipe) userId: number,
+  ): Promise<FullContentDto[]> {
+    this.logger.log(typeof userId);
+    return this.contentService.getLikedByUser(userId);
+  }
+
+  @Public()
+  @Get('user/:userId/pinned')
+  getPinnedByUser(
+    @Param('userId', ParseIntPipe) userId: number,
+  ): Promise<FullContentDto[]> {
+    this.logger.log(typeof userId);
+    return this.contentService.getPinnedByUser(userId);
   }
 
   @Public()

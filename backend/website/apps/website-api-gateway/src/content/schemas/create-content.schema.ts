@@ -44,6 +44,11 @@ export const createContentSchema = {
       description: 'Parent content ID (optional)',
       example: null,
     },
+    published_at: {
+      type: 'string',
+      description: 'Publication date in ISO format',
+      example: '2024-01-01T00:00:00Z',
+    },
   },
   required: [
     'thumbnail',
@@ -53,5 +58,6 @@ export const createContentSchema = {
     'post_type',
     'title',
     'description',
+    'published_at',
   ],
 };

@@ -43,6 +43,8 @@ export const CONTENT_MSG = {
   getFiles: 'content.getFiles',
   getFollowingContent: 'content.getFollowingContent',
   getFriendContent: 'content.getFriendContent',
+  getLikedByUser: 'content.getLikedByUser',
+  getPinnedByUser: 'content.getPinnedByUser',
   remove: 'content.remove',
 };
 

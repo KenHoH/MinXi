@@ -11,6 +11,8 @@ import {
   UseGuards,
   UseInterceptors,
   Res,
+  UploadedFiles,
+  BadRequestException,
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import { CreateUserDto } from '@app/contracts/shared-dto/user/create-user.dto';
@@ -25,12 +27,20 @@ import { NameRequest } from '@app/contracts/shared-dto/user/find.name.dto';
 import { JwtAuthGuard } from '@app/common/guard/jwt-auth-guard/jwt-auth.guard';
 import { AdminGuard } from '@app/common/guard/admin/admin.guard';
 import { LogInterceptor } from '@app/common/interceptor/log/log.interceptor';
-import { ApiBearerAuth } from '@nestjs/swagger';
+import {
+  ApiBearerAuth,
+  ApiBody,
+  ApiConsumes,
+  ApiResponse,
+} from '@nestjs/swagger';
 import { Public } from '@app/common/decorators/public.decorator';
 import type { Response } from 'express';
 import { Ack } from '@app/contracts/shared-dto/ack.dto';
 import { UserDto } from '@app/contracts/shared-dto/user/user.dto';
 import { CredentialRes } from '@app/contracts/shared-dto/user/Creds.dto';
+import { createProfileSchema } from './schemas/create-profile.schema';
+import { FileFieldsInterceptor } from '@nestjs/platform-express';
+import { MulterConfiguration } from '@app/common/config/multer.config';
 
 @Controller('user')
 @UseFilters(RpcTranslateFilter)
@@ -59,11 +69,48 @@ export class UserController {
   }
 
   @Patch(':id/profile')
+  @ApiConsumes('multipart/form-data')
+  @ApiBody({
+    description: 'Update profile',
+    required: true,
+    schema: createProfileSchema,
+  })
+  @ApiResponse({
+    status: 201,
+    description: 'Profile updated successfully',
+    type: UserDto,
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Bad request - missing required files or fields',
+  })
+  @UseInterceptors(
+    FileFieldsInterceptor(
+      [{ name: 'profile', maxCount: 1 }],
+      MulterConfiguration,
+    ),
+  )
   update(
-    @Param('id', ParseIntPipe) id: number,
-    @Body() body: UpdateProfileUserDto,
+    @UploadedFiles()
+    files: {
+      profile?: Express.Multer.File[];
+    },
+    @Body() body: any,
   ): Promise<UserDto> {
-    return this.userService.updateProfile(+id, body);
+    const creator_id = parseInt(body.creator_id, 10);
+    const profileFile = files.profile ? files.profile[0] : null;
+
+    if (!profileFile) {
+      throw new BadRequestException('Profile file is required');
+    }
+    const profilePath = `http://localhost:3000/uploads/profile/${profileFile.filename}`;
+
+    const dto: UpdateProfileUserDto = {
+      desc: body.description,
+      profile_picture: profilePath,
+    };
+
+    return this.userService.updateProfile(+creator_id, dto);
   }
 
   @Patch(':id/like')

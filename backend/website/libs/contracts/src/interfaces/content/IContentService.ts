@@ -32,6 +32,8 @@ export interface IContentService {
 
   getFollowingContent(userId: number): Promise<FullContentDto[]>;
   getFriendContent(userId: number): Promise<FullContentDto[]>;
+  getLikedByUser(userId: number): Promise<FullContentDto[]>;
+  getPinnedByUser(userId: number): Promise<FullContentDto[]>;
 
   remove(content_id: number, area_id: number): Promise<Ack>;
 }

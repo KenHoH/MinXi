@@ -10,7 +10,7 @@ export const MulterConfiguration = {
         destPath += 'thumbnail';
       } else if (file.fieldname === 'contents') {
         destPath += 'content';
-      } else if (file.mimetype === 'profile') {
+      } else if (file.fieldname === 'profile') {
         destPath += 'profile';
       }
 
