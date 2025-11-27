@@ -7,6 +7,7 @@ import { CreateBoardDto } from '@app/contracts/shared-dto/board/request/create-b
 import { RemoveContentDto } from '@app/contracts/shared-dto/board/request/remove-content.dto';
 import { UpdateContentDto } from '@app/contracts/shared-dto/board/request/update-content.dto';
 import { BoardDto } from '@app/contracts/shared-dto/board/response/board.dto';
+import { ContentIdsResDto } from '@app/contracts/shared-dto/content/res/content-ids.res.dto';
 import { HttpException, HttpStatus, Injectable, Logger } from '@nestjs/common';
 import { mapBoardToDto } from './utils/mapBoardToDTO';
 
@@ -297,6 +298,44 @@ export class BoardService implements IBoardService {
       throw httpToRpc(
         new HttpException(
           'Failed to fetch boards by user',
+          HttpStatus.INTERNAL_SERVER_ERROR,
+        ),
+      );
+    }
+  }
+
+  async getContentIdsByBoardId(boardId: number): Promise<ContentIdsResDto> {
+    try {
+      const board = await this.prisma.board.findUnique({
+        where: { board_id: boardId },
+      });
+
+      if (!board) {
+        throw httpToRpc(
+          new HttpException('Board not found', HttpStatus.NOT_FOUND),
+        );
+      }
+
+      const boardContents = await this.prisma.boardContent.findMany({
+        where: { board_id: boardId },
+        select: { content_id: true },
+      });
+
+      const contentIds = boardContents.map((bc) => bc.content_id);
+
+      return {
+        Valid: true,
+        Msg: 'Content IDs retrieved successfully',
+        data: contentIds,
+      };
+    } catch (error) {
+      if (error instanceof HttpException) {
+        throw error;
+      }
+      this.logger.error('Failed to fetch content IDs for board', error.message);
+      throw httpToRpc(
+        new HttpException(
+          'Failed to fetch content IDs for board',
           HttpStatus.INTERNAL_SERVER_ERROR,
         ),
       );

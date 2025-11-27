@@ -6,6 +6,7 @@ import { CreateBoardDto } from '@app/contracts/shared-dto/board/request/create-b
 import { RemoveContentDto } from '@app/contracts/shared-dto/board/request/remove-content.dto';
 import { UpdateContentDto } from '@app/contracts/shared-dto/board/request/update-content.dto';
 import { BoardDto } from '@app/contracts/shared-dto/board/response/board.dto';
+import { ContentIdsResDto } from '@app/contracts/shared-dto/content/res/content-ids.res.dto';
 import { Inject, Injectable } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
 import { firstValueFrom } from 'rxjs';
@@ -61,6 +62,12 @@ export class BoardService {
   async getBoardByUser(userId: number): Promise<BoardDto[]> {
     return await firstValueFrom(
       this.boardClient.send(BOARD_MSG.getBoardByUser, userId),
+    );
+  }
+
+  async getContentIdsByBoardId(boardId: number): Promise<ContentIdsResDto> {
+    return await firstValueFrom(
+      this.boardClient.send(BOARD_MSG.getContentIdsByBoardId, { boardId }),
     );
   }
 }

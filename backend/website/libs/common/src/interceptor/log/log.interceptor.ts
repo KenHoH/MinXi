@@ -50,6 +50,10 @@ export class LogInterceptor implements NestInterceptor {
     const path = req.url;
     const authHeader = req.headers['authorization'];
 
+    if (!authHeader) {
+      return next.handle();
+    }
+
     return from(this.getUserIdFromToken(authHeader)).pipe(
       switchMap((userId) => {
         logger.log(`User ${userId} -> ${method} ${path}`);

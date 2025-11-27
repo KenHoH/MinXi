@@ -40,6 +40,11 @@ export const CONTENT_MSG = {
   getStats: 'content.getStats',
   getByUser: 'content.getByUser',
   getFile: 'content.getFile',
+  getFiles: 'content.getFiles',
+  getFollowingContent: 'content.getFollowingContent',
+  getFriendContent: 'content.getFriendContent',
+  getLikedByUser: 'content.getLikedByUser',
+  getPinnedByUser: 'content.getPinnedByUser',
   remove: 'content.remove',
 };
 
@@ -57,6 +62,7 @@ export const BOARD_MSG = {
   updateContent: 'board.updateContent',
   deleteBoard: 'board.delete',
   getBoardByUser: 'board.getByUser',
+  getContentIdsByBoardId: 'board.getContentIdsByBoardId',
 };
 
 export const CONNECTION_MSG = {

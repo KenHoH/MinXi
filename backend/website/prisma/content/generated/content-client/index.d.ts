@@ -60,7 +60,7 @@ export type Comment = $Result.DefaultSelection<Prisma.$CommentPayload>
  */
 export class PrismaClient<
   ClientOptions extends Prisma.PrismaClientOptions = Prisma.PrismaClientOptions,
-  const U = 'log' extends keyof ClientOptions ? ClientOptions['log'] extends Array<Prisma.LogLevel | Prisma.LogDefinition> ? Prisma.GetEvents<ClientOptions['log']> : never : never,
+  U = 'log' extends keyof ClientOptions ? ClientOptions['log'] extends Array<Prisma.LogLevel | Prisma.LogDefinition> ? Prisma.GetEvents<ClientOptions['log']> : never : never,
   ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs
 > {
   [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['other'] }
@@ -92,6 +92,13 @@ export class PrismaClient<
    * Disconnect from the database
    */
   $disconnect(): $Utils.JsPromise<void>;
+
+  /**
+   * Add a middleware
+   * @deprecated since 4.16.0. For new code, prefer client extensions instead.
+   * @see https://pris.ly/d/extensions
+   */
+  $use(cb: Prisma.Middleware): void
 
 /**
    * Executes a prepared raw query and returns the number of affected rows.
@@ -279,8 +286,8 @@ export namespace Prisma {
   export import Exact = $Public.Exact
 
   /**
-   * Prisma Client JS version: 6.19.0
-   * Query Engine version: 2ba551f319ab1df4bc874a89965d8b3641056773
+   * Prisma Client JS version: 6.9.0
+   * Query Engine version: 81e4af48011447c3cc503a190e86995b66d2a28e
    */
   export type PrismaVersion = {
     client: string
@@ -293,7 +300,6 @@ export namespace Prisma {
    */
 
 
-  export import Bytes = runtime.Bytes
   export import JsonObject = runtime.JsonObject
   export import JsonArray = runtime.JsonArray
   export import JsonValue = runtime.JsonValue
@@ -1129,24 +1135,16 @@ export namespace Prisma {
     /**
      * @example
      * ```
-     * // Shorthand for `emit: 'stdout'`
+     * // Defaults to stdout
      * log: ['query', 'info', 'warn', 'error']
      * 
-     * // Emit as events only
+     * // Emit as events
      * log: [
-     *   { emit: 'event', level: 'query' },
-     *   { emit: 'event', level: 'info' },
-     *   { emit: 'event', level: 'warn' }
-     *   { emit: 'event', level: 'error' }
+     *   { emit: 'stdout', level: 'query' },
+     *   { emit: 'stdout', level: 'info' },
+     *   { emit: 'stdout', level: 'warn' }
+     *   { emit: 'stdout', level: 'error' }
      * ]
-     * 
-     * / Emit as events and log to stdout
-     * og: [
-     *  { emit: 'stdout', level: 'query' },
-     *  { emit: 'stdout', level: 'info' },
-     *  { emit: 'stdout', level: 'warn' }
-     *  { emit: 'stdout', level: 'error' }
-     * 
      * ```
      * Read more in our [docs](https://www.prisma.io/docs/reference/tools-and-interfaces/prisma-client/logging#the-log-option).
      */
@@ -1161,10 +1159,6 @@ export namespace Prisma {
       timeout?: number
       isolationLevel?: Prisma.TransactionIsolationLevel
     }
-    /**
-     * Instance of a Driver Adapter, e.g., like one provided by `@prisma/adapter-planetscale`
-     */
-    adapter?: runtime.SqlDriverAdapterFactory | null
     /**
      * Global configuration for omitting model fields by default.
      * 
@@ -1197,15 +1191,10 @@ export namespace Prisma {
     emit: 'stdout' | 'event'
   }
 
-  export type CheckIsLogLevel<T> = T extends LogLevel ? T : never;
-
-  export type GetLogType<T> = CheckIsLogLevel<
-    T extends LogDefinition ? T['level'] : T
-  >;
-
-  export type GetEvents<T extends any[]> = T extends Array<LogLevel | LogDefinition>
-    ? GetLogType<T[number]>
-    : never;
+  export type GetLogType<T extends LogLevel | LogDefinition> = T extends LogDefinition ? T['emit'] extends 'event' ? T['level'] : never : never
+  export type GetEvents<T extends any> = T extends Array<LogLevel | LogDefinition> ?
+    GetLogType<T[0]> | GetLogType<T[1]> | GetLogType<T[2]> | GetLogType<T[3]>
+    : never
 
   export type QueryEvent = {
     timestamp: Date
@@ -1245,6 +1234,25 @@ export namespace Prisma {
     | 'runCommandRaw'
     | 'findRaw'
     | 'groupBy'
+
+  /**
+   * These options are being passed into the middleware as "params"
+   */
+  export type MiddlewareParams = {
+    model?: ModelName
+    action: PrismaAction
+    args: any
+    dataPath: string[]
+    runInTransaction: boolean
+  }
+
+  /**
+   * The `T` type makes sure, that the `return proceed` is not forgotten in the middleware implementation
+   */
+  export type Middleware<T = any> = (
+    params: MiddlewareParams,
+    next: (params: MiddlewareParams) => $Utils.JsPromise<T>,
+  ) => $Utils.JsPromise<T>
 
   // tested in getLogLevel.test.ts
   export function getLogLevel(log: Array<LogLevel | LogDefinition>): LogLevel | undefined;
@@ -1349,6 +1357,7 @@ export namespace Prisma {
     reports: number | null
     area_id: number | null
     created_at: Date | null
+    published_at: Date | null
   }
 
   export type ContentMaxAggregateOutputType = {
@@ -1366,6 +1375,7 @@ export namespace Prisma {
     reports: number | null
     area_id: number | null
     created_at: Date | null
+    published_at: Date | null
   }
 
   export type ContentCountAggregateOutputType = {
@@ -1383,6 +1393,7 @@ export namespace Prisma {
     reports: number
     area_id: number
     created_at: number
+    published_at: number
     _all: number
   }
 
@@ -1426,6 +1437,7 @@ export namespace Prisma {
     reports?: true
     area_id?: true
     created_at?: true
+    published_at?: true
   }
 
   export type ContentMaxAggregateInputType = {
@@ -1443,6 +1455,7 @@ export namespace Prisma {
     reports?: true
     area_id?: true
     created_at?: true
+    published_at?: true
   }
 
   export type ContentCountAggregateInputType = {
@@ -1460,6 +1473,7 @@ export namespace Prisma {
     reports?: true
     area_id?: true
     created_at?: true
+    published_at?: true
     _all?: true
   }
 
@@ -1564,6 +1578,7 @@ export namespace Prisma {
     reports: number
     area_id: number
     created_at: Date
+    published_at: Date
     _count: ContentCountAggregateOutputType | null
     _avg: ContentAvgAggregateOutputType | null
     _sum: ContentSumAggregateOutputType | null
@@ -1600,6 +1615,7 @@ export namespace Prisma {
     reports?: boolean
     area_id?: boolean
     created_at?: boolean
+    published_at?: boolean
   }, ExtArgs["result"]["content"]>
 
 
@@ -1619,9 +1635,10 @@ export namespace Prisma {
     reports?: boolean
     area_id?: boolean
     created_at?: boolean
+    published_at?: boolean
   }
 
-  export type ContentOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"content_id" | "creator_id" | "parent_id" | "title" | "description" | "post_type" | "visibilityPrivate" | "views" | "likes" | "comments" | "pins" | "reports" | "area_id" | "created_at", ExtArgs["result"]["content"]>
+  export type ContentOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"content_id" | "creator_id" | "parent_id" | "title" | "description" | "post_type" | "visibilityPrivate" | "views" | "likes" | "comments" | "pins" | "reports" | "area_id" | "created_at" | "published_at", ExtArgs["result"]["content"]>
 
   export type $ContentPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     name: "Content"
@@ -1641,6 +1658,7 @@ export namespace Prisma {
       reports: number
       area_id: number
       created_at: Date
+      published_at: Date
     }, ExtArgs["result"]["content"]>
     composites: {}
   }
@@ -2024,6 +2042,7 @@ export namespace Prisma {
     readonly reports: FieldRef<"Content", 'Int'>
     readonly area_id: FieldRef<"Content", 'Int'>
     readonly created_at: FieldRef<"Content", 'DateTime'>
+    readonly published_at: FieldRef<"Content", 'DateTime'>
   }
     
 
@@ -2372,7 +2391,7 @@ export namespace Prisma {
   export type FileMinAggregateOutputType = {
     file_id: number | null
     filepath: string | null
-    thumbnail: string | null
+    type: string | null
     content_id: number | null
     content_area_id: number | null
   }
@@ -2380,7 +2399,7 @@ export namespace Prisma {
   export type FileMaxAggregateOutputType = {
     file_id: number | null
     filepath: string | null
-    thumbnail: string | null
+    type: string | null
     content_id: number | null
     content_area_id: number | null
   }
@@ -2388,7 +2407,7 @@ export namespace Prisma {
   export type FileCountAggregateOutputType = {
     file_id: number
     filepath: number
-    thumbnail: number
+    type: number
     content_id: number
     content_area_id: number
     _all: number
@@ -2410,7 +2429,7 @@ export namespace Prisma {
   export type FileMinAggregateInputType = {
     file_id?: true
     filepath?: true
-    thumbnail?: true
+    type?: true
     content_id?: true
     content_area_id?: true
   }
@@ -2418,7 +2437,7 @@ export namespace Prisma {
   export type FileMaxAggregateInputType = {
     file_id?: true
     filepath?: true
-    thumbnail?: true
+    type?: true
     content_id?: true
     content_area_id?: true
   }
@@ -2426,7 +2445,7 @@ export namespace Prisma {
   export type FileCountAggregateInputType = {
     file_id?: true
     filepath?: true
-    thumbnail?: true
+    type?: true
     content_id?: true
     content_area_id?: true
     _all?: true
@@ -2521,7 +2540,7 @@ export namespace Prisma {
   export type FileGroupByOutputType = {
     file_id: number
     filepath: string
-    thumbnail: string | null
+    type: string
     content_id: number
     content_area_id: number
     _count: FileCountAggregateOutputType | null
@@ -2548,7 +2567,7 @@ export namespace Prisma {
   export type FileSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
     file_id?: boolean
     filepath?: boolean
-    thumbnail?: boolean
+    type?: boolean
     content_id?: boolean
     content_area_id?: boolean
   }, ExtArgs["result"]["file"]>
@@ -2558,12 +2577,12 @@ export namespace Prisma {
   export type FileSelectScalar = {
     file_id?: boolean
     filepath?: boolean
-    thumbnail?: boolean
+    type?: boolean
     content_id?: boolean
     content_area_id?: boolean
   }
 
-  export type FileOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"file_id" | "filepath" | "thumbnail" | "content_id" | "content_area_id", ExtArgs["result"]["file"]>
+  export type FileOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"file_id" | "filepath" | "type" | "content_id" | "content_area_id", ExtArgs["result"]["file"]>
 
   export type $FilePayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     name: "File"
@@ -2571,7 +2590,7 @@ export namespace Prisma {
     scalars: $Extensions.GetPayloadResult<{
       file_id: number
       filepath: string
-      thumbnail: string | null
+      type: string
       content_id: number
       content_area_id: number
     }, ExtArgs["result"]["file"]>
@@ -2945,7 +2964,7 @@ export namespace Prisma {
   interface FileFieldRefs {
     readonly file_id: FieldRef<"File", 'Int'>
     readonly filepath: FieldRef<"File", 'String'>
-    readonly thumbnail: FieldRef<"File", 'String'>
+    readonly type: FieldRef<"File", 'String'>
     readonly content_id: FieldRef<"File", 'Int'>
     readonly content_area_id: FieldRef<"File", 'Int'>
   }
@@ -6195,18 +6214,21 @@ export namespace Prisma {
     id: number | null
     content_id: number | null
     creator_id: number | null
+    parent_id: number | null
   }
 
   export type CommentSumAggregateOutputType = {
     id: number | null
     content_id: number | null
     creator_id: number | null
+    parent_id: number | null
   }
 
   export type CommentMinAggregateOutputType = {
     id: number | null
     content_id: number | null
     creator_id: number | null
+    parent_id: number | null
     text: string | null
     created_at: Date | null
   }
@@ -6215,6 +6237,7 @@ export namespace Prisma {
     id: number | null
     content_id: number | null
     creator_id: number | null
+    parent_id: number | null
     text: string | null
     created_at: Date | null
   }
@@ -6223,6 +6246,7 @@ export namespace Prisma {
     id: number
     content_id: number
     creator_id: number
+    parent_id: number
     text: number
     created_at: number
     _all: number
@@ -6233,18 +6257,21 @@ export namespace Prisma {
     id?: true
     content_id?: true
     creator_id?: true
+    parent_id?: true
   }
 
   export type CommentSumAggregateInputType = {
     id?: true
     content_id?: true
     creator_id?: true
+    parent_id?: true
   }
 
   export type CommentMinAggregateInputType = {
     id?: true
     content_id?: true
     creator_id?: true
+    parent_id?: true
     text?: true
     created_at?: true
   }
@@ -6253,6 +6280,7 @@ export namespace Prisma {
     id?: true
     content_id?: true
     creator_id?: true
+    parent_id?: true
     text?: true
     created_at?: true
   }
@@ -6261,6 +6289,7 @@ export namespace Prisma {
     id?: true
     content_id?: true
     creator_id?: true
+    parent_id?: true
     text?: true
     created_at?: true
     _all?: true
@@ -6356,6 +6385,7 @@ export namespace Prisma {
     id: number
     content_id: number
     creator_id: number
+    parent_id: number | null
     text: string
     created_at: Date
     _count: CommentCountAggregateOutputType | null
@@ -6383,6 +6413,7 @@ export namespace Prisma {
     id?: boolean
     content_id?: boolean
     creator_id?: boolean
+    parent_id?: boolean
     text?: boolean
     created_at?: boolean
   }, ExtArgs["result"]["comment"]>
@@ -6393,11 +6424,12 @@ export namespace Prisma {
     id?: boolean
     content_id?: boolean
     creator_id?: boolean
+    parent_id?: boolean
     text?: boolean
     created_at?: boolean
   }
 
-  export type CommentOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "content_id" | "creator_id" | "text" | "created_at", ExtArgs["result"]["comment"]>
+  export type CommentOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "content_id" | "creator_id" | "parent_id" | "text" | "created_at", ExtArgs["result"]["comment"]>
 
   export type $CommentPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     name: "Comment"
@@ -6406,6 +6438,7 @@ export namespace Prisma {
       id: number
       content_id: number
       creator_id: number
+      parent_id: number | null
       text: string
       created_at: Date
     }, ExtArgs["result"]["comment"]>
@@ -6780,6 +6813,7 @@ export namespace Prisma {
     readonly id: FieldRef<"Comment", 'Int'>
     readonly content_id: FieldRef<"Comment", 'Int'>
     readonly creator_id: FieldRef<"Comment", 'Int'>
+    readonly parent_id: FieldRef<"Comment", 'Int'>
     readonly text: FieldRef<"Comment", 'String'>
     readonly created_at: FieldRef<"Comment", 'DateTime'>
   }
@@ -7131,7 +7165,8 @@ export namespace Prisma {
     pins: 'pins',
     reports: 'reports',
     area_id: 'area_id',
-    created_at: 'created_at'
+    created_at: 'created_at',
+    published_at: 'published_at'
   };
 
   export type ContentScalarFieldEnum = (typeof ContentScalarFieldEnum)[keyof typeof ContentScalarFieldEnum]
@@ -7140,7 +7175,7 @@ export namespace Prisma {
   export const FileScalarFieldEnum: {
     file_id: 'file_id',
     filepath: 'filepath',
-    thumbnail: 'thumbnail',
+    type: 'type',
     content_id: 'content_id',
     content_area_id: 'content_area_id'
   };
@@ -7187,6 +7222,7 @@ export namespace Prisma {
     id: 'id',
     content_id: 'content_id',
     creator_id: 'creator_id',
+    parent_id: 'parent_id',
     text: 'text',
     created_at: 'created_at'
   };
@@ -7221,7 +7257,7 @@ export namespace Prisma {
 
   export const FileOrderByRelevanceFieldEnum: {
     filepath: 'filepath',
-    thumbnail: 'thumbnail'
+    type: 'type'
   };
 
   export type FileOrderByRelevanceFieldEnum = (typeof FileOrderByRelevanceFieldEnum)[keyof typeof FileOrderByRelevanceFieldEnum]
@@ -7304,6 +7340,7 @@ export namespace Prisma {
     reports?: IntFilter<"Content"> | number
     area_id?: IntFilter<"Content"> | number
     created_at?: DateTimeFilter<"Content"> | Date | string
+    published_at?: DateTimeFilter<"Content"> | Date | string
   }
 
   export type ContentOrderByWithRelationInput = {
@@ -7321,6 +7358,7 @@ export namespace Prisma {
     reports?: SortOrder
     area_id?: SortOrder
     created_at?: SortOrder
+    published_at?: SortOrder
     _relevance?: ContentOrderByRelevanceInput
   }
 
@@ -7343,6 +7381,7 @@ export namespace Prisma {
     reports?: IntFilter<"Content"> | number
     area_id?: IntFilter<"Content"> | number
     created_at?: DateTimeFilter<"Content"> | Date | string
+    published_at?: DateTimeFilter<"Content"> | Date | string
   }, "content_id_area_id">
 
   export type ContentOrderByWithAggregationInput = {
@@ -7360,6 +7399,7 @@ export namespace Prisma {
     reports?: SortOrder
     area_id?: SortOrder
     created_at?: SortOrder
+    published_at?: SortOrder
     _count?: ContentCountOrderByAggregateInput
     _avg?: ContentAvgOrderByAggregateInput
     _max?: ContentMaxOrderByAggregateInput
@@ -7385,6 +7425,7 @@ export namespace Prisma {
     reports?: IntWithAggregatesFilter<"Content"> | number
     area_id?: IntWithAggregatesFilter<"Content"> | number
     created_at?: DateTimeWithAggregatesFilter<"Content"> | Date | string
+    published_at?: DateTimeWithAggregatesFilter<"Content"> | Date | string
   }
 
   export type FileWhereInput = {
@@ -7393,7 +7434,7 @@ export namespace Prisma {
     NOT?: FileWhereInput | FileWhereInput[]
     file_id?: IntFilter<"File"> | number
     filepath?: StringFilter<"File"> | string
-    thumbnail?: StringNullableFilter<"File"> | string | null
+    type?: StringFilter<"File"> | string
     content_id?: IntFilter<"File"> | number
     content_area_id?: IntFilter<"File"> | number
   }
@@ -7401,7 +7442,7 @@ export namespace Prisma {
   export type FileOrderByWithRelationInput = {
     file_id?: SortOrder
     filepath?: SortOrder
-    thumbnail?: SortOrderInput | SortOrder
+    type?: SortOrder
     content_id?: SortOrder
     content_area_id?: SortOrder
     _relevance?: FileOrderByRelevanceInput
@@ -7414,7 +7455,7 @@ export namespace Prisma {
     OR?: FileWhereInput[]
     NOT?: FileWhereInput | FileWhereInput[]
     filepath?: StringFilter<"File"> | string
-    thumbnail?: StringNullableFilter<"File"> | string | null
+    type?: StringFilter<"File"> | string
     content_id?: IntFilter<"File"> | number
     content_area_id?: IntFilter<"File"> | number
   }, "file_id" | "content_id_filepath">
@@ -7422,7 +7463,7 @@ export namespace Prisma {
   export type FileOrderByWithAggregationInput = {
     file_id?: SortOrder
     filepath?: SortOrder
-    thumbnail?: SortOrderInput | SortOrder
+    type?: SortOrder
     content_id?: SortOrder
     content_area_id?: SortOrder
     _count?: FileCountOrderByAggregateInput
@@ -7438,7 +7479,7 @@ export namespace Prisma {
     NOT?: FileScalarWhereWithAggregatesInput | FileScalarWhereWithAggregatesInput[]
     file_id?: IntWithAggregatesFilter<"File"> | number
     filepath?: StringWithAggregatesFilter<"File"> | string
-    thumbnail?: StringNullableWithAggregatesFilter<"File"> | string | null
+    type?: StringWithAggregatesFilter<"File"> | string
     content_id?: IntWithAggregatesFilter<"File"> | number
     content_area_id?: IntWithAggregatesFilter<"File"> | number
   }
@@ -7631,6 +7672,7 @@ export namespace Prisma {
     id?: IntFilter<"Comment"> | number
     content_id?: IntFilter<"Comment"> | number
     creator_id?: IntFilter<"Comment"> | number
+    parent_id?: IntNullableFilter<"Comment"> | number | null
     text?: StringFilter<"Comment"> | string
     created_at?: DateTimeFilter<"Comment"> | Date | string
   }
@@ -7639,6 +7681,7 @@ export namespace Prisma {
     id?: SortOrder
     content_id?: SortOrder
     creator_id?: SortOrder
+    parent_id?: SortOrderInput | SortOrder
     text?: SortOrder
     created_at?: SortOrder
     _relevance?: CommentOrderByRelevanceInput
@@ -7651,6 +7694,7 @@ export namespace Prisma {
     NOT?: CommentWhereInput | CommentWhereInput[]
     content_id?: IntFilter<"Comment"> | number
     creator_id?: IntFilter<"Comment"> | number
+    parent_id?: IntNullableFilter<"Comment"> | number | null
     text?: StringFilter<"Comment"> | string
     created_at?: DateTimeFilter<"Comment"> | Date | string
   }, "id">
@@ -7659,6 +7703,7 @@ export namespace Prisma {
     id?: SortOrder
     content_id?: SortOrder
     creator_id?: SortOrder
+    parent_id?: SortOrderInput | SortOrder
     text?: SortOrder
     created_at?: SortOrder
     _count?: CommentCountOrderByAggregateInput
@@ -7675,6 +7720,7 @@ export namespace Prisma {
     id?: IntWithAggregatesFilter<"Comment"> | number
     content_id?: IntWithAggregatesFilter<"Comment"> | number
     creator_id?: IntWithAggregatesFilter<"Comment"> | number
+    parent_id?: IntNullableWithAggregatesFilter<"Comment"> | number | null
     text?: StringWithAggregatesFilter<"Comment"> | string
     created_at?: DateTimeWithAggregatesFilter<"Comment"> | Date | string
   }
@@ -7694,6 +7740,7 @@ export namespace Prisma {
     reports?: number
     area_id: number
     created_at?: Date | string
+    published_at: Date | string
   }
 
   export type ContentUncheckedCreateInput = {
@@ -7711,6 +7758,7 @@ export namespace Prisma {
     reports?: number
     area_id: number
     created_at?: Date | string
+    published_at: Date | string
   }
 
   export type ContentUpdateInput = {
@@ -7728,6 +7776,7 @@ export namespace Prisma {
     reports?: IntFieldUpdateOperationsInput | number
     area_id?: IntFieldUpdateOperationsInput | number
     created_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    published_at?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
   export type ContentUncheckedUpdateInput = {
@@ -7745,6 +7794,7 @@ export namespace Prisma {
     reports?: IntFieldUpdateOperationsInput | number
     area_id?: IntFieldUpdateOperationsInput | number
     created_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    published_at?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
   export type ContentCreateManyInput = {
@@ -7762,6 +7812,7 @@ export namespace Prisma {
     reports?: number
     area_id: number
     created_at?: Date | string
+    published_at: Date | string
   }
 
   export type ContentUpdateManyMutationInput = {
@@ -7779,6 +7830,7 @@ export namespace Prisma {
     reports?: IntFieldUpdateOperationsInput | number
     area_id?: IntFieldUpdateOperationsInput | number
     created_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    published_at?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
   export type ContentUncheckedUpdateManyInput = {
@@ -7796,11 +7848,12 @@ export namespace Prisma {
     reports?: IntFieldUpdateOperationsInput | number
     area_id?: IntFieldUpdateOperationsInput | number
     created_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    published_at?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
   export type FileCreateInput = {
     filepath: string
-    thumbnail?: string | null
+    type?: string
     content_id: number
     content_area_id: number
   }
@@ -7808,14 +7861,14 @@ export namespace Prisma {
   export type FileUncheckedCreateInput = {
     file_id?: number
     filepath: string
-    thumbnail?: string | null
+    type?: string
     content_id: number
     content_area_id: number
   }
 
   export type FileUpdateInput = {
     filepath?: StringFieldUpdateOperationsInput | string
-    thumbnail?: NullableStringFieldUpdateOperationsInput | string | null
+    type?: StringFieldUpdateOperationsInput | string
     content_id?: IntFieldUpdateOperationsInput | number
     content_area_id?: IntFieldUpdateOperationsInput | number
   }
@@ -7823,7 +7876,7 @@ export namespace Prisma {
   export type FileUncheckedUpdateInput = {
     file_id?: IntFieldUpdateOperationsInput | number
     filepath?: StringFieldUpdateOperationsInput | string
-    thumbnail?: NullableStringFieldUpdateOperationsInput | string | null
+    type?: StringFieldUpdateOperationsInput | string
     content_id?: IntFieldUpdateOperationsInput | number
     content_area_id?: IntFieldUpdateOperationsInput | number
   }
@@ -7831,14 +7884,14 @@ export namespace Prisma {
   export type FileCreateManyInput = {
     file_id?: number
     filepath: string
-    thumbnail?: string | null
+    type?: string
     content_id: number
     content_area_id: number
   }
 
   export type FileUpdateManyMutationInput = {
     filepath?: StringFieldUpdateOperationsInput | string
-    thumbnail?: NullableStringFieldUpdateOperationsInput | string | null
+    type?: StringFieldUpdateOperationsInput | string
     content_id?: IntFieldUpdateOperationsInput | number
     content_area_id?: IntFieldUpdateOperationsInput | number
   }
@@ -7846,7 +7899,7 @@ export namespace Prisma {
   export type FileUncheckedUpdateManyInput = {
     file_id?: IntFieldUpdateOperationsInput | number
     filepath?: StringFieldUpdateOperationsInput | string
-    thumbnail?: NullableStringFieldUpdateOperationsInput | string | null
+    type?: StringFieldUpdateOperationsInput | string
     content_id?: IntFieldUpdateOperationsInput | number
     content_area_id?: IntFieldUpdateOperationsInput | number
   }
@@ -8033,6 +8086,7 @@ export namespace Prisma {
   export type CommentCreateInput = {
     content_id: number
     creator_id: number
+    parent_id?: number | null
     text: string
     created_at?: Date | string
   }
@@ -8041,6 +8095,7 @@ export namespace Prisma {
     id?: number
     content_id: number
     creator_id: number
+    parent_id?: number | null
     text: string
     created_at?: Date | string
   }
@@ -8048,6 +8103,7 @@ export namespace Prisma {
   export type CommentUpdateInput = {
     content_id?: IntFieldUpdateOperationsInput | number
     creator_id?: IntFieldUpdateOperationsInput | number
+    parent_id?: NullableIntFieldUpdateOperationsInput | number | null
     text?: StringFieldUpdateOperationsInput | string
     created_at?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -8056,6 +8112,7 @@ export namespace Prisma {
     id?: IntFieldUpdateOperationsInput | number
     content_id?: IntFieldUpdateOperationsInput | number
     creator_id?: IntFieldUpdateOperationsInput | number
+    parent_id?: NullableIntFieldUpdateOperationsInput | number | null
     text?: StringFieldUpdateOperationsInput | string
     created_at?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -8064,6 +8121,7 @@ export namespace Prisma {
     id?: number
     content_id: number
     creator_id: number
+    parent_id?: number | null
     text: string
     created_at?: Date | string
   }
@@ -8071,6 +8129,7 @@ export namespace Prisma {
   export type CommentUpdateManyMutationInput = {
     content_id?: IntFieldUpdateOperationsInput | number
     creator_id?: IntFieldUpdateOperationsInput | number
+    parent_id?: NullableIntFieldUpdateOperationsInput | number | null
     text?: StringFieldUpdateOperationsInput | string
     created_at?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -8079,6 +8138,7 @@ export namespace Prisma {
     id?: IntFieldUpdateOperationsInput | number
     content_id?: IntFieldUpdateOperationsInput | number
     creator_id?: IntFieldUpdateOperationsInput | number
+    parent_id?: NullableIntFieldUpdateOperationsInput | number | null
     text?: StringFieldUpdateOperationsInput | string
     created_at?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -8167,6 +8227,7 @@ export namespace Prisma {
     reports?: SortOrder
     area_id?: SortOrder
     created_at?: SortOrder
+    published_at?: SortOrder
   }
 
   export type ContentAvgOrderByAggregateInput = {
@@ -8196,6 +8257,7 @@ export namespace Prisma {
     reports?: SortOrder
     area_id?: SortOrder
     created_at?: SortOrder
+    published_at?: SortOrder
   }
 
   export type ContentMinOrderByAggregateInput = {
@@ -8213,6 +8275,7 @@ export namespace Prisma {
     reports?: SortOrder
     area_id?: SortOrder
     created_at?: SortOrder
+    published_at?: SortOrder
   }
 
   export type ContentSumOrderByAggregateInput = {
@@ -8299,21 +8362,6 @@ export namespace Prisma {
     _max?: NestedDateTimeFilter<$PrismaModel>
   }
 
-  export type StringNullableFilter<$PrismaModel = never> = {
-    equals?: string | StringFieldRefInput<$PrismaModel> | null
-    in?: string[] | null
-    notIn?: string[] | null
-    lt?: string | StringFieldRefInput<$PrismaModel>
-    lte?: string | StringFieldRefInput<$PrismaModel>
-    gt?: string | StringFieldRefInput<$PrismaModel>
-    gte?: string | StringFieldRefInput<$PrismaModel>
-    contains?: string | StringFieldRefInput<$PrismaModel>
-    startsWith?: string | StringFieldRefInput<$PrismaModel>
-    endsWith?: string | StringFieldRefInput<$PrismaModel>
-    search?: string
-    not?: NestedStringNullableFilter<$PrismaModel> | string | null
-  }
-
   export type FileOrderByRelevanceInput = {
     fields: FileOrderByRelevanceFieldEnum | FileOrderByRelevanceFieldEnum[]
     sort: SortOrder
@@ -8328,7 +8376,7 @@ export namespace Prisma {
   export type FileCountOrderByAggregateInput = {
     file_id?: SortOrder
     filepath?: SortOrder
-    thumbnail?: SortOrder
+    type?: SortOrder
     content_id?: SortOrder
     content_area_id?: SortOrder
   }
@@ -8342,7 +8390,7 @@ export namespace Prisma {
   export type FileMaxOrderByAggregateInput = {
     file_id?: SortOrder
     filepath?: SortOrder
-    thumbnail?: SortOrder
+    type?: SortOrder
     content_id?: SortOrder
     content_area_id?: SortOrder
   }
@@ -8350,7 +8398,7 @@ export namespace Prisma {
   export type FileMinOrderByAggregateInput = {
     file_id?: SortOrder
     filepath?: SortOrder
-    thumbnail?: SortOrder
+    type?: SortOrder
     content_id?: SortOrder
     content_area_id?: SortOrder
   }
@@ -8359,24 +8407,6 @@ export namespace Prisma {
     file_id?: SortOrder
     content_id?: SortOrder
     content_area_id?: SortOrder
-  }
-
-  export type StringNullableWithAggregatesFilter<$PrismaModel = never> = {
-    equals?: string | StringFieldRefInput<$PrismaModel> | null
-    in?: string[] | null
-    notIn?: string[] | null
-    lt?: string | StringFieldRefInput<$PrismaModel>
-    lte?: string | StringFieldRefInput<$PrismaModel>
-    gt?: string | StringFieldRefInput<$PrismaModel>
-    gte?: string | StringFieldRefInput<$PrismaModel>
-    contains?: string | StringFieldRefInput<$PrismaModel>
-    startsWith?: string | StringFieldRefInput<$PrismaModel>
-    endsWith?: string | StringFieldRefInput<$PrismaModel>
-    search?: string
-    not?: NestedStringNullableWithAggregatesFilter<$PrismaModel> | string | null
-    _count?: NestedIntNullableFilter<$PrismaModel>
-    _min?: NestedStringNullableFilter<$PrismaModel>
-    _max?: NestedStringNullableFilter<$PrismaModel>
   }
 
   export type HistoryContentUser_idContent_idCompoundUniqueInput = {
@@ -8532,6 +8562,7 @@ export namespace Prisma {
     id?: SortOrder
     content_id?: SortOrder
     creator_id?: SortOrder
+    parent_id?: SortOrder
     text?: SortOrder
     created_at?: SortOrder
   }
@@ -8540,12 +8571,14 @@ export namespace Prisma {
     id?: SortOrder
     content_id?: SortOrder
     creator_id?: SortOrder
+    parent_id?: SortOrder
   }
 
   export type CommentMaxOrderByAggregateInput = {
     id?: SortOrder
     content_id?: SortOrder
     creator_id?: SortOrder
+    parent_id?: SortOrder
     text?: SortOrder
     created_at?: SortOrder
   }
@@ -8554,6 +8587,7 @@ export namespace Prisma {
     id?: SortOrder
     content_id?: SortOrder
     creator_id?: SortOrder
+    parent_id?: SortOrder
     text?: SortOrder
     created_at?: SortOrder
   }
@@ -8562,6 +8596,7 @@ export namespace Prisma {
     id?: SortOrder
     content_id?: SortOrder
     creator_id?: SortOrder
+    parent_id?: SortOrder
   }
 
   export type IntFieldUpdateOperationsInput = {
@@ -8590,10 +8625,6 @@ export namespace Prisma {
 
   export type DateTimeFieldUpdateOperationsInput = {
     set?: Date | string
-  }
-
-  export type NullableStringFieldUpdateOperationsInput = {
-    set?: string | null
   }
 
   export type BoardContentCreateNestedManyWithoutBoardInput = {
@@ -8797,39 +8828,6 @@ export namespace Prisma {
     _count?: NestedIntFilter<$PrismaModel>
     _min?: NestedDateTimeFilter<$PrismaModel>
     _max?: NestedDateTimeFilter<$PrismaModel>
-  }
-
-  export type NestedStringNullableFilter<$PrismaModel = never> = {
-    equals?: string | StringFieldRefInput<$PrismaModel> | null
-    in?: string[] | null
-    notIn?: string[] | null
-    lt?: string | StringFieldRefInput<$PrismaModel>
-    lte?: string | StringFieldRefInput<$PrismaModel>
-    gt?: string | StringFieldRefInput<$PrismaModel>
-    gte?: string | StringFieldRefInput<$PrismaModel>
-    contains?: string | StringFieldRefInput<$PrismaModel>
-    startsWith?: string | StringFieldRefInput<$PrismaModel>
-    endsWith?: string | StringFieldRefInput<$PrismaModel>
-    search?: string
-    not?: NestedStringNullableFilter<$PrismaModel> | string | null
-  }
-
-  export type NestedStringNullableWithAggregatesFilter<$PrismaModel = never> = {
-    equals?: string | StringFieldRefInput<$PrismaModel> | null
-    in?: string[] | null
-    notIn?: string[] | null
-    lt?: string | StringFieldRefInput<$PrismaModel>
-    lte?: string | StringFieldRefInput<$PrismaModel>
-    gt?: string | StringFieldRefInput<$PrismaModel>
-    gte?: string | StringFieldRefInput<$PrismaModel>
-    contains?: string | StringFieldRefInput<$PrismaModel>
-    startsWith?: string | StringFieldRefInput<$PrismaModel>
-    endsWith?: string | StringFieldRefInput<$PrismaModel>
-    search?: string
-    not?: NestedStringNullableWithAggregatesFilter<$PrismaModel> | string | null
-    _count?: NestedIntNullableFilter<$PrismaModel>
-    _min?: NestedStringNullableFilter<$PrismaModel>
-    _max?: NestedStringNullableFilter<$PrismaModel>
   }
 
   export type BoardContentCreateWithoutBoardInput = {

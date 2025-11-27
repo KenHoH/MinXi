@@ -167,4 +167,39 @@ export class ContentController {
     );
     return this.contentService.getFile(payload.contentId, payload.areaId);
   }
+
+  @MessagePattern(CONTENT_MSG.getFiles)
+  async getFiles(
+    @Payload(ValidationPipe) payload: { contentId: number; areaId: number },
+  ): Promise<FileDto[]> {
+    this.logger.log(
+      `Fetching all files for content ${payload.contentId} in area ${payload.areaId}`,
+    );
+    return this.contentService.getFiles(payload.contentId, payload.areaId);
+  }
+
+  @MessagePattern(CONTENT_MSG.getFollowingContent)
+  async getFollowingContent(
+    @Payload() userId: number,
+  ): Promise<FullContentDto[]> {
+    this.logger.log(`Fetching Following content by user ID ${userId}`);
+    return this.contentService.getFollowingContent(userId);
+  }
+
+  @MessagePattern(CONTENT_MSG.getFriendContent)
+  async getFriendContent(@Payload() userId: number): Promise<FullContentDto[]> {
+    this.logger.log(`Fetching Friend content by user ID ${userId}`);
+    return this.contentService.getFriendContent(userId);
+  }
+  @MessagePattern(CONTENT_MSG.getLikedByUser)
+  async getLikedByUser(@Payload() userId: number): Promise<FullContentDto[]> {
+    this.logger.log(`Fetching Liked content by user ID ${userId}`);
+    return this.contentService.getLikedByUser(userId);
+  }
+
+  @MessagePattern(CONTENT_MSG.getPinnedByUser)
+  async getPinnedByUser(@Payload() userId: number): Promise<FullContentDto[]> {
+    this.logger.log(`Fetching Pinned content by user ID ${userId}`);
+    return this.contentService.getPinnedByUser(userId);
+  }
 }

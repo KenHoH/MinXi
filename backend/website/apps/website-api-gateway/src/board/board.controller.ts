@@ -19,6 +19,10 @@ import { CreateBoardDto } from '@app/contracts/shared-dto/board/request/create-b
 import { AddContentDto } from '@app/contracts/shared-dto/board/request/add-content.dto';
 import { RemoveContentDto } from '@app/contracts/shared-dto/board/request/remove-content.dto';
 import { UpdateContentDto } from '@app/contracts/shared-dto/board/request/update-content.dto';
+import { Public } from '@app/common/decorators/public.decorator';
+import { BoardDto } from '@app/contracts/shared-dto/board/response/board.dto';
+import { Ack } from '@app/contracts/shared-dto/ack.dto';
+import { ContentIdsResDto } from '@app/contracts/shared-dto/content/res/content-ids.res.dto';
 
 @Controller('board')
 @UseGuards(JwtAuthGuard)
@@ -30,17 +34,17 @@ export class BoardController {
   constructor(private readonly boardService: BoardService) {}
 
   @Post()
-  create(@Body() dto: CreateBoardDto) {
+  create(@Body() dto: CreateBoardDto): Promise<BoardDto> {
     return this.boardService.create(dto);
   }
 
   @Patch(':id/private')
-  setPrivate(@Param('id', ParseIntPipe) id: number) {
+  setPrivate(@Param('id', ParseIntPipe) id: number): Promise<Ack> {
     return this.boardService.setPrivate(id);
   }
 
   @Patch(':id/public')
-  setPublic(@Param('id', ParseIntPipe) id: number) {
+  setPublic(@Param('id', ParseIntPipe) id: number): Promise<Ack> {
     return this.boardService.setPublic(id);
   }
 
@@ -48,7 +52,7 @@ export class BoardController {
   addContent(
     @Param('boardId', ParseIntPipe) boardId: number,
     @Body() dto: AddContentDto,
-  ) {
+  ): Promise<Ack> {
     return this.boardService.addContent(boardId, dto);
   }
 
@@ -56,7 +60,7 @@ export class BoardController {
   removeContent(
     @Param('boardId', ParseIntPipe) boardId: number,
     @Body() dto: RemoveContentDto,
-  ) {
+  ): Promise<Ack> {
     return this.boardService.removeContent(boardId, dto);
   }
 
@@ -64,17 +68,28 @@ export class BoardController {
   updateContent(
     @Param('boardId', ParseIntPipe) boardId: number,
     @Body() dto: UpdateContentDto,
-  ) {
+  ): Promise<BoardDto> {
     return this.boardService.updateContent(boardId, dto);
   }
 
   @Delete(':id')
-  deleteBoard(@Param('id', ParseIntPipe) id: number) {
+  deleteBoard(@Param('id', ParseIntPipe) id: number): Promise<Ack> {
     return this.boardService.deleteBoard(id);
   }
 
+  @Public()
   @Get('user/:userId')
-  getBoardByUser(@Param('userId', ParseIntPipe) userId: number) {
+  getBoardByUser(
+    @Param('userId', ParseIntPipe) userId: number,
+  ): Promise<BoardDto[]> {
     return this.boardService.getBoardByUser(userId);
+  }
+
+  @Public()
+  @Get(':boardId/content-ids')
+  getContentIdsByBoardId(
+    @Param('boardId', ParseIntPipe) boardId: number,
+  ): Promise<ContentIdsResDto> {
+    return this.boardService.getContentIdsByBoardId(boardId);
   }
 }

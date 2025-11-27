@@ -25,38 +25,49 @@ export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
   @Post()
-  login(@Body() dto: LoginDto, @Res({ passthrough: true }) response: Response) {
-    const token = this.authService.login(dto);
-    token.then((res) =>
-      response.cookie('token', res, {
-        httpOnly: true,
-        secure: true,
-        sameSite: 'strict',
-        maxAge: 15 * 60 * 1000,
-      }),
-    );
+  async login(
+    @Body() dto: LoginDto,
+    @Res({ passthrough: true }) response: Response,
+  ) {
+    const token = await this.authService.login(dto);
+    response.cookie('accessToken', token.accessToken, {
+      httpOnly: false,
+      secure: true,
+      sameSite: 'none',
+      maxAge: 3 * 60 * 60 * 1000,
+    });
 
-    return this.authService.login(dto);
+    response.cookie('refreshToken', token.refreshToken, {
+      httpOnly: false,
+      secure: true,
+      sameSite: 'none',
+      maxAge: 7 * 24 * 60 * 60 * 1000,
+    });
+    return token;
   }
 
   @ApiBearerAuth()
   @UseGuards(JwtRefreshGuard)
   @Post('/refresh')
-  refresh(
+  async refresh(
     @Body() dto: RefreshTokenRequestDto,
     @Res({ passthrough: true }) response: Response,
   ) {
-    const token = this.authService.refresh(dto);
-    token.then((res) =>
-      response.cookie('token', res, {
-        httpOnly: true,
-        secure: true,
-        sameSite: 'strict',
-        maxAge: 15 * 60 * 1000,
-      }),
-    );
+    const token = await this.authService.refresh(dto);
+    response.cookie('accessToken', token.accessToken, {
+      httpOnly: false,
+      secure: true,
+      sameSite: 'none',
+      maxAge: 3 * 60 * 60 * 1000,
+    });
 
-    return this.authService.refresh(dto);
+    response.cookie('refreshToken', token.refreshToken, {
+      httpOnly: false,
+      secure: true,
+      sameSite: 'none',
+      maxAge: 7 * 24 * 60 * 60 * 1000,
+    });
+    return token;
   }
 
   @Post('/logout')

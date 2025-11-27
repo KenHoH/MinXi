@@ -14,7 +14,10 @@ export class RpcTranslateFilter implements ExceptionFilter {
 
   catch(exception: any, host: ArgumentsHost) {
     const contextType = host.getType();
+    this.logger.error('Translate layer');
 
+    this.logger.error(`Exception: ${exception}`);
+    this.logger.error(`Exception: ${exception.stack}`);
     if (contextType === 'http') {
       const ctx = host.switchToHttp();
       const res = ctx.getResponse<Response>();

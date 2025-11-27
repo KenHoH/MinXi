@@ -4,6 +4,7 @@
 // Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
 // Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
 
+
 generator client {
   provider = "prisma-client-js"
   output   = "../content/generated/content-client"
@@ -28,13 +29,13 @@ model Content {
   reports         Int      @default(0)
   area_id         Int
   created_at      DateTime @default(now())
-
+  published_at    DateTime
   @@id([content_id, area_id])
 }
 model File {
   file_id           Int      @id @default(autoincrement())
   filepath          String
-  thumbnail         String?
+  type              String   @default("thumbnail")  
   
   content_id        Int
   content_area_id   Int 
@@ -42,6 +43,7 @@ model File {
   @@unique([content_id, filepath])
   @@index([content_id, content_area_id]) 
 }
+
 model HistoryContent {
   user_id             Int     @default(0) 
   content_id          Int     @default(0)
@@ -79,6 +81,7 @@ model Comment {
   id       Int      @id @default(autoincrement())
   content_id       Int
   creator_id       Int
+  parent_id        Int?
   text             String
   created_at       DateTime @default(now())
 }

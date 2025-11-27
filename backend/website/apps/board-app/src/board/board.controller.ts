@@ -8,6 +8,7 @@ import { RemoveContentDto } from '@app/contracts/shared-dto/board/request/remove
 import { UpdateContentDto } from '@app/contracts/shared-dto/board/request/update-content.dto';
 import { BoardDto } from '@app/contracts/shared-dto/board/response/board.dto';
 import { Ack } from '@app/contracts/shared-dto/ack.dto';
+import { ContentIdsResDto } from '@app/contracts/shared-dto/content/res/content-ids.res.dto';
 
 @Controller()
 @UsePipes(new ValidationPipe())
@@ -60,5 +61,12 @@ export class BoardController {
   @MessagePattern(BOARD_MSG.getBoardByUser)
   async getBoardByUser(@Payload() userId: number): Promise<BoardDto[]> {
     return this.boardService.getBoardByUser(userId);
+  }
+
+  @MessagePattern(BOARD_MSG.getContentIdsByBoardId)
+  async getContentIdsByBoardId(
+    @Payload() payload: { boardId: number },
+  ): Promise<ContentIdsResDto> {
+    return this.boardService.getContentIdsByBoardId(payload.boardId);
   }
 }

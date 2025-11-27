@@ -6,28 +6,35 @@ import {
   Patch,
   Param,
   Delete,
-  UploadedFile,
   UseInterceptors,
-  ParseFilePipeBuilder,
-  HttpStatus,
   ParseIntPipe,
   UploadedFiles,
   Logger,
   UseGuards,
+  BadRequestException,
 } from '@nestjs/common';
 import { ContentService } from './content.service';
 import {
   FileFieldsInterceptor,
   FileInterceptor,
 } from '@nestjs/platform-express';
-import { ApiBearerAuth, ApiBody, ApiConsumes } from '@nestjs/swagger';
+import {
+  ApiBearerAuth,
+  ApiBody,
+  ApiConsumes,
+  ApiResponse,
+} from '@nestjs/swagger';
 import { MulterConfiguration } from '@app/common/config/multer.config';
 import { CreatePostDto } from '@app/contracts/shared-dto/content/req/CreatePost.req.dto';
 import { deltaDto } from '@app/contracts/shared-dto/user/delta.dto';
-import { fileFieldsSchema } from '@app/contracts/shared-dto/schema/fileFieldsSchema';
-import { CreateFileDto } from '@app/contracts/shared-dto/content/req/CreateFile.req.dto';
+import { FullContentDto } from '@app/contracts/shared-dto/content/res/full.content.dto';
+import { createContentSchema } from './schemas/create-content.schema';
+import { Ack } from '@app/contracts/shared-dto/ack.dto';
 import { JwtAuthGuard } from '@app/common/guard/jwt-auth-guard/jwt-auth.guard';
 import { LogInterceptor } from '@app/common/interceptor/log/log.interceptor';
+import { Public } from '@app/common/decorators/public.decorator';
+import { FileDtoReq } from '@app/contracts/shared-dto/content/req/FIleDto.req';
+import { FileDto } from '@app/contracts/shared-dto/content/res/file.dto';
 
 @Controller('content')
 @UseGuards(JwtAuthGuard)
@@ -39,71 +46,163 @@ export class ContentController {
   private readonly logger = new Logger(ContentController.name);
 
   @Post()
-  create(@Body() dto: CreatePostDto) {
-    return this.contentService.create(dto);
-  }
-
-  @Post('createFile')
-  createFile(@Body() dto: CreateFileDto) {
-    return this.contentService.createFile(dto);
-  }
-
-  @Post('files')
+  @Public()
   @ApiConsumes('multipart/form-data')
   @ApiBody({
-    description:
-      'Uploads a mandatory image and an optional second image or video.',
-    schema: fileFieldsSchema,
+    description: 'Create content with thumbnail and file uploads',
+    required: true,
+    schema: createContentSchema,
+  })
+  @ApiResponse({
+    status: 201,
+    description: 'Content created successfully',
+    type: FullContentDto,
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Bad request - missing required files or fields',
   })
   @UseInterceptors(
     FileFieldsInterceptor(
       [
-        { name: 'image', maxCount: 1 },
-        { name: 'video', maxCount: 1 },
+        { name: 'thumbnail', maxCount: 1 },
+        { name: 'contents', maxCount: 5 },
       ],
       MulterConfiguration,
     ),
   )
-  uploadMultipleFiles(
+  async create(
     @UploadedFiles()
     files: {
-      image?: Express.Multer.File[];
-      video?: Express.Multer.File[];
+      thumbnail?: Express.Multer.File[];
+      contents?: Express.Multer.File[];
     },
-  ) {
-    const imageFile = files.image ? files.image[0] : null;
-    const videoFile = files.video ? files.video[0] : null;
+    @Body() body: any,
+  ): Promise<FullContentDto> {
+    const creator_id = parseInt(body.creator_id, 10);
+    const area_id = parseInt(body.area_id, 10);
+    const parent_id = body.parent_id ? parseInt(body.parent_id, 10) : undefined;
+    const title = body.title;
+    const description = body.description;
+    const post_type = body.post_type;
+    const published_at = body.published_at;
 
-    const mainImagePath = imageFile
-      ? `http://localhost:3000/uploads/thumbnail/${imageFile.filename}`
-      : null;
+    if (isNaN(creator_id) || isNaN(area_id)) {
+      throw new BadRequestException(
+        'creator_id and area_id must be valid numbers',
+      );
+    }
 
-    const optionalMediaPath = videoFile
-      ? `http://localhost:3000/uploads/content/${videoFile.filename}`
-      : null;
+    if (!title || !description || !post_type) {
+      throw new BadRequestException(
+        'title, description, and post_type are required',
+      );
+    }
 
-    return {
-      mainImagePath: mainImagePath,
-      optionalMediaPath: optionalMediaPath,
+    if (!published_at) {
+      throw new BadRequestException('published_at is required');
+    }
+
+    const publishedDate = new Date(published_at);
+    if (isNaN(publishedDate.getTime())) {
+      throw new BadRequestException(
+        'published_at must be a valid date in ISO 8601 format (e.g., 2024-01-01T00:00:00Z)',
+      );
+    }
+
+    const thumbnailFile = files.thumbnail ? files.thumbnail[0] : null;
+
+    if (!thumbnailFile) {
+      throw new BadRequestException('Thumbnail file is required');
+    }
+
+    const thumbnailPath = `http://localhost:3000/uploads/thumbnail/${thumbnailFile.filename}`;
+
+    const posts: FileDtoReq[] =
+      files.contents?.map((file) => ({
+        content_area_id: area_id,
+        type: file.mimetype.startsWith('image/') ? 'image' : 'video',
+        filepath: `http://localhost:3000/uploads/content/${file.filename}`,
+      })) || [];
+
+    if (posts.length === 0) {
+      throw new BadRequestException('At least one content file is required');
+    }
+
+    const createDto: CreatePostDto = {
+      creator_id,
+      area_id,
+      parent_id,
+      thumbnail: thumbnailPath,
+      contents: posts as FileDto[],
+      title,
+      description,
+      post_type,
+      published_at: body.published_at,
     };
+
+    return await this.contentService.create(createDto);
   }
 
+  @Public()
   @Get('user/:creator_id')
-  getByUser(@Param('creator_id', ParseIntPipe) creator_id: number) {
+  getByUser(
+    @Param('creator_id', ParseIntPipe) creator_id: number,
+  ): Promise<FullContentDto[]> {
     this.logger.log(typeof creator_id);
     return this.contentService.getByUser(creator_id);
   }
 
+  @Public()
+  @Get('user/:userId/following')
+  getFollowingContent(
+    @Param('userId', ParseIntPipe) userId: number,
+  ): Promise<FullContentDto[]> {
+    this.logger.log(typeof userId);
+    return this.contentService.getFollowingContent(userId);
+  }
+
+  @Public()
+  @Get('user/:userId/friends')
+  getFriendContent(
+    @Param('userId', ParseIntPipe) userId: number,
+  ): Promise<FullContentDto[]> {
+    this.logger.log(typeof userId);
+    return this.contentService.getFriendContent(userId);
+  }
+
+  @Public()
+  @Get('user/:userId/liked')
+  getLikedByUser(
+    @Param('userId', ParseIntPipe) userId: number,
+  ): Promise<FullContentDto[]> {
+    this.logger.log(typeof userId);
+    return this.contentService.getLikedByUser(userId);
+  }
+
+  @Public()
+  @Get('user/:userId/pinned')
+  getPinnedByUser(
+    @Param('userId', ParseIntPipe) userId: number,
+  ): Promise<FullContentDto[]> {
+    this.logger.log(typeof userId);
+    return this.contentService.getPinnedByUser(userId);
+  }
+
+  @Public()
   @Get(':area_id')
-  findAll(@Param('area_id', ParseIntPipe) area_id: number) {
+  findAll(
+    @Param('area_id', ParseIntPipe) area_id: number,
+  ): Promise<FullContentDto[]> {
     return this.contentService.findAll(area_id);
   }
 
+  @Public()
   @Get(':content_id/:area_id')
   findOne(
     @Param('content_id', ParseIntPipe) content_id: number,
     @Param('area_id', ParseIntPipe) area_id: number,
-  ) {
+  ): Promise<FullContentDto> {
     return this.contentService.findOne(content_id, area_id);
   }
 
@@ -112,7 +211,7 @@ export class ContentController {
     @Param('content_id', ParseIntPipe) content_id: number,
     @Param('area_id', ParseIntPipe) area_id: number,
     @Body() dto: deltaDto,
-  ) {
+  ): Promise<Ack> {
     return this.contentService.updateView(content_id, area_id, dto);
   }
 
@@ -121,7 +220,7 @@ export class ContentController {
     @Param('content_id', ParseIntPipe) content_id: number,
     @Param('area_id', ParseIntPipe) area_id: number,
     @Body() dto: deltaDto,
-  ) {
+  ): Promise<Ack> {
     return this.contentService.updateLike(content_id, area_id, dto);
   }
 
@@ -130,7 +229,7 @@ export class ContentController {
     @Param('content_id', ParseIntPipe) content_id: number,
     @Param('area_id', ParseIntPipe) area_id: number,
     @Body() dto: deltaDto,
-  ) {
+  ): Promise<Ack> {
     return this.contentService.updatePin(content_id, area_id, dto);
   }
 
@@ -139,7 +238,7 @@ export class ContentController {
     @Param('content_id', ParseIntPipe) content_id: number,
     @Param('area_id', ParseIntPipe) area_id: number,
     @Body() dto: deltaDto,
-  ) {
+  ): Promise<Ack> {
     return this.contentService.updateComment(content_id, area_id, dto);
   }
 
@@ -148,7 +247,7 @@ export class ContentController {
     @Param('content_id', ParseIntPipe) content_id: number,
     @Param('area_id', ParseIntPipe) area_id: number,
     @Body() dto: deltaDto,
-  ) {
+  ): Promise<Ack> {
     return this.contentService.updateReport(content_id, area_id, dto);
   }
 
@@ -156,7 +255,7 @@ export class ContentController {
   setPrivate(
     @Param('content_id', ParseIntPipe) content_id: number,
     @Param('area_id', ParseIntPipe) area_id: number,
-  ) {
+  ): Promise<Ack> {
     return this.contentService.setPrivate(content_id, area_id);
   }
 
@@ -164,7 +263,7 @@ export class ContentController {
   setPublic(
     @Param('content_id', ParseIntPipe) content_id: number,
     @Param('area_id', ParseIntPipe) area_id: number,
-  ) {
+  ): Promise<Ack> {
     return this.contentService.setPublic(content_id, area_id);
   }
 
@@ -172,7 +271,7 @@ export class ContentController {
   remove(
     @Param('content_id', ParseIntPipe) content_id: number,
     @Param('area_id', ParseIntPipe) area_id: number,
-  ) {
+  ): Promise<Ack> {
     return this.contentService.remove(content_id, area_id);
   }
 }

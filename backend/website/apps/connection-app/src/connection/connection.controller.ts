@@ -84,6 +84,7 @@ export class ConnectionController {
   async getFollowingByUser(
     @Payload() payload: GetByIdDto,
   ): Promise<FollowingDto[]> {
+    this.logger.log(`Getting following list for user ID ${payload.id}`);
     return this.connectionService.getFollowingByUser(payload.id);
   }
 

@@ -4,6 +4,7 @@ import { AddContentDto } from '@app/contracts/shared-dto/board/request/add-conte
 import { RemoveContentDto } from '@app/contracts/shared-dto/board/request/remove-content.dto';
 import { UpdateContentDto } from '@app/contracts/shared-dto/board/request/update-content.dto';
 import { BoardDto } from '@app/contracts/shared-dto/board/response/board.dto';
+import { ContentIdsResDto } from '@app/contracts/shared-dto/content/res/content-ids.res.dto';
 
 export interface IBoardService {
   create(dto: CreateBoardDto): Promise<BoardDto>;
@@ -14,4 +15,5 @@ export interface IBoardService {
   updateContent(boardId: number, dto: UpdateContentDto): Promise<BoardDto>;
   deleteBoard(id: number): Promise<Ack>;
   getBoardByUser(userId: number): Promise<BoardDto[]>;
+  getContentIdsByBoardId(boardId: number): Promise<ContentIdsResDto>;
 }
