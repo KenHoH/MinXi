@@ -36,6 +36,7 @@ import { createMetadataSchema } from './schemas/create-metadata.schema';
 export class SseController {
   constructor(private readonly sseService: SseService) {}
 
+  @Public()
   @Sse('subscribe/rooms/:roomId')
   subscribeToRoom(
     @Param('roomId') roomId: string,
@@ -111,6 +112,7 @@ export class SseController {
     return this.sseService.sendBroadcast(dto.roomId, dto);
   }
 
+  @Public()
   @Post('sendNotificationToRoom')
   sendNotification(@Body() dto: BroadcastNotifReq): Promise<Ack> {
     return this.sseService.sendNotification(dto.userId, dto);
