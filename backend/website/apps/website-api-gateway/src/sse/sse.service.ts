@@ -15,7 +15,13 @@ import { SendMessageDto } from '@app/contracts/shared-dto/social/request/sendMes
 import { MessageResponseDto } from '@app/contracts/shared-dto/social/response/messageResDTO';
 import { BroadcastMsgReq } from '@app/contracts/shared-dto/sse/req/BroadcastMsgReq';
 import { ConnectionStatsRes } from '@app/contracts/shared-dto/sse/res/ConnectionStatsRes';
-import { HttpException, HttpStatus, Inject, Injectable } from '@nestjs/common';
+import {
+  HttpException,
+  HttpStatus,
+  Inject,
+  Injectable,
+  Logger,
+} from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
 import { Http2ServerRequest } from 'http2';
 import { firstValueFrom, map, Observable, Subject } from 'rxjs';
@@ -100,6 +106,9 @@ export class SseService implements ISSEService {
       mediaUrl: dto.mediaUrl,
       roomId: dto.roomId,
     };
+
+    const logger = new Logger(this.constructor.name);
+    logger.log(`Forwarding message: ${JSON.stringify(payload)}`);
 
     try {
       await firstValueFrom(this.client.send(SOCIAL_MSG.sendMessage, payload));

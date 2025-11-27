@@ -282,20 +282,25 @@ export class SocialService implements ISocialService {
 
   async sendMessage(dto: SendMessageDto): Promise<MessageResponseDto> {
     try {
+      this.logger.log(`Sending message with dto: ${JSON.stringify(dto)}`);
       const msg = await this.messageClient.message.create({
         data: {
           roomId: dto.roomId,
           content: dto.content,
-          authorId: dto.authorId,
+          authorId: Number(dto.authorId),
           mediaUrl: dto.mediaUrl,
         },
       });
 
       return mapMessageToResponse(msg);
     } catch (error: any) {
+      this.logger.error(
+        `Error sending message: ${error?.message}`,
+        error?.stack,
+      );
       throw httpToRpc(
         new HttpException(
-          'Failed to send message',
+          error?.message || 'Failed to send message',
           HttpStatus.INTERNAL_SERVER_ERROR,
         ),
       );

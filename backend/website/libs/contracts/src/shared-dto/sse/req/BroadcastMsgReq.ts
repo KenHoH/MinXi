@@ -21,12 +21,6 @@ export class BroadcastMsgReq {
   })
   mediaUrl?: string;
 
-  @ApiProperty({
-    description: 'Creation timestamp',
-    example: '2023-01-01T00:00:00.000Z',
-  })
-  createdAt: Date;
-
   @ApiProperty({ description: 'Author user ID', example: 1 })
   authorId: number;
 }

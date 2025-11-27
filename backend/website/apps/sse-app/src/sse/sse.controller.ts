@@ -10,6 +10,6 @@ export class SseController {
   constructor(private readonly sseService: SseService) {}
   @MessagePattern(SSE_MSG.sendBroadcast)
   sendBroadcast(@Payload() dto: BroadcastMsgReq) {
-    this.sseService.sendBroadcast(dto.roomId, dto);
+    return this.sseService.sendBroadcast(dto.roomId, dto);
   }
 }
