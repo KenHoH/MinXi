@@ -289,6 +289,7 @@ export class SocialService implements ISocialService {
           content: dto.content,
           authorId: Number(dto.authorId),
           mediaUrl: dto.mediaUrl,
+          type: dto.type,
         },
       });
 

@@ -13,6 +13,8 @@ export class BroadcastMsgReq {
 
   @ApiProperty({ description: 'Message content', example: 'Hello!' })
   content: string;
+  @ApiProperty({ description: 'Type metadata', example: 'TEXT' })
+  type: string;
 
   @ApiProperty({
     required: false,

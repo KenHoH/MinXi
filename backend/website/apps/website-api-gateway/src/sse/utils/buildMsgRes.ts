@@ -9,5 +9,6 @@ export function buildMessageResponse(dto: any): MessageResponseDto {
     mediaUrl: dto.mediaUrl,
     createdAt: new Date(),
     roomId: dto.roomId,
+    type: dto.type || 'TEXT',
   };
 }

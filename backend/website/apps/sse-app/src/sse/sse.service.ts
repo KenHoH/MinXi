@@ -68,6 +68,7 @@ export class SseService implements ISSEService {
       mediaUrl: dto.mediaUrl,
       createdAt: new Date(),
       roomId: dto.roomId,
+      type: dto.type || 'TEXT',
     };
   }
 
@@ -97,6 +98,7 @@ export class SseService implements ISSEService {
       content: dto.content,
       mediaUrl: dto.mediaUrl,
       roomId: dto.roomId,
+      type: dto.type || 'TEXT',
     };
 
     try {

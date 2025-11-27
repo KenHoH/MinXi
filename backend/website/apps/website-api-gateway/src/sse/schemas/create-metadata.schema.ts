@@ -7,7 +7,7 @@ export const createMetadataSchema = {
       description: 'metadata file optional',
     },
     room_id: {
-      type: 'number',
+      type: 'string',
       description: 'ID of the room ',
       example: 1,
     },

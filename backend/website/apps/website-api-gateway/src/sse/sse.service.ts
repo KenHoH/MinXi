@@ -105,6 +105,7 @@ export class SseService implements ISSEService {
       content: dto.content,
       mediaUrl: dto.mediaUrl,
       roomId: dto.roomId,
+      type: dto.type || 'TEXT',
     };
 
     const logger = new Logger(this.constructor.name);
@@ -113,9 +114,11 @@ export class SseService implements ISSEService {
     try {
       await firstValueFrom(this.client.send(SOCIAL_MSG.sendMessage, payload));
     } catch (err) {
-      throw new HttpException(
-        'Failed to send message',
-        HttpStatus.INTERNAL_SERVER_ERROR,
+      throw httpToRpc(
+        new HttpException(
+          'Failed to send message',
+          HttpStatus.INTERNAL_SERVER_ERROR,
+        ),
       );
     }
   }

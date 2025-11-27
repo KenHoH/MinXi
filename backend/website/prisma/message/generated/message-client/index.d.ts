@@ -35,7 +35,7 @@ export type Message = $Result.DefaultSelection<Prisma.$MessagePayload>
  */
 export class PrismaClient<
   ClientOptions extends Prisma.PrismaClientOptions = Prisma.PrismaClientOptions,
-  const U = 'log' extends keyof ClientOptions ? ClientOptions['log'] extends Array<Prisma.LogLevel | Prisma.LogDefinition> ? Prisma.GetEvents<ClientOptions['log']> : never : never,
+  U = 'log' extends keyof ClientOptions ? ClientOptions['log'] extends Array<Prisma.LogLevel | Prisma.LogDefinition> ? Prisma.GetEvents<ClientOptions['log']> : never : never,
   ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs
 > {
   [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['other'] }
@@ -67,6 +67,13 @@ export class PrismaClient<
    * Disconnect from the database
    */
   $disconnect(): $Utils.JsPromise<void>;
+
+  /**
+   * Add a middleware
+   * @deprecated since 4.16.0. For new code, prefer client extensions instead.
+   * @see https://pris.ly/d/extensions
+   */
+  $use(cb: Prisma.Middleware): void
 
 /**
    * Executes a prepared raw query and returns the number of affected rows.
@@ -204,8 +211,8 @@ export namespace Prisma {
   export import Exact = $Public.Exact
 
   /**
-   * Prisma Client JS version: 6.19.0
-   * Query Engine version: 2ba551f319ab1df4bc874a89965d8b3641056773
+   * Prisma Client JS version: 6.9.0
+   * Query Engine version: 81e4af48011447c3cc503a190e86995b66d2a28e
    */
   export type PrismaVersion = {
     client: string
@@ -218,7 +225,6 @@ export namespace Prisma {
    */
 
 
-  export import Bytes = runtime.Bytes
   export import JsonObject = runtime.JsonObject
   export import JsonArray = runtime.JsonArray
   export import JsonValue = runtime.JsonValue
@@ -719,24 +725,16 @@ export namespace Prisma {
     /**
      * @example
      * ```
-     * // Shorthand for `emit: 'stdout'`
+     * // Defaults to stdout
      * log: ['query', 'info', 'warn', 'error']
      * 
-     * // Emit as events only
+     * // Emit as events
      * log: [
-     *   { emit: 'event', level: 'query' },
-     *   { emit: 'event', level: 'info' },
-     *   { emit: 'event', level: 'warn' }
-     *   { emit: 'event', level: 'error' }
+     *   { emit: 'stdout', level: 'query' },
+     *   { emit: 'stdout', level: 'info' },
+     *   { emit: 'stdout', level: 'warn' }
+     *   { emit: 'stdout', level: 'error' }
      * ]
-     * 
-     * / Emit as events and log to stdout
-     * og: [
-     *  { emit: 'stdout', level: 'query' },
-     *  { emit: 'stdout', level: 'info' },
-     *  { emit: 'stdout', level: 'warn' }
-     *  { emit: 'stdout', level: 'error' }
-     * 
      * ```
      * Read more in our [docs](https://www.prisma.io/docs/reference/tools-and-interfaces/prisma-client/logging#the-log-option).
      */
@@ -751,10 +749,6 @@ export namespace Prisma {
       timeout?: number
       isolationLevel?: Prisma.TransactionIsolationLevel
     }
-    /**
-     * Instance of a Driver Adapter, e.g., like one provided by `@prisma/adapter-planetscale`
-     */
-    adapter?: runtime.SqlDriverAdapterFactory | null
     /**
      * Global configuration for omitting model fields by default.
      * 
@@ -782,15 +776,10 @@ export namespace Prisma {
     emit: 'stdout' | 'event'
   }
 
-  export type CheckIsLogLevel<T> = T extends LogLevel ? T : never;
-
-  export type GetLogType<T> = CheckIsLogLevel<
-    T extends LogDefinition ? T['level'] : T
-  >;
-
-  export type GetEvents<T extends any[]> = T extends Array<LogLevel | LogDefinition>
-    ? GetLogType<T[number]>
-    : never;
+  export type GetLogType<T extends LogLevel | LogDefinition> = T extends LogDefinition ? T['emit'] extends 'event' ? T['level'] : never : never
+  export type GetEvents<T extends any> = T extends Array<LogLevel | LogDefinition> ?
+    GetLogType<T[0]> | GetLogType<T[1]> | GetLogType<T[2]> | GetLogType<T[3]>
+    : never
 
   export type QueryEvent = {
     timestamp: Date
@@ -830,6 +819,25 @@ export namespace Prisma {
     | 'runCommandRaw'
     | 'findRaw'
     | 'groupBy'
+
+  /**
+   * These options are being passed into the middleware as "params"
+   */
+  export type MiddlewareParams = {
+    model?: ModelName
+    action: PrismaAction
+    args: any
+    dataPath: string[]
+    runInTransaction: boolean
+  }
+
+  /**
+   * The `T` type makes sure, that the `return proceed` is not forgotten in the middleware implementation
+   */
+  export type Middleware<T = any> = (
+    params: MiddlewareParams,
+    next: (params: MiddlewareParams) => $Utils.JsPromise<T>,
+  ) => $Utils.JsPromise<T>
 
   // tested in getLogLevel.test.ts
   export function getLogLevel(log: Array<LogLevel | LogDefinition>): LogLevel | undefined;
@@ -878,6 +886,7 @@ export namespace Prisma {
     roomId: string | null
     content: string | null
     mediaUrl: string | null
+    type: string | null
     createdAt: Date | null
     authorId: number | null
   }
@@ -887,6 +896,7 @@ export namespace Prisma {
     roomId: string | null
     content: string | null
     mediaUrl: string | null
+    type: string | null
     createdAt: Date | null
     authorId: number | null
   }
@@ -896,6 +906,7 @@ export namespace Prisma {
     roomId: number
     content: number
     mediaUrl: number
+    type: number
     createdAt: number
     authorId: number
     _all: number
@@ -915,6 +926,7 @@ export namespace Prisma {
     roomId?: true
     content?: true
     mediaUrl?: true
+    type?: true
     createdAt?: true
     authorId?: true
   }
@@ -924,6 +936,7 @@ export namespace Prisma {
     roomId?: true
     content?: true
     mediaUrl?: true
+    type?: true
     createdAt?: true
     authorId?: true
   }
@@ -933,6 +946,7 @@ export namespace Prisma {
     roomId?: true
     content?: true
     mediaUrl?: true
+    type?: true
     createdAt?: true
     authorId?: true
     _all?: true
@@ -1029,6 +1043,7 @@ export namespace Prisma {
     roomId: string
     content: string
     mediaUrl: string | null
+    type: string
     createdAt: Date
     authorId: number
     _count: MessageCountAggregateOutputType | null
@@ -1057,6 +1072,7 @@ export namespace Prisma {
     roomId?: boolean
     content?: boolean
     mediaUrl?: boolean
+    type?: boolean
     createdAt?: boolean
     authorId?: boolean
   }, ExtArgs["result"]["message"]>
@@ -1068,11 +1084,12 @@ export namespace Prisma {
     roomId?: boolean
     content?: boolean
     mediaUrl?: boolean
+    type?: boolean
     createdAt?: boolean
     authorId?: boolean
   }
 
-  export type MessageOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "roomId" | "content" | "mediaUrl" | "createdAt" | "authorId", ExtArgs["result"]["message"]>
+  export type MessageOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "roomId" | "content" | "mediaUrl" | "type" | "createdAt" | "authorId", ExtArgs["result"]["message"]>
 
   export type $MessagePayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     name: "Message"
@@ -1082,6 +1099,7 @@ export namespace Prisma {
       roomId: string
       content: string
       mediaUrl: string | null
+      type: string
       createdAt: Date
       authorId: number
     }, ExtArgs["result"]["message"]>
@@ -1457,6 +1475,7 @@ export namespace Prisma {
     readonly roomId: FieldRef<"Message", 'String'>
     readonly content: FieldRef<"Message", 'String'>
     readonly mediaUrl: FieldRef<"Message", 'String'>
+    readonly type: FieldRef<"Message", 'String'>
     readonly createdAt: FieldRef<"Message", 'DateTime'>
     readonly authorId: FieldRef<"Message", 'Int'>
   }
@@ -1799,6 +1818,7 @@ export namespace Prisma {
     roomId: 'roomId',
     content: 'content',
     mediaUrl: 'mediaUrl',
+    type: 'type',
     createdAt: 'createdAt',
     authorId: 'authorId'
   };
@@ -1826,7 +1846,8 @@ export namespace Prisma {
     id: 'id',
     roomId: 'roomId',
     content: 'content',
-    mediaUrl: 'mediaUrl'
+    mediaUrl: 'mediaUrl',
+    type: 'type'
   };
 
   export type MessageOrderByRelevanceFieldEnum = (typeof MessageOrderByRelevanceFieldEnum)[keyof typeof MessageOrderByRelevanceFieldEnum]
@@ -1876,6 +1897,7 @@ export namespace Prisma {
     roomId?: StringFilter<"Message"> | string
     content?: StringFilter<"Message"> | string
     mediaUrl?: StringNullableFilter<"Message"> | string | null
+    type?: StringFilter<"Message"> | string
     createdAt?: DateTimeFilter<"Message"> | Date | string
     authorId?: IntFilter<"Message"> | number
   }
@@ -1885,6 +1907,7 @@ export namespace Prisma {
     roomId?: SortOrder
     content?: SortOrder
     mediaUrl?: SortOrderInput | SortOrder
+    type?: SortOrder
     createdAt?: SortOrder
     authorId?: SortOrder
     _relevance?: MessageOrderByRelevanceInput
@@ -1898,6 +1921,7 @@ export namespace Prisma {
     roomId?: StringFilter<"Message"> | string
     content?: StringFilter<"Message"> | string
     mediaUrl?: StringNullableFilter<"Message"> | string | null
+    type?: StringFilter<"Message"> | string
     createdAt?: DateTimeFilter<"Message"> | Date | string
     authorId?: IntFilter<"Message"> | number
   }, "id">
@@ -1907,6 +1931,7 @@ export namespace Prisma {
     roomId?: SortOrder
     content?: SortOrder
     mediaUrl?: SortOrderInput | SortOrder
+    type?: SortOrder
     createdAt?: SortOrder
     authorId?: SortOrder
     _count?: MessageCountOrderByAggregateInput
@@ -1924,6 +1949,7 @@ export namespace Prisma {
     roomId?: StringWithAggregatesFilter<"Message"> | string
     content?: StringWithAggregatesFilter<"Message"> | string
     mediaUrl?: StringNullableWithAggregatesFilter<"Message"> | string | null
+    type?: StringWithAggregatesFilter<"Message"> | string
     createdAt?: DateTimeWithAggregatesFilter<"Message"> | Date | string
     authorId?: IntWithAggregatesFilter<"Message"> | number
   }
@@ -1933,6 +1959,7 @@ export namespace Prisma {
     roomId: string
     content: string
     mediaUrl?: string | null
+    type?: string
     createdAt?: Date | string
     authorId: number
   }
@@ -1942,6 +1969,7 @@ export namespace Prisma {
     roomId: string
     content: string
     mediaUrl?: string | null
+    type?: string
     createdAt?: Date | string
     authorId: number
   }
@@ -1951,6 +1979,7 @@ export namespace Prisma {
     roomId?: StringFieldUpdateOperationsInput | string
     content?: StringFieldUpdateOperationsInput | string
     mediaUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    type?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     authorId?: IntFieldUpdateOperationsInput | number
   }
@@ -1960,6 +1989,7 @@ export namespace Prisma {
     roomId?: StringFieldUpdateOperationsInput | string
     content?: StringFieldUpdateOperationsInput | string
     mediaUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    type?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     authorId?: IntFieldUpdateOperationsInput | number
   }
@@ -1969,6 +1999,7 @@ export namespace Prisma {
     roomId: string
     content: string
     mediaUrl?: string | null
+    type?: string
     createdAt?: Date | string
     authorId: number
   }
@@ -1978,6 +2009,7 @@ export namespace Prisma {
     roomId?: StringFieldUpdateOperationsInput | string
     content?: StringFieldUpdateOperationsInput | string
     mediaUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    type?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     authorId?: IntFieldUpdateOperationsInput | number
   }
@@ -1987,6 +2019,7 @@ export namespace Prisma {
     roomId?: StringFieldUpdateOperationsInput | string
     content?: StringFieldUpdateOperationsInput | string
     mediaUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    type?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     authorId?: IntFieldUpdateOperationsInput | number
   }
@@ -2059,6 +2092,7 @@ export namespace Prisma {
     roomId?: SortOrder
     content?: SortOrder
     mediaUrl?: SortOrder
+    type?: SortOrder
     createdAt?: SortOrder
     authorId?: SortOrder
   }
@@ -2072,6 +2106,7 @@ export namespace Prisma {
     roomId?: SortOrder
     content?: SortOrder
     mediaUrl?: SortOrder
+    type?: SortOrder
     createdAt?: SortOrder
     authorId?: SortOrder
   }
@@ -2081,6 +2116,7 @@ export namespace Prisma {
     roomId?: SortOrder
     content?: SortOrder
     mediaUrl?: SortOrder
+    type?: SortOrder
     createdAt?: SortOrder
     authorId?: SortOrder
   }

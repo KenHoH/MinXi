@@ -89,9 +89,14 @@ export class SseController {
       throw new BadRequestException('message is required');
     }
 
+    let typeMetadata: string = '';
+
     let profilePath: string = '';
     if (metadataFile) {
       profilePath = `http://localhost:3000/uploads/metadata/${metadataFile.filename}`;
+      typeMetadata = metadataFile.mimetype.startsWith('image/')
+        ? 'IMAGE'
+        : 'VIDEO';
     }
 
     const dto: BroadcastMsgReq = {
@@ -100,6 +105,7 @@ export class SseController {
       content: message,
       mediaUrl: profilePath,
       id: '',
+      type: typeMetadata,
     };
 
     return this.sseService.sendBroadcast(dto.roomId, dto);
