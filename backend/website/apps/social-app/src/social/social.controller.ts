@@ -19,63 +19,63 @@ export class SocialController {
   constructor(private readonly socialService: SocialService) {}
   logger = new Logger(SocialService.name);
   @MessagePattern(SOCIAL_MSG.createRoom)
-  createRoom(@Payload() dto: CreateRoomDto) {
+  async createRoom(@Payload() dto: CreateRoomDto) {
     this.logger.log(`Creating room with dto: ${JSON.stringify(dto)}`);
     return this.socialService.createRoom(dto);
   }
 
   @MessagePattern(SOCIAL_MSG.getRoomInfo)
-  getRoomInfo(@Payload() dto: GetRoomInfoDto) {
+  async getRoomInfo(@Payload() dto: GetRoomInfoDto) {
     return this.socialService.getRoomInfo(dto);
   }
 
   @MessagePattern(SOCIAL_MSG.getAllRoomID)
-  getAllRoomID(@Payload() dto: GetAllRoomsDto) {
+  async getAllRoomID(@Payload() dto: GetAllRoomsDto) {
     return this.socialService.getAllRoomID(dto);
   }
 
   @MessagePattern(SOCIAL_MSG.addUserToRoom)
-  addUserToRoom(@Payload() dto: AddUserToRoomDto) {
+  async addUserToRoom(@Payload() dto: AddUserToRoomDto) {
     return this.socialService.addUserToRoom(dto);
   }
 
   @MessagePattern(SOCIAL_MSG.removeUserFromRoom)
-  removeUserFromRoom(@Payload() dto: RemoveUserFromRoomDto) {
+  async removeUserFromRoom(@Payload() dto: RemoveUserFromRoomDto) {
     return this.socialService.removeUserFromRoom(dto);
   }
 
   @MessagePattern(SOCIAL_MSG.updateParticipantRole)
-  updateParticipantRole(@Payload() dto: UpdateParticipantRoleDto) {
+  async updateParticipantRole(@Payload() dto: UpdateParticipantRoleDto) {
     return this.socialService.updateParticipantRole(dto);
   }
 
   @MessagePattern(SOCIAL_MSG.getTotalParticipants)
-  getTotalParticipants(@Payload() dto: GetTotalParticipantsDto) {
+  async getTotalParticipants(@Payload() dto: GetTotalParticipantsDto) {
     return this.socialService.getTotalParticipant(dto);
   }
 
   @MessagePattern(SOCIAL_MSG.getParticipantDM)
-  getParticipant(@Payload() roomId: string) {
+  async getParticipant(@Payload() roomId: string) {
     return this.socialService.getParticipant(roomId);
   }
 
   @MessagePattern(SOCIAL_MSG.sendMessage)
-  sendMessage(@Payload() dto: SendMessageDto) {
+  async sendMessage(@Payload() dto: SendMessageDto) {
     return this.socialService.sendMessage(dto);
   }
 
   @MessagePattern(SOCIAL_MSG.getMessage)
-  getMessage(@Payload() dto: GetMessagesDto) {
+  async getMessage(@Payload() dto: GetMessagesDto) {
     return this.socialService.getMessage(dto);
   }
 
   @MessagePattern(SOCIAL_MSG.findDM)
-  findDM(@Payload() dto: FindDmDto) {
+  async findDM(@Payload() dto: FindDmDto) {
     return this.socialService.findDM(dto);
   }
 
   @MessagePattern(SOCIAL_MSG.getMedia)
-  getMedia(@Payload() dto: GetMediaDto) {
+  async getMedia(@Payload() dto: GetMediaDto) {
     return this.socialService.getMedia(dto);
   }
 }

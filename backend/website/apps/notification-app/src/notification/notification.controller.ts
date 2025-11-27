@@ -14,12 +14,12 @@ export class NotificationController {
   }
 
   @MessagePattern(NOTIF_MSG.getNotif)
-  getNotification(@Payload() userId: number) {
+  async getNotification(@Payload() userId: number) {
     return this.notificationService.getNotification(userId);
   }
 
   @MessagePattern(NOTIF_MSG.deleteNotif)
-  remove(@Payload() notificationId: number) {
+  async remove(@Payload() notificationId: number) {
     return this.notificationService.deleteNotification(notificationId);
   }
 }
