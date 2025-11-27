@@ -20,6 +20,7 @@ export class CommentService implements ICommentService {
           creator_id: dto.creator_id,
           content_id: dto.content_id,
           text: dto.text,
+          parent_id: dto.parent_id ?? null,
         },
       });
 
@@ -90,14 +91,41 @@ export class CommentService implements ICommentService {
 
   async getComment(contentId: number): Promise<CommentRes[]> {
     try {
-      const rootComments = await this.prisma.comment.findMany({
+      // Fetch ALL comments for this content (including those with parent_id)
+      const allComments = await this.prisma.comment.findMany({
         where: {
           content_id: contentId,
-          parent_id: null,
         },
-        orderBy: { created_at: 'desc' },
+        orderBy: { created_at: 'asc' },
       });
 
+      if (allComments.length === 0) {
+        return [];
+      }
+
+      // Separate root comments from replies
+      const rootComments = allComments.filter(
+        (c) => !c.parent_id || c.parent_id === 0,
+      );
+
+      // If no root comments exist, all comments are orphaned replies
+      // Return them flat to avoid data loss
+      if (rootComments.length === 0) {
+        this.logger.warn(
+          `No root comments found for content ${contentId}. Returning ${allComments.length} comments as flat list.`,
+        );
+        return allComments.map((c) => ({
+          id: c.id,
+          creator_id: c.creator_id,
+          content_id: c.content_id,
+          text: c.text,
+          created_at: c.created_at,
+          replies: [],
+          parent_id: c.parent_id ?? undefined,
+        }));
+      }
+
+      // Build tree for each root comment
       const result: CommentRes[] = [];
       for (const comment of rootComments) {
         const commentWithReplies = await this.buildCommentTree(comment);

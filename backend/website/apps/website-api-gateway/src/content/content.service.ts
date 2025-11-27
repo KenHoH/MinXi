@@ -169,4 +169,23 @@ export class ContentService implements IContentService {
       this.contentClient.send(CONTENT_MSG.getPinnedByUser, userId),
     );
   }
+  async getAncestorPost(
+    contentId: number,
+    areaId: number,
+  ): Promise<FullContentDto[]> {
+    return await firstValueFrom(
+      this.contentClient.send(CONTENT_MSG.getAncestorPost, {
+        contentId,
+        areaId,
+      }),
+    );
+  }
+  async getFullPost(
+    contentId: number,
+    areaId: number,
+  ): Promise<FullContentDto> {
+    return await firstValueFrom(
+      this.contentClient.send(CONTENT_MSG.getFullPost, { contentId, areaId }),
+    );
+  }
 }

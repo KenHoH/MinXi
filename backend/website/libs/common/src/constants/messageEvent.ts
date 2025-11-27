@@ -45,6 +45,8 @@ export const CONTENT_MSG = {
   getFriendContent: 'content.getFriendContent',
   getLikedByUser: 'content.getLikedByUser',
   getPinnedByUser: 'content.getPinnedByUser',
+  getAncestorPost: 'content.getAncestorPost',
+  getFullPost: 'content.getFullPost',
   remove: 'content.remove',
 };
 

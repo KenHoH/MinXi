@@ -1399,4 +1399,114 @@ export class ContentService implements IContentService {
       return [];
     }
   }
+
+  async buildAncestorPostTree(
+    posts: FullContentDto[],
+    contentId: number,
+  ): Promise<FullContentDto[]> {
+    const map = new Map<number, FullContentDto>();
+    posts.forEach((post) => map.set(post.content_id!, post));
+
+    const chain: FullContentDto[] = [];
+    let current = map.get(contentId);
+
+    while (current) {
+      chain.push(current);
+
+      if (!current.parent_id || current.parent_id === 0) {
+        break;
+      }
+
+      current = map.get(current.parent_id);
+
+      if (!current) {
+        break;
+      }
+    }
+
+    return chain;
+  }
+
+  async getAncestorPost(
+    contentId: number,
+    areaId: number,
+  ): Promise<FullContentDto[]> {
+    if (areaId <= 0 || areaId > 3) {
+      throw httpToRpc(
+        new HttpException('Invalid area ID', HttpStatus.BAD_REQUEST),
+      );
+    }
+
+    try {
+      const content = await this.prisma.content.findUnique({
+        where: {
+          content_id_area_id: { content_id: contentId, area_id: areaId },
+        },
+      });
+
+      if (!content) {
+        throw httpToRpc(
+          new HttpException('Content not found', HttpStatus.NOT_FOUND),
+        );
+      }
+
+      if (!content.parent_id || content.parent_id === 0) {
+        return await this.findOne(contentId, areaId).then((result) => [result]);
+      }
+
+      const ancestors: any[] = [];
+      let current = content;
+
+      while (current && current.parent_id && current.parent_id !== 0) {
+        ancestors.push(current);
+
+        const parent = await this.prisma.content.findUnique({
+          where: {
+            content_id_area_id: {
+              content_id: current.parent_id,
+              area_id: areaId,
+            },
+          },
+        });
+
+        if (!parent) {
+          break;
+        }
+
+        current = parent;
+      }
+
+      if (current && (!current.parent_id || current.parent_id === 0)) {
+        ancestors.push(current);
+      }
+
+      ancestors;
+
+      const result: FullContentDto[] = [];
+      for (const ancestor of ancestors) {
+        const fullContent = await this.findOne(ancestor.content_id, areaId);
+        result.push(fullContent);
+      }
+
+      return result;
+    } catch (error) {
+      if (error.status) {
+        throw error;
+      }
+      this.logger.error('Failed to fetch ancestor posts', error.message);
+      throw httpToRpc(
+        new HttpException(
+          'Failed to fetch ancestor posts',
+          HttpStatus.INTERNAL_SERVER_ERROR,
+        ),
+      );
+    }
+  }
+
+  async getFullPost(
+    contentId: number,
+    areaId: number,
+  ): Promise<FullContentDto> {
+    return await this.findOne(contentId, areaId);
+  }
 }

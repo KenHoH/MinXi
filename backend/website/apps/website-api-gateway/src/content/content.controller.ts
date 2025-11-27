@@ -190,6 +190,24 @@ export class ContentController {
   }
 
   @Public()
+  @Get(':content_id/:area_id/ancestorPost')
+  getAncestorPost(
+    @Param('content_id', ParseIntPipe) content_id: number,
+    @Param('area_id', ParseIntPipe) area_id: number,
+  ): Promise<FullContentDto[]> {
+    return this.contentService.getAncestorPost(content_id, area_id);
+  }
+
+  @Public()
+  @Get(':content_id/:area_id/fullPost')
+  getFullPost(
+    @Param('content_id', ParseIntPipe) content_id: number,
+    @Param('area_id', ParseIntPipe) area_id: number,
+  ): Promise<FullContentDto> {
+    return this.contentService.getFullPost(content_id, area_id);
+  }
+
+  @Public()
   @Get(':area_id')
   findAll(
     @Param('area_id', ParseIntPipe) area_id: number,

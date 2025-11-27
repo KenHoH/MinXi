@@ -202,4 +202,17 @@ export class ContentController {
     this.logger.log(`Fetching Pinned content by user ID ${userId}`);
     return this.contentService.getPinnedByUser(userId);
   }
+  @MessagePattern(CONTENT_MSG.getAncestorPost)
+  async getAncestorPost(
+    @Payload() dto: { contentId: number; areaId: number },
+  ): Promise<FullContentDto[]> {
+    return this.contentService.getAncestorPost(dto.contentId, dto.areaId);
+  }
+
+  @MessagePattern(CONTENT_MSG.getFullPost)
+  async getFullPost(
+    @Payload() dto: { contentId: number; areaId: number },
+  ): Promise<FullContentDto> {
+    return this.contentService.getFullPost(dto.contentId, dto.areaId);
+  }
 }
