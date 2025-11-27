@@ -1,5 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsString, IsBoolean, IsArray, IsInt, IsDate } from 'class-validator';
+import { FullContentDto } from '../../content/res/full.content.dto';
 
 export class BoardDto {
   @ApiProperty()
@@ -26,10 +27,9 @@ export class BoardDto {
   @IsString()
   description: string;
 
-  @ApiProperty({ type: [Number] })
+  @ApiProperty({ type: [FullContentDto] })
   @IsArray()
-  @IsInt({ each: true })
-  contents: number[];
+  contents: FullContentDto[];
 
   @ApiProperty()
   @IsDate()

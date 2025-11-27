@@ -32,24 +32,33 @@ export class BoardService {
     return await firstValueFrom(this.boardClient.send(BOARD_MSG.setPublic, id));
   }
 
-  async addContent(boardId: number, dto: AddContentDto): Promise<Ack> {
+  async addContent(
+    boardId: number,
+    area_id: number,
+    dto: AddContentDto,
+  ): Promise<Ack> {
     return await firstValueFrom(
-      this.boardClient.send(BOARD_MSG.addContent, { boardId, dto }),
+      this.boardClient.send(BOARD_MSG.addContent, { boardId, area_id, dto }),
     );
   }
 
-  async removeContent(boardId: number, dto: RemoveContentDto): Promise<Ack> {
+  async removeContent(
+    boardId: number,
+    area_id: number,
+    dto: RemoveContentDto,
+  ): Promise<Ack> {
     return await firstValueFrom(
-      this.boardClient.send(BOARD_MSG.removeContent, { boardId, dto }),
+      this.boardClient.send(BOARD_MSG.removeContent, { boardId, area_id, dto }),
     );
   }
 
   async updateContent(
     boardId: number,
+    area_id: number,
     dto: UpdateContentDto,
   ): Promise<BoardDto> {
     return await firstValueFrom(
-      this.boardClient.send(BOARD_MSG.updateContent, { boardId, dto }),
+      this.boardClient.send(BOARD_MSG.updateContent, { boardId, area_id, dto }),
     );
   }
 
@@ -59,9 +68,9 @@ export class BoardService {
     );
   }
 
-  async getBoardByUser(userId: number): Promise<BoardDto[]> {
+  async getBoardByUser(userId: number, area_id: number): Promise<BoardDto[]> {
     return await firstValueFrom(
-      this.boardClient.send(BOARD_MSG.getBoardByUser, userId),
+      this.boardClient.send(BOARD_MSG.getBoardByUser, { userId, area_id }),
     );
   }
 

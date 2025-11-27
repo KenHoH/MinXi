@@ -34,23 +34,50 @@ export class BoardController {
 
   @MessagePattern(BOARD_MSG.addContent)
   async addContent(
-    @Payload() payload: { boardId: number; dto: AddContentDto },
+    @Payload()
+    payload: {
+      boardId: number;
+      area_id: number;
+      dto: AddContentDto;
+    },
   ): Promise<Ack> {
-    return this.boardService.addContent(payload.boardId, payload.dto);
+    return this.boardService.addContent(
+      payload.boardId,
+      payload.area_id,
+      payload.dto,
+    );
   }
 
   @MessagePattern(BOARD_MSG.removeContent)
   async removeContent(
-    @Payload() payload: { boardId: number; dto: RemoveContentDto },
+    @Payload()
+    payload: {
+      boardId: number;
+      area_id: number;
+      dto: RemoveContentDto;
+    },
   ): Promise<Ack> {
-    return this.boardService.removeContent(payload.boardId, payload.dto);
+    return this.boardService.removeContent(
+      payload.boardId,
+      payload.area_id,
+      payload.dto,
+    );
   }
 
   @MessagePattern(BOARD_MSG.updateContent)
   async updateContent(
-    @Payload() payload: { boardId: number; dto: UpdateContentDto },
+    @Payload()
+    payload: {
+      boardId: number;
+      area_id: number;
+      dto: UpdateContentDto;
+    },
   ): Promise<BoardDto> {
-    return this.boardService.updateContent(payload.boardId, payload.dto);
+    return this.boardService.updateContent(
+      payload.boardId,
+      payload.area_id,
+      payload.dto,
+    );
   }
 
   @MessagePattern(BOARD_MSG.deleteBoard)
@@ -59,8 +86,10 @@ export class BoardController {
   }
 
   @MessagePattern(BOARD_MSG.getBoardByUser)
-  async getBoardByUser(@Payload() userId: number): Promise<BoardDto[]> {
-    return this.boardService.getBoardByUser(userId);
+  async getBoardByUser(
+    @Payload() payload: { userId: number; area_id: number },
+  ): Promise<BoardDto[]> {
+    return this.boardService.getBoardByUser(payload.userId, payload.area_id);
   }
 
   @MessagePattern(BOARD_MSG.getContentIdsByBoardId)

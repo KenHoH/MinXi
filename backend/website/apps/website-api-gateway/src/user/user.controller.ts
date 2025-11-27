@@ -100,6 +100,12 @@ export class UserController {
     const creator_id = parseInt(body.creator_id, 10);
     const profileFile = files.profile ? files.profile[0] : null;
 
+    if (isNaN(creator_id)) {
+      throw new BadRequestException(
+        'creator_id and area_id must be valid numbers',
+      );
+    }
+
     if (!profileFile) {
       throw new BadRequestException('Profile file is required');
     }

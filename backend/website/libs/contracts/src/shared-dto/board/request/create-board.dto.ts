@@ -15,6 +15,9 @@ export class CreateBoardDto {
   @ApiProperty()
   @IsInt()
   creator_id: number;
+  @ApiProperty()
+  @IsInt()
+  area_id: number;
 
   @ApiProperty({ required: false })
   @IsOptional()
