@@ -1,7 +1,6 @@
 import { useEffect, useState, useRef } from "react";
-import { X } from "lucide-react";
 import useUserService from "@/shared/hooks/useUserService";
-import type { CredentialRes } from "@/services/api";
+import type { CredentialRes, UserDto } from "@/service/api";
 
 interface ProfilePictureProps {
   creator_id: number;
@@ -15,8 +14,9 @@ export function ProfilePicture({
   clickable = true,
 }: ProfilePictureProps) {
   const [showProfileModal, setShowProfileModal] = useState(false);
-  const { userData, findUserById } = useUserService();
+  const { findUserById } = useUserService();
   const lastFetchedIdRef = useRef<number | null>(null);
+  const [userData, setUserData] = useState<UserDto | null>(null);
 
   useEffect(() => {
     if (lastFetchedIdRef.current === creator_id) {
@@ -26,7 +26,8 @@ export function ProfilePicture({
     async function fetchUser() {
       try {
         lastFetchedIdRef.current = creator_id;
-        await findUserById(creator_id);
+        const user = await findUserById(creator_id);
+        setUserData(user);
       } catch (error) {
         console.error("Failed to fetch user data:", error);
       }

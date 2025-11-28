@@ -1,5 +1,4 @@
 import axios from "axios";
-import { AuthService } from "../../services/api";
 
 const http = axios.create({
   baseURL: "http://localhost:3000/api",

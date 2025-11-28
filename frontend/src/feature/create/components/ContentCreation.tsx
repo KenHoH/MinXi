@@ -3,12 +3,13 @@ import { Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Masonry } from "@/shared/components/Masonry";
 import { ContentComponent } from "@/feature/content/components/ContentComponent/ContentComponent";
-import { CreateContentModal } from "@/feature/content/components/CreateContentModal";
-import type Content from "@/feature/content/object/PublicContent";
+
 import { useAuthContext } from "@/feature/auth/context/AuthContext";
+import type { FullContentDto } from "@/service/api";
+import { CreateContentModal } from "./CreateContent/CreateContentModal";
 
 interface ContentCreationProps {
-  items: Content[];
+  items: FullContentDto[];
   onDelete: (id: number) => void;
 }
 
@@ -16,6 +17,7 @@ export function ContentCreation({ items, onDelete }: ContentCreationProps) {
   const [showCreateModal, setShowCreateModal] = useState(false);
   const { user } = useAuthContext();
   const currentUserId = user?.user_id || 0;
+  const currentAreaId = user?.area_id || 0;
 
   return (
     <div className="space-y-6">
@@ -30,6 +32,7 @@ export function ContentCreation({ items, onDelete }: ContentCreationProps) {
         isOpen={showCreateModal}
         onClose={() => setShowCreateModal(false)}
         currentUserId={currentUserId}
+        currentAreaId={currentAreaId}
       />
       <Masonry columns={4}>
         {items.map((item) => (

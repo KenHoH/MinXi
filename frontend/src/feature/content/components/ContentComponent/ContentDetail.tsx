@@ -7,10 +7,10 @@ import { HeaderContentComponent } from "./HeaderContentComponent";
 import { InputContentCommentComponent } from "./InputContentCommentComponent";
 import { FooterContentComponent } from "./FooterContentComponent";
 import { ContentMediaGallery } from "./ContentMediaGallery";
-import type Content from "../../object/PublicContent";
+import type { FullContentDto } from "@/service/api";
 
 interface ContentDetailComponentProps {
-  content: Content;
+  content: FullContentDto;
   onClose: () => void;
 }
 
@@ -25,13 +25,13 @@ export function ContentDetailComponent({
 
   const handlePrevMedia = () => {
     setCurrentMediaIndex((prev) =>
-      prev === 0 ? content.metadata.length - 1 : prev - 1
+      prev === 0 ? content.contents.length - 1 : prev - 1
     );
   };
 
   const handleNextMedia = () => {
     setCurrentMediaIndex((prev) =>
-      prev === content.metadata.length - 1 ? 0 : prev + 1
+      prev === content.contents.length - 1 ? 0 : prev + 1
     );
   };
 
@@ -49,7 +49,7 @@ export function ContentDetailComponent({
     >
       <div className="flex gap-6 w-full max-w-5xl h-[85vh] bg-dark-800 rounded-lg overflow-hidden">
         <ContentMediaGallery
-          mediaItems={content.metadata}
+          mediaItems={content.contents}
           currentMediaIndex={currentMediaIndex}
           onPrevMedia={handlePrevMedia}
           onNextMedia={handleNextMedia}
@@ -61,6 +61,7 @@ export function ContentDetailComponent({
           <HeaderContentComponent
             creator_id={content.creator_id}
             title={content.title}
+            description={content.description}
             views={content.views}
             content_id={content.content_id}
             followed={followed}

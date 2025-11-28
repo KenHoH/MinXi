@@ -5,10 +5,10 @@ import { useState } from "react";
 import { PostFooterInfo } from "./PostFooterInfo";
 import { PostHeaderInfo } from "./PostHeaderInfo";
 import { PostDetailComponent } from "./PostDetail";
-import type Content from "../../object/PublicContent";
+import type { FullContentDto } from "@/service/api";
 
 interface PostComponentProps {
-  post: Content;
+  post: FullContentDto;
 }
 
 export function PostComponent({ post }: PostComponentProps) {

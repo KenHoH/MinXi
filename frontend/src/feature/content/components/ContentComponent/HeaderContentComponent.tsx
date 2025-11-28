@@ -1,9 +1,10 @@
-import { CommentParentComponent } from "../CommentParentComponent";
+import { CommentParentComponent } from "../CommentComponent/CommentParentComponent";
 import { ProfilePicture } from "../ProfilePicture";
 
 interface HeaderContentComponentProps {
   creator_id: number;
   title: string;
+  description: string;
   views: number;
   content_id: number;
   followed: boolean;
@@ -16,11 +17,11 @@ export function HeaderContentComponent({
   views,
   content_id,
   followed,
+  description,
   onFollowClick,
 }: HeaderContentComponentProps) {
   return (
     <div className="flex-1 overflow-y-auto p-4 border-b border-dark-700 space-y-4">
-      {/* Creator Info */}
       <div className="flex items-center gap-3">
         <ProfilePicture creator_id={creator_id} size="md" clickable={true} />
         <div className="flex-1">
@@ -45,10 +46,7 @@ export function HeaderContentComponent({
       <h2 className="font-semibold text-white text-sm">{title}</h2>
 
       {/* Description */}
-      <p className="text-gray-300 text-xs leading-relaxed">
-        This is a beautiful piece of content. Check out the amazing details and
-        let us know what you think in the comments below!
-      </p>
+      <p className="text-gray-300 text-xs leading-relaxed">{description}</p>
 
       {/* Comments */}
       <div className="space-y-3">

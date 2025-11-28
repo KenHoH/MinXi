@@ -1,8 +1,8 @@
 import { ChevronLeft, ChevronRight, X } from "lucide-react";
-import type Metadata from "../../object/Metadata";
+import type { FileDto } from "@/service/api";
 
 interface ContentMediaGalleryProps {
-  mediaItems: Metadata[];
+  mediaItems: FileDto[];
   currentMediaIndex: number;
   onPrevMedia: () => void;
   onNextMedia: () => void;
@@ -30,14 +30,14 @@ export function ContentMediaGallery({
       {mediaItems[currentMediaIndex].type === "video" ? (
         <video
           key={`video-${currentMediaIndex}`}
-          src={mediaItems[currentMediaIndex].file_url}
+          src={mediaItems[currentMediaIndex].filepath}
           controls
           className="w-full h-full object-cover"
         />
       ) : (
         <img
           key={`image-${currentMediaIndex}`}
-          src={mediaItems[currentMediaIndex].file_url}
+          src={mediaItems[currentMediaIndex].filepath}
           alt={`${title} - ${currentMediaIndex + 1}`}
           className="w-full h-full object-cover"
         />

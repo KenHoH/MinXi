@@ -1,375 +1,52 @@
-"use client";
-
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { ContentCreation } from "../components/ContentCreation";
 import { PostCreation } from "../components/PostCreation";
 import { BoardCreation } from "../components/BoardCreation";
 import RootLayout from "@/app/LayoutPage";
-import useContentService from "@/shared/hooks/useContentService";
 import { useToast } from "@/shared/context/ToastContext";
-import type Content from "@/feature/content/object/PublicContent";
-import type Metadata from "@/feature/content/object/Metadata";
 import { useAuthContext } from "@/feature/auth/context/AuthContext";
+import useContentService from "@/shared/hooks/useContentService";
+import type { BoardDto, FullContentDto } from "@/service/api";
 import useBoardService from "@/shared/hooks/useBoardService";
-import type Board from "@/feature/content/object/Board";
-
-const dummyUserBoards = [
-  {
-    board_id: 1,
-    board_thumbnail: "http://localhost:3000/uploads/thumbnail/board1.jpg",
-    creator_id: 5,
-    title: "Travel",
-    description: "All my travel photography and videos from around the world",
-    visibilityPrivate: false,
-    created_at: new Date().toISOString(),
-    contents: [
-      {
-        content_id: 1,
-        creator_id: 5,
-        parent_id: null,
-        title: "My First Photo",
-        description: "A beautiful first photo from my collection",
-        post_type: "image" as const,
-        likes: 120,
-        comments: 15,
-        views: 1200,
-        pins: 5,
-        reports: 0,
-        visibilityPrivate: false,
-        metadata: [
-          {
-            file_id: 1,
-            content_id: 1,
-            content_area_id: 1,
-            thumbnail_url:
-              "http://localhost:3000/uploads/thumbnail/1763296139023-929553449.jpg",
-            file_url:
-              "http://localhost:3000/uploads/content/1763296139023-929553449.jpg",
-          },
-        ],
-      },
-      {
-        content_id: 2,
-        creator_id: 6,
-        parent_id: null,
-        title: "Travel Vlog",
-        description: "Amazing travel vlog from my recent trip",
-        post_type: "video" as const,
-        likes: 340,
-        comments: 45,
-        views: 5600,
-        pins: 12,
-        reports: 0,
-        visibilityPrivate: false,
-        metadata: [
-          {
-            file_id: 2,
-            content_id: 2,
-            content_area_id: 1,
-            thumbnail_url:
-              "http://localhost:3000/uploads/thumbnail/1763296139023-929553449.jpg",
-            file_url: "http://localhost:3000/uploads/content/travel-vlog.mp4",
-          },
-        ],
-      },
-    ],
-  },
-  {
-    board_id: 2,
-    board_thumbnail: "http://localhost:3000/uploads/thumbnail/board2.jpg",
-    creator_id: 5,
-    title: "Photography",
-    description: "Collection of my best photography work",
-    visibilityPrivate: false,
-    created_at: new Date().toISOString(),
-    contents: [
-      {
-        content_id: 3,
-        creator_id: 7,
-        parent_id: null,
-        title: "Sunset Shots",
-        description: "Beautiful sunset photography series",
-        post_type: "image" as const,
-        likes: 200,
-        comments: 28,
-        views: 2100,
-        pins: 8,
-        reports: 0,
-        visibilityPrivate: false,
-        metadata: [
-          {
-            file_id: 3,
-            content_id: 3,
-            content_area_id: 1,
-            thumbnail_url:
-              "http://localhost:3000/uploads/thumbnail/1763296139023-929553449.jpg",
-            file_url: "http://localhost:3000/uploads/content/sunset.jpg",
-          },
-        ],
-      },
-    ],
-  },
-  {
-    board_id: 3,
-    board_thumbnail: "http://localhost:3000/uploads/thumbnail/board3.jpg",
-    creator_id: 5,
-    title: "Design Inspiration",
-    description: "Design ideas and inspiration from my projects",
-    visibilityPrivate: true,
-    created_at: new Date().toISOString(),
-    contents: [
-      {
-        content_id: 1,
-        creator_id: 5,
-        parent_id: null,
-        title: "My Journey",
-        description: "Starting my creative journey today...",
-        likes: 250,
-        comments: 35,
-        post_type: "post" as const,
-        views: 1500,
-        pins: 2,
-        reports: 0,
-        visibilityPrivate: false,
-        metadata: [],
-      },
-    ],
-  },
-];
 
 export default function CreatePage() {
   const [activeTab, setActiveTab] = useState<"content" | "post" | "board">(
     "content"
   );
-  const [contentItems, setContentItems] = useState<Content[]>([]);
-  const [contentAll, setContentAll] = useState<Content[]>([]);
-  const [postItems, setPostItems] = useState<Content[]>([]);
-  const [boardItems, setBoardItems] = useState<Board[]>([]);
-  const { getByUser, getFiles } = useContentService();
-  const { getBoardsByUser, getContentIdsByBoardId } = useBoardService();
+  const [contentItems, setContentItems] = useState<FullContentDto[]>([]);
+  const [contentAll, setContentAll] = useState<FullContentDto[]>([]);
+  const [postItems, setPostItems] = useState<FullContentDto[]>([]);
+  const [boardItems, setBoardItems] = useState<BoardDto[]>([]);
   const { showToast } = useToast();
   const { user } = useAuthContext();
 
-  const getBoardByUser = async (userId: number) => {
-    console.log("Starting to fetch boards and content for user:", userId);
-    const boardList: Board[] = [];
-    try {
-      console.log("Fetching all content items for user...");
-      const contentRes = await getByUser(userId);
-      const allContentItems = contentRes.map((item) => ({
-        content_id: item.content_id,
-        creator_id: item.creator_id,
-        parent_id: item.parent_id ?? null,
-        thumbnail_url: "",
-        title: item.title,
-        description: item.description,
-        post_type: item.post_type as "image" | "video" | "post",
-        likes: item.likes || 0,
-        comments: item.comments || 0,
-        views: item.views || 0,
-        pins: item.pins || 0,
-        reports: item.reports || 0,
-        visibilityPrivate: item.visibilityPrivate || false,
-        area_id: item.area_id,
-        metadata: [],
-      }));
-      console.log("Fetched all content items:", allContentItems);
+  const { getByUser } = useContentService();
+  const { getBoardByUser } = useBoardService();
 
-      console.log("Fetching boards for user...");
-      const boards = await getBoardsByUser(userId);
-      console.log("Fetched boards:", boards);
+  const getContentByUser = useCallback(async (userId: number) => {
+    const res = await getByUser(userId);
 
-      for (const board of boards) {
-        console.log(`Processing board ${board.board_id}...`);
-        const contentIdsRes = await getContentIdsByBoardId(board.board_id);
-        console.log(
-          `Fetched content IDs for board ${board.board_id}:`,
-          contentIdsRes.data
-        );
-
-        const boardContents = contentIdsRes.data
-          .map((contentId) =>
-            allContentItems.find((content) => content.content_id === contentId)
-          )
-          .filter((content) => content !== undefined) as Content[];
-
-        console.log(
-          `Mapped contents for board ${board.board_id}:`,
-          boardContents
-        );
-
-        boardList.push({
-          board_id: board.board_id,
-          thumbnail_url: board.board_thumbnail,
-          creator_id: board.creator_id,
-          title: board.title,
-          description: board.description,
-          visibilityPrivate: board.visibilityPrivate,
-          created_at: board.created_at,
-          contents: boardContents,
-        });
-      }
-
-      console.log("Setting board items:", boardList);
-      setBoardItems(boardList);
-    } catch (error) {
-      showToast("Failed to fetch user boards.");
-      console.error("Error fetching boards:", error);
-    }
-  };
-
-  const getAllItemsByUser = async (userId: number) => {
-    try {
-      const res = await getByUser(userId);
-      console.log("Fetched content by user:", res);
-
-      const contentItems: Content[] = [];
-      const content = res;
-
-      for (const item of content) {
-        const files = await getFiles(item.content_id, item.area_id);
-
-        console.log("Fetched files for content:", files);
-        const metadata: Metadata[] = files.map((file) => ({
-          file_id: file.file_id,
-          content_id: file.content_id,
-          content_area_id: file.content_area_id,
-          thumbnail_url: file.thumbnail || "",
-          file_url: file.filepath,
-          type: file.type || "",
-        }));
-
-        console.log(metadata);
-        const contentItem: Content = {
-          content_id: item.content_id,
-          creator_id: item.creator_id,
-          parent_id: null,
-          thumbnail_url: metadata[0]?.thumbnail_url || "",
-          title: item.title,
-          description: item.description,
-          post_type: item.post_type as "image" | "video" | "post",
-          likes: item.likes || 0,
-          comments: item.comments || 0,
-          views: item.views || 0,
-          pins: item.pins || 0,
-          reports: item.reports || 0,
-          visibilityPrivate: item.visibilityPrivate || false,
-          area_id: item.area_id,
-          metadata,
-        };
-
-        contentItems.push(contentItem);
-      }
-
-      setContentAll(contentItems);
-    } catch (error) {
-      showToast("Failed to fetch user content.");
-      console.error("Error fetching content:", error);
-    }
-  };
-
-  const getContentByUser = async (userId: number) => {
-    try {
-      const res = await getByUser(userId);
-      console.log("Fetched content by user:", res);
-
-      const contentItems: Content[] = [];
-      const content = res.filter(
-        (item) => item.post_type === "image" || item.post_type === "video"
-      );
-
-      for (const item of content) {
-        const files = await getFiles(item.content_id, item.area_id);
-
-        console.log("Fetched files for content:", files);
-        const metadata: Metadata[] = files.map((file) => ({
-          file_id: file.file_id,
-          content_id: file.content_id,
-          content_area_id: file.content_area_id,
-          thumbnail_url: file.thumbnail || "",
-          file_url: file.filepath,
-          type: file.type || "",
-        }));
-
-        console.log(metadata);
-        const contentItem: Content = {
-          content_id: item.content_id,
-          creator_id: item.creator_id,
-          parent_id: null,
-          thumbnail_url: metadata[0]?.thumbnail_url || "",
-          title: item.title,
-          description: item.description,
-          post_type: item.post_type as "image" | "video",
-          likes: item.likes || 0,
-          comments: item.comments || 0,
-          views: item.views || 0,
-          pins: item.pins || 0,
-          reports: item.reports || 0,
-          visibilityPrivate: item.visibilityPrivate || false,
-          area_id: item.area_id,
-          metadata,
-        };
-
-        contentItems.push(contentItem);
-      }
-
-      setContentItems(contentItems);
-    } catch (error) {
-      showToast("Failed to fetch user content.");
-      console.error("Error fetching content:", error);
-    }
-  };
-
-  const getPostByUser = async (userId: number) => {
-    try {
-      const res = await getByUser(userId);
-
-      const postItems: Content[] = [];
+    if (res) {
       const posts = res.filter((item) => item.post_type === "post");
-
-      for (const item of posts) {
-        let metadata: Metadata[] = [];
-        try {
-          const files = await getFiles(item.content_id, item.area_id);
-          metadata = files.map((file) => ({
-            file_id: file.file_id,
-            content_id: file.content_id,
-            content_area_id: file.content_area_id,
-            thumbnail_url: file.thumbnail || "",
-            file_url: file.filepath,
-            type: file.type || "",
-          }));
-        } catch (err) {
-          console.error("Error fetching files for post:", err);
-        }
-
-        const postItem: Content = {
-          content_id: item.content_id,
-          creator_id: item.creator_id,
-          parent_id: item.parent_id ?? null,
-          thumbnail_url: "",
-          title: item.title,
-          description: item.description,
-          post_type: "post" as const,
-          likes: item.likes || 0,
-          comments: item.comments || 0,
-          views: item.views || 0,
-          pins: item.pins || 0,
-          reports: item.reports || 0,
-          visibilityPrivate: item.visibilityPrivate || false,
-          area_id: item.area_id,
-          metadata,
-        };
-
-        postItems.push(postItem);
-      }
-
-      setPostItems(postItems);
-    } catch (error) {
-      showToast("Failed to fetch user posts.");
-      console.error("Error fetching posts:", error);
+      const contents = res.filter((item) => item.post_type !== "post");
+      setPostItems(posts);
+      setContentItems(contents);
+    } else {
+      showToast("Failed To Load User's Content");
     }
-  };
+  }, []);
+  const getBoardsByUser = useCallback(
+    async (userId: number, areaId: number) => {
+      const res = await getBoardByUser(userId, areaId);
+
+      if (res) {
+        setBoardItems(res);
+      } else {
+        showToast("Failed To Load User's Content");
+      }
+    },
+    []
+  );
 
   useEffect(() => {
     if (!user || !user.user_id) {
@@ -377,23 +54,23 @@ export default function CreatePage() {
       return;
     }
     getContentByUser(user.user_id);
-    getPostByUser(user.user_id);
-    getBoardByUser(user.user_id);
-    getAllItemsByUser(user.user_id);
+    getBoardsByUser(user.user_id, user.area_id);
   }, [user]);
 
   const handleDeleteContent = (id: number) => {
     setContentItems(
-      contentItems.filter((item: Content) => item.content_id !== id)
+      contentItems.filter((item: FullContentDto) => item.content_id !== id)
     );
   };
 
   const handleDeletePost = (id: number) => {
-    setPostItems(postItems.filter((item: Content) => item.content_id !== id));
+    setPostItems(
+      postItems.filter((item: FullContentDto) => item.content_id !== id)
+    );
   };
 
   const handleDeleteBoard = (id: number) => {
-    setBoardItems(boardItems.filter((item) => item.board_id !== id));
+    setBoardItems(boardItems.filter((item: BoardDto) => item.board_id !== id));
   };
 
   return (

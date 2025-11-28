@@ -2,10 +2,10 @@ import { useState } from "react";
 import { ContentHeaderInfo } from "./ContentHeaderInfo";
 import { ContentDetailInfo } from "./ContentDetailInfo";
 import { ContentDetailComponent } from "./ContentDetail";
-import type Content from "../../object/PublicContent";
+import type { FullContentDto } from "@/service/api";
 
 interface ContentComponentProps {
-  content: Content;
+  content: FullContentDto;
 }
 
 export function ContentComponent({ content }: ContentComponentProps) {
@@ -20,6 +20,7 @@ export function ContentComponent({ content }: ContentComponentProps) {
         <ContentHeaderInfo
           post_type={content.post_type}
           content_id={content.content_id}
+          thumbnail={content.thumbnail.filepath}
         />
 
         <ContentDetailInfo

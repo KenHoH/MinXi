@@ -3,7 +3,7 @@ import { Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Masonry } from "@/shared/components/Masonry";
 import { PostComponent } from "@/feature/content/components/PostComponent/PostComponent";
-import { CreatePostModal } from "@/feature/content/components/CreatePostModal";
+import { CreatePostModal } from "@/feature/create/components/CreatePost/CreatePostModal";
 import { useAuthContext } from "@/feature/auth/context/AuthContext";
 import type Post from "@/feature/content/object/Post";
 

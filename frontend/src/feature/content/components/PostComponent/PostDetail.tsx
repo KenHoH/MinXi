@@ -4,19 +4,17 @@ import type React from "react";
 
 import { useState } from "react";
 import { X } from "lucide-react";
-import { CommentParentComponent } from "../CommentParentComponent";
-import { CreatePostModal } from "../CreatePostModal";
+import { CommentParentComponent } from "../CommentComponent/CommentParentComponent";
+import { CreatePostModal } from "../../../create/components/CreatePost/CreatePostModal";
 import { PostDetailHeader } from "./PostDetailHeader";
 import { PostDetailMain } from "./PostDetailMain";
-import { ReplyChain } from "./ReplyChain";
 import { PostMediaGallery } from "./PostMediaGallery";
-import type Content from "../../object/PublicContent";
-import type { Connect } from "vite";
+import type { FullContentDto } from "@/service/api";
 
 interface PostDetailComponentProps {
-  post: Content;
+  post: FullContentDto;
   onClose: () => void;
-  allPosts?: Record<number, Content>; // All posts for recursive lookup
+  allPosts?: Record<number, FullContentDto>; // All posts for recursive lookup
 }
 
 export function PostDetailComponent({
@@ -28,59 +26,6 @@ export function PostDetailComponent({
   const [followed, setFollowed] = useState(false);
   const [showCreatePost, setShowCreatePost] = useState(false);
   const [currentMediaIndex, setCurrentMediaIndex] = useState(0);
-
-  // // Mock posts with reply chains for testing
-  // const mockPosts: Record<number, Connect> = {
-  //   1: {
-  //     content_id: 1,
-  //     creator_id: 5,
-  //     title: "Original thought about design",
-  //     description: "Design is important for user experience",
-  //     likes: 1200,
-  //     comments: 45,
-  //     post_type: "post",
-  //   },
-  //   2: {
-  //     content_id: 2,
-  //     creator_id: 12,
-  //     title: "I completely agree with this",
-  //     description:
-  //       "Design really makes a difference in how users perceive your product",
-  //     likes: 850,
-  //     comments: 32,
-  //     post_type: "post",
-  //     parent_id: 1,
-  //   },
-  //   3: {
-  //     content_id: 3,
-  //     creator_id: 18,
-  //     title: "Great discussion everyone",
-  //     description:
-  //       "This thread has some excellent insights about design principles",
-  //     likes: 450,
-  //     comments: 15,
-  //     post_type: "post",
-  //     parent_id: 2,
-  //   },
-  // };
-
-  // // Merge provided allPosts with mock posts
-  // const allPostsWithMock = { ...mockPosts, ...allPosts };
-
-  // const mediaItems = [
-  //   {
-  //     type: "image" as const,
-  //     src: `http://localhost:3000/uploads/thumbnail/1763296139023-929553449.jpg`,
-  //   },
-  //   {
-  //     type: "video" as const,
-  //     src: "http://localhost:3000/uploads/content/1763296139026-969061576.mp4",
-  //   },
-  //   {
-  //     type: "image" as const,
-  //     src: `http://localhost:3000/uploads/thumbnail/1763296139023-929553449.jpg`,
-  //   },
-  // ];
 
   const handlePrevMedia = () => {
     // setCurrentMediaIndex((prev) =>
@@ -122,7 +67,7 @@ export function PostDetailComponent({
           )} */}
 
           <PostMediaGallery
-            mediaItems={post.metadata}
+            mediaItems={post.contents}
             currentMediaIndex={currentMediaIndex}
             onPrevMedia={handlePrevMedia}
             onNextMedia={handleNextMedia}
