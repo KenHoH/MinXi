@@ -237,6 +237,7 @@ export class UserService implements IUserService {
         username: result.username,
         password: result.password,
         user_id: result.user_id,
+        area_id: result.area_id,
       };
     } catch (error) {
       this.logger.error(`Failed to find user by name: ${error.message}`);

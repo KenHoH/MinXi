@@ -24,7 +24,7 @@ export class CommentRes {
   @IsString()
   text: string;
 
-  @ApiProperty()
+  @ApiProperty({ type: [CommentRes] })
   @IsArray()
   replies: CommentRes[];
 

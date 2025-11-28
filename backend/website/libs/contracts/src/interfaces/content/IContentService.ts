@@ -27,6 +27,7 @@ export interface IContentService {
   findAll(area_id: number): Promise<FullContentDto[]>;
   findOne(content_id: number, area_id: number): Promise<FullContentDto>;
   getByUser(creator_id: number): Promise<FullContentDto[]>;
+  getByUserAll(creator_id: number): Promise<FullContentDto[]>;
   getFile(contentId: number, areaId: number): Promise<FileDto>;
   getFiles(contentId: number, areaId: number): Promise<FileDto[]>;
 

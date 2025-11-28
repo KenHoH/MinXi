@@ -58,6 +58,12 @@ export class ContentService implements IContentService {
     );
   }
 
+  async getByUserAll(creator_id: number): Promise<FullContentDto[]> {
+    return await firstValueFrom(
+      this.contentClient.send(CONTENT_MSG.getByUserAll, creator_id),
+    );
+  }
+
   async remove(content_id: number, area_id: number): Promise<Ack> {
     return await firstValueFrom(
       this.contentClient.send(CONTENT_MSG.remove, { content_id, area_id }),

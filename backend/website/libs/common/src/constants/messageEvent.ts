@@ -39,6 +39,7 @@ export const CONTENT_MSG = {
   findOne: 'content.findOne',
   getStats: 'content.getStats',
   getByUser: 'content.getByUser',
+  getByUserAll: 'content.getByUserAll',
   getFile: 'content.getFile',
   getFiles: 'content.getFiles',
   getFollowingContent: 'content.getFollowingContent',

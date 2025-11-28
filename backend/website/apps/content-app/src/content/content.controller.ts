@@ -49,6 +49,12 @@ export class ContentController {
     return this.contentService.getByUser(creator_id);
   }
 
+  @MessagePattern(CONTENT_MSG.getByUserAll)
+  async getByUserAll(@Payload() creator_id: number): Promise<FullContentDto[]> {
+    this.logger.log(`Fetching all content by user ID ${creator_id}`);
+    return this.contentService.getByUserAll(creator_id);
+  }
+
   @MessagePattern(CONTENT_MSG.remove)
   async remove(
     @Payload() payload: { content_id: number; area_id: number },

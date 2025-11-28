@@ -154,6 +154,20 @@ export class ContentController {
   }
 
   @Public()
+  @Get('user/:creator_id/all')
+  @ApiResponse({
+    status: 200,
+    description: 'Get all content by user (including private)',
+    type: [FullContentDto],
+  })
+  getByUserAll(
+    @Param('creator_id', ParseIntPipe) creator_id: number,
+  ): Promise<FullContentDto[]> {
+    this.logger.log(`Fetching all content by user ID ${creator_id}`);
+    return this.contentService.getByUserAll(creator_id);
+  }
+
+  @Public()
   @Get('user/:userId/following')
   getFollowingContent(
     @Param('userId', ParseIntPipe) userId: number,
