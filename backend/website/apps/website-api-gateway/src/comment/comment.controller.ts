@@ -16,6 +16,7 @@ import { JwtAuthGuard } from '@app/common/guard/jwt-auth-guard/jwt-auth.guard';
 import { ApiBearerAuth } from '@nestjs/swagger';
 import { Public } from '@app/common/decorators/public.decorator';
 import { CommentReq } from '@app/contracts/shared-dto/comment/req/CommentReq';
+import { CommentFullRes } from '@app/contracts/shared-dto/comment/res/CommentFullRes';
 
 @Controller('comment')
 @UseGuards(JwtAuthGuard)
@@ -31,7 +32,7 @@ export class CommentController {
   @Get(':contentId')
   getComment(
     @Param('contentId', ParseIntPipe) contentId: number,
-  ): Promise<CommentRes[]> {
+  ): Promise<CommentFullRes[]> {
     return this.commentService.getComment(contentId);
   }
 

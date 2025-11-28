@@ -31,7 +31,7 @@ export const CONTENT_MSG = {
   updateView: 'content.view',
   updateLike: 'content.like',
   updatePin: 'content.pin',
-  updateComment: 'content.like',
+  updateComment: 'content.comment',
   updateReport: 'content.report',
   setPrivate: 'content.private',
   setPublic: 'content.public',
@@ -54,6 +54,7 @@ export const CONTENT_MSG = {
 export const HISTORY_MSG = {
   upsert: 'history.upsert',
   getByUser: 'history.getByUser',
+  getByUserAndContent: 'history.getByUserAndContent',
 };
 
 export const BOARD_MSG = {

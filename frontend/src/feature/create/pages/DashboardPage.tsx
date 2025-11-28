@@ -101,6 +101,7 @@ export default function CreatePage() {
               <ContentCreation
                 items={contentItems}
                 onDelete={handleDeleteContent}
+                refresh={() => getContentByUser(user?.user_id || 0)}
               />
             )}
 

@@ -6,9 +6,10 @@ import type { FullContentDto } from "@/service/api";
 
 interface ContentComponentProps {
   content: FullContentDto;
+  refresh: () => void;
 }
 
-export function ContentComponent({ content }: ContentComponentProps) {
+export function ContentComponent({ content, refresh }: ContentComponentProps) {
   const [showDetail, setShowDetail] = useState(false);
 
   return (
@@ -33,7 +34,10 @@ export function ContentComponent({ content }: ContentComponentProps) {
       {showDetail && (
         <ContentDetailComponent
           content={content}
-          onClose={() => setShowDetail(false)}
+          onClose={() => {
+            setShowDetail(false);
+            refresh();
+          }}
         />
       )}
     </>

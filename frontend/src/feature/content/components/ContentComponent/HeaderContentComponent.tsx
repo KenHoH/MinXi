@@ -1,32 +1,39 @@
+import type { UserDto } from "@/service/api";
 import { CommentParentComponent } from "../CommentComponent/CommentParentComponent";
 import { ProfilePicture } from "../ProfilePicture";
 
 interface HeaderContentComponentProps {
-  creator_id: number;
+  creator: UserDto;
   title: string;
   description: string;
   views: number;
   content_id: number;
   followed: boolean;
   onFollowClick: () => void;
+  replyingTo: number | null;
+  onReplySelect?: (commentId: number, commentText: string) => void;
+  refresh: boolean;
 }
 
 export function HeaderContentComponent({
-  creator_id,
+  creator,
   title,
   views,
   content_id,
   followed,
   description,
   onFollowClick,
+  replyingTo,
+  onReplySelect,
+  refresh,
 }: HeaderContentComponentProps) {
   return (
     <div className="flex-1 overflow-y-auto p-4 border-b border-dark-700 space-y-4">
       <div className="flex items-center gap-3">
-        <ProfilePicture creator_id={creator_id} size="md" clickable={true} />
+        <ProfilePicture creator={creator} size="md" clickable={true} />
         <div className="flex-1">
           <p className="font-semibold text-white text-sm">
-            @creator{creator_id}
+            {creator ? creator.username : `@anonymous`}
           </p>
           <p className="text-xs text-gray-400">{views} views</p>
         </div>
@@ -42,15 +49,18 @@ export function HeaderContentComponent({
         </button>
       </div>
 
-      {/* Title */}
       <h2 className="font-semibold text-white text-sm">{title}</h2>
 
-      {/* Description */}
       <p className="text-gray-300 text-xs leading-relaxed">{description}</p>
 
       {/* Comments */}
       <div className="space-y-3">
-        <CommentParentComponent contentId={content_id} />
+        <CommentParentComponent
+          refresh={refresh}
+          contentId={content_id}
+          replyingTo={replyingTo}
+          onReplySelect={onReplySelect}
+        />
       </div>
     </div>
   );

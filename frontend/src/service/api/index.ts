@@ -12,6 +12,7 @@ export type { AddContentDto } from './models/AddContentDto';
 export { AddUserToRoomDto } from './models/AddUserToRoomDto';
 export type { BoardDto } from './models/BoardDto';
 export type { BroadcastNotifReq } from './models/BroadcastNotifReq';
+export type { CommentFullRes } from './models/CommentFullRes';
 export type { CommentReq } from './models/CommentReq';
 export type { CommentRes } from './models/CommentRes';
 export type { ConnectionStatsRes } from './models/ConnectionStatsRes';

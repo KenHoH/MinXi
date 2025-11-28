@@ -1,4 +1,5 @@
 import { ChevronLeft, ChevronRight, X } from "lucide-react";
+import { useRef, useEffect } from "react";
 import type { FileDto } from "@/service/api";
 
 interface ContentMediaGalleryProps {
@@ -18,6 +19,13 @@ export function ContentMediaGallery({
   onClose,
   title,
 }: ContentMediaGalleryProps) {
+  const videoRef = useRef<HTMLVideoElement>(null);
+
+  useEffect(() => {
+    if (videoRef.current) {
+      videoRef.current.volume = 0.25;
+    }
+  }, [currentMediaIndex]);
   return (
     <div className="flex-1 bg-black flex flex-col items-center justify-center relative group">
       <button
@@ -29,6 +37,7 @@ export function ContentMediaGallery({
 
       {mediaItems[currentMediaIndex].type === "video" ? (
         <video
+          ref={videoRef}
           key={`video-${currentMediaIndex}`}
           src={mediaItems[currentMediaIndex].filepath}
           controls

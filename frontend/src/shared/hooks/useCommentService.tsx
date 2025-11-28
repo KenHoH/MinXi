@@ -3,6 +3,7 @@ import type { CommentReq } from "../../service/api/models/CommentReq";
 import type { CommentRes } from "../../service/api/models/CommentRes";
 import type { DeleteCommentRes } from "../../service/api/models/DeleteCommentRes";
 import useApiCall from "./useApiCall";
+import type { CommentFullRes } from "@/service/api";
 
 export default function useCommentService() {
   const { call, data, loading, error } = useApiCall();
@@ -11,7 +12,7 @@ export default function useCommentService() {
     call<CommentRes>(() => CommentService.commentControllerCreate(dto));
 
   const getComment = (contentId: number) =>
-    call<CommentRes[]>(() =>
+    call<CommentFullRes[]>(() =>
       CommentService.commentControllerGetComment(contentId)
     );
 

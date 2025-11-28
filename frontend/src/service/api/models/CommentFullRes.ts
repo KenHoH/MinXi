@@ -2,10 +2,13 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-export type CommentReq = {
+import type { UserDto } from "./UserDto";
+export type CommentFullRes = {
   id: number;
   content_id: number;
-  creator_id: number;
-  parent_id?: number;
+  creator: UserDto;
+  parent_id: number;
   text: string;
+  replies: Array<CommentFullRes>;
+  created_at: string;
 };

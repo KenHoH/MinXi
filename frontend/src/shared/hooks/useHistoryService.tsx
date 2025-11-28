@@ -12,10 +12,15 @@ export default function useHistoryService() {
     call<CreateHistoryDto[]>(() =>
       HistoryService.historyControllerGetByUser(userId)
     );
+  const getByUserAndContent = (userId: number, contentId: number) =>
+    call<CreateHistoryDto[]>(() =>
+      HistoryService.historyControllerGetByUserAndContent(userId, contentId)
+    );
 
   return {
     upsert,
     getByUser,
+    getByUserAndContent,
     result: data,
     loading,
     error,

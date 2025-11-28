@@ -38,4 +38,23 @@ export class HistoryService {
             },
         });
     }
+    /**
+     * @param userId
+     * @param contentId
+     * @returns CreateHistoryDto
+     * @throws ApiError
+     */
+    public static historyControllerGetByUserAndContent(
+        userId: number,
+        contentId: number,
+    ): CancelablePromise<Array<CreateHistoryDto>> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/history/{user_id}/{content_id}',
+            path: {
+                'user_id': userId,
+                'content_id': contentId,
+            },
+        });
+    }
 }

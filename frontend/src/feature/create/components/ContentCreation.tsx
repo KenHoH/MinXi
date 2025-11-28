@@ -11,9 +11,14 @@ import { CreateContentModal } from "./CreateContent/CreateContentModal";
 interface ContentCreationProps {
   items: FullContentDto[];
   onDelete: (id: number) => void;
+  refresh: () => void;
 }
 
-export function ContentCreation({ items, onDelete }: ContentCreationProps) {
+export function ContentCreation({
+  items,
+  onDelete,
+  refresh,
+}: ContentCreationProps) {
   const [showCreateModal, setShowCreateModal] = useState(false);
   const { user } = useAuthContext();
   const currentUserId = user?.user_id || 0;
@@ -37,7 +42,7 @@ export function ContentCreation({ items, onDelete }: ContentCreationProps) {
       <Masonry columns={4}>
         {items.map((item) => (
           <div key={item.content_id} className="relative group">
-            <ContentComponent content={item} />
+            <ContentComponent content={item} refresh={refresh} />
             <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
               <button
                 onClick={() => onDelete(item.content_id)}

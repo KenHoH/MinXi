@@ -1,39 +1,18 @@
-import { useEffect, useState, useRef } from "react";
-import useUserService from "@/shared/hooks/useUserService";
-import type { CredentialRes, UserDto } from "@/service/api";
+import type { UserDto } from "@/service/api";
+import { useState } from "react";
 
 interface ProfilePictureProps {
-  creator_id: number;
+  creator: UserDto;
   size?: "sm" | "md" | "lg";
   clickable?: boolean;
 }
 
 export function ProfilePicture({
-  creator_id,
+  creator,
   size = "md",
   clickable = true,
 }: ProfilePictureProps) {
   const [showProfileModal, setShowProfileModal] = useState(false);
-  const { findUserById } = useUserService();
-  const lastFetchedIdRef = useRef<number | null>(null);
-  const [userData, setUserData] = useState<UserDto | null>(null);
-
-  useEffect(() => {
-    if (lastFetchedIdRef.current === creator_id) {
-      return;
-    }
-
-    async function fetchUser() {
-      try {
-        lastFetchedIdRef.current = creator_id;
-        const user = await findUserById(creator_id);
-        setUserData(user);
-      } catch (error) {
-        console.error("Failed to fetch user data:", error);
-      }
-    }
-    fetchUser();
-  }, [creator_id, findUserById]);
 
   const sizeClasses = {
     sm: "w-8 h-8",
@@ -45,10 +24,10 @@ export function ProfilePicture({
     <>
       <img
         src={
-          userData?.profile_picture ||
+          creator.profile_picture ||
           "http://localhost:3000/uploads/profile/1763906830326-69740177.png"
         }
-        alt={`Creator ${creator_id}`}
+        alt={`Creator ${creator.user_id}`}
         className={`${sizeClasses[size]} rounded-full ${
           clickable ? "cursor-pointer hover:opacity-80 transition-opacity" : ""
         }`}

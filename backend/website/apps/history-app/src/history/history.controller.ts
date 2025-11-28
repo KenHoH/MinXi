@@ -16,4 +16,8 @@ export class HistoryController {
   getByUser(@Payload() user_id: number) {
     return this.historyService.getByUser(user_id);
   }
+  @MessagePattern(HISTORY_MSG.getByUserAndContent)
+  getByUserAndContent(@Payload() payload: { user_id: number; content_id: number }) {
+    return this.historyService.getByUserAndContent(payload.user_id, payload.content_id);
+  }
 }

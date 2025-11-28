@@ -2,6 +2,7 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
+import type { CommentFullRes } from '../models/CommentFullRes';
 import type { CommentReq } from '../models/CommentReq';
 import type { CommentRes } from '../models/CommentRes';
 import type { DeleteCommentRes } from '../models/DeleteCommentRes';
@@ -26,12 +27,12 @@ export class CommentService {
     }
     /**
      * @param contentId
-     * @returns CommentRes
+     * @returns CommentFullRes
      * @throws ApiError
      */
     public static commentControllerGetComment(
         contentId: number,
-    ): CancelablePromise<Array<CommentRes>> {
+    ): CancelablePromise<Array<CommentFullRes>> {
         return __request(OpenAPI, {
             method: 'GET',
             url: '/comment/{contentId}',
