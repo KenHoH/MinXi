@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { CreatePostHeader } from "./CreatePostHeader";
 import { CreatePostUserInfo } from "./CreatePostUserInfo";
 import { UploadImages } from "./UploadImages";
@@ -10,6 +10,8 @@ import { useToast } from "@/shared/context/ToastContext";
 import useContentService from "@/shared/hooks/useContentService";
 import type FileItem from "@/feature/content/object/FileItem";
 import type MediaItem from "@/feature/content/object/MediaItem";
+import useUserService from "@/shared/hooks/useUserService";
+import type { UserDto } from "@/service/api";
 
 interface CreatePostModalProps {
   isOpen: boolean;
@@ -29,14 +31,13 @@ export function CreatePostModal({
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [media, setMedia] = useState<MediaItem[]>([]);
-
+  const { findUserById } = useUserService();
+  const [userData, setUserdata] = useState<UserDto | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const { showToast } = useToast();
   const { create } = useContentService();
-  if (!isOpen) {
-    return null;
-  }
+
   const handleMediaFilesSelected = (files: File[], type: "image" | "video") => {
     files.forEach((file) => {
       const reader = new FileReader();
@@ -102,6 +103,26 @@ export function CreatePostModal({
     resetForm();
   };
 
+  const fetchUserData = useCallback(
+    async (userId: number) => {
+      try {
+        const response = await findUserById(userId);
+        if (response) setUserdata(response);
+      } catch (error) {
+        console.error("Failed to fetch user data:", error);
+      }
+    },
+    [findUserById]
+  );
+
+  useEffect(() => {
+    fetchUserData(currentUserId);
+  }, [currentUserId]);
+
+  if (!isOpen) {
+    return null;
+  }
+
   return (
     <>
       {/* Backdrop */}
@@ -116,10 +137,13 @@ export function CreatePostModal({
           {/* Content */}
           <div className="p-6 space-y-4">
             {/* User Info */}
-            <CreatePostUserInfo
-              currentUserId={currentUserId}
-              parentPostId={parentPostId}
-            />
+            {userData && (
+              <CreatePostUserInfo
+                currentUserId={currentUserId}
+                parentPostId={parentPostId}
+                creator={userData}
+              />
+            )}
 
             {/* Title Input */}
             <div>

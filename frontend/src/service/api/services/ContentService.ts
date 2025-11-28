@@ -81,6 +81,22 @@ export class ContentService {
         });
     }
     /**
+     * @param parentId
+     * @returns FullContentDto
+     * @throws ApiError
+     */
+    public static contentControllerGetChildPost(
+        parentId: number,
+    ): CancelablePromise<Array<FullContentDto>> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/content/childpost/{parent_id}',
+            path: {
+                'parent_id': parentId,
+            },
+        });
+    }
+    /**
      * @param creatorId
      * @returns FullContentDto Get all content by user (including private)
      * @throws ApiError

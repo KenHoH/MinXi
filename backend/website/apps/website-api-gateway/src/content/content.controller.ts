@@ -154,6 +154,14 @@ export class ContentController {
   }
 
   @Public()
+  @Get('childpost/:parent_id')
+  getChildPost(
+    @Param('parent_id', ParseIntPipe) parent_id: number,
+  ): Promise<FullContentDto[]> {
+    return this.contentService.getChildPost(parent_id);
+  }
+
+  @Public()
   @Get('user/:creator_id/all')
   @ApiResponse({
     status: 200,

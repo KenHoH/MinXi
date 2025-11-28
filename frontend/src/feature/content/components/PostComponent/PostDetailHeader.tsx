@@ -1,21 +1,22 @@
+import type { UserDto } from "@/service/api";
 import { ProfilePicture } from "../ProfilePicture";
 
 interface PostDetailHeaderProps {
-  creator_id: number;
+  creator: UserDto;
   followed: boolean;
   onFollowClick: () => void;
 }
 
 export function PostDetailHeader({
-  creator_id,
+  creator,
   followed,
   onFollowClick,
 }: PostDetailHeaderProps) {
   return (
     <div className="flex items-center gap-3 pb-4 border-b border-dark-700">
-      <ProfilePicture creator_id={creator_id} size="md" clickable={true} />
+      <ProfilePicture creator={creator} size="md" clickable={true} />
       <div className="flex-1">
-        <p className="font-semibold text-gray-100">@creator{creator_id}</p>
+        <p className="font-semibold text-gray-100">@{creator.username}</p>
         <p className="text-xs text-gray-400">2 hours ago</p>
       </div>
       <button

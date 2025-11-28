@@ -58,6 +58,10 @@ export default function useContentService() {
     call<FullContentDto[]>(() =>
       ContentService.contentControllerGetAncestorPost(contentId, areaId)
     );
+  const getChildPost = (parentId: number) =>
+    call<FullContentDto[]>(() =>
+      ContentService.contentControllerGetChildPost(parentId)
+    );
 
   const getFullPost = (contentId: number, areaId: number) =>
     call<FullContentDto>(() =>
@@ -122,6 +126,7 @@ export default function useContentService() {
     getPinnedByUser,
     getAncestorPost,
     getFullPost,
+    getChildPost,
     findAll,
     findOne,
     remove,

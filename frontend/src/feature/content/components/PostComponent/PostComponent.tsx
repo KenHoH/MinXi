@@ -1,11 +1,10 @@
-"use client";
-
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import { PostFooterInfo } from "./PostFooterInfo";
 import { PostHeaderInfo } from "./PostHeaderInfo";
 import { PostDetailComponent } from "./PostDetail";
 import type { FullContentDto } from "@/service/api";
+import useContentService from "@/shared/hooks/useContentService";
 
 interface PostComponentProps {
   post: FullContentDto;
@@ -15,6 +14,19 @@ export function PostComponent({ post }: PostComponentProps) {
   const [showDetail, setShowDetail] = useState(false);
   const heights = ["min-h-[180px]", "min-h-[220px]", "min-h-[160px]"];
   const randomHeight = heights[post.content_id % heights.length];
+  const [ancestor, setAncestor] = useState<FullContentDto[] | null>(null);
+
+  const { getAncestorPost } = useContentService();
+
+  // Get Posts
+  const getAncestors = async () => {
+    const res = await getAncestorPost(post.content_id, post.area_id);
+    if (res) setAncestor(res);
+  };
+
+  useEffect(() => {
+    getAncestors();
+  }, []);
 
   return (
     <>
@@ -27,7 +39,11 @@ export function PostComponent({ post }: PostComponentProps) {
       </div>
 
       {showDetail && (
-        <PostDetailComponent post={post} onClose={() => setShowDetail(false)} />
+        <PostDetailComponent
+          post={post}
+          posts={ancestor}
+          onClose={() => setShowDetail(false)}
+        />
       )}
     </>
   );

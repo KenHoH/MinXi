@@ -5,10 +5,10 @@ import { Masonry } from "@/shared/components/Masonry";
 import { PostComponent } from "@/feature/content/components/PostComponent/PostComponent";
 import { CreatePostModal } from "@/feature/create/components/CreatePost/CreatePostModal";
 import { useAuthContext } from "@/feature/auth/context/AuthContext";
-import type Post from "@/feature/content/object/Post";
+import type { FullContentDto } from "@/service/api";
 
 interface PostCreationProps {
-  items: Post[];
+  items: FullContentDto[];
   onDelete: (id: number) => void;
 }
 
@@ -16,6 +16,7 @@ export function PostCreation({ items, onDelete }: PostCreationProps) {
   const [showCreateModal, setShowCreateModal] = useState(false);
   const { user } = useAuthContext();
   const currentUserId = user?.user_id || 0;
+  const currentAreaId = user?.area_id || 0;
 
   return (
     <div className="space-y-6">
@@ -30,6 +31,7 @@ export function PostCreation({ items, onDelete }: PostCreationProps) {
         isOpen={showCreateModal}
         onClose={() => setShowCreateModal(false)}
         currentUserId={currentUserId}
+        currentAreaId={currentAreaId}
       />
       <Masonry columns={4}>
         {items.map((item) => (

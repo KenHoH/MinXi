@@ -45,7 +45,6 @@ export function FooterContentComponent({
         </span>
       </button>
 
-      {/* Comment */}
       <button className="flex flex-col items-center gap-1 text-gray-300 hover:text-burgundy-400 transition-colors group">
         <MessageCircle className="w-6 h-6 group-hover:text-burgundy-400" />
         <span className="text-xs group-hover:text-burgundy-400">
@@ -53,7 +52,6 @@ export function FooterContentComponent({
         </span>
       </button>
 
-      {/* Pin */}
       <button
         onClick={onPin}
         className="flex flex-col items-center gap-1 transition-colors group"

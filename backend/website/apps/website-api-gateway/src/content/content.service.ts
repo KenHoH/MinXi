@@ -186,6 +186,12 @@ export class ContentService implements IContentService {
       }),
     );
   }
+  async getChildPost(parentId: number): Promise<FullContentDto[]> {
+    return await firstValueFrom(
+      this.contentClient.send(CONTENT_MSG.getChildPost, parentId),
+    );
+  }
+
   async getFullPost(
     contentId: number,
     areaId: number,

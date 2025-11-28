@@ -214,6 +214,11 @@ export class ContentController {
   ): Promise<FullContentDto[]> {
     return this.contentService.getAncestorPost(dto.contentId, dto.areaId);
   }
+  @MessagePattern(CONTENT_MSG.getChildPost)
+  async getChildPost(@Payload() parentId: number): Promise<FullContentDto[]> {
+    this.logger.log(`Fetching child posts for parent ID ${parentId}`);
+    return this.contentService.getChildPost(parentId);
+  }
 
   @MessagePattern(CONTENT_MSG.getFullPost)
   async getFullPost(
