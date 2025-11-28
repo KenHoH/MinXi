@@ -6,17 +6,27 @@ import { PostComponent } from "@/feature/content/components/PostComponent/PostCo
 import { CreatePostModal } from "@/feature/create/components/CreatePost/CreatePostModal";
 import { useAuthContext } from "@/feature/auth/context/AuthContext";
 import type { FullContentDto } from "@/service/api";
+import useContentService from "@/shared/hooks/useContentService";
 
 interface PostCreationProps {
   items: FullContentDto[];
+  onRefreshChild: () => void;
   onDelete: (id: number) => void;
 }
 
-export function PostCreation({ items, onDelete }: PostCreationProps) {
+export function PostCreation({
+  items,
+  onRefreshChild,
+  onDelete,
+}: PostCreationProps) {
   const [showCreateModal, setShowCreateModal] = useState(false);
   const { user } = useAuthContext();
   const currentUserId = user?.user_id || 0;
   const currentAreaId = user?.area_id || 0;
+  const { updateComment } = useContentService();
+  const handleUpdateComment = async (conteId: number, areaId: number) => {
+    await updateComment(conteId, areaId, { delta: 1 });
+  };
 
   return (
     <div className="space-y-6">
@@ -28,6 +38,8 @@ export function PostCreation({ items, onDelete }: PostCreationProps) {
         Create New Post
       </Button>
       <CreatePostModal
+        onRefreshChild={onRefreshChild}
+        onUpdateComment={handleUpdateComment}
         isOpen={showCreateModal}
         onClose={() => setShowCreateModal(false)}
         currentUserId={currentUserId}

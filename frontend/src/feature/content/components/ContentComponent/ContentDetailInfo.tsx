@@ -14,12 +14,17 @@ export function ContentDetailInfo({
   return (
     <div className="p-3 space-y-2">
       <h3 className="font-medium text-gray-100 truncate text-sm">{title}</h3>
-      <div className="flex items-center justify-between text-xs text-gray-400">
+      <div className="flex items-center justify-start gap-3 text-xs text-gray-400">
         <span className="flex items-center gap-1 hover:text-burgundy-400 transition-colors">
-          <Heart className="w-4 h-4" /> {likes}
+          <Heart
+            className={`w-4 h-4 ${
+              likes > 0 ? "fill-red-500 text-red-500" : "text-gray-500"
+            }`}
+          />
+          {likes}
         </span>
         <span className="flex items-center gap-1 hover:text-burgundy-400 transition-colors">
-          <MessageCircle className="w-4 h-4" />
+          <MessageCircle className="w-4 h-4 " />
           {comments}
         </span>
       </div>

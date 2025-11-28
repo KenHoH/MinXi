@@ -108,6 +108,7 @@ export default function CreatePage() {
             {activeTab === "post" && (
               <PostCreation
                 items={postItems as any}
+                onRefreshChild={() => getContentByUser(user?.user_id || 0)}
                 onDelete={handleDeletePost}
               />
             )}

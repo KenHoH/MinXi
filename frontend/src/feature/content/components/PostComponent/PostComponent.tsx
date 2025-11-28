@@ -15,8 +15,12 @@ export function PostComponent({ post }: PostComponentProps) {
   const heights = ["min-h-[180px]", "min-h-[220px]", "min-h-[160px]"];
   const randomHeight = heights[post.content_id % heights.length];
   const [ancestor, setAncestor] = useState<FullContentDto[] | null>(null);
+  const [children, setChildren] = useState<FullContentDto[] | null>(null);
+  const [likes, setLikes] = useState(post.likes);
+  const [comments, setComments] = useState(post.comments);
+  const [pins, setPins] = useState(post.pins);
 
-  const { getAncestorPost } = useContentService();
+  const { getAncestorPost, getChildPost } = useContentService();
 
   // Get Posts
   const getAncestors = async () => {
@@ -24,8 +28,14 @@ export function PostComponent({ post }: PostComponentProps) {
     if (res) setAncestor(res);
   };
 
+  const getChildren = async () => {
+    const res = await getChildPost(post.content_id);
+    if (res) setChildren(res);
+  };
+
   useEffect(() => {
     getAncestors();
+    getChildren();
   }, []);
 
   return (
@@ -35,14 +45,19 @@ export function PostComponent({ post }: PostComponentProps) {
         className={`bg-dark-800 border border-dark-700 rounded-lg p-4 cursor-pointer hover:border-burgundy-600 hover:shadow-lg hover:shadow-burgundy-500/20 transition-all w-full ${randomHeight} flex flex-col justify-between`}
       >
         <PostHeaderInfo title={post.title} description={post.description} />
-        <PostFooterInfo likes={post.likes} comments={post.comments} />
+        <PostFooterInfo likes={likes} comments={comments} pins={pins} />
       </div>
 
       {showDetail && (
         <PostDetailComponent
           post={post}
-          posts={ancestor}
+          ancestors={ancestor}
+          children={children}
+          onRefreshChild={() => getChildren()}
           onClose={() => setShowDetail(false)}
+          onLikeClick={setLikes}
+          onCommentClick={setComments}
+          onPinClick={setPins}
         />
       )}
     </>

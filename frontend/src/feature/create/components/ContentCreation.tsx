@@ -14,11 +14,7 @@ interface ContentCreationProps {
   refresh: () => void;
 }
 
-export function ContentCreation({
-  items,
-  onDelete,
-  refresh,
-}: ContentCreationProps) {
+export function ContentCreation({ items, onDelete }: ContentCreationProps) {
   const [showCreateModal, setShowCreateModal] = useState(false);
   const { user } = useAuthContext();
   const currentUserId = user?.user_id || 0;
@@ -33,24 +29,19 @@ export function ContentCreation({
         <Plus className="w-5 h-5" />
         Create New Content
       </Button>
-      <CreateContentModal
-        isOpen={showCreateModal}
-        onClose={() => setShowCreateModal(false)}
-        currentUserId={currentUserId}
-        currentAreaId={currentAreaId}
-      />
+      {user && (
+        <CreateContentModal
+          isOpen={showCreateModal}
+          onClose={() => setShowCreateModal(false)}
+          currentUserId={currentUserId}
+          currentAreaId={currentAreaId}
+        />
+      )}
+
       <Masonry columns={4}>
         {items.map((item) => (
           <div key={item.content_id} className="relative group">
-            <ContentComponent content={item} refresh={refresh} />
-            <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
-              <button
-                onClick={() => onDelete(item.content_id)}
-                className="bg-red-600 hover:bg-red-700 text-white px-2 py-1 rounded text-xs font-medium flex items-center gap-1"
-              >
-                ✕ Delete
-              </button>
-            </div>
+            <ContentComponent content={item} />
           </div>
         ))}
       </Masonry>

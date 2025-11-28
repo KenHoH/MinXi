@@ -11,14 +11,17 @@ import useContentService from "@/shared/hooks/useContentService";
 import type FileItem from "@/feature/content/object/FileItem";
 import type MediaItem from "@/feature/content/object/MediaItem";
 import useUserService from "@/shared/hooks/useUserService";
-import type { UserDto } from "@/service/api";
+import type { FullContentDto, UserDto } from "@/service/api";
 
 interface CreatePostModalProps {
+  post?: FullContentDto | null;
   isOpen: boolean;
   onClose: () => void;
   parentPostId?: number;
   currentUserId: number;
   currentAreaId: number;
+  onRefreshChild: () => void;
+  onUpdateComment: (contentId: number, areaId: number) => void;
 }
 
 export function CreatePostModal({
@@ -27,6 +30,9 @@ export function CreatePostModal({
   parentPostId,
   currentUserId,
   currentAreaId,
+  onRefreshChild,
+  onUpdateComment,
+  post,
 }: CreatePostModalProps) {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
@@ -101,6 +107,10 @@ export function CreatePostModal({
     });
 
     resetForm();
+    if (post) {
+      onUpdateComment(post.content_id, currentAreaId);
+    }
+    onRefreshChild();
   };
 
   const fetchUserData = useCallback(
@@ -126,10 +136,13 @@ export function CreatePostModal({
   return (
     <>
       {/* Backdrop */}
-      <div className="fixed inset-0 bg-black z-40" onClick={onClose} />
+      <div
+        className="fixed inset-0 bg-black/95 backdrop-blur-sm  z-40"
+        onClick={onClose}
+      />
 
       {/* Modal */}
-      <div className="fixed inset-0 flex items-center justify-center z-50 p-4">
+      <div className="bg-dark-800 fixed inset-0 flex items-center justify-center z-50 p-4">
         <div className="bg-dark-800 rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto">
           {/* Header */}
           <CreatePostHeader parentPostId={parentPostId} onClose={onClose} />
@@ -139,9 +152,9 @@ export function CreatePostModal({
             {/* User Info */}
             {userData && (
               <CreatePostUserInfo
-                currentUserId={currentUserId}
                 parentPostId={parentPostId}
                 creator={userData}
+                parentAreaId={post?.area_id || currentAreaId}
               />
             )}
 

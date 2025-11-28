@@ -2,7 +2,7 @@ import type { UserDto } from "@/service/api";
 import { useState } from "react";
 
 interface ProfilePictureProps {
-  creator: UserDto;
+  creator: UserDto | null;
   size?: "sm" | "md" | "lg";
   clickable?: boolean;
 }
@@ -24,10 +24,10 @@ export function ProfilePicture({
     <>
       <img
         src={
-          creator.profile_picture ||
+          creator?.profile_picture ||
           "http://localhost:3000/uploads/profile/1763906830326-69740177.png"
         }
-        alt={`Creator ${creator.user_id}`}
+        alt={`Creator ${creator?.user_id}`}
         className={`${sizeClasses[size]} rounded-full ${
           clickable ? "cursor-pointer hover:opacity-80 transition-opacity" : ""
         }`}

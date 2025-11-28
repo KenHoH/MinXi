@@ -35,7 +35,7 @@ export function FooterContentComponent({
         <Heart
           className={`w-6 h-6 ${
             liked
-              ? "text-burgundy-500 fill-burgundy-500 fill-red-500"
+              ? "fill-red-500 text-red-500 "
               : "text-gray-300 group-hover:text-burgundy-400"
           }`}
         />

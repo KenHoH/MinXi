@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { X } from "lucide-react";
 import { CreatePostModal } from "../../../create/components/CreatePost/CreatePostModal";
 import { PostDetailHeader } from "./PostDetailHeader";
@@ -8,40 +8,63 @@ import { MiniPostDetail } from "./MiniPostDetail";
 import type { FullContentDto, UserDto } from "@/service/api";
 import useContentService from "@/shared/hooks/useContentService";
 import useUserService from "@/shared/hooks/useUserService";
+import useHistoryService from "@/shared/hooks/useHistoryService";
+import { useAuthContext } from "@/feature/auth/context/AuthContext";
+import { ReportModal } from "../ContentComponent/ReportModal";
 
 interface PostDetailComponentProps {
   post: FullContentDto;
   onClose: () => void;
-  posts: FullContentDto[] | null;
+  ancestors: FullContentDto[] | null;
+  children: FullContentDto[] | null;
+  onRefreshChild: () => void;
+  onLikeClick?: (newLike: number) => void;
+  onCommentClick?: (newComment: number) => void;
+  onPinClick?: (newPin: number) => void;
 }
 
 export function PostDetailComponent({
   post,
   onClose,
+  ancestors,
+  children,
+  onRefreshChild,
+  onLikeClick,
+  onCommentClick,
+  onPinClick,
 }: PostDetailComponentProps) {
+  const { user } = useAuthContext();
   const [liked, setLiked] = useState(false);
-  const [followed, setFollowed] = useState(false);
+  const [pinned, setPinned] = useState(false);
   const [showCreatePost, setShowCreatePost] = useState(false);
   const [currentMediaIndex, setCurrentMediaIndex] = useState(0);
   const [userData, setUserdata] = useState<UserDto | null>(null);
-  const [ancestors, setAncestors] = useState<FullContentDto[]>([]);
-  const { getAncestorPost } = useContentService();
   const { findUserById } = useUserService();
-
-  const getAncestors = async () => {
-    const res = await getAncestorPost(post.content_id, post.area_id);
-    if (res) setAncestors(res);
-  };
+  const [currentPost, setCurrentPost] = useState<FullContentDto>(post);
+  const [totalLikes, setTotalLikes] = useState(post.likes);
+  const [totalPins, setTotalPins] = useState(post.pins);
+  const [showReportModal, setShowReportModal] = useState(false);
+  const [followed, setFollowed] = useState(user?.user_id === post.creator_id);
+  const [reported, setReported] = useState(false);
+  const { upsert, getByUserAndContent } = useHistoryService();
+  const {
+    updateLike,
+    updatePin,
+    updateComment,
+    findOne,
+    getAncestorPost,
+    getChildPost,
+  } = useContentService();
 
   const handlePrevMedia = () => {
     setCurrentMediaIndex((prev) =>
-      prev === 0 ? post.contents.length - 1 : prev - 1
+      prev === 0 ? currentPost.contents.length - 1 : prev - 1
     );
   };
 
   const handleNextMedia = () => {
     setCurrentMediaIndex((prev) =>
-      prev === post.contents.length - 1 ? 0 : prev + 1
+      prev === currentPost.contents.length - 1 ? 0 : prev + 1
     );
   };
 
@@ -51,34 +74,140 @@ export function PostDetailComponent({
     }
   };
 
-  useEffect(() => {
-    getAncestors();
-  }, [post.content_id, post.area_id]);
+  const getHistory = async () => {
+    if (!user) return;
+    const res = await getByUserAndContent(user.user_id, post.content_id);
+    if (res) {
+      console.log("History fetched:", res);
+      setLiked(res.some((history) => history.liked));
+      setPinned(res.some((history) => history.pinned));
+    }
+  };
 
-  const fetchUserData = useCallback(
-    async (userId: number) => {
-      try {
-        const response = await findUserById(userId);
-        if (response) setUserdata(response);
-      } catch (error) {
-        console.error("Failed to fetch user data:", error);
+  const handleBtn = async (typeBtn: number) => {
+    if (!user) return;
+    switch (typeBtn) {
+      case 1: {
+        const newLiked = !liked;
+        await updateLike(post.content_id, userData?.area_id || 0, {
+          delta: newLiked ? 1 : -1,
+        });
+        setLiked(newLiked);
+        setTotalLikes((prev) => prev + (newLiked ? 1 : -1));
+        await upsert({
+          content_id: post.content_id,
+          user_id: user.user_id,
+          liked: newLiked,
+          pinned,
+          reps: 0,
+        });
+        break;
       }
-    },
-    [findUserById]
-  );
+      case 2: {
+        const newPinned = !pinned;
+        await updatePin(post.content_id, userData?.area_id || 0, {
+          delta: newPinned ? 1 : -1,
+        });
+        setTotalPins((prev) => prev + (newPinned ? 1 : -1));
+        setPinned(newPinned);
+        await upsert({
+          content_id: post.content_id,
+          user_id: user.user_id,
+          liked,
+          pinned: newPinned,
+          reps: 0,
+        });
+        break;
+      }
+      case 3: {
+        await updateComment(post.content_id, userData?.area_id || 0, {
+          delta: 1,
+        });
+        break;
+      }
+    }
+  };
+
+  const fetchUserData = async (userId: number) => {
+    try {
+      const response = await findUserById(userId);
+      if (response) setUserdata(response);
+    } catch (error) {
+      console.error("Failed to fetch user data:", error);
+    }
+  };
+
+  // Fetch fresh post data whenever post_id changes
+  useEffect(() => {
+    const fetchFreshPost = async () => {
+      try {
+        const freshData = await findOne(post.content_id, post.area_id);
+        if (freshData) {
+          setCurrentPost(freshData);
+          setTotalLikes(freshData.likes);
+          setTotalPins(freshData.pins);
+
+          // Update parent component with fresh data
+          if (onLikeClick) onLikeClick(freshData.likes);
+          if (onCommentClick) onCommentClick(freshData.comments);
+          if (onPinClick) onPinClick(freshData.pins);
+        }
+      } catch (error) {
+        console.error("Failed to fetch updated post:", error);
+      }
+    };
+    fetchFreshPost();
+  }, [post.content_id, post.area_id]);
 
   useEffect(() => {
     fetchUserData(post.creator_id);
-  }, [post.creator_id]);
+    getHistory();
+  }, [post.creator_id, post]);
+
+  // Refetch ancestors and children when post changes
+  useEffect(() => {
+    const refetchPostTree = async () => {
+      try {
+        const ancestorData = await getAncestorPost(
+          post.content_id,
+          post.area_id
+        );
+        if (ancestorData) return ancestorData;
+      } catch (error) {
+        console.error("Failed to fetch ancestors:", error);
+      }
+    };
+
+    const refetchChildren = async () => {
+      try {
+        const childData = await getChildPost(post.content_id);
+        if (childData) return childData;
+      } catch (error) {
+        console.error("Failed to fetch children:", error);
+      }
+    };
+
+    // Only refetch if not already provided
+    if (!ancestors || ancestors.length === 0) {
+      refetchPostTree();
+    }
+    if (!children || children.length === 0) {
+      refetchChildren();
+    }
+  }, [post.content_id, post.area_id]);
+
+  // Reset media index when post changes
+  useEffect(() => {
+    setCurrentMediaIndex(0);
+  }, [post.content_id]);
 
   return (
     <div
       id="post-detail-backdrop"
       onClick={handleClickOutside}
-      className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4"
+      className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-4"
     >
       <div className="bg-dark-800 rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-        {/* Close Button */}
         <button
           onClick={onClose}
           className="absolute top-4 right-4 p-2 bg-black rounded-full hover:bg-black text-white z-10"
@@ -87,26 +216,30 @@ export function PostDetailComponent({
         </button>
 
         <div className="p-6 space-y-4">
-          {/* Ancestor Posts Chain */}
-          {ancestors.length > 0 && (
+          {ancestors && ancestors.length > 0 && (
             <div className="space-y-2 pb-4 border-b border-dark-700">
               <h4 className="text-xs font-semibold text-gray-400 uppercase">
                 Replying to:
               </h4>
               <div className="space-y-2">
-                {ancestors.map((ancestor) => (
-                  <MiniPostDetail key={ancestor.content_id} post={ancestor} />
+                {ancestors.map((ancestor, index) => (
+                  <div key={ancestor.content_id}>
+                    <MiniPostDetail post={ancestor} />
+                    {index < ancestors.length - 1 && (
+                      <div className="h-10 w-1 bg-red-400 my-2 rounded ml-4" />
+                    )}
+                  </div>
                 ))}
               </div>
             </div>
           )}
 
           <PostMediaGallery
-            mediaItems={post.contents}
+            mediaItems={currentPost.contents}
             currentMediaIndex={currentMediaIndex}
             onPrevMedia={handlePrevMedia}
             onNextMedia={handleNextMedia}
-            title={post.title}
+            title={currentPost.title}
           />
 
           {userData && (
@@ -118,29 +251,55 @@ export function PostDetailComponent({
           )}
 
           <PostDetailMain
-            title={post.title}
-            description={post.description}
-            likes={post.likes}
-            comments={post.comments}
+            title={currentPost.title}
+            description={currentPost.description}
+            likes={totalLikes}
+            comments={currentPost.comments}
+            pins={totalPins}
             liked={liked}
-            onLikeClick={() => setLiked(!liked)}
+            pinned={pinned}
+            reported={reported}
+            onLikeClick={() => handleBtn(1)}
+            onPinClick={() => handleBtn(2)}
+            onReportClick={() => setShowReportModal(true)}
             onReplyClick={() => setShowCreatePost(true)}
           />
 
           <div className="pt-4 border-t border-dark-700 space-y-4">
             <div>
               <h3 className="font-semibold text-gray-100 mb-4">Replies</h3>
+              {children && children.length > 0 ? (
+                <div className="space-y-2">
+                  {children.map((child) => (
+                    <MiniPostDetail key={child.content_id} post={child} />
+                  ))}
+                </div>
+              ) : (
+                <p className="text-xs text-gray-400">No replies yet</p>
+              )}
             </div>
           </div>
         </div>
       </div>
 
       <CreatePostModal
+        post={post}
         isOpen={showCreatePost}
+        onRefreshChild={onRefreshChild}
         onClose={() => setShowCreatePost(false)}
         parentPostId={post.content_id}
         currentUserId={post.creator_id}
         currentAreaId={post.area_id}
+        onUpdateComment={() => handleBtn(3)}
+      />
+      <ReportModal
+        isOpen={showReportModal}
+        onClose={() => setShowReportModal(false)}
+        content={post}
+        loggedUserData={userData}
+        onReportSuccess={() => {
+          setReported(true);
+        }}
       />
     </div>
   );

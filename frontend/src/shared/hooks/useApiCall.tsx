@@ -13,8 +13,6 @@ export default function useApiCall() {
   const call = useCallback(
     async <T,>(apiFn: () => Promise<T>): Promise<T | null> => {
       try {
-        setLoading(true);
-        showLoading();
         setError(null);
 
         const res = await apiFn();
@@ -27,8 +25,6 @@ export default function useApiCall() {
         showToast(msg);
         return null;
       } finally {
-        setLoading(false);
-        hideLoading();
       }
     },
     [showLoading, hideLoading, showToast]

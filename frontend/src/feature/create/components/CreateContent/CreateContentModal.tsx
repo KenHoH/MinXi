@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useToast } from "@/shared/context/ToastContext";
 import useContentService from "@/shared/hooks/useContentService";
 import type ThumbnailFile from "@/feature/content/object/ThumbnailFile";
@@ -11,6 +11,8 @@ import { UploadContentFiles } from "./UploadContentFiles";
 import { FileGalleryContent } from "./FileGalleryContent";
 import { UploadThumbnail } from "./UploadThumbnail";
 import { ThumbnailGallery } from "./ThumbnailGallery";
+import type { UserDto } from "@/service/api";
+import useUserService from "@/shared/hooks/useUserService";
 
 interface CreateContentModalProps {
   isOpen: boolean;
@@ -33,17 +35,16 @@ export function CreateContentModal({
   const [contentFiles, setContentFiles] = useState<ContentFile[]>([]);
   const [thumbnail, setThumbnail] = useState<ThumbnailFile | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [user, setUser] = useState<UserDto | null>(null);
   const { showToast } = useToast();
   const { create, loading } = useContentService();
+  const { findUserById } = useUserService();
 
   const isFormValid =
     contentTitle.trim() !== "" &&
     contentType !== null &&
     contentFiles.length > 0 &&
     thumbnail !== null;
-  if (!isOpen) {
-    return null;
-  }
 
   const handleContentFilesSelected = (files: File[]) => {
     files.forEach((file) => {
@@ -113,20 +114,6 @@ export function CreateContentModal({
     try {
       setIsSubmitting(true);
 
-      const formData = new FormData();
-      formData.append("thumbnail", thumbnail.file);
-      formData.append("creator_id", currentUserId.toString());
-      formData.append("area_id", "1"); // Default area, adjust as needed
-      formData.append("post_type", contentType);
-      formData.append("title", contentTitle);
-      formData.append("description", description);
-      formData.append("published_at", new Date().toISOString());
-
-      // Add all content files
-      contentFiles.forEach((file) => {
-        formData.append("contents", file.file);
-      });
-
       await create({
         thumbnail: thumbnail.file,
         creator_id: currentUserId,
@@ -145,6 +132,17 @@ export function CreateContentModal({
     }
   };
 
+  useEffect(() => {
+    const fetchUser = async () => {
+      const userData = await findUserById(currentUserId);
+      setUser(userData);
+    };
+    fetchUser();
+  }, []);
+  if (!isOpen) {
+    return null;
+  }
+
   return (
     <>
       <div className="fixed inset-0 bg-black z-40" onClick={onClose} />
@@ -156,7 +154,7 @@ export function CreateContentModal({
           {/* Content */}
           <div className="p-6 space-y-4">
             {/* User Info */}
-            <CreateContentUserInfo currentUserId={currentUserId} />
+            {user && <CreateContentUserInfo creator={user} />}
 
             {/* Title Input */}
             <div>

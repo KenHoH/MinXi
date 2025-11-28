@@ -1565,15 +1565,13 @@ export class ContentService implements IContentService {
       }
 
       if (!content.parent_id || content.parent_id === 0) {
-        return await this.findOne(contentId, areaId).then((result) => [result]);
+        return [];
       }
 
       const ancestors: any[] = [];
       let current = content;
 
       while (current && current.parent_id && current.parent_id !== 0) {
-        ancestors.push(current);
-
         const parent = await this.prisma.content.findUnique({
           where: {
             content_id_area_id: {
@@ -1587,14 +1585,9 @@ export class ContentService implements IContentService {
           break;
         }
 
+        ancestors.push(parent);
         current = parent;
       }
-
-      if (current && (!current.parent_id || current.parent_id === 0)) {
-        ancestors.push(current);
-      }
-
-      ancestors;
 
       const result: FullContentDto[] = [];
       for (const ancestor of ancestors) {

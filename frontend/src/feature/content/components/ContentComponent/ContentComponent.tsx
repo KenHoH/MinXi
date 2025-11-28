@@ -1,16 +1,18 @@
-import { useState } from "react";
+import { useEffect, useEffectEvent, useState } from "react";
 import { ContentHeaderInfo } from "./ContentHeaderInfo";
 import { ContentDetailInfo } from "./ContentDetailInfo";
 import { ContentDetailComponent } from "./ContentDetail";
-import type { FullContentDto } from "@/service/api";
+import type { FullContentDto, UserDto } from "@/service/api";
+import useUserService from "@/shared/hooks/useUserService";
 
 interface ContentComponentProps {
   content: FullContentDto;
-  refresh: () => void;
 }
 
-export function ContentComponent({ content, refresh }: ContentComponentProps) {
+export function ContentComponent({ content }: ContentComponentProps) {
   const [showDetail, setShowDetail] = useState(false);
+  const [like, setLike] = useState(content.likes);
+  const [comment, setComment] = useState(content.comments);
 
   return (
     <>
@@ -18,16 +20,16 @@ export function ContentComponent({ content, refresh }: ContentComponentProps) {
         onClick={() => setShowDetail(true)}
         className="bg-dark-800 rounded-lg overflow-hidden cursor-pointer hover:shadow-lg hover:shadow-burgundy-500/20 transition-all group w-full"
       >
-        <ContentHeaderInfo
+        <ContentHeaderInfo // DONE
           post_type={content.post_type}
           content_id={content.content_id}
           thumbnail={content.thumbnail.filepath}
         />
-
-        <ContentDetailInfo
+ 
+        <ContentDetailInfo // DONE
           title={content.title}
-          likes={content.likes}
-          comments={content.comments}
+          likes={like}
+          comments={comment}
         />
       </div>
 
@@ -36,8 +38,9 @@ export function ContentComponent({ content, refresh }: ContentComponentProps) {
           content={content}
           onClose={() => {
             setShowDetail(false);
-            refresh();
           }}
+          onCommentClick={setComment}
+          onLikeClick={setLike}
         />
       )}
     </>
