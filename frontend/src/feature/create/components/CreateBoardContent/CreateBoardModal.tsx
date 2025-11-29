@@ -153,11 +153,9 @@ export function CreateBoardModal({
     setIsSubmitting(true);
 
     const validContents = selectedIds.filter((id) => id && !isNaN(id));
-    // Send as comma-separated string (empty string if no contents)
     const contentsString =
       validContents.length > 0 ? validContents.join(",") : "";
 
-    // Create a custom payload object that will be sent to the API
     const formDataPayload = {
       visibility: isPrivate,
       creator_id: currentUserId,
@@ -165,7 +163,7 @@ export function CreateBoardModal({
       description: description.trim(),
       thumbnail: thumbnail!.file,
       area_id: loggedUserData?.area_id || undefined,
-      contents: contentsString, // Send as string, not array
+      contents: contentsString,
     };
 
     const res = await create(formDataPayload as any);

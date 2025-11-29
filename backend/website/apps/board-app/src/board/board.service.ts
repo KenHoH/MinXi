@@ -18,6 +18,7 @@ import {
 import { mapBoardToDto } from './utils/mapBoardToDTO';
 import { ClientProxy } from '@nestjs/microservices';
 import { FullContentDto } from '@app/contracts/shared-dto/content/res/full.content.dto';
+import { FileDto } from '@app/contracts/shared-dto/content/res/file.dto';
 import { CONTENT_MSG } from '@app/common/constants/messageEvent';
 import { firstValueFrom } from 'rxjs';
 import { CONTENT_SERVICES } from '@app/common/constants/services';
@@ -507,6 +508,145 @@ export class BoardService implements IBoardService {
           HttpStatus.INTERNAL_SERVER_ERROR,
         ),
       );
+    }
+  }
+  async getContentByBoardId(
+    boardId: number,
+    area_id: number,
+  ): Promise<FullContentDto[]> {
+    try {
+      const result = await this.prisma
+        .$transaction(async (tx) => {
+          const board = await tx.board.findUnique({
+            where: { board_id: boardId },
+          });
+
+          if (!board) {
+            throw httpToRpc(
+              new HttpException('Board not found', HttpStatus.NOT_FOUND),
+            );
+          }
+
+          const boardContents = await tx.boardContent.findMany({
+            where: { board_id: boardId },
+            select: { content_id: true },
+          });
+
+          if (boardContents.length === 0) {
+            return [];
+          }
+
+          const contentIds = boardContents.map((bc) => bc.content_id);
+
+          const contents = await tx.content
+            .findMany({
+              where: {
+                AND: [{ content_id: { in: contentIds } }, { area_id: area_id }],
+              },
+              orderBy: { created_at: 'desc' },
+            })
+            .catch((error) => {
+              this.logger.error(
+                'Failed to fetch board contents',
+                error.message,
+              );
+              throw httpToRpc(
+                new HttpException(
+                  'Failed to fetch board contents',
+                  HttpStatus.INTERNAL_SERVER_ERROR,
+                ),
+              );
+            });
+
+          const allContents: FullContentDto[] = [];
+
+          for (const content of contents) {
+            try {
+              const files = await tx.file.findMany({
+                where: {
+                  content_id: content.content_id,
+                  content_area_id: content.area_id,
+                },
+              });
+
+              const thumbnail = files.find((file) => file.type === 'thumbnail');
+              if (!thumbnail) {
+                this.logger.warn(
+                  `Content ${content.content_id} missing thumbnail`,
+                );
+                continue;
+              }
+
+              const mappedFiles: FileDto[] = files
+                .filter((file) => file.type !== 'thumbnail')
+                .map((file) => ({
+                  file_id: file.file_id,
+                  filepath: file.filepath,
+                  content_id: file.content_id,
+                  content_area_id: file.content_area_id,
+                  type: file.type,
+                }));
+
+              allContents.push({
+                content_id: content.content_id,
+                creator_id: content.creator_id,
+                parent_id: content.parent_id ?? undefined,
+                area_id: content.area_id,
+                title: content.title,
+                description: content.description,
+                post_type: content.post_type,
+                published_at: content.published_at,
+                visibilityPrivate: content.visibilityPrivate,
+                views: content.views,
+                likes: content.likes,
+                comments: content.comments,
+                pins: content.pins,
+                reports: content.reports,
+                thumbnail: {
+                  file_id: thumbnail.file_id,
+                  filepath: thumbnail.filepath,
+                  content_id: thumbnail.content_id,
+                  content_area_id: thumbnail.content_area_id,
+                  type: thumbnail.type,
+                },
+                contents: mappedFiles,
+              });
+            } catch (error) {
+              this.logger.error(
+                `Failed to fetch files for content ${content.content_id}`,
+                error.message,
+              );
+              throw httpToRpc(
+                new HttpException(
+                  `Failed to fetch files for content ${content.content_id}`,
+                  HttpStatus.INTERNAL_SERVER_ERROR,
+                ),
+              );
+            }
+          }
+
+          return allContents;
+        })
+        .catch((error) => {
+          if (error.status) {
+            throw error;
+          }
+          this.logger.error('Transaction failed', error.message);
+          throw httpToRpc(
+            new HttpException(
+              'Failed to fetch board contents - transaction rolled back',
+              HttpStatus.INTERNAL_SERVER_ERROR,
+            ),
+          );
+        });
+
+      return result;
+    } catch (error) {
+      if (error.status) {
+        throw error;
+      }
+      this.logger.warn('No board contents found or error occurred');
+      return [];
     }
   }
 }

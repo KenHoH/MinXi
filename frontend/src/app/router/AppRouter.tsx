@@ -23,17 +23,18 @@ export default function AppRouter() {
               {/* Public routes go here */}
               <Route path="/login" element={<LoginPage />} />
               <Route path="/register" element={<RegisterPage />} />
+              <Route path="/feed/*" element={<FeedPage />}></Route>
+              <Route path="/profile/:user" element={<ProfilePage />} />
+              <Route path="/search" element={<SearchPage />}></Route>
+
               <Route element={<ProtectedRoute />}>
                 {/* Protected routes go here */}
-                <Route path="/profile/:user" element={<ProfilePage />} />
                 <Route path="/chat/:user" element={<ChatPage />} />
                 <Route path="/create" element={<CreatePage />} />
-                <Route path="/feed/*" element={<FeedPage />}></Route>
                 <Route
                   path="/settings/:user"
                   element={<SettingsPage />}
                 ></Route>
-                <Route path="/search" element={<SearchPage />}></Route>
               </Route>
               <Route path="*" element={<NotFoundPage />} />
             </Routes>

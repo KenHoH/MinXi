@@ -4,37 +4,16 @@ import { useEffect, useRef, useCallback, useState } from "react";
 import { ContentComponent } from "@/feature/content/components/ContentComponent/ContentComponent";
 import { PostComponent } from "@/feature/content/components/PostComponent/PostComponent";
 import { useLoading } from "@/shared/context/LoadingContext";
-
-interface Content {
-  content_id: number;
-  creator_id: number;
-  title: string;
-  post_type: "image" | "video";
-  likes: number;
-  comments: number;
-  views: number;
-}
-
-interface Post {
-  content_id: number;
-  creator_id: number;
-  title: string;
-  description: string;
-  likes: number;
-  comments: number;
-  post_type: "post";
-}
-
-type FeedItem = Content | Post;
+import type { FullContentDto } from "@/service/api";
 
 interface FeedListProps {
-  onLoadMore: (page: number) => Promise<FeedItem[]>;
+  onLoadMore: (page: number) => Promise<FullContentDto[]>;
 }
 
 export default function FeedList({ onLoadMore }: FeedListProps) {
   const { showLoading, hideLoading } = useLoading();
 
-  const [items, setItems] = useState<FeedItem[]>([]);
+  const [items, setItems] = useState<FullContentDto[]>([]);
   const [page, setPage] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
   const [hasMore, setHasMore] = useState(true);
@@ -81,16 +60,14 @@ export default function FeedList({ onLoadMore }: FeedListProps) {
     return () => observer.disconnect();
   }, [loadMore, hasMore, isLoading]);
 
-  const renderItem = (item: FeedItem) => {
+  const renderItem = (item: FullContentDto) => {
     const isPost = item.post_type === "post";
     const isContent = item.post_type === "image" || item.post_type === "video";
 
     if (isContent) {
-      return (
-        <ContentComponent key={item.content_id} content={item as Content} />
-      );
+      return <ContentComponent key={item.content_id} content={item} />;
     } else if (isPost) {
-      return <PostComponent key={item.content_id} post={item as Post} />;
+      return <PostComponent key={item.content_id} post={item} />;
     }
 
     return null;

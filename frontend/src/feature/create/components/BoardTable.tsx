@@ -1,16 +1,5 @@
 import { useState } from "react";
-import {
-  Plus,
-  Trash2,
-  ChevronDown,
-  ChevronRight,
-  X,
-  Image,
-  Video,
-  FileText,
-  Package,
-  Calendar,
-} from "lucide-react";
+import { Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { CreateBoardModal } from "@/feature/create/components/CreateBoardContent/CreateBoardModal";
 import { useAuthContext } from "@/feature/auth/context/AuthContext";

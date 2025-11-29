@@ -33,6 +33,7 @@ import { ContentIdsResDto } from '@app/contracts/shared-dto/content/res/content-
 import { FileFieldsInterceptor } from '@nestjs/platform-express/multer/interceptors/file-fields.interceptor';
 import { MulterConfiguration } from '@app/common/config/multer.config';
 import { createBoardSchema } from './schemas/create-board.schema';
+import { FullContentDto } from '@app/contracts/shared-dto/content/res/full.content.dto';
 
 @Controller('board')
 @UseGuards(JwtAuthGuard)
@@ -193,6 +194,14 @@ export class BoardController {
     @Param('boardId', ParseIntPipe) boardId: number,
   ): Promise<ContentIdsResDto> {
     return this.boardService.getContentIdsByBoardId(boardId);
+  }
+  @Public()
+  @Get(':boardId/:area_id/content')
+  getContentByBoardId(
+    @Param('boardId', ParseIntPipe) boardId: number,
+    @Param('area_id', ParseIntPipe) area_id: number,
+  ): Promise<FullContentDto[]> {
+    return this.boardService.getContentByBoardId(boardId, area_id);
   }
 
   @Delete(':boardId/:area_id/content')

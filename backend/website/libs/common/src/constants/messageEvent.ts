@@ -69,6 +69,7 @@ export const BOARD_MSG = {
   deleteBoard: 'board.delete',
   getBoardByUser: 'board.getByUser',
   getContentIdsByBoardId: 'board.getContentIdsByBoardId',
+  getContentByBoardId: 'board.getContentByBoardId',
 };
 
 export const CONNECTION_MSG = {
