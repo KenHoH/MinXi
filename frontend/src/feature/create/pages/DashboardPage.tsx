@@ -22,18 +22,21 @@ export default function CreatePage() {
   const { getByUserAll } = useContentService();
   const { getBoardByUser } = useBoardService();
 
-  const getContentByUser = useCallback(async (userId: number) => {
-    const res = await getByUserAll(userId);
+  const getContentByUser = useCallback(
+    async (userId: number) => {
+      const res = await getByUserAll(userId);
 
-    if (res) {
-      const posts = res.filter((item) => item.post_type === "post");
-      const contents = res.filter((item) => item.post_type !== "post");
-      setPostItems(posts);
-      setContentItems(contents);
-    } else {
-      showToast("Failed To Load User's Content");
-    }
-  }, []);
+      if (res) {
+        const posts = res.filter((item) => item.post_type === "post");
+        const contents = res.filter((item) => item.post_type !== "post");
+        setPostItems(posts);
+        setContentItems(contents);
+      } else {
+        showToast("Failed To Load User's Content");
+      }
+    },
+    [getByUserAll, showToast]
+  );
   const getBoardsByUser = useCallback(
     async (userId: number, areaId: number) => {
       const res = await getBoardByUser(userId, areaId);
@@ -44,7 +47,7 @@ export default function CreatePage() {
         showToast("Failed To Load User's Content");
       }
     },
-    []
+    [getBoardByUser, showToast]
   );
 
   useEffect(() => {
@@ -116,9 +119,10 @@ export default function CreatePage() {
               <BoardTable
                 items={boardItems}
                 onDelete={handleDeleteBoard}
-                onRefresh={() =>
-                  getBoardByUser(user?.user_id || 0, user?.area_id || 0)
-                }
+                onRefresh={() => {
+                  console.log("Refresh called from BoardTable");
+                  getBoardsByUser(user?.user_id || 0, user?.area_id || 0);
+                }}
               />
             )}
           </div>

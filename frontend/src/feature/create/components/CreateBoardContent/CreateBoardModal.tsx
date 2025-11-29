@@ -170,13 +170,12 @@ export function CreateBoardModal({
 
     if (res) {
       showToast("Board created successfully!");
-
+      onBoardCreated && onBoardCreated();
       onClose();
     } else {
       showToast("Failed to create board. Please try again.");
     }
     setIsSubmitting(false);
-    onBoardCreated && onBoardCreated();
     resetForm();
   };
 

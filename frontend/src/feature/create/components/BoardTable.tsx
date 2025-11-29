@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { CreateBoardModal } from "@/feature/create/components/CreateBoardContent/CreateBoardModal";
@@ -30,6 +30,11 @@ export function BoardTable({
   const { showToast } = useToast();
 
   const currentUserId = user?.user_id || 0;
+
+  // Sync local state when parent updates boards
+  useEffect(() => {
+    setBoards(initialItems);
+  }, [initialItems]);
 
   const handleDeleteBoard = async (boardId: number) => {
     setDeletingId(boardId);

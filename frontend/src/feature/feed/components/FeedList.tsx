@@ -4,17 +4,23 @@ import { useEffect, useRef, useCallback, useState } from "react";
 import { ContentComponent } from "@/feature/content/components/ContentComponent/ContentComponent";
 import { PostComponent } from "@/feature/content/components/PostComponent/PostComponent";
 import { useLoading } from "@/shared/context/LoadingContext";
+import { Masonry } from "@/shared/components/Masonry";
 import type { FullContentDto } from "@/service/api";
 
 interface FeedListProps {
-  onLoadMore: (page: number) => Promise<FullContentDto[]>;
+  onLoadMore: () => Promise<FullContentDto[]>;
+  currentFilter?: string;
+  enableInfiniteScroll?: boolean;
 }
 
-export default function FeedList({ onLoadMore }: FeedListProps) {
+export default function FeedList({
+  onLoadMore,
+  currentFilter,
+  enableInfiniteScroll = true,
+}: FeedListProps) {
   const { showLoading, hideLoading } = useLoading();
 
   const [items, setItems] = useState<FullContentDto[]>([]);
-  const [page, setPage] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
   const [hasMore, setHasMore] = useState(true);
   const observerTarget = useRef<HTMLDivElement>(null);
@@ -26,13 +32,12 @@ export default function FeedList({ onLoadMore }: FeedListProps) {
     showLoading();
 
     try {
-      const newItems = await onLoadMore(page);
+      const newItems = await onLoadMore();
 
       if (newItems.length === 0) {
         setHasMore(false);
       } else {
         setItems((prev) => [...prev, ...newItems]);
-        setPage((prev) => prev + 1);
       }
     } catch (error) {
       console.error("Failed to load more items:", error);
@@ -41,12 +46,30 @@ export default function FeedList({ onLoadMore }: FeedListProps) {
       setIsLoading(false);
       hideLoading();
     }
-  }, [page, isLoading, hasMore, onLoadMore, showLoading, hideLoading]);
+  }, [isLoading, hasMore, onLoadMore, showLoading, hideLoading]);
 
   useEffect(() => {
+    setItems([]);
+    setHasMore(true);
+    setIsLoading(false);
+
+    onLoadMore().then((newItems) => {
+      setItems(newItems);
+      if (newItems.length === 0) setHasMore(false);
+    });
+  }, [currentFilter]);
+
+  useEffect(() => {
+    if (!enableInfiniteScroll) return;
+
     const observer = new IntersectionObserver(
       (entries) => {
-        if (entries[0].isIntersecting && hasMore && !isLoading) {
+        if (
+          entries[0].isIntersecting &&
+          hasMore &&
+          !isLoading &&
+          items.length !== 0
+        ) {
           loadMore();
         }
       },
@@ -58,7 +81,7 @@ export default function FeedList({ onLoadMore }: FeedListProps) {
     }
 
     return () => observer.disconnect();
-  }, [loadMore, hasMore, isLoading]);
+  }, [enableInfiniteScroll, loadMore, hasMore, isLoading]);
 
   const renderItem = (item: FullContentDto) => {
     const isPost = item.post_type === "post";
@@ -76,29 +99,23 @@ export default function FeedList({ onLoadMore }: FeedListProps) {
   return (
     <div className="w-3/4 h-full">
       {/* Masonry Grid */}
-      <div
-        className="p-4"
-        style={{ columnCount: "auto", columnWidth: "280px", columnGap: "1rem" }}
-      >
-        {items.length === 0 ? (
-          <div className="text-center py-12 text-gray-500">
-            No items to display
-          </div>
-        ) : (
-          items.map((item) => (
-            <div
-              key={`${item.post_type}-${item.content_id}`}
-              className="mb-4"
-              style={{ breakInside: "avoid", pageBreakInside: "avoid" }}
-            >
-              {renderItem(item)}
-            </div>
-          ))
-        )}
-      </div>
+      {items.length === 0 ? (
+        <div className="text-center py-12 text-gray-500">
+          No items to display
+        </div>
+      ) : (
+        <div className="p-4">
+          <Masonry columns={3}>
+            {items.map((item) => (
+              <div key={`${item.post_type}-${item.content_id}`}>
+                {renderItem(item)}
+              </div>
+            ))}
+          </Masonry>
+        </div>
+      )}
 
-      {/* Infinite scroll trigger */}
-      {hasMore && (
+      {enableInfiniteScroll && hasMore && (
         <div ref={observerTarget} className="py-8 text-center">
           {isLoading ? (
             <div className="flex justify-center items-center">

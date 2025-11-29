@@ -6,6 +6,7 @@ import type { Ack } from '../models/Ack';
 import type { AddContentDto } from '../models/AddContentDto';
 import type { BoardDto } from '../models/BoardDto';
 import type { ContentIdsResDto } from '../models/ContentIdsResDto';
+import type { FullContentDto } from '../models/FullContentDto';
 import type { RemoveContentDto } from '../models/RemoveContentDto';
 import type { UpdateContentDto } from '../models/UpdateContentDto';
 import type { CancelablePromise } from '../core/CancelablePromise';
@@ -80,6 +81,25 @@ export class BoardService {
             },
             body: requestBody,
             mediaType: 'application/json',
+        });
+    }
+    /**
+     * @param boardId
+     * @param areaId
+     * @returns FullContentDto
+     * @throws ApiError
+     */
+    public static boardControllerGetContentByBoardId(
+        boardId: number,
+        areaId: number,
+    ): CancelablePromise<Array<FullContentDto>> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/board/{boardId}/{area_id}/content',
+            path: {
+                'boardId': boardId,
+                'area_id': areaId,
+            },
         });
     }
     /**

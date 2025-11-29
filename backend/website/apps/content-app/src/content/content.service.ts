@@ -635,7 +635,7 @@ export class ContentService implements IContentService {
               });
 
               const thumbnail = files.find((file) => file.type === 'thumbnail');
-              if (!thumbnail) {
+              if (!thumbnail && content.post_type !== 'post') {
                 this.logger.warn(
                   `Content ${content.content_id} missing thumbnail`,
                 );
@@ -667,13 +667,15 @@ export class ContentService implements IContentService {
                 comments: content.comments,
                 pins: content.pins,
                 reports: content.reports,
-                thumbnail: {
-                  file_id: thumbnail.file_id,
-                  filepath: thumbnail.filepath,
-                  content_id: thumbnail.content_id,
-                  content_area_id: thumbnail.content_area_id,
-                  type: thumbnail.type,
-                },
+                thumbnail: thumbnail
+                  ? {
+                      file_id: thumbnail.file_id,
+                      filepath: thumbnail.filepath,
+                      content_id: thumbnail.content_id,
+                      content_area_id: thumbnail.content_area_id,
+                      type: thumbnail.type,
+                    }
+                  : null,
                 contents: mappedFiles,
               });
             } catch (error) {
@@ -872,7 +874,7 @@ export class ContentService implements IContentService {
               });
 
               const thumbnail = files.find((file) => file.type === 'thumbnail');
-              if (!thumbnail) {
+              if (!thumbnail && content.post_type !== 'post') {
                 this.logger.warn(
                   `Content ${content.content_id} missing thumbnail`,
                 );
@@ -904,13 +906,15 @@ export class ContentService implements IContentService {
                 comments: content.comments,
                 pins: content.pins,
                 reports: content.reports,
-                thumbnail: {
-                  file_id: thumbnail.file_id,
-                  filepath: thumbnail.filepath,
-                  content_id: thumbnail.content_id,
-                  content_area_id: thumbnail.content_area_id,
-                  type: thumbnail.type,
-                },
+                thumbnail: thumbnail
+                  ? {
+                      file_id: thumbnail.file_id,
+                      filepath: thumbnail.filepath,
+                      content_id: thumbnail.content_id,
+                      content_area_id: thumbnail.content_area_id,
+                      type: thumbnail.type,
+                    }
+                  : null,
                 contents: mappedFiles,
               });
             } catch (error) {
@@ -1299,7 +1303,7 @@ export class ContentService implements IContentService {
               });
 
               const thumbnail = files.find((file) => file.type === 'thumbnail');
-              if (!thumbnail) {
+              if (!thumbnail && content.post_type !== 'post') {
                 this.logger.warn(
                   `Content ${content.content_id} missing thumbnail`,
                 );
@@ -1331,13 +1335,15 @@ export class ContentService implements IContentService {
                 comments: content.comments,
                 pins: content.pins,
                 reports: content.reports,
-                thumbnail: {
-                  file_id: thumbnail.file_id,
-                  filepath: thumbnail.filepath,
-                  content_id: thumbnail.content_id,
-                  content_area_id: thumbnail.content_area_id,
-                  type: thumbnail.type,
-                },
+                thumbnail: thumbnail
+                  ? {
+                      file_id: thumbnail.file_id,
+                      filepath: thumbnail.filepath,
+                      content_id: thumbnail.content_id,
+                      content_area_id: thumbnail.content_area_id,
+                      type: thumbnail.type,
+                    }
+                  : null,
                 contents: mappedFiles,
               });
             } catch (error) {
@@ -1435,7 +1441,7 @@ export class ContentService implements IContentService {
               });
 
               const thumbnail = files.find((file) => file.type === 'thumbnail');
-              if (!thumbnail) {
+              if (!thumbnail && content.post_type !== 'post') {
                 this.logger.warn(
                   `Content ${content.content_id} missing thumbnail`,
                 );
@@ -1467,13 +1473,15 @@ export class ContentService implements IContentService {
                 published_at: content.published_at,
                 pins: content.pins,
                 reports: content.reports,
-                thumbnail: {
-                  file_id: thumbnail.file_id,
-                  filepath: thumbnail.filepath,
-                  content_id: thumbnail.content_id,
-                  content_area_id: thumbnail.content_area_id,
-                  type: thumbnail.type,
-                },
+                thumbnail: thumbnail
+                  ? {
+                      file_id: thumbnail.file_id,
+                      filepath: thumbnail.filepath,
+                      content_id: thumbnail.content_id,
+                      content_area_id: thumbnail.content_area_id,
+                      type: thumbnail.type,
+                    }
+                  : null,
                 contents: mappedFiles,
               });
             } catch (error) {
@@ -1575,7 +1583,7 @@ export class ContentService implements IContentService {
               });
 
               const thumbnail = files.find((file) => file.type === 'thumbnail');
-              if (!thumbnail) {
+              if (!thumbnail && content.post_type !== 'post') {
                 this.logger.warn(
                   `Content ${content.content_id} missing thumbnail`,
                 );
@@ -1607,13 +1615,15 @@ export class ContentService implements IContentService {
                 comments: content.comments,
                 pins: content.pins,
                 reports: content.reports,
-                thumbnail: {
-                  file_id: thumbnail.file_id,
-                  filepath: thumbnail.filepath,
-                  content_id: thumbnail.content_id,
-                  content_area_id: thumbnail.content_area_id,
-                  type: thumbnail.type,
-                },
+                thumbnail: thumbnail
+                  ? {
+                      file_id: thumbnail.file_id,
+                      filepath: thumbnail.filepath,
+                      content_id: thumbnail.content_id,
+                      content_area_id: thumbnail.content_area_id,
+                      type: thumbnail.type,
+                    }
+                  : null,
                 contents: mappedFiles,
               });
             } catch (error) {
@@ -1706,7 +1716,7 @@ export class ContentService implements IContentService {
               });
 
               const thumbnail = files.find((file) => file.type === 'thumbnail');
-              if (!thumbnail) {
+              if (!thumbnail && content.post_type !== 'post') {
                 this.logger.warn(
                   `Content ${content.content_id} missing thumbnail`,
                 );
@@ -1738,13 +1748,15 @@ export class ContentService implements IContentService {
                 comments: content.comments,
                 pins: content.pins,
                 reports: content.reports,
-                thumbnail: {
-                  file_id: thumbnail.file_id,
-                  filepath: thumbnail.filepath,
-                  content_id: thumbnail.content_id,
-                  content_area_id: thumbnail.content_area_id,
-                  type: thumbnail.type,
-                },
+                thumbnail: thumbnail
+                  ? {
+                      file_id: thumbnail.file_id,
+                      filepath: thumbnail.filepath,
+                      content_id: thumbnail.content_id,
+                      content_area_id: thumbnail.content_area_id,
+                      type: thumbnail.type,
+                    }
+                  : null,
                 contents: mappedFiles,
               });
             } catch (error) {
@@ -1925,7 +1937,7 @@ export class ContentService implements IContentService {
               });
 
               const thumbnail = files.find((file) => file.type === 'thumbnail');
-              if (!thumbnail) {
+              if (!thumbnail && content.post_type !== 'post') {
                 this.logger.warn(
                   `Content ${content.content_id} missing thumbnail`,
                 );
@@ -1957,13 +1969,15 @@ export class ContentService implements IContentService {
                 comments: content.comments,
                 pins: content.pins,
                 reports: content.reports,
-                thumbnail: {
-                  file_id: thumbnail.file_id,
-                  filepath: thumbnail.filepath,
-                  content_id: thumbnail.content_id,
-                  content_area_id: thumbnail.content_area_id,
-                  type: thumbnail.type,
-                },
+                thumbnail: thumbnail
+                  ? {
+                      file_id: thumbnail.file_id,
+                      filepath: thumbnail.filepath,
+                      content_id: thumbnail.content_id,
+                      content_area_id: thumbnail.content_area_id,
+                      type: thumbnail.type,
+                    }
+                  : null,
                 contents: mappedFiles,
               });
             } catch (error) {

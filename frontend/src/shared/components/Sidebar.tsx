@@ -36,6 +36,7 @@ export function Sidebar() {
       id: user.user_id,
       refreshToken: refreshToken,
     });
+    window.location.href = "/login";
   };
 
   const userInitials =

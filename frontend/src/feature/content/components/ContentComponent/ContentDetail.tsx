@@ -10,12 +10,14 @@ import { FooterContentComponent } from "./FooterContentComponent";
 import { ContentMediaGallery } from "./ContentMediaGallery";
 import { ContentDetailSkeleton } from "./ContentDetailSkeleton";
 import { ReportModal } from "./ReportModal";
-import type { FullContentDto, UserDto } from "@/service/api";
+import type { BoardDto, FullContentDto, UserDto } from "@/service/api";
 import useUserService from "@/shared/hooks/useUserService";
 import useHistoryService from "@/shared/hooks/useHistoryService";
 import useContentService from "@/shared/hooks/useContentService";
 import useCommentService from "@/shared/hooks/useCommentService";
 import { Navigate } from "react-router";
+import useBoardService from "@/shared/hooks/useBoardService";
+import PinModal from "./PinModal";
 
 interface ContentDetailComponentProps {
   content: FullContentDto;
@@ -37,6 +39,7 @@ export function ContentDetailComponent({
   // ============ UI STATE ============
   const [currentMediaIndex, setCurrentMediaIndex] = useState(0);
   const [showReportModal, setShowReportModal] = useState(false);
+  const [showPinModal, setShowPinModal] = useState(false);
   const [refreshComments, setRefreshComments] = useState(false);
 
   // ============ INTERACTION STATE ============
@@ -64,12 +67,15 @@ export function ContentDetailComponent({
   const [totalLikes, setTotalLikes] = useState(content.likes);
   const [totalPins, setTotalPins] = useState(content.pins);
   const [totalReports, setTotalReports] = useState(content.reports);
+  const [userBoards, setUserBoards] = useState<BoardDto[]>([]);
+  const [pinnedBoardId, setPinnedBoardId] = useState<number | null>(null);
 
   // ============ HOOKS ============
   const { upsert, getByUserAndContent } = useHistoryService();
   const { updateLike, updatePin, updateComment, findOne } = useContentService();
   const { create } = useCommentService();
   const { findUserById } = useUserService();
+  const { getBoardByUser, removeContent } = useBoardService();
 
   // ============ MEDIA GALLERY HANDLERS ============
   const handlePrevMedia = () => {
@@ -121,6 +127,27 @@ export function ContentDetailComponent({
   };
 
   // ============ INTERACTION HANDLERS ============
+  const getBoards = async () => {
+    if (!loggedUserData) return;
+
+    const boards = await getBoardByUser(
+      loggedUserData.user_id,
+      loggedUserData.area_id
+    );
+    setUserBoards(boards || []);
+    console.log("Fetched user boards:", boards);
+
+    // Find which board contains this content if pinned
+    if (pinned && boards) {
+      for (const board of boards) {
+        if (board.contents?.some((c) => c.content_id === content.content_id)) {
+          setPinnedBoardId(board.board_id);
+          break;
+        }
+      }
+    }
+  };
+
   const getHistory = async () => {
     if (!user) return;
     const res = await getByUserAndContent(user.user_id, content.content_id);
@@ -150,23 +177,46 @@ export function ContentDetailComponent({
         onLikeClick(totalLikes + (newLiked ? 1 : -1));
         break;
       }
-      // Pin button
       case 2: {
         const newPinned = !pinned;
-        await updatePin(content.content_id, loggedUserData?.area_id || 0, {
-          delta: newPinned ? 1 : -1,
-        });
-        setTotalPins((prev) => prev + (newPinned ? 1 : -1));
-        setPinned(newPinned);
-        await upsert({
-          content_id: content.content_id,
-          user_id: user.user_id,
-          liked,
-          pinned: newPinned,
-          reps: 0,
-        });
+        if (newPinned) {
+          setShowPinModal(true);
+        } else {
+          await handleUnpin();
+        }
         break;
       }
+    }
+  };
+
+  const handleUnpin = async () => {
+    if (!user || !loggedUserData || pinnedBoardId === null) return;
+
+    try {
+      await removeContent(pinnedBoardId, loggedUserData.area_id, {
+        content_id: content.content_id,
+      });
+
+      await updatePin(content.content_id, loggedUserData.area_id, {
+        delta: -1,
+      });
+
+      setTotalPins((prev) => prev - 1);
+      setPinned(false);
+      setPinnedBoardId(null);
+
+      await upsert({
+        content_id: content.content_id,
+        user_id: user.user_id,
+        liked,
+        pinned: false,
+        reps: 0,
+      });
+
+      showToast("Content unpinned successfully");
+    } catch (error) {
+      console.error("Failed to unpin content:", error);
+      showToast("Failed to unpin content");
     }
   };
 
@@ -213,11 +263,16 @@ export function ContentDetailComponent({
     const getLoggedUserData = async () => {
       if (user) {
         const data = await findUserById(user.user_id);
+        console.log("Fetched logged user data:", data);
         if (data) setLoggedUserData(data);
       }
     };
     getLoggedUserData();
   }, [user]);
+
+  useEffect(() => {
+    getBoards();
+  }, [loggedUserData]);
 
   // Upset History
   useEffect(() => {
@@ -251,7 +306,7 @@ export function ContentDetailComponent({
       onClick={handleClickOutside}
       className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-4"
     >
-      <div className="flex gap-6 w-full max-w-5xl h-[85vh]  rounded-lg overflow-hidden">
+      <div className="flex gap-6 w-full max-w-5xl h-[85vh] bg-black/80 rounded-lg overflow-hidden">
         <ContentMediaGallery
           mediaItems={currentContent.contents}
           currentMediaIndex={currentMediaIndex}
@@ -291,7 +346,10 @@ export function ContentDetailComponent({
                   setReplyingToCommentId(null);
                   setReplyingToComment(null);
                 }}
-                profile={loggedUserData?.profile_picture || ""}
+                profile={
+                  loggedUserData?.profile_picture ||
+                  "http://localhost:3000/uploads/profile/1763906830326-69740177.png"
+                }
               />
             </>
           ) : (
@@ -308,7 +366,7 @@ export function ContentDetailComponent({
             pins={totalPins}
             reports={totalReports}
             onLikeClick={() => handleBtn(1)}
-            onPin={() => handleBtn(2)}
+            onPin={() => (pinned ? handleBtn(2) : setShowPinModal(true))}
             onReport={() => setShowReportModal(true)}
           />
         </div>
@@ -323,6 +381,39 @@ export function ContentDetailComponent({
         onReportSuccess={() => {
           setReported(true);
           setTotalReports((prev) => prev + 1);
+        }}
+      />
+
+      <PinModal
+        isOpen={showPinModal}
+        onClose={() => setShowPinModal(false)}
+        content={content}
+        loggedUserData={loggedUserData}
+        userBoards={userBoards}
+        onPinSuccess={async (boardId) => {
+          if (!user) return;
+          try {
+            await updatePin(content.content_id, loggedUserData?.area_id || 0, {
+              delta: 1,
+            });
+
+            // Upsert history
+            await upsert({
+              content_id: content.content_id,
+              user_id: user.user_id,
+              liked,
+              pinned: true,
+              reps: 0,
+            });
+
+            setPinnedBoardId(boardId);
+            setPinned(true);
+            setTotalPins((prev) => prev + 1);
+            setShowPinModal(false);
+          } catch (error) {
+            console.error("Failed to complete pin:", error);
+            showToast("Failed to complete pin");
+          }
         }}
       />
     </div>

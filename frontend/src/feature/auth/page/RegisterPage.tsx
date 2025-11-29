@@ -41,6 +41,7 @@ export default function RegisterPage() {
       username: username,
       password: password,
     });
+    showToast("Account created successfully! Please log in.");
   };
   return (
     <div className="min-h-screen flex items-center justify-center bg-background p-4">

@@ -6,6 +6,7 @@ import type { RemoveContentDto } from "../../service/api/models/RemoveContentDto
 import type { UpdateContentDto } from "../../service/api/models/UpdateContentDto";
 import type { ContentIdsResDto } from "../../service/api/models/ContentIdsResDto";
 import useApiCall from "./useApiCall";
+import type { FullContentDto } from "@/service/api";
 
 interface CreateBoardFormData {
   thumbnail: Blob;
@@ -55,6 +56,10 @@ export default function useBoardService() {
     call<ContentIdsResDto>(() =>
       BoardService.boardControllerGetContentIdsByBoardId(boardId)
     );
+  const getContentByBoardId = (boardId: number, areaId: number) =>
+    call<FullContentDto[]>(() =>
+      BoardService.boardControllerGetContentByBoardId(boardId, areaId)
+    );
 
   const deleteBoard = (id: number) =>
     call<Ack>(() => BoardService.boardControllerDeleteBoard(id));
@@ -71,6 +76,7 @@ export default function useBoardService() {
     removeContent,
     updateContent,
     getBoardByUser,
+    getContentByBoardId,
     getContentIdsByBoardId,
     deleteBoard,
     setPrivate,

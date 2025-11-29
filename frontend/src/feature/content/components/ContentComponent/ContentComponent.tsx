@@ -13,6 +13,16 @@ export function ContentComponent({ content }: ContentComponentProps) {
   const [showDetail, setShowDetail] = useState(false);
   const [like, setLike] = useState(content.likes);
   const [comment, setComment] = useState(content.comments);
+  const [loggedUserData, setLoggedUserData] = useState<UserDto | null>(null);
+
+  const { findUserById } = useUserService();
+  useEffect(() => {
+    const fetchCreatorData = async () => {
+      const userData: UserDto | null = await findUserById(content.creator_id);
+      if (userData) setLoggedUserData(userData);
+    };
+    fetchCreatorData();
+  }, [content.creator_id]);
 
   return (
     <>
@@ -25,11 +35,17 @@ export function ContentComponent({ content }: ContentComponentProps) {
           content_id={content.content_id}
           thumbnail={content.thumbnail.filepath}
         />
- 
+
         <ContentDetailInfo // DONE
           title={content.title}
           likes={like}
           comments={comment}
+          creator={loggedUserData ? loggedUserData.username : "anonymous"}
+          creatorProfile={
+            loggedUserData
+              ? loggedUserData.profile_picture
+              : "http://localhost:3000/uploads/profile/1763906830326-69740177.png"
+          }
         />
       </div>
 
