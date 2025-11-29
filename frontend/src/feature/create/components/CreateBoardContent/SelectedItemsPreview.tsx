@@ -1,10 +1,11 @@
 import { Trash2 } from "lucide-react";
+import type { FileDto } from "@/service/api";
 
 interface SelectedItem {
   content_id: number;
   title: string;
   type?: "image" | "video" | "post";
-  thumbnail?: string;
+  thumbnail?: FileDto;
 }
 
 interface SelectedItemsPreviewProps {
@@ -40,9 +41,9 @@ export function SelectedItemsPreview({
               <div className="flex items-center gap-2 flex-1 min-w-0">
                 {item.thumbnail && (
                   <img
-                    src={item.thumbnail}
+                    src={item.thumbnail.filepath}
                     alt={item.title}
-                    className="w-8 h-8 rounded object-cover flex-shrink-0"
+                    className="w-8 h-8 rounded object-cover shrink-0"
                     onError={(e) => {
                       (e.target as HTMLImageElement).src =
                         "https://via.placeholder.com/32";

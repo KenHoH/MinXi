@@ -19,5 +19,6 @@ export type FullContentDto = {
     comments: number;
     pins: number;
     reports: number;
+    published_at: string;
 };
 

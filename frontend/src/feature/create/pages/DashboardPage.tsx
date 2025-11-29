@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
-import { ContentCreation } from "../components/ContentCreation";
-import { PostCreation } from "../components/PostCreation";
-import { BoardCreation } from "../components/BoardCreation";
+import { ContentTable } from "../components/ContentTable";
+import { PostTable } from "../components/PostTable";
+import { BoardTable } from "../components/BoardTable";
 import RootLayout from "@/app/LayoutPage";
 import { useToast } from "@/shared/context/ToastContext";
 import { useAuthContext } from "@/feature/auth/context/AuthContext";
@@ -14,17 +14,16 @@ export default function CreatePage() {
     "content"
   );
   const [contentItems, setContentItems] = useState<FullContentDto[]>([]);
-  const [contentAll, setContentAll] = useState<FullContentDto[]>([]);
   const [postItems, setPostItems] = useState<FullContentDto[]>([]);
   const [boardItems, setBoardItems] = useState<BoardDto[]>([]);
   const { showToast } = useToast();
   const { user } = useAuthContext();
 
-  const { getByUser } = useContentService();
+  const { getByUserAll } = useContentService();
   const { getBoardByUser } = useBoardService();
 
   const getContentByUser = useCallback(async (userId: number) => {
-    const res = await getByUser(userId);
+    const res = await getByUserAll(userId);
 
     if (res) {
       const posts = res.filter((item) => item.post_type === "post");
@@ -77,7 +76,7 @@ export default function CreatePage() {
     <RootLayout>
       <div className="w-full h-full bg-dark-900">
         <div className="p-8">
-          <div className="max-w-6xl mx-auto">
+          <div className="max-w-7xl mx-auto">
             <h1 className="text-3xl font-bold text-gray-100 mb-8">Create</h1>
 
             {/* Tabs */}
@@ -98,27 +97,22 @@ export default function CreatePage() {
             </div>
 
             {activeTab === "content" && (
-              <ContentCreation
+              <ContentTable
                 items={contentItems}
                 onDelete={handleDeleteContent}
-                refresh={() => getContentByUser(user?.user_id || 0)}
               />
             )}
 
             {activeTab === "post" && (
-              <PostCreation
-                items={postItems as any}
+              <PostTable
+                items={postItems}
                 onRefreshChild={() => getContentByUser(user?.user_id || 0)}
                 onDelete={handleDeletePost}
               />
             )}
 
             {activeTab === "board" && (
-              <BoardCreation
-                items={boardItems}
-                contents={contentAll}
-                onDelete={handleDeleteBoard}
-              />
+              <BoardTable items={boardItems} onDelete={handleDeleteBoard} />
             )}
           </div>
         </div>

@@ -11,8 +11,10 @@ import { UploadContentFiles } from "./UploadContentFiles";
 import { FileGalleryContent } from "./FileGalleryContent";
 import { UploadThumbnail } from "./UploadThumbnail";
 import { ThumbnailGallery } from "./ThumbnailGallery";
+import { Input } from "@/components/ui/input";
 import type { UserDto } from "@/service/api";
 import useUserService from "@/shared/hooks/useUserService";
+import { Calendar } from "lucide-react";
 
 interface CreateContentModalProps {
   isOpen: boolean;
@@ -35,6 +37,7 @@ export function CreateContentModal({
   const [contentFiles, setContentFiles] = useState<ContentFile[]>([]);
   const [thumbnail, setThumbnail] = useState<ThumbnailFile | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [publishedAt, setPublishedAt] = useState("");
   const [user, setUser] = useState<UserDto | null>(null);
   const { showToast } = useToast();
   const { create, loading } = useContentService();
@@ -111,6 +114,15 @@ export function CreateContentModal({
       return;
     }
 
+    // Validate published_at if provided
+    if (publishedAt) {
+      const selectedDate = new Date(publishedAt);
+      if (isNaN(selectedDate.getTime())) {
+        showToast("Invalid publish date. Please select a valid date.");
+        return;
+      }
+    }
+
     try {
       setIsSubmitting(true);
 
@@ -121,7 +133,9 @@ export function CreateContentModal({
         post_type: contentType,
         title: contentTitle,
         description: description,
-        published_at: new Date().toISOString(),
+        published_at: publishedAt
+          ? new Date(publishedAt).toISOString()
+          : new Date().toISOString(),
         contents: contentFiles.map((file) => file.file),
       });
     } catch (error) {
@@ -168,6 +182,31 @@ export function CreateContentModal({
                 placeholder="What's your content about?"
                 className="w-full px-4 py-2 bg-dark-700 border border-dark-600 rounded-lg text-gray-100 placeholder:text-gray-500 focus:outline-none focus:ring-1 focus:ring-burgundy-600"
               />
+            </div>
+            {/* Date Input */}
+            <div>
+              <label className="block text-sm font-medium text-gray-300 mb-2">
+                Published At{" "}
+                <span className="text-gray-500 text-xs">
+                  (Optional - defaults to now)
+                </span>
+              </label>
+              <div className="relative">
+                <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500 pointer-events-none" />
+                <Input
+                  type="datetime-local"
+                  value={publishedAt}
+                  onChange={(e) => setPublishedAt(e.target.value)}
+                  placeholder="Select publish date and time"
+                  className="pl-10 bg-dark-700 border border-dark-600 text-gray-100 placeholder:text-gray-500"
+                />
+              </div>
+              {publishedAt && (
+                <p className="mt-2 text-xs text-gray-400 flex items-center gap-1">
+                  <Calendar className="w-3 h-3" />
+                  Publishing on: {new Date(publishedAt).toLocaleString()}
+                </p>
+              )}
             </div>
 
             {/* Description Input */}

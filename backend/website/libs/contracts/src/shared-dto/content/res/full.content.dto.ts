@@ -18,4 +18,5 @@ export class FullContentDto {
   comments: number;
   pins: number;
   reports: number;
+  published_at: Date;
 }

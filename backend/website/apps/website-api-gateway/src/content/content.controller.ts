@@ -99,15 +99,14 @@ export class ContentController {
       );
     }
 
-    if (!published_at) {
-      throw new BadRequestException('published_at is required');
-    }
-
-    const publishedDate = new Date(published_at);
-    if (isNaN(publishedDate.getTime())) {
-      throw new BadRequestException(
-        'published_at must be a valid date in ISO 8601 format (e.g., 2024-01-01T00:00:00Z)',
-      );
+    let publishedDate = new Date();
+    if (published_at) {
+      publishedDate = new Date(published_at);
+      if (isNaN(publishedDate.getTime())) {
+        throw new BadRequestException(
+          'published_at must be a valid date in ISO 8601 format (e.g., 2024-01-01T00:00:00Z)',
+        );
+      }
     }
 
     const thumbnailFile = files.thumbnail ? files.thumbnail[0] : null;
@@ -138,7 +137,7 @@ export class ContentController {
       title,
       description,
       post_type,
-      published_at: body.published_at,
+      published_at: publishedDate.toISOString(),
     };
 
     return await this.contentService.create(createDto);

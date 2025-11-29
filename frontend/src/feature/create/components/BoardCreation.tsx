@@ -6,19 +6,14 @@ import { Masonry } from "@/shared/components/Masonry";
 import { BoardModal } from "./BoardModal";
 import { CreateBoardModal } from "@/feature/create/components/CreateBoardContent/CreateBoardModal";
 import { useAuthContext } from "@/feature/auth/context/AuthContext";
-import type { BoardDto, FullContentDto } from "@/service/api";
+import type { BoardDto } from "@/service/api";
 
 interface BoardCreationProps {
   items: BoardDto[];
-  contents: FullContentDto[];
   onDelete: (id: number) => void;
 }
 
-export function BoardCreation({
-  items,
-  contents,
-  onDelete,
-}: BoardCreationProps) {
+export function BoardCreation({ items, onDelete }: BoardCreationProps) {
   const [selectedBoard, setSelectedBoard] = useState<BoardDto | null>(null);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const { user } = useAuthContext();
@@ -36,7 +31,6 @@ export function BoardCreation({
         </Button>
         <CreateBoardModal
           isOpen={showCreateModal}
-          contents={contents}
           onClose={() => setShowCreateModal(false)}
           currentUserId={currentUserId}
         />

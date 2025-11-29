@@ -7,14 +7,16 @@ import { MasonrySelector } from "./MasonrySelector";
 import { SelectedItemsPreview } from "./SelectedItemsPreview";
 import { useAuthContext } from "@/feature/auth/context/AuthContext";
 import { useToast } from "@/shared/context/ToastContext";
-import type { FullContentDto } from "@/service/api";
+import type { UserDto, FileDto } from "@/service/api";
 import useBoardService from "@/shared/hooks/useBoardService";
+import useUserService from "@/shared/hooks/useUserService";
+import useContentService from "@/shared/hooks/useContentService";
 
 interface ContentGalleryItem {
   content_id: number;
   title: string;
   type: "image" | "video";
-  thumbnail: string;
+  thumbnail: FileDto;
 }
 
 interface PostGalleryItem {
@@ -32,12 +34,11 @@ interface SelectedItem {
   content_id: number;
   title: string;
   type: "image" | "video" | "post";
-  thumbnail?: string;
+  thumbnail?: FileDto;
 }
 
 interface CreateBoardModalProps {
   isOpen: boolean;
-  contents: FullContentDto[];
   onClose: () => void;
   currentUserId: number;
 }
@@ -48,7 +49,6 @@ type GalleryItem = (ContentGalleryItem | PostGalleryItem) & {
 
 export function CreateBoardModal({
   isOpen,
-  contents,
   onClose,
   currentUserId,
 }: CreateBoardModalProps) {
@@ -57,26 +57,38 @@ export function CreateBoardModal({
   const [isPrivate, setIsPrivate] = useState(false);
   const [thumbnail, setThumbnail] = useState<ThumbnailFile | null>(null);
   const [selectedIds, setSelectedIds] = useState<number[]>([]);
-  const [mockAllItems, setMockAllItems] = useState<GalleryItem[]>([]);
+  const [allItems, setAllItems] = useState<GalleryItem[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [loggedUserData, setLoggedUserData] = useState<UserDto | null>(null);
   const { showToast } = useToast();
   const { user } = useAuthContext();
   const { create } = useBoardService();
+  const { findUserById } = useUserService();
+  const { getByUserAll } = useContentService();
 
+  // Fetch user's content when modal opens
   useEffect(() => {
-    console.log(contents);
-    const mappedContents = contents.map((item) => ({
-      content_id: item.content_id,
-      title: item.title,
-      type: item.post_type as "image" | "video" | "post",
-      thumbnail: item.thumbnail,
-    }));
-    setMockAllItems(mappedContents);
-  }, [contents]);
-
-  if (!isOpen) {
-    return null;
-  }
+    if (isOpen && user?.user_id) {
+      const fetchUserContent = async () => {
+        try {
+          const userContent = await getByUserAll(user.user_id);
+          if (userContent) {
+            const mappedContents: GalleryItem[] = userContent.map((item) => ({
+              content_id: item.content_id,
+              title: item.title,
+              type: item.post_type as "image" | "video" | "post",
+              thumbnail: item.thumbnail,
+            }));
+            setAllItems(mappedContents);
+          }
+        } catch (error) {
+          console.error("Failed to fetch user content:", error);
+          showToast("Failed to load your content");
+        }
+      };
+      fetchUserContent();
+    }
+  }, [isOpen, user?.user_id]);
 
   const handleThumbnailSelected = (file: File) => {
     const reader = new FileReader();
@@ -105,7 +117,7 @@ export function CreateBoardModal({
     setSelectedIds((prev) => prev.filter((sid) => sid !== id));
   };
 
-  const selectedItems = mockAllItems
+  const selectedItems = allItems
     .filter((item) => selectedIds.includes(item.content_id))
     .map((item) => ({
       content_id: item.content_id,
@@ -161,33 +173,50 @@ export function CreateBoardModal({
     resetForm();
   };
 
+  useEffect(() => {
+    const fetchLoggedUser = async () => {
+      if (user && user.user_id) {
+        await findUserById(user.user_id).then((res) => {
+          setLoggedUserData(res);
+        });
+      }
+    };
+    fetchLoggedUser();
+  }, [user]);
+
+  if (!isOpen) {
+    return null;
+  }
   const isFormValid = title.trim() && thumbnail && selectedItems.length > 0;
 
   return (
     <>
       {/* Backdrop */}
-      <div className="fixed inset-0 bg-black z-40" onClick={onClose} />
+      <div
+        className="fixed inset-0 bg-black backdrop-blur-sm z-40"
+        onClick={onClose}
+      />
 
       {/* Modal */}
       <div className="fixed inset-0 flex items-center justify-center z-50 p-4">
-        <div className="bg-black rounded-lg max-w-3xl w-full max-h-[90vh] overflow-hidden flex flex-col">
+        <div className="bg-dark-800 rounded-lg max-w-5xl w-full max-h-[95vh] overflow-hidden flex flex-col">
           {/* Header */}
-          <div className="flex items-center justify-between p-6 border-b border-gray-700 bg-black z-10 shrink-0">
+          <div className="flex items-center justify-between p-6 border-b border-dark-700 bg-dark-800 z-10 shrink-0">
             <h2 className="text-xl font-bold text-gray-100">Create Board</h2>
             <button
               onClick={onClose}
-              className="p-2 hover:bg-gray-900 rounded-full transition-colors"
+              className="p-2 hover:bg-dark-700 rounded-full transition-colors"
             >
               <X className="w-6 h-6 text-gray-300" />
             </button>
           </div>
 
           {/* Content */}
-          <div className="flex-1 overflow-y-auto p-6 space-y-6">
+          <div className="flex-1 overflow-y-auto p-6 space-y-6 bg-dark-750">
             {/* User Info */}
             <div className="flex items-center gap-3">
               <ProfilePicture
-                creator_id={currentUserId}
+                creator={loggedUserData || null}
                 size="md"
                 clickable={false}
               />
@@ -208,7 +237,7 @@ export function CreateBoardModal({
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
                 placeholder="Give your board a name..."
-                className="w-full px-4 py-2 bg-gray-900 border border-gray-700 rounded-lg text-gray-100 placeholder:text-gray-500 focus:outline-none focus:ring-1 focus:ring-burgundy-600"
+                className="w-full px-4 py-2 bg-dark-700 border border-dark-600 rounded-lg text-gray-100 placeholder:text-gray-500 focus:outline-none focus:ring-1 focus:ring-burgundy-600"
               />
             </div>
 
@@ -222,12 +251,12 @@ export function CreateBoardModal({
                 onChange={(e) => setDescription(e.target.value)}
                 placeholder="Describe what this board is about..."
                 rows={3}
-                className="w-full px-4 py-2 bg-gray-900 border border-gray-700 rounded-lg text-gray-100 placeholder:text-gray-500 focus:outline-none focus:ring-1 focus:ring-burgundy-600 resize-none"
+                className="w-full px-4 py-2 bg-dark-700 border border-dark-600 rounded-lg text-gray-100 placeholder:text-gray-500 focus:outline-none focus:ring-1 focus:ring-burgundy-600 resize-none"
               />
             </div>
 
             {/* Thumbnail Section */}
-            <div className="space-y-3 p-4 bg-gray-900 rounded-lg border border-gray-700">
+            <div className="space-y-3 p-4 bg-dark-700 rounded-lg border border-dark-600">
               <div>
                 <p className="text-sm font-medium text-gray-300 mb-3">
                   Board Thumbnail <span className="text-burgundy-400">*</span>
@@ -244,13 +273,13 @@ export function CreateBoardModal({
             </div>
 
             {/* Privacy Toggle */}
-            <div className="flex items-center gap-3 p-4 bg-gray-900 rounded-lg border border-gray-700">
+            <div className="flex items-center gap-3 p-4 bg-dark-700 rounded-lg border border-dark-600">
               <input
                 type="checkbox"
                 id="private"
                 checked={isPrivate}
                 onChange={(e) => setIsPrivate(e.target.checked)}
-                className="w-4 h-4 bg-gray-700 border border-gray-600 rounded accent-burgundy-600 cursor-pointer"
+                className="w-4 h-4 bg-dark-600 border border-dark-600 rounded accent-burgundy-600 cursor-pointer"
               />
               <label
                 htmlFor="private"
@@ -261,7 +290,7 @@ export function CreateBoardModal({
             </div>
 
             {/* Divider */}
-            <div className="border-t border-gray-700" />
+            <div className="border-t border-dark-700" />
 
             {/* Selection Gallery */}
             <div className="space-y-6">
@@ -272,7 +301,7 @@ export function CreateBoardModal({
               {/* Masonry Gallery */}
               <MasonrySelector
                 title="Your Posts & Content"
-                items={mockAllItems}
+                items={allItems}
                 selectedIds={selectedIds}
                 onToggleSelect={toggleSelection}
               />
@@ -286,11 +315,11 @@ export function CreateBoardModal({
           </div>
 
           {/* Footer */}
-          <div className="flex gap-3 p-6 border-t border-gray-700 bg-black z-10 shrink-0">
+          <div className="flex gap-3 p-6 border-t border-dark-700 bg-dark-800 z-10 shrink-0">
             <button
               onClick={onClose}
               disabled={isSubmitting}
-              className="flex-1 px-4 py-2 bg-gray-900 text-gray-300 rounded-lg hover:bg-gray-800 transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+              className="flex-1 px-4 py-2 bg-dark-700 text-gray-300 rounded-lg hover:bg-dark-600 transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed"
             >
               Cancel
             </button>
