@@ -8,7 +8,7 @@ export type FullContentDto = {
     creator_id: number;
     parent_id?: number;
     area_id: number;
-    thumbnail: FileDto;
+    thumbnail: FileDto | null;
     contents: Array<FileDto>;
     title: string;
     description: string;

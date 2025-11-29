@@ -6,7 +6,7 @@ export class FullContentDto {
   parent_id?: number;
   area_id: number;
 
-  thumbnail: FileDto;
+  thumbnail: FileDto | null;
   contents: FileDto[];
 
   title: string;

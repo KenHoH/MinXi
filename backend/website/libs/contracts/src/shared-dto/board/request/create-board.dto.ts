@@ -32,8 +32,9 @@ export class CreateBoardDto {
   @IsString()
   description: string;
 
-  @ApiProperty({ type: [Number] })
+  @ApiProperty({ type: [Number], required: false })
+  @IsOptional()
   @IsArray()
   @IsInt({ each: true })
-  contents: number[];
+  contents?: number[];
 }

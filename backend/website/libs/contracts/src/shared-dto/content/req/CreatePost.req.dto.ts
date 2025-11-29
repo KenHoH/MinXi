@@ -34,11 +34,13 @@ export class CreatePostDto {
 
   @ApiProperty()
   @IsString()
-  thumbnail: string;
+  @IsOptional()
+  thumbnail: string | null;
 
   @ApiProperty({ type: [FileDto], isArray: true })
   @IsArray()
-  contents: FileDto[];
+  @IsOptional()
+  contents?: FileDto[];
 
   @ApiProperty()
   @IsString()

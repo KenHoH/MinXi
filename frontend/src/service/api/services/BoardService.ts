@@ -46,7 +46,7 @@ export class BoardService {
             /**
              * Content ids
              */
-            contents: Array<number>;
+            contents?: Array<number>;
         },
     ): CancelablePromise<BoardDto> {
         return __request(OpenAPI, {

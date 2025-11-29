@@ -100,14 +100,17 @@ export function PostTable({ items, onRefreshChild, onDelete }: PostTableProps) {
                     const firstFile = item.contents[0];
                     const fileType = getFileIcon(firstFile.filepath);
                     return fileType === "image" ? (
-                      <img
-                        src={firstFile.filepath}
-                        alt={item.title}
-                        className="w-full h-full object-fill"
-                        onError={(e) => {
-                          (e.target as HTMLImageElement).style.display = "none";
-                        }}
-                      />
+                      firstFile && (
+                        <img
+                          src={firstFile.filepath}
+                          alt={item.title}
+                          className="w-full h-full object-fill"
+                          onError={(e) => {
+                            (e.target as HTMLImageElement).style.display =
+                              "none";
+                          }}
+                        />
+                      )
                     ) : fileType === "video" ? (
                       <video
                         src={firstFile.filepath}

@@ -65,7 +65,27 @@ export class BoardService implements IBoardService {
 
   async create(dto: CreateBoardDto): Promise<BoardDto> {
     try {
-      const { contents, area_id, ...boardData } = dto;
+      const { contents = [], area_id, ...boardData } = dto;
+
+      if (contents.length <= 0) {
+        const board = await this.prisma.board.create({
+          data: {
+            ...boardData,
+          },
+        });
+        const boardDto: BoardDto = {
+          board_id: board.board_id,
+          title: board.title,
+          description: board.description,
+          creator_id: board.creator_id,
+          visibilityPrivate: board.visibilityPrivate,
+          created_at: board.created_at,
+          updated_at: board.updated_at,
+          board_thumbnail: board.board_thumbnail,
+          contents: [] as FullContentDto[],
+        };
+        return boardDto;
+      }
 
       const result = await this.prisma.$transaction(async (tx) => {
         const board = await tx.board.create({

@@ -45,6 +45,5 @@ export const createBoardSchema = {
     'description',
     'title',
     'visibility',
-    'contents',
   ],
 };

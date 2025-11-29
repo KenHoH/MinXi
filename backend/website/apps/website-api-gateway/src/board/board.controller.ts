@@ -107,30 +107,26 @@ export class BoardController {
         .map((item) => item.trim())
         .filter((item) => item !== '');
 
-      if (contentArray.length === 0) {
-        throw new BadRequestException('contents must have at least 1 item');
+      if (contentArray.length > 0) {
+        contents = contentArray.map((item) => {
+          const num = parseInt(item, 10);
+          if (isNaN(num)) {
+            throw new BadRequestException(
+              `Invalid content ID: "${item}" is not a number`,
+            );
+          }
+          return num;
+        });
+
+        this.logger.log(`Parsed contents: ${JSON.stringify(contents)}`);
+      } else {
+        contents = [];
       }
-
-      contents = contentArray.map((item) => {
-        const num = parseInt(item, 10);
-        if (isNaN(num)) {
-          throw new BadRequestException(
-            `Invalid content ID: "${item}" is not a number`,
-          );
-        }
-        return num;
-      });
-
-      this.logger.log(`Parsed contents: ${JSON.stringify(contents)}`);
     } else if (!Array.isArray(contents)) {
       throw new BadRequestException(
         'contents must be an array or comma-separated numbers',
       );
     } else {
-      if (contents.length === 0) {
-        throw new BadRequestException('contents must have at least 1 item');
-      }
-
       if (!contents.every((item) => typeof item === 'number')) {
         throw new BadRequestException('contents must contain only numbers');
       }

@@ -82,8 +82,8 @@ export function CreatePostModal({
   };
 
   const handleSubmit = async () => {
-    if (!title || !description || media.length === 0) {
-      showToast("Please fill in all fields and add at least one media file.");
+    if (!title || !description) {
+      showToast("Please fill in all fields.");
       return;
     }
     console.log({
@@ -94,17 +94,26 @@ export function CreatePostModal({
       creator_id: currentUserId,
     });
 
-    await create({
+    setIsSubmitting(true);
+
+    const thumbnailFile = media.length > 0 ? media[0].file : undefined;
+    const contentFiles =
+      media.length > 0 ? media.map((item) => item.file) : undefined;
+
+    const res = await create({
       area_id: currentAreaId,
       parent_id: parentPostId,
       creator_id: currentUserId,
       post_type: "post",
       title: title,
       description: description,
-      thumbnail: media[0].file,
-      contents: media.map((item) => item.file),
+      thumbnail: thumbnailFile,
+      contents: contentFiles,
       published_at: new Date().toISOString(),
     });
+
+    if (res) showToast("Post created successfully!");
+    else showToast("Failed to create post. Please try again.");
 
     resetForm();
     if (post) {

@@ -4,7 +4,7 @@ export const createContentSchema = {
     thumbnail: {
       type: 'string',
       format: 'binary',
-      description: 'Thumbnail image file (required)',
+      description: 'Thumbnail image file (required for content creation)',
     },
     contents: {
       type: 'array',
@@ -51,8 +51,6 @@ export const createContentSchema = {
     },
   },
   required: [
-    'thumbnail',
-    'contents',
     'creator_id',
     'area_id',
     'post_type',

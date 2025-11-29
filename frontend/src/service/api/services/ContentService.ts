@@ -17,13 +17,13 @@ export class ContentService {
     public static contentControllerCreate(
         formData: {
             /**
-             * Thumbnail image file (required)
+             * Thumbnail image file (required for content creation)
              */
-            thumbnail: Blob;
+            thumbnail?: Blob;
             /**
              * Content files - images or videos (1-5 files required)
              */
-            contents: Array<Blob>;
+            contents?: Array<Blob>;
             /**
              * ID of the content creator
              */
@@ -107,6 +107,22 @@ export class ContentService {
         return __request(OpenAPI, {
             method: 'GET',
             url: '/content/user/{creator_id}/all',
+            path: {
+                'creator_id': creatorId,
+            },
+        });
+    }
+    /**
+     * @param creatorId
+     * @returns FullContentDto Get all content by user (including private)
+     * @throws ApiError
+     */
+    public static contentControllerGetByUserAllPublic(
+        creatorId: number,
+    ): CancelablePromise<Array<FullContentDto>> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/content/user/{creator_id}/all/public',
             path: {
                 'creator_id': creatorId,
             },

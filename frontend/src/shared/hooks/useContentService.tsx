@@ -5,8 +5,8 @@ import type { Ack } from "../../service/api/models/Ack";
 import useApiCall from "./useApiCall";
 
 interface CreateContentFormData {
-  thumbnail: Blob;
-  contents: Array<Blob>;
+  thumbnail?: Blob;
+  contents?: Array<Blob>;
   creator_id: number;
   area_id: number;
   post_type: string;
