@@ -14,7 +14,7 @@ interface CreateBoardFormData {
   title: string;
   description: string;
   visibility: boolean;
-  contents: Array<number>;
+  contents?: Array<number>;
 }
 
 export default function useBoardService() {

@@ -127,9 +127,16 @@ export class BoardController {
         'contents must be an array or comma-separated numbers',
       );
     } else {
-      if (!contents.every((item) => typeof item === 'number')) {
-        throw new BadRequestException('contents must contain only numbers');
-      }
+      // Convert array items to numbers if they're strings
+      contents = contents.map((item) => {
+        const num = typeof item === 'string' ? parseInt(item, 10) : item;
+        if (isNaN(num)) {
+          throw new BadRequestException(
+            `Invalid content ID: "${item}" is not a number`,
+          );
+        }
+        return num;
+      });
     }
 
     const dto: CreateBoardDto = {

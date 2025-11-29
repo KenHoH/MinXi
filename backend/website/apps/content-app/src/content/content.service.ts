@@ -389,8 +389,8 @@ export class ContentService implements IContentService {
               });
 
               const thumbnail = files.find((file) => file.type === 'thumbnail');
-
-              if (!thumbnail) {
+              // For posts without thumbnail, still include them (text-only posts allowed)
+              if (!thumbnail && content.post_type !== 'post') {
                 this.logger.warn(
                   `Content ${content.content_id} missing thumbnail`,
                 );
@@ -422,13 +422,15 @@ export class ContentService implements IContentService {
                 views: content.views,
                 published_at: content.published_at,
                 visibilityPrivate: content.visibilityPrivate,
-                thumbnail: {
-                  file_id: thumbnail.file_id,
-                  filepath: thumbnail.filepath,
-                  content_id: thumbnail.content_id,
-                  content_area_id: thumbnail.content_area_id,
-                  type: thumbnail.type,
-                },
+                thumbnail: thumbnail
+                  ? {
+                      file_id: thumbnail.file_id,
+                      filepath: thumbnail.filepath,
+                      content_id: thumbnail.content_id,
+                      content_area_id: thumbnail.content_area_id,
+                      type: thumbnail.type,
+                    }
+                  : null,
                 contents: mappedFiles,
               };
 
@@ -524,7 +526,8 @@ export class ContentService implements IContentService {
             });
 
           const thumbnail = files.find((file) => file.type === 'thumbnail');
-          if (!thumbnail) {
+          // For posts without thumbnail, still allow them (text-only posts)
+          if (!thumbnail && content.post_type !== 'post') {
             throw httpToRpc(
               new HttpException('Thumbnail not found', HttpStatus.NOT_FOUND),
             );
@@ -555,13 +558,15 @@ export class ContentService implements IContentService {
             views: content.views,
             published_at: content.published_at,
             visibilityPrivate: content.visibilityPrivate,
-            thumbnail: {
-              file_id: thumbnail.file_id,
-              filepath: thumbnail.filepath,
-              content_id: thumbnail.content_id,
-              content_area_id: thumbnail.content_area_id,
-              type: thumbnail.type,
-            },
+            thumbnail: thumbnail
+              ? {
+                  file_id: thumbnail.file_id,
+                  filepath: thumbnail.filepath,
+                  content_id: thumbnail.content_id,
+                  content_area_id: thumbnail.content_area_id,
+                  type: thumbnail.type,
+                }
+              : null,
             contents: mappedFiles,
           };
 

@@ -105,6 +105,9 @@ export class BoardService implements IBoardService {
         let fullContents: FullContentDto[] = [];
         if (contents.length > 0) {
           try {
+            this.logger.debug(
+              `Fetching full content details for area_id: ${area_id}`,
+            );
             fullContents = await firstValueFrom(
               this.contentClient.send(CONTENT_MSG.findAll, area_id),
             );

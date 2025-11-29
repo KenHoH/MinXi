@@ -142,6 +142,7 @@ export function CreateContentModal({
       showToast("Failed to create content. Please try again.");
     } finally {
       setIsSubmitting(false);
+      showToast("Content created successfully!");
       resetForm();
     }
   };

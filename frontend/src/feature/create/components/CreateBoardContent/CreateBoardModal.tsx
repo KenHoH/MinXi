@@ -7,7 +7,7 @@ import { MasonrySelector } from "./MasonrySelector";
 import { SelectedItemsPreview } from "./SelectedItemsPreview";
 import { useAuthContext } from "@/feature/auth/context/AuthContext";
 import { useToast } from "@/shared/context/ToastContext";
-import type { UserDto, FileDto } from "@/service/api";
+import type { UserDto, FileDto, BoardDto } from "@/service/api";
 import useBoardService from "@/shared/hooks/useBoardService";
 import useUserService from "@/shared/hooks/useUserService";
 import useContentService from "@/shared/hooks/useContentService";
@@ -41,6 +41,7 @@ interface CreateBoardModalProps {
   isOpen: boolean;
   onClose: () => void;
   currentUserId: number;
+  onBoardCreated?: () => void;
 }
 
 type GalleryItem = (ContentGalleryItem | PostGalleryItem) & {
@@ -51,6 +52,7 @@ export function CreateBoardModal({
   isOpen,
   onClose,
   currentUserId,
+  onBoardCreated,
 }: CreateBoardModalProps) {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
@@ -130,12 +132,7 @@ export function CreateBoardModal({
     const trimmedTitle = title.trim();
     const trimmedDesc = description.trim();
 
-    if (
-      !trimmedTitle ||
-      !trimmedDesc ||
-      !thumbnail ||
-      selectedIds.length === 0
-    ) {
+    if (!trimmedTitle || !trimmedDesc || !thumbnail) {
       showToast("Please fill in all required fields.");
       return false;
     }
@@ -153,23 +150,35 @@ export function CreateBoardModal({
   const handleSubmit = async () => {
     if (isSubmitting) return;
     if (!validateForm()) return;
+    setIsSubmitting(true);
 
-    const res = await create({
+    const validContents = selectedIds.filter((id) => id && !isNaN(id));
+    // Send as comma-separated string (empty string if no contents)
+    const contentsString =
+      validContents.length > 0 ? validContents.join(",") : "";
+
+    // Create a custom payload object that will be sent to the API
+    const formDataPayload = {
       visibility: isPrivate,
-      contents: selectedIds,
       creator_id: currentUserId,
       title: title.trim(),
       description: description.trim(),
       thumbnail: thumbnail!.file,
-    });
+      area_id: loggedUserData?.area_id || undefined,
+      contents: contentsString, // Send as string, not array
+    };
+
+    const res = await create(formDataPayload as any);
 
     if (res) {
       showToast("Board created successfully!");
+
       onClose();
-      setIsSubmitting(true);
     } else {
       showToast("Failed to create board. Please try again.");
     }
+    setIsSubmitting(false);
+    onBoardCreated && onBoardCreated();
     resetForm();
   };
 
@@ -187,7 +196,7 @@ export function CreateBoardModal({
   if (!isOpen) {
     return null;
   }
-  const isFormValid = title.trim() && thumbnail && selectedItems.length > 0;
+  const isFormValid = title.trim() && thumbnail;
 
   return (
     <>

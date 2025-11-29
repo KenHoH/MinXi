@@ -10,9 +10,14 @@ import { useToast } from "@/shared/context/ToastContext";
 interface ContentTableProps {
   items: FullContentDto[];
   onDelete: (id: number) => void;
+  onRefresh?: () => void;
 }
 
-export function ContentTable({ items, onDelete }: ContentTableProps) {
+export function ContentTable({
+  items,
+  onDelete,
+  onRefresh,
+}: ContentTableProps) {
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [deletingId, setDeletingId] = useState<number | null>(null);
   const { user } = useAuthContext();
@@ -65,7 +70,10 @@ export function ContentTable({ items, onDelete }: ContentTableProps) {
       {user && (
         <CreateContentModal
           isOpen={showCreateModal}
-          onClose={() => setShowCreateModal(false)}
+          onClose={() => {
+            setShowCreateModal(false);
+            onRefresh && onRefresh();
+          }}
           currentUserId={currentUserId}
           currentAreaId={currentAreaId}
         />

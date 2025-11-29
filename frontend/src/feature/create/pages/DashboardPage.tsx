@@ -100,6 +100,7 @@ export default function CreatePage() {
               <ContentTable
                 items={contentItems}
                 onDelete={handleDeleteContent}
+                onRefresh={() => getContentByUser(user?.user_id || 0)}
               />
             )}
 
@@ -112,7 +113,13 @@ export default function CreatePage() {
             )}
 
             {activeTab === "board" && (
-              <BoardTable items={boardItems} onDelete={handleDeleteBoard} />
+              <BoardTable
+                items={boardItems}
+                onDelete={handleDeleteBoard}
+                onRefresh={() =>
+                  getBoardByUser(user?.user_id || 0, user?.area_id || 0)
+                }
+              />
             )}
           </div>
         </div>
