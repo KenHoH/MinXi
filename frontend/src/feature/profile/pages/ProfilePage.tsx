@@ -1,16 +1,16 @@
 import { useEffect, useState, useMemo } from "react";
 import { Button } from "@/components/ui/button";
-import { MoreVertical } from "lucide-react";
 import RootLayout from "@/app/LayoutPage";
 import { ContentComponent } from "@/feature/content/components/ContentComponent/ContentComponent";
 import { PostComponent } from "@/feature/content/components/PostComponent/PostComponent";
-import { useParams } from "react-router";
+import { useNavigate, useParams } from "react-router";
 import useUserService from "@/shared/hooks/useUserService";
 import useContentService from "@/shared/hooks/useContentService";
 import useBoardService from "@/shared/hooks/useBoardService";
 import { useAuthContext } from "@/feature/auth/context/AuthContext";
 import type { BoardDto, FullContentDto, UserDto } from "@/service/api";
 import UserNotFoundPage from "@/feature/not-found/UserNotFoundPage";
+import { useToast } from "@/shared/context/ToastContext";
 
 export default function ProfilePage() {
   const { user } = useAuthContext();
@@ -20,6 +20,8 @@ export default function ProfilePage() {
   const { getPinnedByUser, getLikedByUser, getByUserAll, getByUser } =
     useContentService();
   const { getBoardByUser, getContentByBoardId } = useBoardService();
+  const { showToast } = useToast();
+  const navigate = useNavigate();
 
   const [loggedUserData, setLoggedUserData] = useState<UserDto | null>(null);
   const [creatorUserData, setCreatorUserData] = useState<UserDto | null>(null);
@@ -31,7 +33,23 @@ export default function ProfilePage() {
   const [boards, setBoards] = useState<BoardDto[] | []>([]);
   const [boardItems, setBoardItems] = useState<FullContentDto[] | []>([]);
 
+  const goToSettings = () => {
+    if (!loggedUserData) return;
+    navigate(`https://localhost:5173/settings/${loggedUserData.username}`);
+  };
+
   const [activeTab, setActiveTab] = useState("");
+  const handleShare = async () => {
+    if (!creatorUserData) return;
+    const link = `https://localhost:5173/profile/${creatorUserData.username}`;
+
+    try {
+      await navigator.clipboard.writeText(link);
+      showToast("Link copied to clipboard!");
+    } catch (err) {
+      showToast("Failed to copy link");
+    }
+  };
 
   useEffect(() => {
     const loadLoggedUser = async () => {
@@ -218,7 +236,6 @@ export default function ProfilePage() {
                       <h1 className="text-2xl font-bold">
                         {creatorUserData.username}
                       </h1>
-                      <MoreVertical className="w-5 h-5 text-muted-foreground" />
                     </div>
                     <p className="text-sm text-foreground/60 max-w-md">
                       {creatorUserData.desc}
@@ -244,8 +261,12 @@ export default function ProfilePage() {
                       </div>
                     </div>
                     <div className="flex gap-3 mt-4">
-                      <Button>Edit Profile</Button>
-                      <Button variant="outline">Share</Button>
+                      {owned && (
+                        <Button onClick={goToSettings}>Edit Profile</Button>
+                      )}
+                      <Button onClick={handleShare} variant="outline">
+                        Share
+                      </Button>
                     </div>
                   </>
                 ) : (

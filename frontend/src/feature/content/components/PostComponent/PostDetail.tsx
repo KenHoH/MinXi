@@ -65,6 +65,8 @@ export function PostDetailComponent({
     getAncestorPost,
     getChildPost,
   } = useContentService();
+  const { updateLikeUser, updateFollowUser, updateReportUser } =
+    useUserService();
   const { checkFollow, createFollow, deleteFollow } = useConnectionService();
 
   const handlePrevMedia = () => {
@@ -121,8 +123,10 @@ export function PostDetailComponent({
     try {
       if (isFollowing) {
         await deleteFollow(post.creator_id, user.user_id);
+        await updateFollowUser(post.creator_id, { delta: -1 });
       } else {
         await createFollow(post.creator_id, user.user_id);
+        await updateFollowUser(post.creator_id, { delta: 1 });
       }
     } catch (error) {
       console.error("Failed to handle follow:", error);
@@ -137,6 +141,7 @@ export function PostDetailComponent({
         await updateLike(post.content_id, userData?.area_id || 0, {
           delta: newLiked ? 1 : -1,
         });
+        await updateLikeUser(post.creator_id, { delta: newLiked ? 1 : -1 });
         setLiked(newLiked);
         setTotalLikes((prev) => prev + (newLiked ? 1 : -1));
         await upsert({
@@ -208,6 +213,11 @@ export function PostDetailComponent({
     } catch (error) {
       console.error("Failed to fetch user data:", error);
     }
+  };
+
+  const updateReport = async (delta: boolean) => {
+    if (!user) return;
+    await updateReportUser(post.creator_id, { delta: delta ? 1 : -1 });
   };
 
   useEffect(() => {
@@ -404,6 +414,7 @@ export function PostDetailComponent({
         loggedUserData={userData}
         onReportSuccess={() => {
           setReported(true);
+          updateReport(true);
         }}
       />
 

@@ -2,6 +2,7 @@ import { UserService } from "../../service/api/services/UserService";
 import type { CreateUserDto } from "../../service/api/models/CreateUserDto";
 import type { Ack } from "../../service/api/models/Ack";
 import useApiCall from "./useApiCall";
+import type { deltaDto } from "@/service/api";
 
 export default function useUserService() {
   const { call, data, loading, error } = useApiCall();
@@ -27,11 +28,45 @@ export default function useUserService() {
       })
     );
 
+  const updateLikeUser = (id: number, req: deltaDto) =>
+    call(() => UserService.userControllerUpdateLike(id, req));
+
+  const updateFollowUser = (id: number, req: deltaDto) =>
+    call(() => UserService.userControllerUpdateFollow(id, req));
+
+  const updateReportUser = (id: number, req: deltaDto) =>
+    call(() => UserService.userControllerUpdateReport(id, req));
+
+  const updatePrivacySettings = (
+    id: number,
+    content_visibility: boolean,
+    liked_visibility: boolean,
+    pinned_visibility: boolean
+  ) =>
+    call(() =>
+      UserService.userControllerUpdateRestriction(id, {
+        content_visibility,
+        liked_visibility,
+        pinned_visibility,
+      })
+    );
+
+  const update = (formData: {
+    profile: Blob;
+    creator_id: number;
+    description: string;
+  }) => call(() => UserService.userControllerUpdate(formData));
+
   return {
     create,
     findUserById,
     findByUsername,
     findOneByUsername,
+    updateLikeUser,
+    updateFollowUser,
+    updateReportUser,
+    updatePrivacySettings,
+    update,
     result: data,
     loading,
     error,

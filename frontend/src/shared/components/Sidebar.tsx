@@ -10,11 +10,15 @@ import {
 import { Link } from "react-router-dom";
 import { useAuthContext } from "@/feature/auth/context/AuthContext";
 import { useToast } from "../context/ToastContext";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+import useUserService from "../hooks/useUserService";
+import type { UserDto } from "@/service/api";
 
 export function Sidebar() {
   const { user, logout } = useAuthContext();
+  const { findOneByUsername } = useUserService();
   const { showToast } = useToast();
+  const [loggedUserData, setLoggedUserData] = useState<UserDto | null>(null);
   const dynamicNavItems = [
     { href: "/feed", label: "Home", icon: Home },
     { href: "/search", label: "Search", icon: Search },
@@ -43,6 +47,15 @@ export function Sidebar() {
     window.location.href = "/login";
   };
 
+  useEffect(() => {
+    if (!user) return;
+    const fetchUserData = async () => {
+      const userData = await findOneByUsername(user.username, user.area_id);
+      setLoggedUserData(userData);
+    };
+    fetchUserData();
+  }, [user]);
+
   const userInitials =
     user?.username
       ?.split(" ")
@@ -56,7 +69,14 @@ export function Sidebar() {
       <div className="border-b border-dark-700 p-4">
         <div className="flex flex-col items-center gap-2">
           <div className="w-12 h-12 rounded-full bg-linear-to-br from-burgundy-500 to-burgundy-700 flex items-center justify-center shrink-0 border-2 border-burgundy-400">
-            <span className="text-white text-xs font-bold">{userInitials}</span>
+            <img
+              className="rounded-full"
+              src={
+                loggedUserData?.profile_picture ||
+                "http://localhost:3000/uploads/profile/1763906830326-69740177.png"
+              }
+              alt="Profile"
+            />
           </div>
           <div className="text-center">
             <p className="text-[10px] text-gray-400">
@@ -85,7 +105,7 @@ export function Sidebar() {
 
       <div className="border-t border-dark-700 p-3 flex flex-col gap-2">
         <Link
-          to="/settings"
+          to={user ? `/settings/${user.username}` : "/login"}
           className="flex items-center justify-center w-12 h-12 rounded-lg text-gray-400 hover:bg-red-900/30 hover:text-red-400 hover:shadow-lg hover:shadow-red-500/30 transition-all duration-300"
           title="Settings"
         >

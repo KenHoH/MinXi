@@ -36,6 +36,8 @@ export function ContentDetailComponent({
   // ============ AUTH & CONTEXT ============
   const { user } = useAuthContext();
   const { showToast } = useToast();
+  const { updateFollowUser, updateLikeUser, updateReportUser } =
+    useUserService();
 
   // ============ UI STATE ============
   const [currentMediaIndex, setCurrentMediaIndex] = useState(0);
@@ -171,8 +173,10 @@ export function ContentDetailComponent({
 
     if (delta == false) {
       await createFollow(content.creator_id, user.user_id);
+      await updateFollowUser(content.creator_id, { delta: 1 });
     } else {
       await deleteFollow(content.creator_id, user.user_id);
+      await updateFollowUser(content.creator_id, { delta: -1 });
     }
   };
 
@@ -184,6 +188,7 @@ export function ContentDetailComponent({
         await updateLike(content.content_id, loggedUserData?.area_id || 0, {
           delta: newLiked ? 1 : -1,
         });
+        await updateLikeUser(content.creator_id, { delta: newLiked ? 1 : -1 });
         setLiked(newLiked);
         setTotalLikes((prev) => prev + (newLiked ? 1 : -1));
         await upsert({
@@ -208,6 +213,9 @@ export function ContentDetailComponent({
       case 3: {
         const newReport = !reported;
         await updateReport(content.content_id, loggedUserData?.area_id || 0, {
+          delta: newReport ? 1 : -1,
+        });
+        await updateReportUser(content.creator_id, {
           delta: newReport ? 1 : -1,
         });
         setReported(newReport);
