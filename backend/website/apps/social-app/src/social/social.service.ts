@@ -15,6 +15,7 @@ import { UpdateParticipantRoleDto } from '@app/contracts/shared-dto/social/reque
 import { MessageResponseDto } from '@app/contracts/shared-dto/social/response/messageResDTO';
 import { ParticipantResponseDto } from '@app/contracts/shared-dto/social/response/participantDTO';
 import { RoomResponseDto } from '@app/contracts/shared-dto/social/response/RoomResDTO';
+import { RoomResDmDto } from '@app/contracts/shared-dto/social/response/RoomResDmDTO';
 import { ParticipantTotalResDTO } from '@app/contracts/shared-dto/social/response/totalParticipantResDTO';
 import {
   HttpException,
@@ -31,51 +32,72 @@ import { mapRoomToResponse } from './utils/mapToRoom';
 import { httpToRpc } from '@app/common/utils/httpToRpc';
 import { mapParticipantToResponse } from './utils/mapToParticipant';
 import { mapMessageToResponse } from './utils/mapToMessage';
+import { Ack } from '@app/contracts/shared-dto/ack.dto';
+import { USER_SERVICES } from '@app/common/constants/services';
+import { ClientProxy } from '@nestjs/microservices';
+import { firstValueFrom } from 'rxjs';
+import { USER_MSG } from '@app/common/constants/messageEvent';
+import { UserDto } from '@app/contracts/shared-dto/user/user.dto';
 
 @Injectable()
 export class SocialService implements ISocialService {
   constructor(
     private readonly socialClient: SocialDatabaseConnection,
     private readonly messageClient: MessageDatabaseConnection,
+    @Inject(USER_SERVICES.CLIENT) private readonly userClient: ClientProxy,
   ) {}
   logger = new Logger(SocialService.name);
 
   async createRoom(dto: CreateRoomDto): Promise<RoomResponseDto> {
     this.logger.log(`Creating room with dto: ${JSON.stringify(dto)}`);
+
     try {
-      if (dto.type === RoomType.DIRECT && dto.userIds.length === 2) {
+      const { type, userIds, ownerId } = dto;
+
+      if (type === RoomType.DIRECT && userIds.length === 2) {
         const existingRoom = await this.findDM({
-          targetUserId: dto.userIds[1],
-          userId: dto.userIds[0],
+          userId: userIds[0],
+          targetUserId: userIds[1],
         }).catch(() => null);
 
         if (existingRoom) return existingRoom;
       }
-      let roomType: RoomType = dto.type;
-      if (dto.userIds.length <= 2) roomType = RoomType.DIRECT;
+
+      let roomType: RoomType = type;
+      if (type === RoomType.DIRECT && userIds.length !== 2) {
+        throw new HttpException(
+          'DIRECT room must have exactly 2 users',
+          HttpStatus.BAD_REQUEST,
+        );
+      }
+
       const room = await this.socialClient.room.create({
-        data: { name: dto.name, type: roomType, pictureUrl: dto.pictureUrl },
+        data: {
+          name: dto.name,
+          type: roomType,
+          pictureUrl: dto.pictureUrl || '',
+        },
       });
 
-      if (dto.ownerId) {
-        await this.socialClient.participant.create({
-          data: {
-            roomId: room.id,
-            userId: dto.ownerId,
-            role: ParticipantRole.OWNER,
-          },
-        });
+      const participants = new Map<number, ParticipantRole>();
+
+      if (ownerId) {
+        participants.set(ownerId, ParticipantRole.OWNER);
       }
 
-      for (const id of dto.userIds) {
-        await this.socialClient.participant.create({
-          data: {
-            roomId: room.id,
-            userId: id,
-            role: ParticipantRole.MEMBER,
-          },
-        });
+      for (const id of userIds) {
+        if (!participants.has(id)) {
+          participants.set(id, ParticipantRole.MEMBER);
+        }
       }
+
+      await this.socialClient.participant.createMany({
+        data: Array.from(participants.entries()).map(([userId, role]) => ({
+          userId,
+          role,
+          roomId: room.id,
+        })),
+      });
 
       return mapRoomToResponse(room);
     } catch (error: any) {
@@ -327,35 +349,92 @@ export class SocialService implements ISocialService {
     }
   }
 
-  async findDM(dto: FindDmDto): Promise<RoomResponseDto> {
+  async deleteMessageByRoom(roomId: string): Promise<Ack> {
     try {
-      const currentUserRooms = await this.socialClient.participant.findMany({
-        where: { userId: dto.userId },
-        select: { roomId: true },
+      await this.messageClient.message.deleteMany({
+        where: { roomId: roomId },
       });
 
-      const currentIds = currentUserRooms.map((p) => p.roomId);
+      return { Valid: true, Msg: 'Messages deleted successfully' };
+    } catch (error: any) {
+      throw httpToRpc(
+        new HttpException(
+          'Failed to delete messages',
+          HttpStatus.INTERNAL_SERVER_ERROR,
+        ),
+      );
+    }
+  }
 
-      if (currentIds.length === 0) {
+  async delete(id: string): Promise<Ack> {
+    try {
+      await this.messageClient.message.delete({
+        where: { id: id },
+      });
+
+      return { Valid: true, Msg: 'Message deleted successfully' };
+    } catch (error: any) {
+      throw httpToRpc(
+        new HttpException(
+          'Failed to delete message',
+          HttpStatus.INTERNAL_SERVER_ERROR,
+        ),
+      );
+    }
+  }
+
+  async deleteRoom(roomId: string): Promise<Ack> {
+    try {
+      await this.socialClient.$transaction(async (tx) => {
+        await tx.participant.deleteMany({
+          where: { roomId: roomId },
+        });
+
+        await tx.room.delete({
+          where: { id: roomId },
+        });
+      });
+
+      await this.messageClient.message.deleteMany({
+        where: { roomId: roomId },
+      });
+
+      return { Valid: true, Msg: 'Room deleted successfully' };
+    } catch (error: any) {
+      throw httpToRpc(
+        new HttpException(
+          error?.message || 'Failed to delete room',
+          HttpStatus.INTERNAL_SERVER_ERROR,
+        ),
+      );
+    }
+  }
+
+  async findDM(dto: FindDmDto): Promise<RoomResponseDto> {
+    try {
+      const { userId, targetUserId } = dto;
+
+      const rooms = await this.socialClient.participant.groupBy({
+        by: ['roomId'],
+        where: {
+          userId: { in: [userId, targetUserId] },
+        },
+        _count: { userId: true },
+      });
+
+      const sharedRoomIds = rooms
+        .filter((r) => r._count.userId === 2)
+        .map((r) => r.roomId);
+
+      if (sharedRoomIds.length === 0) {
         throw new HttpException('DM room not found', HttpStatus.NOT_FOUND);
       }
 
-      const targetUserRooms = await this.socialClient.participant.findMany({
-        where: { userId: dto.targetUserId, roomId: { in: currentIds } },
-        select: { roomId: true },
-      });
-
-      const sharedIds = targetUserRooms.map((p) => p.roomId);
-
-      if (sharedIds.length === 0) {
-        throw new HttpException(
-          'DM room not found between users',
-          HttpStatus.NOT_FOUND,
-        );
-      }
-
       const room = await this.socialClient.room.findFirst({
-        where: { id: { in: sharedIds }, type: RoomType.DIRECT },
+        where: {
+          id: { in: sharedRoomIds },
+          type: RoomType.DIRECT,
+        },
       });
 
       if (!room) {
@@ -371,6 +450,173 @@ export class SocialService implements ISocialService {
               'Failed to find DM',
               HttpStatus.INTERNAL_SERVER_ERROR,
             ),
+      );
+    }
+  }
+
+  // ============ DM SECTION ============
+  async getRoomDMByUserId(userId: number): Promise<RoomResDmDto[]> {
+    try {
+      const userParticipants = await this.socialClient.participant.findMany({
+        where: { userId },
+        select: { roomId: true },
+      });
+
+      const roomIds = userParticipants.map((p) => p.roomId);
+
+      if (roomIds.length === 0) return [];
+
+      const rooms = await this.socialClient.room.findMany({
+        where: {
+          id: { in: roomIds },
+          type: RoomType.DIRECT,
+        },
+      });
+
+      const dmRooms: RoomResDmDto[] = [];
+
+      for (const room of rooms) {
+        const participants = await this.socialClient.participant.findMany({
+          where: { roomId: room.id },
+        });
+
+        const participantDetails: UserDto[] = [];
+        let failed = false;
+
+        for (const participant of participants) {
+          try {
+            const user = await firstValueFrom(
+              this.userClient.send<UserDto>(
+                USER_MSG.findOneById,
+                participant.userId,
+              ),
+            );
+
+            if (!user) {
+              failed = true;
+              break;
+            }
+
+            participantDetails.push(user);
+          } catch (err) {
+            failed = true;
+            break;
+          }
+        }
+
+        if (failed) {
+          continue;
+        }
+
+        dmRooms.push({
+          ...mapRoomToResponse(room),
+          participants: participantDetails,
+        });
+      }
+
+      return dmRooms;
+    } catch (error) {
+      throw httpToRpc(
+        new HttpException(
+          'Failed to fetch DM rooms',
+          HttpStatus.INTERNAL_SERVER_ERROR,
+        ),
+      );
+    }
+  }
+
+  // ============ GROUP SECTION ============
+  async getRoomGroupJoinedByUserId(userId: number): Promise<RoomResponseDto[]> {
+    this.logger.log(`Fetching DM rooms for userId: ${userId}`);
+    try {
+      const participants = await this.socialClient.participant.findMany({
+        where: { userId: userId },
+        select: { roomId: true },
+      });
+
+      const roomIds = participants.map((p) => p.roomId);
+
+      const groupRooms = await this.socialClient.room.findMany({
+        where: {
+          id: { in: roomIds },
+          type: RoomType.GROUP,
+        },
+      });
+
+      return groupRooms.map(mapRoomToResponse);
+    } catch (error: any) {
+      throw httpToRpc(
+        new HttpException(
+          'Failed to fetch group rooms joined by user',
+          HttpStatus.INTERNAL_SERVER_ERROR,
+        ),
+      );
+    }
+  }
+
+  async getRoomGroupAll(): Promise<RoomResponseDto[]> {
+    this.logger.log(`Fetching all group rooms`);
+    try {
+      const groupRooms = await this.socialClient.room.findMany({
+        where: { type: RoomType.GROUP },
+      });
+
+      return groupRooms.map(mapRoomToResponse);
+    } catch (error: any) {
+      throw httpToRpc(
+        new HttpException(
+          'Failed to fetch all group rooms',
+          HttpStatus.INTERNAL_SERVER_ERROR,
+        ),
+      );
+    }
+  }
+
+  // ============ COMMUNITY SECTION ============
+  async getRoomCommunityJoinedByUserId(
+    userId: number,
+  ): Promise<RoomResponseDto[]> {
+    this.logger.log(`Fetching community rooms for userId: ${userId}`);
+    try {
+      const participants = await this.socialClient.participant.findMany({
+        where: { userId: userId },
+        select: { roomId: true },
+      });
+
+      const roomIds = participants.map((p) => p.roomId);
+
+      const communityRooms = await this.socialClient.room.findMany({
+        where: {
+          id: { in: roomIds },
+          type: RoomType.COMMUNITY,
+        },
+      });
+
+      return communityRooms.map(mapRoomToResponse);
+    } catch (error: any) {
+      throw httpToRpc(
+        new HttpException(
+          'Failed to fetch community rooms joined by user',
+          HttpStatus.INTERNAL_SERVER_ERROR,
+        ),
+      );
+    }
+  }
+
+  async getRoomCommunityAll(): Promise<RoomResponseDto[]> {
+    this.logger.log(`Fetching all community rooms`);
+    try {
+      const communityRooms = await this.socialClient.room.findMany({
+        where: { type: RoomType.COMMUNITY },
+      });
+
+      return communityRooms.map(mapRoomToResponse);
+    } catch (error: any) {
+      throw httpToRpc(
+        new HttpException(
+          'Failed to fetch all community rooms',
+          HttpStatus.INTERNAL_SERVER_ERROR,
+        ),
       );
     }
   }

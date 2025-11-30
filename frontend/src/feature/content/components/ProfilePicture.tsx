@@ -1,5 +1,6 @@
 import type { UserDto } from "@/service/api";
 import { useState } from "react";
+import { useNavigate } from "react-router";
 
 interface ProfilePictureProps {
   creator: UserDto | null;
@@ -12,8 +13,7 @@ export function ProfilePicture({
   size = "md",
   clickable = true,
 }: ProfilePictureProps) {
-  const [showProfileModal, setShowProfileModal] = useState(false);
-
+  const navigate = useNavigate();
   const sizeClasses = {
     sm: "w-8 h-8",
     md: "w-12 h-12",
@@ -31,16 +31,10 @@ export function ProfilePicture({
         className={`${sizeClasses[size]} rounded-full ${
           clickable ? "cursor-pointer hover:opacity-80 transition-opacity" : ""
         }`}
-        onClick={() => clickable && setShowProfileModal(true)}
+        onClick={() =>
+          clickable && navigate(`/profile/${creator?.username ?? ""}`)
+        }
       />
-
-      {/* Profile Modal */}
-      {/* {showProfileModal && (
-        <ProfileModal
-          creator_id={creator_id}
-          onClose={() => setShowProfileModal(false)}
-        />
-      )} */}
     </>
   );
 }

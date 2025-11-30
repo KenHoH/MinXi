@@ -4,6 +4,7 @@ import { useLoading } from "../../../shared/context/LoadingContext";
 import type { CredentialRes } from "@/service/api/models/CredentialRes";
 import type { LoginDto, LogoutRequest } from "@/service/api";
 import { AuthService, UserService } from "@/service/api";
+import { useNavigate } from "react-router";
 
 interface AuthContextType {
   user: CredentialRes | null;
@@ -47,6 +48,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     getUserData();
   }, []);
 
+  const navigate = useNavigate();
+
   const login = async (dto: LoginDto): Promise<CredentialRes | null> => {
     showLoading();
     try {
@@ -67,6 +70,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       return null;
     } finally {
       hideLoading();
+      navigate("/feed");
     }
   };
 

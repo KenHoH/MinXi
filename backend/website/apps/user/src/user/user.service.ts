@@ -266,4 +266,17 @@ export class UserService implements IUserService {
       );
     }
   }
+  async findOneById(id: number): Promise<UserDto> {
+    try {
+      const user = await this.repo.findOne(id);
+      if (!user) {
+        throw httpToRpc(new NotFoundException('User not found'));
+      }
+      return mapToDto(user);
+    } catch (error) {
+      throw httpToRpc(
+        new HttpException('Failed to find user', HttpStatus.BAD_REQUEST),
+      );
+    }
+  }
 }

@@ -68,6 +68,12 @@ export class UserController {
     return this.userService.findOne(+id);
   }
 
+  @Get('/user/full/:id')
+  @Public()
+  findOneById(@Param('id', ParseIntPipe) id: number): Promise<UserDto> {
+    return this.userService.findOneById(+id);
+  }
+
   @Patch(':id/profile')
   @ApiConsumes('multipart/form-data')
   @ApiBody({

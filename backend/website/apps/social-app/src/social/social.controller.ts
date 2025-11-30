@@ -69,6 +69,21 @@ export class SocialController {
     return this.socialService.getMessage(dto);
   }
 
+  @MessagePattern(SOCIAL_MSG.deleteMessageByRoom)
+  async deleteMessageByRoom(@Payload() roomId: string) {
+    return this.socialService.deleteMessageByRoom(roomId);
+  }
+
+  @MessagePattern(SOCIAL_MSG.deleteMessage)
+  async deleteMessage(@Payload() id: string) {
+    return this.socialService.delete(id);
+  }
+
+  @MessagePattern(SOCIAL_MSG.deleteRoom)
+  async deleteRoom(@Payload() roomId: string) {
+    return this.socialService.deleteRoom(roomId);
+  }
+
   @MessagePattern(SOCIAL_MSG.findDM)
   async findDM(@Payload() dto: FindDmDto) {
     return this.socialService.findDM(dto);
@@ -77,5 +92,30 @@ export class SocialController {
   @MessagePattern(SOCIAL_MSG.getMedia)
   async getMedia(@Payload() dto: GetMediaDto) {
     return this.socialService.getMedia(dto);
+  }
+
+  @MessagePattern(SOCIAL_MSG.getRoomDMByUserId)
+  async getRoomDMByUserId(@Payload() userId: number) {
+    return this.socialService.getRoomDMByUserId(userId);
+  }
+
+  @MessagePattern(SOCIAL_MSG.getRoomGroupJoinedByUserId)
+  async getRoomGroupJoinedByUserId(@Payload() userId: number) {
+    return this.socialService.getRoomGroupJoinedByUserId(userId);
+  }
+
+  @MessagePattern(SOCIAL_MSG.getRoomGroupAll)
+  async getRoomGroupAll() {
+    return this.socialService.getRoomGroupAll();
+  }
+
+  @MessagePattern(SOCIAL_MSG.getRoomCommunityJoinedByUserId)
+  async getRoomCommunityJoinedByUserId(@Payload() userId: number) {
+    return this.socialService.getRoomCommunityJoinedByUserId(userId);
+  }
+
+  @MessagePattern(SOCIAL_MSG.getRoomCommunityAll)
+  async getRoomCommunityAll() {
+    return this.socialService.getRoomCommunityAll();
   }
 }

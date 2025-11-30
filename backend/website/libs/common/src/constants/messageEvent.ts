@@ -10,6 +10,7 @@ export const USER_MSG = {
   updateReport: 'user.updateReport',
   findByName: 'user.findByName',
   findOneByName: 'user.findOneByName',
+  findOneById: 'user.findOneById',
 };
 
 export const AUTH_MSG = {
@@ -118,8 +119,16 @@ export const SOCIAL_MSG = {
 
   findDM: 'social.findDM',
   getAllDM: 'social.getAllDM',
+  getRoomDMByUserId: 'social.getRoomDMByUserId',
+  getRoomGroupJoinedByUserId: 'social.getRoomGroupJoinedByUserId',
+  getRoomGroupAll: 'social.getRoomGroupAll',
+  getRoomCommunityJoinedByUserId: 'social.getRoomCommunityJoinedByUserId',
+  getRoomCommunityAll: 'social.getRoomCommunityAll',
 
   getMedia: 'social.getMedia',
+  deleteMessageByRoom: 'social.deleteMessageByRoom',
+  deleteMessage: 'social.deleteMessage',
+  deleteRoom: 'social.deleteRoom',
 };
 export const COMMENT_MSG = {
   create: 'comment.create',

@@ -69,4 +69,8 @@ export class UserController {
   async findOneByName(@Payload() dto: NameRequest) {
     return this.userService.findOneByName(dto);
   }
+  @MessagePattern(USER_MSG.findOneById)
+  async findOneById(@Payload() id: number) {
+    return this.userService.findOneById(id);
+  }
 }

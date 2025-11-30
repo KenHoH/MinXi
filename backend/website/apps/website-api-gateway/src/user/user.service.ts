@@ -85,4 +85,7 @@ export class UserService implements IUserService {
   async findOneByName(dto: NameRequest): Promise<UserDto> {
     return firstValueFrom(this.userClient.send(USER_MSG.findOneByName, dto));
   }
+  async findOneById(id: number): Promise<UserDto> {
+    return firstValueFrom(this.userClient.send(USER_MSG.findOneById, id));
+  }
 }

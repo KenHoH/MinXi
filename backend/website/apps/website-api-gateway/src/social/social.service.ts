@@ -1,6 +1,7 @@
 import { SOCIAL_MSG } from '@app/common/constants/messageEvent';
 import { SOCIAL_SERVICES } from '@app/common/constants/services';
 import { ISocialService } from '@app/contracts/interfaces/app/ISocialService';
+import { Ack } from '@app/contracts/shared-dto/ack.dto';
 import { AddUserToRoomDto } from '@app/contracts/shared-dto/social/request/addUserToRoomDTO';
 import { CreateRoomDto } from '@app/contracts/shared-dto/social/request/createRoomDTO';
 import { FindDmDto } from '@app/contracts/shared-dto/social/request/findDMDTO';
@@ -15,6 +16,7 @@ import { UpdateParticipantRoleDto } from '@app/contracts/shared-dto/social/reque
 import { MessageResponseDto } from '@app/contracts/shared-dto/social/response/messageResDTO';
 import { ParticipantResponseDto } from '@app/contracts/shared-dto/social/response/participantDTO';
 import { RoomResponseDto } from '@app/contracts/shared-dto/social/response/RoomResDTO';
+import { RoomResDmDto } from '@app/contracts/shared-dto/social/response/RoomResDmDTO';
 import { ParticipantTotalResDTO } from '@app/contracts/shared-dto/social/response/totalParticipantResDTO';
 import { Inject, Injectable, Logger } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
@@ -81,7 +83,49 @@ export class SocialService implements ISocialService {
     return firstValueFrom(this.client.send(SOCIAL_MSG.getMessage, dto));
   }
 
+  async deleteMessageByRoom(roomId: string): Promise<Ack> {
+    return firstValueFrom(
+      this.client.send(SOCIAL_MSG.deleteMessageByRoom, roomId),
+    );
+  }
+
+  async delete(id: string): Promise<Ack> {
+    return firstValueFrom(this.client.send(SOCIAL_MSG.deleteMessage, id));
+  }
+
+  async deleteRoom(roomId: string): Promise<Ack> {
+    return firstValueFrom(this.client.send(SOCIAL_MSG.deleteRoom, roomId));
+  }
+
   async findDM(dto: FindDmDto): Promise<RoomResponseDto> {
     return firstValueFrom(this.client.send(SOCIAL_MSG.findDM, dto));
+  }
+
+  async getRoomDMByUserId(userId: number): Promise<RoomResDmDto[]> {
+    return firstValueFrom(
+      this.client.send(SOCIAL_MSG.getRoomDMByUserId, userId),
+    );
+  }
+
+  async getRoomGroupJoinedByUserId(userId: number): Promise<RoomResponseDto[]> {
+    return firstValueFrom(
+      this.client.send(SOCIAL_MSG.getRoomGroupJoinedByUserId, userId),
+    );
+  }
+
+  async getRoomGroupAll(): Promise<RoomResponseDto[]> {
+    return firstValueFrom(this.client.send(SOCIAL_MSG.getRoomGroupAll, {}));
+  }
+
+  async getRoomCommunityJoinedByUserId(
+    userId: number,
+  ): Promise<RoomResponseDto[]> {
+    return firstValueFrom(
+      this.client.send(SOCIAL_MSG.getRoomCommunityJoinedByUserId, userId),
+    );
+  }
+
+  async getRoomCommunityAll(): Promise<RoomResponseDto[]> {
+    return firstValueFrom(this.client.send(SOCIAL_MSG.getRoomCommunityAll, {}));
   }
 }

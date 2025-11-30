@@ -7,18 +7,36 @@ import {
   FriendDto,
   FollowingDto,
 } from '@app/contracts/shared-dto/connection/response';
-import { HttpException, HttpStatus, Injectable, Logger } from '@nestjs/common';
+import {
+  HttpException,
+  HttpStatus,
+  Inject,
+  Injectable,
+  Logger,
+} from '@nestjs/common';
 import {
   mapFollowerToDto,
   mapFriendToDto,
   mapFollowingToDto,
 } from './utils/mapToDTO';
+import { SOCIAL_SERVICES } from '@app/common/constants/services';
+import { ClientProxy } from '@nestjs/microservices/client/client-proxy';
+import { firstValueFrom } from 'rxjs';
+import { SOCIAL_MSG } from '@app/common/constants/messageEvent';
+import { FindDmDto } from '@app/contracts/shared-dto/social/request/findDMDTO';
+import {
+  CreateRoomDto,
+  RoomType,
+} from '@app/contracts/shared-dto/social/request/createRoomDTO';
 
 @Injectable()
 export class ConnectionService implements IConnectionService {
   private readonly logger = new Logger(ConnectionService.name);
 
-  constructor(private readonly prisma: UserDatabaseConnection) {}
+  constructor(
+    private readonly prisma: UserDatabaseConnection,
+    @Inject(SOCIAL_SERVICES.CLIENT) private readonly socialClient: ClientProxy,
+  ) {}
 
   async createFollow(creator_id: number, follower_id: number): Promise<Ack> {
     try {
@@ -53,6 +71,14 @@ export class ConnectionService implements IConnectionService {
         );
         try {
           await this.createFriend(creator_id, follower_id);
+
+          const dto: CreateRoomDto = {
+            type: RoomType.DIRECT,
+            userIds: [creator_id, follower_id],
+          };
+          await firstValueFrom(
+            this.socialClient.send(SOCIAL_MSG.createRoom, dto),
+          );
         } catch (friendError) {
           this.logger.warn(
             `Friendship already exists between ${creator_id} and ${follower_id}`,
