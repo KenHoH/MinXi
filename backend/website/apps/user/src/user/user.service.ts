@@ -249,4 +249,21 @@ export class UserService implements IUserService {
       );
     }
   }
+
+  async findOneByName(dto: NameRequest): Promise<UserDto> {
+    this.logger.log('findOneByName dto:', dto);
+    this.logger.log('findOneByName name:', dto.name);
+    this.logger.log('findOneByName area_id:', dto.area_id);
+    try {
+      const user = await this.repo.findOneByName(dto.name, dto.area_id);
+      if (!user) {
+        throw httpToRpc(new NotFoundException('User not found'));
+      }
+      return mapToDto(user);
+    } catch (error) {
+      throw httpToRpc(
+        new HttpException('Failed to find user', HttpStatus.BAD_REQUEST),
+      );
+    }
+  }
 }

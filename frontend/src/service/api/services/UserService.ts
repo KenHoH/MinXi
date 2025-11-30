@@ -202,4 +202,19 @@ export class UserService {
             mediaType: 'application/json',
         });
     }
+    /**
+     * @param requestBody
+     * @returns UserDto
+     * @throws ApiError
+     */
+    public static userControllerFindOneByName(
+        requestBody: NameRequest,
+    ): CancelablePromise<UserDto> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/user/one/name',
+            body: requestBody,
+            mediaType: 'application/json',
+        });
+    }
 }

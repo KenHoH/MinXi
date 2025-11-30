@@ -9,6 +9,7 @@ export const USER_MSG = {
   updateLike: 'user.updateLike',
   updateReport: 'user.updateReport',
   findByName: 'user.findByName',
+  findOneByName: 'user.findOneByName',
 };
 
 export const AUTH_MSG = {

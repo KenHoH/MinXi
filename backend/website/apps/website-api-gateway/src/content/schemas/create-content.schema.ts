@@ -39,6 +39,11 @@ export const createContentSchema = {
       description: 'Content description',
       example: 'This is a great content',
     },
+    visibilityPrivate: {
+      type: 'boolean',
+      description: 'Visibility of the content (private or not)',
+      example: false,
+    },
     parent_id: {
       type: 'number',
       description: 'Parent content ID (optional)',

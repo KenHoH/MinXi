@@ -130,4 +130,15 @@ export class Repository {
       },
     });
   }
+  async findOneByName(name: string, area_id: number) {
+    this.logger.log(name);
+    return await this.prisma.user.findUnique({
+      where: {
+        username_area_id: {
+          username: name,
+          area_id: area_id,
+        },
+      },
+    });
+  }
 }

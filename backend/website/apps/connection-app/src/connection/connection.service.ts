@@ -318,9 +318,11 @@ export class ConnectionService implements IConnectionService {
       });
 
       const isFriend = await this.checkFriendMutual(creator_id, follower_id);
-      const stillMutualFollow = await this.checkFollow(follower_id, creator_id);
 
-      if (isFriend && !stillMutualFollow) {
+      this.logger.log(
+        `Checking friendship status between ${creator_id} and ${follower_id} after follow removal`,
+      );
+      if (isFriend) {
         this.logger.log(
           `Mutual follow no longer exists between ${creator_id} and ${follower_id}, removing friendship`,
         );

@@ -11,5 +11,29 @@ export default function useUserService() {
   const findUserById = (userId: number) =>
     call(() => UserService.userControllerFindOne(userId));
 
-  return { create, findUserById, result: data, loading, error };
+  const findByUsername = (username: string, areaId: number) =>
+    call(() =>
+      UserService.userControllerFindByName({
+        name: username,
+        area_id: areaId,
+      })
+    );
+
+  const findOneByUsername = (username: string, areaId: number) =>
+    call(() =>
+      UserService.userControllerFindOneByName({
+        name: username,
+        area_id: areaId,
+      })
+    );
+
+  return {
+    create,
+    findUserById,
+    findByUsername,
+    findOneByUsername,
+    result: data,
+    loading,
+    error,
+  };
 }

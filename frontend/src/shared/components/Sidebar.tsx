@@ -7,22 +7,26 @@ import {
   Settings,
   LogOut,
 } from "lucide-react";
-import { Link, useLocation } from "react-router";
+import { Link } from "react-router-dom";
 import { useAuthContext } from "@/feature/auth/context/AuthContext";
-import { cn } from "@/lib/utils";
 import { useToast } from "../context/ToastContext";
-
-const navItems = [
-  { href: "/feed", label: "Home", icon: Home },
-  { href: "/search", label: "Search", icon: Search },
-  { href: "/create", label: "Create", icon: Plus },
-  { href: "/chat", label: "Chat", icon: MessageSquare },
-  { href: "/profile", label: "Profile", icon: User },
-];
+import { useEffect } from "react";
 
 export function Sidebar() {
   const { user, logout } = useAuthContext();
   const { showToast } = useToast();
+  const dynamicNavItems = [
+    { href: "/feed", label: "Home", icon: Home },
+    { href: "/search", label: "Search", icon: Search },
+    { href: "/create", label: "Create", icon: Plus },
+    { href: "/chat", label: "Chat", icon: MessageSquare },
+    {
+      href: user ? `/profile/${user.username}` : "/profile",
+      label: "Profile",
+      icon: User,
+    },
+  ];
+
   const handleLogout = async () => {
     const refreshToken = document.cookie
       .split("; ")
@@ -64,7 +68,7 @@ export function Sidebar() {
 
       {/* Navigation */}
       <nav className="flex-1 flex flex-col gap-2 p-3">
-        {navItems.map((item) => {
+        {dynamicNavItems.map((item) => {
           const Icon = item.icon;
           return (
             <Link

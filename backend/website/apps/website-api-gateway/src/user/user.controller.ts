@@ -175,4 +175,9 @@ export class UserController {
 
     return userData;
   }
+  @Post('/one/name')
+  @Public()
+  findOneByName(@Body() body: NameRequest): Promise<UserDto> {
+    return this.userService.findOneByName(body);
+  }
 }

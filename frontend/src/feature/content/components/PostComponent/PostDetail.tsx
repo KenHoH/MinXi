@@ -14,6 +14,7 @@ import { ReportModal } from "../ContentComponent/ReportModal";
 import { useToast } from "@/shared/context/ToastContext";
 import useBoardService from "@/shared/hooks/useBoardService";
 import PinModal from "../ContentComponent/PinModal";
+import useConnectionService from "@/shared/hooks/useConnectionService";
 
 interface PostDetailComponentProps {
   post: FullContentDto;
@@ -49,7 +50,8 @@ export function PostDetailComponent({
   const [totalPins, setTotalPins] = useState(post.pins);
   const [showReportModal, setShowReportModal] = useState(false);
   const [showPinModal, setShowPinModal] = useState(false);
-  const [followed, setFollowed] = useState(user?.user_id === post.creator_id);
+  const [followed, setFollowed] = useState(false);
+  const [isOwnContent, setIsOwnContent] = useState(false);
   const [reported, setReported] = useState(false);
   const [userBoards, setUserBoards] = useState<BoardDto[]>([]);
   const [pinnedBoardId, setPinnedBoardId] = useState<number | null>(null);
@@ -63,6 +65,7 @@ export function PostDetailComponent({
     getAncestorPost,
     getChildPost,
   } = useContentService();
+  const { checkFollow, createFollow, deleteFollow } = useConnectionService();
 
   const handlePrevMedia = () => {
     setCurrentMediaIndex((prev) =>
@@ -109,6 +112,20 @@ export function PostDetailComponent({
       console.log("History fetched:", res);
       setLiked(res.some((history) => history.liked));
       setPinned(res.some((history) => history.pinned));
+    }
+  };
+
+  const handleFollow = async (isFollowing: boolean) => {
+    if (!user) return;
+
+    try {
+      if (isFollowing) {
+        await deleteFollow(post.creator_id, user.user_id);
+      } else {
+        await createFollow(post.creator_id, user.user_id);
+      }
+    } catch (error) {
+      console.error("Failed to handle follow:", error);
     }
   };
 
@@ -216,7 +233,34 @@ export function PostDetailComponent({
   useEffect(() => {
     fetchUserData(post.creator_id);
     getHistory();
-  }, [post.creator_id, post]);
+
+    // Check if this is the user's own content
+    if (user?.user_id === post.creator_id) {
+      setIsOwnContent(true);
+    } else {
+      setIsOwnContent(false);
+    }
+  }, [post.creator_id, post, user?.user_id]);
+
+  // Check follow status if not own content
+  useEffect(() => {
+    const checkFollowStatus = async () => {
+      if (!user || isOwnContent) {
+        setFollowed(false);
+        return;
+      }
+
+      try {
+        const isFollowing = await checkFollow(post.creator_id, user.user_id);
+        setFollowed(isFollowing || false);
+      } catch (error) {
+        console.error("Failed to check follow status:", error);
+        setFollowed(false);
+      }
+    };
+
+    checkFollowStatus();
+  }, [user, post.creator_id, isOwnContent]);
 
   useEffect(() => {
     getBoards();
@@ -303,7 +347,11 @@ export function PostDetailComponent({
             <PostDetailHeader
               creator={userData}
               followed={followed}
-              onFollowClick={() => setFollowed(!followed)}
+              isOwnContent={isOwnContent}
+              onFollowClick={() => {
+                setFollowed(!followed);
+                handleFollow(followed);
+              }}
             />
           )}
 

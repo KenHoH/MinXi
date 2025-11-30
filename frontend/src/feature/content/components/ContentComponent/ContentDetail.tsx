@@ -18,6 +18,7 @@ import useCommentService from "@/shared/hooks/useCommentService";
 import { Navigate } from "react-router";
 import useBoardService from "@/shared/hooks/useBoardService";
 import PinModal from "./PinModal";
+import useConnectionService from "@/shared/hooks/useConnectionService";
 
 interface ContentDetailComponentProps {
   content: FullContentDto;
@@ -46,9 +47,8 @@ export function ContentDetailComponent({
   const [liked, setLiked] = useState(false);
   const [pinned, setPinned] = useState(false);
   const [reported, setReported] = useState(false);
-  const [followed, setFollowed] = useState(
-    user?.user_id === content.creator_id
-  );
+  const [followed, setFollowed] = useState(false);
+  const [isOwnContent, setIsOwnContent] = useState(false);
 
   // ============ COMMENT STATE ============
   const [commentText, setCommentText] = useState("");
@@ -72,10 +72,18 @@ export function ContentDetailComponent({
 
   // ============ HOOKS ============
   const { upsert, getByUserAndContent } = useHistoryService();
-  const { updateLike, updatePin, updateComment, findOne } = useContentService();
+  const {
+    updateLike,
+    updatePin,
+    updateComment,
+    findOne,
+    updateView,
+    updateReport,
+  } = useContentService();
   const { create } = useCommentService();
   const { findUserById } = useUserService();
   const { getBoardByUser, removeContent } = useBoardService();
+  const { createFollow, deleteFollow, checkFollow } = useConnectionService();
 
   // ============ MEDIA GALLERY HANDLERS ============
   const handlePrevMedia = () => {
@@ -157,6 +165,17 @@ export function ContentDetailComponent({
     }
   };
 
+  const handleFollow = async (delta: boolean) => {
+    if (!user) return;
+    if (!loggedUserData) return;
+
+    if (delta == false) {
+      await createFollow(content.creator_id, user.user_id);
+    } else {
+      await deleteFollow(content.creator_id, user.user_id);
+    }
+  };
+
   const handleBtn = async (typeBtn: number) => {
     if (!user) return;
     switch (typeBtn) {
@@ -184,6 +203,22 @@ export function ContentDetailComponent({
         } else {
           await handleUnpin();
         }
+        break;
+      }
+      case 3: {
+        const newReport = !reported;
+        await updateReport(content.content_id, loggedUserData?.area_id || 0, {
+          delta: newReport ? 1 : -1,
+        });
+        setReported(newReport);
+        setTotalReports((prev) => prev + (newReport ? 1 : -1));
+        await upsert({
+          content_id: content.content_id,
+          user_id: user.user_id,
+          liked,
+          pinned,
+          reps: 0,
+        });
         break;
       }
     }
@@ -256,7 +291,14 @@ export function ContentDetailComponent({
     };
     getCreator(content.creator_id);
     getHistory();
-  }, [content.creator_id, content.content_id]);
+
+    // Check if this is the user's own content
+    if (user?.user_id === content.creator_id) {
+      setIsOwnContent(true);
+    } else {
+      setIsOwnContent(false);
+    }
+  }, [content.creator_id, content.content_id, user?.user_id]);
 
   // Get Logged User Data
   useEffect(() => {
@@ -269,6 +311,26 @@ export function ContentDetailComponent({
     };
     getLoggedUserData();
   }, [user]);
+
+  // Check follow status if not own content
+  useEffect(() => {
+    const checkFollowStatus = async () => {
+      if (!user || isOwnContent) {
+        setFollowed(false);
+        return;
+      }
+
+      try {
+        const isFollowing = await checkFollow(content.creator_id, user.user_id);
+        setFollowed(isFollowing || false);
+      } catch (error) {
+        console.error("Failed to check follow status:", error);
+        setFollowed(false);
+      }
+    };
+
+    checkFollowStatus();
+  }, [user, content.creator_id, isOwnContent]);
 
   useEffect(() => {
     getBoards();
@@ -287,6 +349,8 @@ export function ContentDetailComponent({
           pinned,
           reps: 1,
         });
+
+        await updateView(content.content_id, content.area_id, { delta: 1 });
       };
 
       sendHistory();
@@ -327,7 +391,11 @@ export function ContentDetailComponent({
                 views={currentContent.views}
                 content_id={currentContent.content_id}
                 followed={followed}
-                onFollowClick={() => setFollowed(!followed)}
+                isOwnContent={isOwnContent}
+                onFollowClick={() => {
+                  setFollowed(!followed);
+                  handleFollow(followed);
+                }}
                 replyingTo={replyingToCommentId}
                 onReplySelect={(id, text) => {
                   setReplyingToCommentId(id);

@@ -10,6 +10,7 @@ interface HeaderContentComponentProps {
   content_id: number;
   followed: boolean;
   onFollowClick: () => void;
+  isOwnContent?: boolean;
   replyingTo: number | null;
   onReplySelect?: (commentId: number, commentText: string) => void;
   refresh: boolean;
@@ -23,6 +24,7 @@ export function HeaderContentComponent({
   followed,
   description,
   onFollowClick,
+  isOwnContent,
   replyingTo,
   onReplySelect,
   refresh,
@@ -39,13 +41,16 @@ export function HeaderContentComponent({
         </div>
         <button
           onClick={onFollowClick}
+          disabled={isOwnContent}
           className={`px-3 py-1 rounded-full text-xs font-medium transition-all whitespace-nowrap ${
-            followed
+            isOwnContent
+              ? "bg-gray-700 text-gray-500 cursor-not-allowed opacity-50"
+              : followed
               ? "bg-dark-700 text-gray-300 hover:bg-dark-600"
               : "bg-burgundy-600 text-white hover:bg-burgundy-700"
           }`}
         >
-          {followed ? "Following" : "Follow"}
+          {isOwnContent ? "Your Content" : followed ? "Following" : "Follow"}
         </button>
       </div>
 

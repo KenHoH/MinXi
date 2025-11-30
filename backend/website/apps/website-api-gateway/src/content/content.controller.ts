@@ -85,6 +85,7 @@ export class ContentController {
     const description = body.description;
     const post_type = body.post_type;
     const published_at = body.published_at;
+    const visibilityPrivate = body.visibilityPrivate === 'true';
 
     if (isNaN(creator_id) || isNaN(area_id)) {
       throw new BadRequestException(
@@ -138,6 +139,7 @@ export class ContentController {
       title,
       description,
       post_type,
+      visibilityPrivate,
       published_at: publishedDate.toISOString(),
     };
 

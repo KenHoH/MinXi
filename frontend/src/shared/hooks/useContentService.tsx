@@ -13,6 +13,7 @@ interface CreateContentFormData {
   title: string;
   description: string;
   parent_id?: number;
+  visibilityPrivate: boolean;
   published_at: string;
 }
 

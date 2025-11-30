@@ -37,6 +37,7 @@ export function CreateContentModal({
   const [contentFiles, setContentFiles] = useState<ContentFile[]>([]);
   const [thumbnail, setThumbnail] = useState<ThumbnailFile | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isPrivate, setIsPrivate] = useState(false);
   const [publishedAt, setPublishedAt] = useState("");
   const [user, setUser] = useState<UserDto | null>(null);
   const { showToast } = useToast();
@@ -136,6 +137,7 @@ export function CreateContentModal({
         published_at: publishedAt
           ? new Date(publishedAt).toISOString()
           : new Date().toISOString(),
+        visibilityPrivate: isPrivate,
         contents: contentFiles.map((file) => file.file),
       });
     } catch (error) {
@@ -222,6 +224,22 @@ export function CreateContentModal({
                 rows={3}
                 className="w-full px-4 py-2 bg-dark-700 border border-dark-600 rounded-lg text-gray-100 placeholder:text-gray-500 focus:outline-none focus:ring-1 focus:ring-burgundy-600 resize-none"
               />
+            </div>
+
+            <div className="flex items-center gap-3 p-4 bg-dark-700 rounded-lg border border-dark-600">
+              <input
+                type="checkbox"
+                id="private"
+                checked={isPrivate}
+                onChange={(e) => setIsPrivate(e.target.checked)}
+                className="w-4 h-4 bg-dark-600 border border-dark-600 rounded accent-burgundy-600 cursor-pointer"
+              />
+              <label
+                htmlFor="private"
+                className="flex-1 text-sm text-gray-300 cursor-pointer"
+              >
+                Make this board private (Only you can see it)
+              </label>
             </div>
 
             {/* Content Type Selector */}

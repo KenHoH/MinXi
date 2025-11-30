@@ -69,6 +69,14 @@ export default function FeedPage() {
 
   const handleFilterChange = (filter: string) => {
     setCurrentFilter(filter);
+
+    // If switching to a board filter, refetch its content to ensure it's up-to-date
+    if (filter !== "All" && filter !== "Following" && filter !== "Friends") {
+      const board = userBoards.find((b) => b.title === filter);
+      if (board) {
+        fetchBoardContent(board.board_id);
+      }
+    }
   };
 
   const handleLoadMore = useCallback(async () => {
@@ -87,6 +95,7 @@ export default function FeedPage() {
       result = await getFriendContent(loggedUser.user_id);
     } else {
       const board = userBoards.find((b) => b.title === currentFilter);
+      console.log("Loading content for board filter:", currentFilter, board);
       if (board) {
         result = boardContentsMap.get(board.board_id) || [];
       }
@@ -120,12 +129,13 @@ export default function FeedPage() {
   useEffect(() => {
     if (userBoards.length > 0) {
       userBoards.forEach((board) => {
-        if (board.board_id && !boardContentsMap.has(board.board_id)) {
+        if (board.board_id) {
+          // Always refetch to ensure content is up-to-date
           fetchBoardContent(board.board_id);
         }
       });
     }
-  }, [userBoards, boardContentsMap]);
+  }, [userBoards]);
 
   useEffect(() => {
     console.log("Current filter changed to:", currentFilter);
