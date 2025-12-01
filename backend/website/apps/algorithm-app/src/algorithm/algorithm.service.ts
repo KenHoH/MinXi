@@ -51,27 +51,31 @@ export class AlgorithmService implements IAlgoService {
       }
 
       const queryLower = query.toLowerCase();
-      const searchResults = contents
-        .map((content) => ({
-          content,
-          titleDistance: levenshteinDistance(
-            queryLower,
-            content.title.toLowerCase(),
-          ),
-          descDistance: levenshteinDistance(
-            queryLower,
-            content.description?.toLowerCase() || '',
-          ),
-        }))
-        .map((result) => ({
-          ...result,
-          minDistance: Math.min(result.titleDistance, result.descDistance),
-        }))
-        .sort((a, b) => a.minDistance - b.minDistance)
-        .filter((result) => result.minDistance < query.length + 5)
-        .map((result) => result.content);
+      const results = contents
+        .map((content) => {
+          const title = content.title.toLowerCase();
+          const description = (content.description || '').toLowerCase();
 
-      return searchResults;
+          const titleDist = levenshteinDistance(queryLower, title);
+          const descDist = levenshteinDistance(queryLower, description);
+
+          const titleSim =
+            1 - titleDist / Math.max(queryLower.length, title.length);
+          const descSim =
+            1 - descDist / Math.max(queryLower.length, description.length || 1);
+
+          const similarity = Math.max(titleSim, descSim);
+
+          return {
+            content,
+            similarity,
+          };
+        })
+        .filter((item) => item.similarity >= 0.6)
+        .sort((a, b) => b.similarity - a.similarity)
+        .map((item) => item.content);
+
+      return results;
     } catch (error) {
       if (error instanceof HttpException) {
         throw error;

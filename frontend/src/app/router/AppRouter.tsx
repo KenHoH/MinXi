@@ -29,7 +29,7 @@ export default function AppRouter() {
 
               <Route element={<ProtectedRoute />}>
                 {/* Protected routes go here */}
-                <Route path="/chat/:username" element={<ChatPage />} />
+                <Route path="/chat" element={<ChatPage />} />
                 <Route path="/create" element={<CreatePage />} />
                 <Route
                   path="/settings/:username"
