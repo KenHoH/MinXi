@@ -85,11 +85,19 @@ export class AlgorithmService implements IAlgoService {
       );
     }
   }
-  async findFYP(userId: number, areaId: number): Promise<FullContentDto[]> {
+  async findFYP(
+    userId: number,
+    areaId: number,
+    page: number,
+  ): Promise<FullContentDto[]> {
     try {
       this.logger.error(`Finding FYP for user ${userId} in area ${areaId}`);
       const contents: FullContentDto[] = await firstValueFrom(
-        this.contentClient.send(CONTENT_MSG.findAll, areaId),
+        this.contentClient.send(CONTENT_MSG.findAllPage, {
+          area_id: areaId,
+          page,
+          limit: 10,
+        }),
       );
 
       this.logger.error(`Total contents fetched: ${contents.length}`);
