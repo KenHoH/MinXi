@@ -137,6 +137,7 @@ export class ContentService implements IContentService {
               reports: content.reports,
               title: content.title,
               views: content.views,
+              score: content.score,
               visibilityPrivate: content.visibilityPrivate,
               thumbnail: thumbnail,
             };
@@ -290,6 +291,7 @@ export class ContentService implements IContentService {
             views: content.views,
             visibilityPrivate: content.visibilityPrivate,
             thumbnail: thumbnail,
+            score: content.score,
           };
 
           return fullResponse;
@@ -425,6 +427,7 @@ export class ContentService implements IContentService {
                 views: content.views,
                 published_at: content.published_at,
                 visibilityPrivate: content.visibilityPrivate,
+                score: content.score,
                 thumbnail: thumbnail
                   ? {
                       file_id: thumbnail.file_id,
@@ -561,6 +564,7 @@ export class ContentService implements IContentService {
             views: content.views,
             published_at: content.published_at,
             visibilityPrivate: content.visibilityPrivate,
+            score: content.score,
             thumbnail: thumbnail
               ? {
                   file_id: thumbnail.file_id,
@@ -670,6 +674,7 @@ export class ContentService implements IContentService {
                 comments: content.comments,
                 pins: content.pins,
                 reports: content.reports,
+                score: content.score,
                 thumbnail: thumbnail
                   ? {
                       file_id: thumbnail.file_id,
@@ -787,6 +792,7 @@ export class ContentService implements IContentService {
                 comments: content.comments,
                 pins: content.pins,
                 reports: content.reports,
+                score: content.score,
                 thumbnail: thumbnail
                   ? {
                       file_id: thumbnail.file_id,
@@ -909,6 +915,7 @@ export class ContentService implements IContentService {
                 comments: content.comments,
                 pins: content.pins,
                 reports: content.reports,
+                score: content.score,
                 thumbnail: thumbnail
                   ? {
                       file_id: thumbnail.file_id,
@@ -1369,6 +1376,7 @@ export class ContentService implements IContentService {
                 comments: content.comments,
                 pins: content.pins,
                 reports: content.reports,
+                score: content.score,
                 thumbnail: thumbnail
                   ? {
                       file_id: thumbnail.file_id,
@@ -1507,6 +1515,7 @@ export class ContentService implements IContentService {
                 published_at: content.published_at,
                 pins: content.pins,
                 reports: content.reports,
+                score: content.score,
                 thumbnail: thumbnail
                   ? {
                       file_id: thumbnail.file_id,
@@ -1649,6 +1658,7 @@ export class ContentService implements IContentService {
                 comments: content.comments,
                 pins: content.pins,
                 reports: content.reports,
+                score: content.score,
                 thumbnail: thumbnail
                   ? {
                       file_id: thumbnail.file_id,
@@ -1782,6 +1792,7 @@ export class ContentService implements IContentService {
                 comments: content.comments,
                 pins: content.pins,
                 reports: content.reports,
+                score: content.score,
                 thumbnail: thumbnail
                   ? {
                       file_id: thumbnail.file_id,
@@ -2003,6 +2014,7 @@ export class ContentService implements IContentService {
                 comments: content.comments,
                 pins: content.pins,
                 reports: content.reports,
+                score: content.score,
                 thumbnail: thumbnail
                   ? {
                       file_id: thumbnail.file_id,
@@ -2150,6 +2162,7 @@ export class ContentService implements IContentService {
                 title: content.title,
                 views: content.views,
                 published_at: content.published_at,
+                score: content.score,
                 visibilityPrivate: content.visibilityPrivate,
                 thumbnail: thumbnail
                   ? {
