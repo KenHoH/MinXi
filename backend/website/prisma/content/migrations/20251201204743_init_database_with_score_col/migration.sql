@@ -1,0 +1,2 @@
+-- AlterTable
+ALTER TABLE `content` ADD COLUMN `score` DOUBLE NOT NULL DEFAULT 0;

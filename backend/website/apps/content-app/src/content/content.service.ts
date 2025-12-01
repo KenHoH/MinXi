@@ -1016,6 +1016,37 @@ export class ContentService implements IContentService {
     }
   }
 
+  async updateScore(
+    content_id: number,
+    area_id: number,
+    score: number,
+  ): Promise<Ack> {
+    if (area_id <= 0 || area_id > 3)
+      throw httpToRpc(
+        new HttpException('Invalid area ID', HttpStatus.BAD_REQUEST),
+      );
+    try {
+      await this.prisma.content.update({
+        where: {
+          content_id_area_id: {
+            content_id: content_id,
+            area_id: area_id,
+          },
+        },
+        data: { score: score },
+      });
+      return { Valid: true, Msg: 'Score updated' };
+    } catch (error) {
+      this.logger.error('Failed to update score', error);
+      throw httpToRpc(
+        new HttpException(
+          'Failed to update score',
+          HttpStatus.INTERNAL_SERVER_ERROR,
+        ),
+      );
+    }
+  }
+
   async updateLike(
     content_id: number,
     area_id: number,

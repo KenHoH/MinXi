@@ -98,6 +98,22 @@ export class ContentController {
       payload.dto,
     );
   }
+  @MessagePattern(CONTENT_MSG.updateScore)
+  async updateScore(
+    @Payload()
+    payload: {
+      content_id: number;
+      area_id: number;
+      score: number;
+    },
+  ): Promise<Ack> {
+    this.logger.log(`Updating score for content ${payload.content_id}`);
+    return this.contentService.updateScore(
+      payload.content_id,
+      payload.area_id,
+      payload.score,
+    );
+  }
 
   @MessagePattern(CONTENT_MSG.updateLike)
   async updateLike(

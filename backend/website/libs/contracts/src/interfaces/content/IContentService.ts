@@ -23,6 +23,8 @@ export interface IContentService {
     area_id: number,
     dto: deltaDto,
   ): Promise<Ack>;
+
+  updateScore(content_id: number, area_id: number, score: number): Promise<Ack>;
   setPrivate(content_id: number, area_id: number): Promise<Ack>;
   setPublic(content_id: number, area_id: number): Promise<Ack>;
   findAll(area_id: number): Promise<FullContentDto[]>;

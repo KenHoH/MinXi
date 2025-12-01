@@ -30,6 +30,7 @@ model Content {
   area_id         Int
   created_at      DateTime @default(now())
   published_at    DateTime
+  score           Float    @default(0)
   @@id([content_id, area_id])
 }
 model File {

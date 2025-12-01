@@ -1328,6 +1328,7 @@ export namespace Prisma {
     pins: number | null
     reports: number | null
     area_id: number | null
+    score: number | null
   }
 
   export type ContentSumAggregateOutputType = {
@@ -1340,6 +1341,7 @@ export namespace Prisma {
     pins: number | null
     reports: number | null
     area_id: number | null
+    score: number | null
   }
 
   export type ContentMinAggregateOutputType = {
@@ -1358,6 +1360,7 @@ export namespace Prisma {
     area_id: number | null
     created_at: Date | null
     published_at: Date | null
+    score: number | null
   }
 
   export type ContentMaxAggregateOutputType = {
@@ -1376,6 +1379,7 @@ export namespace Prisma {
     area_id: number | null
     created_at: Date | null
     published_at: Date | null
+    score: number | null
   }
 
   export type ContentCountAggregateOutputType = {
@@ -1394,6 +1398,7 @@ export namespace Prisma {
     area_id: number
     created_at: number
     published_at: number
+    score: number
     _all: number
   }
 
@@ -1408,6 +1413,7 @@ export namespace Prisma {
     pins?: true
     reports?: true
     area_id?: true
+    score?: true
   }
 
   export type ContentSumAggregateInputType = {
@@ -1420,6 +1426,7 @@ export namespace Prisma {
     pins?: true
     reports?: true
     area_id?: true
+    score?: true
   }
 
   export type ContentMinAggregateInputType = {
@@ -1438,6 +1445,7 @@ export namespace Prisma {
     area_id?: true
     created_at?: true
     published_at?: true
+    score?: true
   }
 
   export type ContentMaxAggregateInputType = {
@@ -1456,6 +1464,7 @@ export namespace Prisma {
     area_id?: true
     created_at?: true
     published_at?: true
+    score?: true
   }
 
   export type ContentCountAggregateInputType = {
@@ -1474,6 +1483,7 @@ export namespace Prisma {
     area_id?: true
     created_at?: true
     published_at?: true
+    score?: true
     _all?: true
   }
 
@@ -1579,6 +1589,7 @@ export namespace Prisma {
     area_id: number
     created_at: Date
     published_at: Date
+    score: number
     _count: ContentCountAggregateOutputType | null
     _avg: ContentAvgAggregateOutputType | null
     _sum: ContentSumAggregateOutputType | null
@@ -1616,6 +1627,7 @@ export namespace Prisma {
     area_id?: boolean
     created_at?: boolean
     published_at?: boolean
+    score?: boolean
   }, ExtArgs["result"]["content"]>
 
 
@@ -1636,9 +1648,10 @@ export namespace Prisma {
     area_id?: boolean
     created_at?: boolean
     published_at?: boolean
+    score?: boolean
   }
 
-  export type ContentOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"content_id" | "creator_id" | "parent_id" | "title" | "description" | "post_type" | "visibilityPrivate" | "views" | "likes" | "comments" | "pins" | "reports" | "area_id" | "created_at" | "published_at", ExtArgs["result"]["content"]>
+  export type ContentOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"content_id" | "creator_id" | "parent_id" | "title" | "description" | "post_type" | "visibilityPrivate" | "views" | "likes" | "comments" | "pins" | "reports" | "area_id" | "created_at" | "published_at" | "score", ExtArgs["result"]["content"]>
 
   export type $ContentPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     name: "Content"
@@ -1659,6 +1672,7 @@ export namespace Prisma {
       area_id: number
       created_at: Date
       published_at: Date
+      score: number
     }, ExtArgs["result"]["content"]>
     composites: {}
   }
@@ -2043,6 +2057,7 @@ export namespace Prisma {
     readonly area_id: FieldRef<"Content", 'Int'>
     readonly created_at: FieldRef<"Content", 'DateTime'>
     readonly published_at: FieldRef<"Content", 'DateTime'>
+    readonly score: FieldRef<"Content", 'Float'>
   }
     
 
@@ -7166,7 +7181,8 @@ export namespace Prisma {
     reports: 'reports',
     area_id: 'area_id',
     created_at: 'created_at',
-    published_at: 'published_at'
+    published_at: 'published_at',
+    score: 'score'
   };
 
   export type ContentScalarFieldEnum = (typeof ContentScalarFieldEnum)[keyof typeof ContentScalarFieldEnum]
@@ -7341,6 +7357,7 @@ export namespace Prisma {
     area_id?: IntFilter<"Content"> | number
     created_at?: DateTimeFilter<"Content"> | Date | string
     published_at?: DateTimeFilter<"Content"> | Date | string
+    score?: FloatFilter<"Content"> | number
   }
 
   export type ContentOrderByWithRelationInput = {
@@ -7359,6 +7376,7 @@ export namespace Prisma {
     area_id?: SortOrder
     created_at?: SortOrder
     published_at?: SortOrder
+    score?: SortOrder
     _relevance?: ContentOrderByRelevanceInput
   }
 
@@ -7382,6 +7400,7 @@ export namespace Prisma {
     area_id?: IntFilter<"Content"> | number
     created_at?: DateTimeFilter<"Content"> | Date | string
     published_at?: DateTimeFilter<"Content"> | Date | string
+    score?: FloatFilter<"Content"> | number
   }, "content_id_area_id">
 
   export type ContentOrderByWithAggregationInput = {
@@ -7400,6 +7419,7 @@ export namespace Prisma {
     area_id?: SortOrder
     created_at?: SortOrder
     published_at?: SortOrder
+    score?: SortOrder
     _count?: ContentCountOrderByAggregateInput
     _avg?: ContentAvgOrderByAggregateInput
     _max?: ContentMaxOrderByAggregateInput
@@ -7426,6 +7446,7 @@ export namespace Prisma {
     area_id?: IntWithAggregatesFilter<"Content"> | number
     created_at?: DateTimeWithAggregatesFilter<"Content"> | Date | string
     published_at?: DateTimeWithAggregatesFilter<"Content"> | Date | string
+    score?: FloatWithAggregatesFilter<"Content"> | number
   }
 
   export type FileWhereInput = {
@@ -7741,6 +7762,7 @@ export namespace Prisma {
     area_id: number
     created_at?: Date | string
     published_at: Date | string
+    score?: number
   }
 
   export type ContentUncheckedCreateInput = {
@@ -7759,6 +7781,7 @@ export namespace Prisma {
     area_id: number
     created_at?: Date | string
     published_at: Date | string
+    score?: number
   }
 
   export type ContentUpdateInput = {
@@ -7777,6 +7800,7 @@ export namespace Prisma {
     area_id?: IntFieldUpdateOperationsInput | number
     created_at?: DateTimeFieldUpdateOperationsInput | Date | string
     published_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    score?: FloatFieldUpdateOperationsInput | number
   }
 
   export type ContentUncheckedUpdateInput = {
@@ -7795,6 +7819,7 @@ export namespace Prisma {
     area_id?: IntFieldUpdateOperationsInput | number
     created_at?: DateTimeFieldUpdateOperationsInput | Date | string
     published_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    score?: FloatFieldUpdateOperationsInput | number
   }
 
   export type ContentCreateManyInput = {
@@ -7813,6 +7838,7 @@ export namespace Prisma {
     area_id: number
     created_at?: Date | string
     published_at: Date | string
+    score?: number
   }
 
   export type ContentUpdateManyMutationInput = {
@@ -7831,6 +7857,7 @@ export namespace Prisma {
     area_id?: IntFieldUpdateOperationsInput | number
     created_at?: DateTimeFieldUpdateOperationsInput | Date | string
     published_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    score?: FloatFieldUpdateOperationsInput | number
   }
 
   export type ContentUncheckedUpdateManyInput = {
@@ -7849,6 +7876,7 @@ export namespace Prisma {
     area_id?: IntFieldUpdateOperationsInput | number
     created_at?: DateTimeFieldUpdateOperationsInput | Date | string
     published_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    score?: FloatFieldUpdateOperationsInput | number
   }
 
   export type FileCreateInput = {
@@ -8196,6 +8224,17 @@ export namespace Prisma {
     not?: NestedDateTimeFilter<$PrismaModel> | Date | string
   }
 
+  export type FloatFilter<$PrismaModel = never> = {
+    equals?: number | FloatFieldRefInput<$PrismaModel>
+    in?: number[]
+    notIn?: number[]
+    lt?: number | FloatFieldRefInput<$PrismaModel>
+    lte?: number | FloatFieldRefInput<$PrismaModel>
+    gt?: number | FloatFieldRefInput<$PrismaModel>
+    gte?: number | FloatFieldRefInput<$PrismaModel>
+    not?: NestedFloatFilter<$PrismaModel> | number
+  }
+
   export type SortOrderInput = {
     sort: SortOrder
     nulls?: NullsOrder
@@ -8228,6 +8267,7 @@ export namespace Prisma {
     area_id?: SortOrder
     created_at?: SortOrder
     published_at?: SortOrder
+    score?: SortOrder
   }
 
   export type ContentAvgOrderByAggregateInput = {
@@ -8240,6 +8280,7 @@ export namespace Prisma {
     pins?: SortOrder
     reports?: SortOrder
     area_id?: SortOrder
+    score?: SortOrder
   }
 
   export type ContentMaxOrderByAggregateInput = {
@@ -8258,6 +8299,7 @@ export namespace Prisma {
     area_id?: SortOrder
     created_at?: SortOrder
     published_at?: SortOrder
+    score?: SortOrder
   }
 
   export type ContentMinOrderByAggregateInput = {
@@ -8276,6 +8318,7 @@ export namespace Prisma {
     area_id?: SortOrder
     created_at?: SortOrder
     published_at?: SortOrder
+    score?: SortOrder
   }
 
   export type ContentSumOrderByAggregateInput = {
@@ -8288,6 +8331,7 @@ export namespace Prisma {
     pins?: SortOrder
     reports?: SortOrder
     area_id?: SortOrder
+    score?: SortOrder
   }
 
   export type IntWithAggregatesFilter<$PrismaModel = never> = {
@@ -8360,6 +8404,22 @@ export namespace Prisma {
     _count?: NestedIntFilter<$PrismaModel>
     _min?: NestedDateTimeFilter<$PrismaModel>
     _max?: NestedDateTimeFilter<$PrismaModel>
+  }
+
+  export type FloatWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: number | FloatFieldRefInput<$PrismaModel>
+    in?: number[]
+    notIn?: number[]
+    lt?: number | FloatFieldRefInput<$PrismaModel>
+    lte?: number | FloatFieldRefInput<$PrismaModel>
+    gt?: number | FloatFieldRefInput<$PrismaModel>
+    gte?: number | FloatFieldRefInput<$PrismaModel>
+    not?: NestedFloatWithAggregatesFilter<$PrismaModel> | number
+    _count?: NestedIntFilter<$PrismaModel>
+    _avg?: NestedFloatFilter<$PrismaModel>
+    _sum?: NestedFloatFilter<$PrismaModel>
+    _min?: NestedFloatFilter<$PrismaModel>
+    _max?: NestedFloatFilter<$PrismaModel>
   }
 
   export type FileOrderByRelevanceInput = {
@@ -8627,6 +8687,14 @@ export namespace Prisma {
     set?: Date | string
   }
 
+  export type FloatFieldUpdateOperationsInput = {
+    set?: number
+    increment?: number
+    decrement?: number
+    multiply?: number
+    divide?: number
+  }
+
   export type BoardContentCreateNestedManyWithoutBoardInput = {
     create?: XOR<BoardContentCreateWithoutBoardInput, BoardContentUncheckedCreateWithoutBoardInput> | BoardContentCreateWithoutBoardInput[] | BoardContentUncheckedCreateWithoutBoardInput[]
     connectOrCreate?: BoardContentCreateOrConnectWithoutBoardInput | BoardContentCreateOrConnectWithoutBoardInput[]
@@ -8736,6 +8804,17 @@ export namespace Prisma {
     not?: NestedDateTimeFilter<$PrismaModel> | Date | string
   }
 
+  export type NestedFloatFilter<$PrismaModel = never> = {
+    equals?: number | FloatFieldRefInput<$PrismaModel>
+    in?: number[]
+    notIn?: number[]
+    lt?: number | FloatFieldRefInput<$PrismaModel>
+    lte?: number | FloatFieldRefInput<$PrismaModel>
+    gt?: number | FloatFieldRefInput<$PrismaModel>
+    gte?: number | FloatFieldRefInput<$PrismaModel>
+    not?: NestedFloatFilter<$PrismaModel> | number
+  }
+
   export type NestedIntWithAggregatesFilter<$PrismaModel = never> = {
     equals?: number | IntFieldRefInput<$PrismaModel>
     in?: number[]
@@ -8750,17 +8829,6 @@ export namespace Prisma {
     _sum?: NestedIntFilter<$PrismaModel>
     _min?: NestedIntFilter<$PrismaModel>
     _max?: NestedIntFilter<$PrismaModel>
-  }
-
-  export type NestedFloatFilter<$PrismaModel = never> = {
-    equals?: number | FloatFieldRefInput<$PrismaModel>
-    in?: number[]
-    notIn?: number[]
-    lt?: number | FloatFieldRefInput<$PrismaModel>
-    lte?: number | FloatFieldRefInput<$PrismaModel>
-    gt?: number | FloatFieldRefInput<$PrismaModel>
-    gte?: number | FloatFieldRefInput<$PrismaModel>
-    not?: NestedFloatFilter<$PrismaModel> | number
   }
 
   export type NestedIntNullableWithAggregatesFilter<$PrismaModel = never> = {
@@ -8828,6 +8896,22 @@ export namespace Prisma {
     _count?: NestedIntFilter<$PrismaModel>
     _min?: NestedDateTimeFilter<$PrismaModel>
     _max?: NestedDateTimeFilter<$PrismaModel>
+  }
+
+  export type NestedFloatWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: number | FloatFieldRefInput<$PrismaModel>
+    in?: number[]
+    notIn?: number[]
+    lt?: number | FloatFieldRefInput<$PrismaModel>
+    lte?: number | FloatFieldRefInput<$PrismaModel>
+    gt?: number | FloatFieldRefInput<$PrismaModel>
+    gte?: number | FloatFieldRefInput<$PrismaModel>
+    not?: NestedFloatWithAggregatesFilter<$PrismaModel> | number
+    _count?: NestedIntFilter<$PrismaModel>
+    _avg?: NestedFloatFilter<$PrismaModel>
+    _sum?: NestedFloatFilter<$PrismaModel>
+    _min?: NestedFloatFilter<$PrismaModel>
+    _max?: NestedFloatFilter<$PrismaModel>
   }
 
   export type BoardContentCreateWithoutBoardInput = {

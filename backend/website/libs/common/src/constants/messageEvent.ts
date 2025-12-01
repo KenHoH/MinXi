@@ -35,6 +35,7 @@ export const CONTENT_MSG = {
   updatePin: 'content.pin',
   updateComment: 'content.comment',
   updateReport: 'content.report',
+  updateScore: 'content.score',
   setPrivate: 'content.private',
   setPublic: 'content.public',
   findAll: 'content.findAll',

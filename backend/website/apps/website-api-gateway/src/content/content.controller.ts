@@ -316,6 +316,14 @@ export class ContentController {
   ): Promise<Ack> {
     return this.contentService.updateReport(content_id, area_id, dto);
   }
+  @Patch(':content_id/:area_id/score/:score')
+  updateScore(
+    @Param('content_id', ParseIntPipe) content_id: number,
+    @Param('area_id', ParseIntPipe) area_id: number,
+    @Param('score', ParseIntPipe) score: number,
+  ): Promise<Ack> {
+    return this.contentService.updateScore(content_id, area_id, score);
+  }
 
   @Patch(':content_id/:area_id/private')
   setPrivate(

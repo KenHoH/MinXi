@@ -160,6 +160,20 @@ export class ContentService implements IContentService {
     );
   }
 
+  async updateScore(
+    content_id: number,
+    area_id: number,
+    score: number,
+  ): Promise<Ack> {
+    return await firstValueFrom(
+      this.contentClient.send(CONTENT_MSG.updateScore, {
+        content_id,
+        area_id,
+        score,
+      }),
+    );
+  }
+
   async setPrivate(content_id: number, area_id: number): Promise<Ack> {
     return await firstValueFrom(
       this.contentClient.send(CONTENT_MSG.setPrivate, { content_id, area_id }),
