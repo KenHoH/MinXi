@@ -30,6 +30,9 @@ export class Repository {
         pinned_visibilityPrivate: false,
         content_visibilityPrivate: false,
         area_id: newUser.area_id,
+        liked_notification_disabled: false,
+        comments_notification_disabled: false,
+        followers_notification_disabled: false,
       },
     });
   }
@@ -82,6 +85,11 @@ export class Repository {
         content_visibilityPrivate: restriction.content_visibility,
         liked_visibilityPrivate: restriction.liked_visibility,
         pinned_visibilityPrivate: restriction.pinned_visibility,
+        liked_notification_disabled: restriction.liked_notification_disabled,
+        comments_notification_disabled:
+          restriction.comments_notification_disabled,
+        followers_notification_disabled:
+          restriction.followers_notification_disabled,
       },
     });
   }

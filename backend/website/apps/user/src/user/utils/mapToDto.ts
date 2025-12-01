@@ -12,4 +12,7 @@ export const mapToDto = (user: any): UserDto => ({
   pinned_visibilityPrivate: user.pinned_visibilityPrivate,
   liked_visibilityPrivate: user.liked_visibilityPrivate,
   area_id: user.area_id,
+  comments_notification_disabled: user.comments_notification_disabled,
+  followers_notification_disabled: user.followers_notification_disabled,
+  liked_notification_disabled: user.liked_notification_disabled,
 });

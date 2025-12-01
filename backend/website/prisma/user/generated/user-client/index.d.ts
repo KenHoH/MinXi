@@ -1067,6 +1067,9 @@ export namespace Prisma {
     content_visibilityPrivate: boolean | null
     pinned_visibilityPrivate: boolean | null
     liked_visibilityPrivate: boolean | null
+    liked_notification_disabled: boolean | null
+    comments_notification_disabled: boolean | null
+    followers_notification_disabled: boolean | null
     area_id: number | null
   }
 
@@ -1082,6 +1085,9 @@ export namespace Prisma {
     content_visibilityPrivate: boolean | null
     pinned_visibilityPrivate: boolean | null
     liked_visibilityPrivate: boolean | null
+    liked_notification_disabled: boolean | null
+    comments_notification_disabled: boolean | null
+    followers_notification_disabled: boolean | null
     area_id: number | null
   }
 
@@ -1097,6 +1103,9 @@ export namespace Prisma {
     content_visibilityPrivate: number
     pinned_visibilityPrivate: number
     liked_visibilityPrivate: number
+    liked_notification_disabled: number
+    comments_notification_disabled: number
+    followers_notification_disabled: number
     area_id: number
     _all: number
   }
@@ -1130,6 +1139,9 @@ export namespace Prisma {
     content_visibilityPrivate?: true
     pinned_visibilityPrivate?: true
     liked_visibilityPrivate?: true
+    liked_notification_disabled?: true
+    comments_notification_disabled?: true
+    followers_notification_disabled?: true
     area_id?: true
   }
 
@@ -1145,6 +1157,9 @@ export namespace Prisma {
     content_visibilityPrivate?: true
     pinned_visibilityPrivate?: true
     liked_visibilityPrivate?: true
+    liked_notification_disabled?: true
+    comments_notification_disabled?: true
+    followers_notification_disabled?: true
     area_id?: true
   }
 
@@ -1160,6 +1175,9 @@ export namespace Prisma {
     content_visibilityPrivate?: true
     pinned_visibilityPrivate?: true
     liked_visibilityPrivate?: true
+    liked_notification_disabled?: true
+    comments_notification_disabled?: true
+    followers_notification_disabled?: true
     area_id?: true
     _all?: true
   }
@@ -1262,6 +1280,9 @@ export namespace Prisma {
     content_visibilityPrivate: boolean
     pinned_visibilityPrivate: boolean
     liked_visibilityPrivate: boolean
+    liked_notification_disabled: boolean
+    comments_notification_disabled: boolean
+    followers_notification_disabled: boolean
     area_id: number
     _count: UserCountAggregateOutputType | null
     _avg: UserAvgAggregateOutputType | null
@@ -1296,6 +1317,9 @@ export namespace Prisma {
     content_visibilityPrivate?: boolean
     pinned_visibilityPrivate?: boolean
     liked_visibilityPrivate?: boolean
+    liked_notification_disabled?: boolean
+    comments_notification_disabled?: boolean
+    followers_notification_disabled?: boolean
     area_id?: boolean
   }, ExtArgs["result"]["user"]>
 
@@ -1313,10 +1337,13 @@ export namespace Prisma {
     content_visibilityPrivate?: boolean
     pinned_visibilityPrivate?: boolean
     liked_visibilityPrivate?: boolean
+    liked_notification_disabled?: boolean
+    comments_notification_disabled?: boolean
+    followers_notification_disabled?: boolean
     area_id?: boolean
   }
 
-  export type UserOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"user_id" | "username" | "password" | "desc" | "profile_picture" | "follower" | "total_like" | "total_reports" | "content_visibilityPrivate" | "pinned_visibilityPrivate" | "liked_visibilityPrivate" | "area_id", ExtArgs["result"]["user"]>
+  export type UserOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"user_id" | "username" | "password" | "desc" | "profile_picture" | "follower" | "total_like" | "total_reports" | "content_visibilityPrivate" | "pinned_visibilityPrivate" | "liked_visibilityPrivate" | "liked_notification_disabled" | "comments_notification_disabled" | "followers_notification_disabled" | "area_id", ExtArgs["result"]["user"]>
 
   export type $UserPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     name: "User"
@@ -1333,6 +1360,9 @@ export namespace Prisma {
       content_visibilityPrivate: boolean
       pinned_visibilityPrivate: boolean
       liked_visibilityPrivate: boolean
+      liked_notification_disabled: boolean
+      comments_notification_disabled: boolean
+      followers_notification_disabled: boolean
       area_id: number
     }, ExtArgs["result"]["user"]>
     composites: {}
@@ -1714,6 +1744,9 @@ export namespace Prisma {
     readonly content_visibilityPrivate: FieldRef<"User", 'Boolean'>
     readonly pinned_visibilityPrivate: FieldRef<"User", 'Boolean'>
     readonly liked_visibilityPrivate: FieldRef<"User", 'Boolean'>
+    readonly liked_notification_disabled: FieldRef<"User", 'Boolean'>
+    readonly comments_notification_disabled: FieldRef<"User", 'Boolean'>
+    readonly followers_notification_disabled: FieldRef<"User", 'Boolean'>
     readonly area_id: FieldRef<"User", 'Int'>
   }
     
@@ -3866,6 +3899,9 @@ export namespace Prisma {
     content_visibilityPrivate: 'content_visibilityPrivate',
     pinned_visibilityPrivate: 'pinned_visibilityPrivate',
     liked_visibilityPrivate: 'liked_visibilityPrivate',
+    liked_notification_disabled: 'liked_notification_disabled',
+    comments_notification_disabled: 'comments_notification_disabled',
+    followers_notification_disabled: 'followers_notification_disabled',
     area_id: 'area_id'
   };
 
@@ -3959,6 +3995,9 @@ export namespace Prisma {
     content_visibilityPrivate?: BoolFilter<"User"> | boolean
     pinned_visibilityPrivate?: BoolFilter<"User"> | boolean
     liked_visibilityPrivate?: BoolFilter<"User"> | boolean
+    liked_notification_disabled?: BoolFilter<"User"> | boolean
+    comments_notification_disabled?: BoolFilter<"User"> | boolean
+    followers_notification_disabled?: BoolFilter<"User"> | boolean
     area_id?: IntFilter<"User"> | number
   }
 
@@ -3974,6 +4013,9 @@ export namespace Prisma {
     content_visibilityPrivate?: SortOrder
     pinned_visibilityPrivate?: SortOrder
     liked_visibilityPrivate?: SortOrder
+    liked_notification_disabled?: SortOrder
+    comments_notification_disabled?: SortOrder
+    followers_notification_disabled?: SortOrder
     area_id?: SortOrder
     _relevance?: UserOrderByRelevanceInput
   }
@@ -3994,6 +4036,9 @@ export namespace Prisma {
     content_visibilityPrivate?: BoolFilter<"User"> | boolean
     pinned_visibilityPrivate?: BoolFilter<"User"> | boolean
     liked_visibilityPrivate?: BoolFilter<"User"> | boolean
+    liked_notification_disabled?: BoolFilter<"User"> | boolean
+    comments_notification_disabled?: BoolFilter<"User"> | boolean
+    followers_notification_disabled?: BoolFilter<"User"> | boolean
     area_id?: IntFilter<"User"> | number
   }, "user_id" | "username_area_id">
 
@@ -4009,6 +4054,9 @@ export namespace Prisma {
     content_visibilityPrivate?: SortOrder
     pinned_visibilityPrivate?: SortOrder
     liked_visibilityPrivate?: SortOrder
+    liked_notification_disabled?: SortOrder
+    comments_notification_disabled?: SortOrder
+    followers_notification_disabled?: SortOrder
     area_id?: SortOrder
     _count?: UserCountOrderByAggregateInput
     _avg?: UserAvgOrderByAggregateInput
@@ -4032,6 +4080,9 @@ export namespace Prisma {
     content_visibilityPrivate?: BoolWithAggregatesFilter<"User"> | boolean
     pinned_visibilityPrivate?: BoolWithAggregatesFilter<"User"> | boolean
     liked_visibilityPrivate?: BoolWithAggregatesFilter<"User"> | boolean
+    liked_notification_disabled?: BoolWithAggregatesFilter<"User"> | boolean
+    comments_notification_disabled?: BoolWithAggregatesFilter<"User"> | boolean
+    followers_notification_disabled?: BoolWithAggregatesFilter<"User"> | boolean
     area_id?: IntWithAggregatesFilter<"User"> | number
   }
 
@@ -4136,6 +4187,9 @@ export namespace Prisma {
     content_visibilityPrivate?: boolean
     pinned_visibilityPrivate?: boolean
     liked_visibilityPrivate?: boolean
+    liked_notification_disabled?: boolean
+    comments_notification_disabled?: boolean
+    followers_notification_disabled?: boolean
     area_id: number
   }
 
@@ -4151,6 +4205,9 @@ export namespace Prisma {
     content_visibilityPrivate?: boolean
     pinned_visibilityPrivate?: boolean
     liked_visibilityPrivate?: boolean
+    liked_notification_disabled?: boolean
+    comments_notification_disabled?: boolean
+    followers_notification_disabled?: boolean
     area_id: number
   }
 
@@ -4165,6 +4222,9 @@ export namespace Prisma {
     content_visibilityPrivate?: BoolFieldUpdateOperationsInput | boolean
     pinned_visibilityPrivate?: BoolFieldUpdateOperationsInput | boolean
     liked_visibilityPrivate?: BoolFieldUpdateOperationsInput | boolean
+    liked_notification_disabled?: BoolFieldUpdateOperationsInput | boolean
+    comments_notification_disabled?: BoolFieldUpdateOperationsInput | boolean
+    followers_notification_disabled?: BoolFieldUpdateOperationsInput | boolean
     area_id?: IntFieldUpdateOperationsInput | number
   }
 
@@ -4180,6 +4240,9 @@ export namespace Prisma {
     content_visibilityPrivate?: BoolFieldUpdateOperationsInput | boolean
     pinned_visibilityPrivate?: BoolFieldUpdateOperationsInput | boolean
     liked_visibilityPrivate?: BoolFieldUpdateOperationsInput | boolean
+    liked_notification_disabled?: BoolFieldUpdateOperationsInput | boolean
+    comments_notification_disabled?: BoolFieldUpdateOperationsInput | boolean
+    followers_notification_disabled?: BoolFieldUpdateOperationsInput | boolean
     area_id?: IntFieldUpdateOperationsInput | number
   }
 
@@ -4195,6 +4258,9 @@ export namespace Prisma {
     content_visibilityPrivate?: boolean
     pinned_visibilityPrivate?: boolean
     liked_visibilityPrivate?: boolean
+    liked_notification_disabled?: boolean
+    comments_notification_disabled?: boolean
+    followers_notification_disabled?: boolean
     area_id: number
   }
 
@@ -4209,6 +4275,9 @@ export namespace Prisma {
     content_visibilityPrivate?: BoolFieldUpdateOperationsInput | boolean
     pinned_visibilityPrivate?: BoolFieldUpdateOperationsInput | boolean
     liked_visibilityPrivate?: BoolFieldUpdateOperationsInput | boolean
+    liked_notification_disabled?: BoolFieldUpdateOperationsInput | boolean
+    comments_notification_disabled?: BoolFieldUpdateOperationsInput | boolean
+    followers_notification_disabled?: BoolFieldUpdateOperationsInput | boolean
     area_id?: IntFieldUpdateOperationsInput | number
   }
 
@@ -4224,6 +4293,9 @@ export namespace Prisma {
     content_visibilityPrivate?: BoolFieldUpdateOperationsInput | boolean
     pinned_visibilityPrivate?: BoolFieldUpdateOperationsInput | boolean
     liked_visibilityPrivate?: BoolFieldUpdateOperationsInput | boolean
+    liked_notification_disabled?: BoolFieldUpdateOperationsInput | boolean
+    comments_notification_disabled?: BoolFieldUpdateOperationsInput | boolean
+    followers_notification_disabled?: BoolFieldUpdateOperationsInput | boolean
     area_id?: IntFieldUpdateOperationsInput | number
   }
 
@@ -4359,6 +4431,9 @@ export namespace Prisma {
     content_visibilityPrivate?: SortOrder
     pinned_visibilityPrivate?: SortOrder
     liked_visibilityPrivate?: SortOrder
+    liked_notification_disabled?: SortOrder
+    comments_notification_disabled?: SortOrder
+    followers_notification_disabled?: SortOrder
     area_id?: SortOrder
   }
 
@@ -4382,6 +4457,9 @@ export namespace Prisma {
     content_visibilityPrivate?: SortOrder
     pinned_visibilityPrivate?: SortOrder
     liked_visibilityPrivate?: SortOrder
+    liked_notification_disabled?: SortOrder
+    comments_notification_disabled?: SortOrder
+    followers_notification_disabled?: SortOrder
     area_id?: SortOrder
   }
 
@@ -4397,6 +4475,9 @@ export namespace Prisma {
     content_visibilityPrivate?: SortOrder
     pinned_visibilityPrivate?: SortOrder
     liked_visibilityPrivate?: SortOrder
+    liked_notification_disabled?: SortOrder
+    comments_notification_disabled?: SortOrder
+    followers_notification_disabled?: SortOrder
     area_id?: SortOrder
   }
 
