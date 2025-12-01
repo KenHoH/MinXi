@@ -22,7 +22,8 @@ export class Repository {
         password: newUser.password,
         desc: '你好很高興見到你',
         follower: 0,
-        profile_picture: '',
+        profile_picture:
+          'http://localhost:3000/uploads/profile/1763906830326-69740177.png',
         total_like: 0,
         total_reports: 0,
         liked_visibilityPrivate: false,
@@ -119,6 +120,17 @@ export class Repository {
   }
 
   async findByName(name: string, area_id: number) {
+    this.logger.log(name);
+    return await this.prisma.user.findUnique({
+      where: {
+        username_area_id: {
+          username: name,
+          area_id: area_id,
+        },
+      },
+    });
+  }
+  async findOneByName(name: string, area_id: number) {
     this.logger.log(name);
     return await this.prisma.user.findUnique({
       where: {

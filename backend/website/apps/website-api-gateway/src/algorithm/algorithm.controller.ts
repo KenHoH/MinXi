@@ -19,7 +19,6 @@ import { Public } from '@app/common/decorators/public.decorator';
 export class AlgorithmController {
   constructor(private readonly algorithmService: AlgorithmService) {}
 
-  @Public()
   @Get('fyp')
   async findFYP(
     @Query('userId', ParseIntPipe) userId: number,
@@ -28,7 +27,6 @@ export class AlgorithmController {
     return await this.algorithmService.findFYP(userId, areaId);
   }
 
-  @Public()
   @Get('search')
   async searchContent(
     @Query('query') query: string,

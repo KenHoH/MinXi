@@ -4,23 +4,17 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Plus } from "lucide-react";
 import { Masonry } from "@/shared/components/Masonry";
 import { BoardModal } from "./BoardModal";
-import { CreateBoardModal } from "@/feature/content/components/CreateBoardModal";
-import type Board from "@/feature/content/object/Board";
+import { CreateBoardModal } from "@/feature/create/components/CreateBoardContent/CreateBoardModal";
 import { useAuthContext } from "@/feature/auth/context/AuthContext";
-import type Content from "@/feature/content/object/PublicContent";
+import type { BoardDto } from "@/service/api";
 
 interface BoardCreationProps {
-  items: Board[];
-  contents: Content[];
+  items: BoardDto[];
   onDelete: (id: number) => void;
 }
 
-export function BoardCreation({
-  items,
-  contents,
-  onDelete,
-}: BoardCreationProps) {
-  const [selectedBoard, setSelectedBoard] = useState<Board | null>(null);
+export function BoardCreation({ items, onDelete }: BoardCreationProps) {
+  const [selectedBoard, setSelectedBoard] = useState<BoardDto | null>(null);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const { user } = useAuthContext();
   const currentUserId = user?.user_id || 0;
@@ -37,7 +31,6 @@ export function BoardCreation({
         </Button>
         <CreateBoardModal
           isOpen={showCreateModal}
-          contents={contents}
           onClose={() => setShowCreateModal(false)}
           currentUserId={currentUserId}
         />
@@ -51,7 +44,7 @@ export function BoardCreation({
               <CardContent className="pt-6">
                 <div className="aspect-square bg-dark-700 rounded mb-3 flex items-center justify-center overflow-hidden">
                   <img
-                    src={item.thumbnail_url}
+                    src={item.board_thumbnail}
                     alt={item.title}
                     className="w-full h-full object-cover"
                     onError={(e) => {

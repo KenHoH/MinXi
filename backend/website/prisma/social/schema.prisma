@@ -11,7 +11,7 @@ enum RoomType {
 }
 
 enum ParticipantRole {
-  OWNER
+  OWNER 
   ADMIN
   MEMBER
 }

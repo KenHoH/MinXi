@@ -19,6 +19,7 @@ model Message {
   roomId    String
   content   String // text content
   mediaUrl  String? // image or video URL 
+  type      String   @default("TEXT") // TEXT, IMAGE, VIDEO
   createdAt DateTime @default(now())
   authorId  Int
 

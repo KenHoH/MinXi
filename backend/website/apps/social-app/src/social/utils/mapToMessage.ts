@@ -8,5 +8,6 @@ export function mapMessageToResponse(message: any): MessageResponseDto {
     mediaUrl: message.mediaUrl,
     createdAt: message.createdAt,
     authorId: message.authorId,
+    type: message.type,
   };
 }

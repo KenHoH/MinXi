@@ -9,6 +9,8 @@ export const USER_MSG = {
   updateLike: 'user.updateLike',
   updateReport: 'user.updateReport',
   findByName: 'user.findByName',
+  findOneByName: 'user.findOneByName',
+  findOneById: 'user.findOneById',
 };
 
 export const AUTH_MSG = {
@@ -31,26 +33,33 @@ export const CONTENT_MSG = {
   updateView: 'content.view',
   updateLike: 'content.like',
   updatePin: 'content.pin',
-  updateComment: 'content.like',
+  updateComment: 'content.comment',
   updateReport: 'content.report',
   setPrivate: 'content.private',
   setPublic: 'content.public',
   findAll: 'content.findAll',
+  findAllPage: 'content.findAllPage',
   findOne: 'content.findOne',
   getStats: 'content.getStats',
   getByUser: 'content.getByUser',
+  getByUserAll: 'content.getByUserAll',
+  getByUserAllPublic: 'content.getByUserAllPublic',
   getFile: 'content.getFile',
   getFiles: 'content.getFiles',
   getFollowingContent: 'content.getFollowingContent',
   getFriendContent: 'content.getFriendContent',
   getLikedByUser: 'content.getLikedByUser',
   getPinnedByUser: 'content.getPinnedByUser',
+  getAncestorPost: 'content.getAncestorPost',
+  getChildPost: 'content.getChildPost',
+  getFullPost: 'content.getFullPost',
   remove: 'content.remove',
 };
 
 export const HISTORY_MSG = {
   upsert: 'history.upsert',
   getByUser: 'history.getByUser',
+  getByUserAndContent: 'history.getByUserAndContent',
 };
 
 export const BOARD_MSG = {
@@ -63,6 +72,7 @@ export const BOARD_MSG = {
   deleteBoard: 'board.delete',
   getBoardByUser: 'board.getByUser',
   getContentIdsByBoardId: 'board.getContentIdsByBoardId',
+  getContentByBoardId: 'board.getContentByBoardId',
 };
 
 export const CONNECTION_MSG = {
@@ -110,8 +120,16 @@ export const SOCIAL_MSG = {
 
   findDM: 'social.findDM',
   getAllDM: 'social.getAllDM',
+  getRoomDMByUserId: 'social.getRoomDMByUserId',
+  getRoomGroupJoinedByUserId: 'social.getRoomGroupJoinedByUserId',
+  getRoomGroupAll: 'social.getRoomGroupAll',
+  getRoomCommunityJoinedByUserId: 'social.getRoomCommunityJoinedByUserId',
+  getRoomCommunityAll: 'social.getRoomCommunityAll',
 
   getMedia: 'social.getMedia',
+  deleteMessageByRoom: 'social.deleteMessageByRoom',
+  deleteMessage: 'social.deleteMessage',
+  deleteRoom: 'social.deleteRoom',
 };
 export const COMMENT_MSG = {
   create: 'comment.create',

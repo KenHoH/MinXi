@@ -11,6 +11,7 @@ import { Inject, Injectable } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
 import { firstValueFrom } from 'rxjs';
 import { IContentService } from '@app/contracts/interfaces/content/IContentService';
+import { PageContentRes } from '@app/contracts/shared-dto/content/res/page.content.dto';
 
 @Injectable()
 export class ContentService implements IContentService {
@@ -46,6 +47,20 @@ export class ContentService implements IContentService {
     );
   }
 
+  async findAllPage(
+    area_id: number,
+    page: number,
+    limit: number,
+  ): Promise<PageContentRes> {
+    return await firstValueFrom(
+      this.contentClient.send(CONTENT_MSG.findAllPage, {
+        area_id,
+        page,
+        limit,
+      }),
+    );
+  }
+
   async findOne(content_id: number, area_id: number): Promise<FullContentDto> {
     return await firstValueFrom(
       this.contentClient.send(CONTENT_MSG.findOne, { content_id, area_id }),
@@ -55,6 +70,17 @@ export class ContentService implements IContentService {
   async getByUser(creator_id: number): Promise<FullContentDto[]> {
     return await firstValueFrom(
       this.contentClient.send(CONTENT_MSG.getByUser, creator_id),
+    );
+  }
+
+  async getByUserAll(creator_id: number): Promise<FullContentDto[]> {
+    return await firstValueFrom(
+      this.contentClient.send(CONTENT_MSG.getByUserAll, creator_id),
+    );
+  }
+  async getByUserAllPublic(creator_id: number): Promise<FullContentDto[]> {
+    return await firstValueFrom(
+      this.contentClient.send(CONTENT_MSG.getByUserAllPublic, creator_id),
     );
   }
 
@@ -167,6 +193,31 @@ export class ContentService implements IContentService {
   async getPinnedByUser(userId: number): Promise<FullContentDto[]> {
     return firstValueFrom(
       this.contentClient.send(CONTENT_MSG.getPinnedByUser, userId),
+    );
+  }
+  async getAncestorPost(
+    contentId: number,
+    areaId: number,
+  ): Promise<FullContentDto[]> {
+    return await firstValueFrom(
+      this.contentClient.send(CONTENT_MSG.getAncestorPost, {
+        contentId,
+        areaId,
+      }),
+    );
+  }
+  async getChildPost(parentId: number): Promise<FullContentDto[]> {
+    return await firstValueFrom(
+      this.contentClient.send(CONTENT_MSG.getChildPost, parentId),
+    );
+  }
+
+  async getFullPost(
+    contentId: number,
+    areaId: number,
+  ): Promise<FullContentDto> {
+    return await firstValueFrom(
+      this.contentClient.send(CONTENT_MSG.getFullPost, { contentId, areaId }),
     );
   }
 }

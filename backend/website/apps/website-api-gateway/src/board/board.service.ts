@@ -7,6 +7,7 @@ import { RemoveContentDto } from '@app/contracts/shared-dto/board/request/remove
 import { UpdateContentDto } from '@app/contracts/shared-dto/board/request/update-content.dto';
 import { BoardDto } from '@app/contracts/shared-dto/board/response/board.dto';
 import { ContentIdsResDto } from '@app/contracts/shared-dto/content/res/content-ids.res.dto';
+import { FullContentDto } from '@app/contracts/shared-dto/content/res/full.content.dto';
 import { Inject, Injectable } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
 import { firstValueFrom } from 'rxjs';
@@ -32,24 +33,33 @@ export class BoardService {
     return await firstValueFrom(this.boardClient.send(BOARD_MSG.setPublic, id));
   }
 
-  async addContent(boardId: number, dto: AddContentDto): Promise<Ack> {
+  async addContent(
+    boardId: number,
+    area_id: number,
+    dto: AddContentDto,
+  ): Promise<Ack> {
     return await firstValueFrom(
-      this.boardClient.send(BOARD_MSG.addContent, { boardId, dto }),
+      this.boardClient.send(BOARD_MSG.addContent, { boardId, area_id, dto }),
     );
   }
 
-  async removeContent(boardId: number, dto: RemoveContentDto): Promise<Ack> {
+  async removeContent(
+    boardId: number,
+    area_id: number,
+    dto: RemoveContentDto,
+  ): Promise<Ack> {
     return await firstValueFrom(
-      this.boardClient.send(BOARD_MSG.removeContent, { boardId, dto }),
+      this.boardClient.send(BOARD_MSG.removeContent, { boardId, area_id, dto }),
     );
   }
 
   async updateContent(
     boardId: number,
+    area_id: number,
     dto: UpdateContentDto,
   ): Promise<BoardDto> {
     return await firstValueFrom(
-      this.boardClient.send(BOARD_MSG.updateContent, { boardId, dto }),
+      this.boardClient.send(BOARD_MSG.updateContent, { boardId, area_id, dto }),
     );
   }
 
@@ -59,15 +69,23 @@ export class BoardService {
     );
   }
 
-  async getBoardByUser(userId: number): Promise<BoardDto[]> {
+  async getBoardByUser(userId: number, area_id: number): Promise<BoardDto[]> {
     return await firstValueFrom(
-      this.boardClient.send(BOARD_MSG.getBoardByUser, userId),
+      this.boardClient.send(BOARD_MSG.getBoardByUser, { userId, area_id }),
     );
   }
 
   async getContentIdsByBoardId(boardId: number): Promise<ContentIdsResDto> {
     return await firstValueFrom(
       this.boardClient.send(BOARD_MSG.getContentIdsByBoardId, { boardId }),
+    );
+  }
+  async getContentByBoardId(
+    boardId: number,
+    areaId: number,
+  ): Promise<FullContentDto[]> {
+    return await firstValueFrom(
+      this.boardClient.send(BOARD_MSG.getContentByBoardId, { boardId, areaId }),
     );
   }
 }

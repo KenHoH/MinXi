@@ -12,8 +12,8 @@ import { SendMessageDto } from '@app/contracts/shared-dto/social/request/sendMes
 import { UpdateParticipantRoleDto } from '@app/contracts/shared-dto/social/request/updateParticipantRoleDTO';
 import { MessageResponseDto } from '@app/contracts/shared-dto/social/response/messageResDTO';
 import { ParticipantResponseDto } from '@app/contracts/shared-dto/social/response/participantDTO';
-
 import { RoomResponseDto } from '@app/contracts/shared-dto/social/response/RoomResDTO';
+import { RoomResDmDto } from '@app/contracts/shared-dto/social/response/RoomResDmDTO';
 import { ParticipantTotalResDTO } from '@app/contracts/shared-dto/social/response/totalParticipantResDTO';
 
 export interface ISocialService {
@@ -36,5 +36,14 @@ export interface ISocialService {
   getMedia(dto: GetMediaDto): Promise<MessageResponseDto>;
   sendMessage(dto: SendMessageDto): Promise<MessageResponseDto>;
   getMessage(dto: GetMessagesDto): Promise<MessageResponseDto[]>;
+  delete(id: string): Promise<Ack>;
+  deleteMessageByRoom(roomId: string): Promise<Ack>;
+  deleteRoom(roomId: string): Promise<Ack>;
   findDM(dto: FindDmDto): Promise<RoomResponseDto>;
+
+  getRoomDMByUserId(userId: number): Promise<RoomResDmDto[]>;
+  getRoomGroupJoinedByUserId(userId: number): Promise<RoomResponseDto[]>;
+  getRoomGroupAll(): Promise<RoomResponseDto[]>;
+  getRoomCommunityJoinedByUserId(userId: number): Promise<RoomResponseDto[]>;
+  getRoomCommunityAll(): Promise<RoomResponseDto[]>;
 }

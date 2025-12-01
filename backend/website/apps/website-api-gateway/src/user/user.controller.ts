@@ -68,6 +68,12 @@ export class UserController {
     return this.userService.findOne(+id);
   }
 
+  @Get('/user/full/:id')
+  @Public()
+  findOneById(@Param('id', ParseIntPipe) id: number): Promise<UserDto> {
+    return this.userService.findOneById(+id);
+  }
+
   @Patch(':id/profile')
   @ApiConsumes('multipart/form-data')
   @ApiBody({
@@ -99,6 +105,12 @@ export class UserController {
   ): Promise<UserDto> {
     const creator_id = parseInt(body.creator_id, 10);
     const profileFile = files.profile ? files.profile[0] : null;
+
+    if (isNaN(creator_id)) {
+      throw new BadRequestException(
+        'creator_id and area_id must be valid numbers',
+      );
+    }
 
     if (!profileFile) {
       throw new BadRequestException('Profile file is required');
@@ -168,5 +180,10 @@ export class UserController {
     });
 
     return userData;
+  }
+  @Post('/one/name')
+  @Public()
+  findOneByName(@Body() body: NameRequest): Promise<UserDto> {
+    return this.userService.findOneByName(body);
   }
 }

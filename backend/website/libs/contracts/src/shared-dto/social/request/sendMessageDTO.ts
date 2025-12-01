@@ -11,6 +11,8 @@ export class SendMessageDto {
   @ApiProperty({ description: 'Message content', example: 'Hello everyone!' })
   @IsString()
   content: string;
+  @ApiProperty({ description: 'Type metadata', example: 'TEXT' })
+  type: string;
 
   @ApiProperty({ description: 'Author user ID', example: 1 })
   @IsNumber()

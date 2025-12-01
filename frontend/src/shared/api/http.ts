@@ -1,5 +1,4 @@
 import axios from "axios";
-import { AuthService } from "../../services/api";
 
 const http = axios.create({
   baseURL: "http://localhost:3000/api",
@@ -47,6 +46,13 @@ http.interceptors.response.use(
 
         return http(original);
       } catch (refreshError) {
+        const clearCookie = (name: string) => {
+          document.cookie = `${name}=; path=/; max-age=0`;
+        };
+        clearCookie("accessToken");
+        clearCookie("refreshToken");
+        clearCookie("user");
+        window.location.href = "/login";
         return Promise.reject(error);
       }
     }

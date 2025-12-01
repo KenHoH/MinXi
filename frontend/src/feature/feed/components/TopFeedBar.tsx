@@ -1,22 +1,12 @@
 import { useState } from "react";
 
 interface TopFeedBarProps {
-  userBoards?: string[];
+  filters: string[];
   onFilterChange?: (filter: string) => void;
 }
 
-const defaultFilters = ["All", "Followed", "Friends"];
-
-export function TopFeedBar({
-  userBoards = [],
-  onFilterChange,
-}: TopFeedBarProps) {
+export function TopFeedBar({ filters, onFilterChange }: TopFeedBarProps) {
   const [activeFilter, setActiveFilter] = useState("All");
-
-  const filters = [
-    ...defaultFilters,
-    ...userBoards.map((board) => `Board: ${board}`),
-  ];
 
   const handleFilterClick = (filter: string) => {
     setActiveFilter(filter);

@@ -66,16 +66,39 @@ export class SseService implements ISSEService {
       authorId: dto.authorId,
       content: dto.content,
       mediaUrl: dto.mediaUrl,
-      createdAt: dto.createdAt,
+      createdAt: new Date(),
       roomId: dto.roomId,
+      type: dto.type || 'TEXT',
     };
   }
+
+  async sendNotification(userId: number, dto: any): Promise<Ack> {
+    const connection = this.roomConnections.get(userId.toString());
+
+    if (!connection) {
+      throw httpToRpc(
+        new HttpException('Connection not found', HttpStatus.NOT_FOUND),
+      );
+    }
+
+    connection.next({
+      type: 'NEW_NOTIFICATION',
+      data: dto,
+    });
+
+    return {
+      Valid: true,
+      Msg: 'Successfully sent notification',
+    };
+  }
+
   private async forwardMessage(dto: BroadcastMsgReq) {
     const payload: SendMessageDto = {
       authorId: dto.authorId,
       content: dto.content,
       mediaUrl: dto.mediaUrl,
       roomId: dto.roomId,
+      type: dto.type || 'TEXT',
     };
 
     try {

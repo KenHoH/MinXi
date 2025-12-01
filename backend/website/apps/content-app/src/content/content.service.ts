@@ -26,6 +26,7 @@ import {
   HISTORY_MSG,
 } from '@app/common/constants/messageEvent';
 import { mapToContent } from './utils/mapToContent';
+import { PageContentRes } from '@app/contracts/shared-dto/content/res/page.content.dto';
 
 @Injectable()
 export class ContentService implements IContentService {
@@ -45,19 +46,129 @@ export class ContentService implements IContentService {
       );
     }
 
-    if (
-      !dto.creator_id ||
-      !dto.title ||
-      !dto.thumbnail ||
-      !dto.contents ||
-      dto.contents.length === 0
-    ) {
+    if (!dto.creator_id || !dto.title) {
       throw httpToRpc(
         new HttpException(
-          'Missing required fields: creator_id, title, thumbnail, or contents',
+          'Missing required fields: creator_id and title',
           HttpStatus.BAD_REQUEST,
         ),
       );
+    }
+
+    if (dto.post_type !== 'post') {
+      if (!dto.thumbnail || !dto.contents || dto.contents.length === 0) {
+        throw httpToRpc(
+          new HttpException(
+            `Post type '${dto.post_type}' requires both thumbnail and contents`,
+            HttpStatus.BAD_REQUEST,
+          ),
+        );
+      }
+    }
+
+    if (!dto.contents && dto.post_type === 'post') {
+      try {
+        const result = await this.prisma
+          .$transaction(async (tx) => {
+            const content = await tx.content
+              .create({
+                data: {
+                  creator_id: dto.creator_id,
+                  parent_id: dto.parent_id ?? null,
+                  title: dto.title,
+                  description: dto.description,
+                  visibilityPrivate: dto.visibilityPrivate,
+                  post_type: dto.post_type,
+                  area_id: dto.area_id,
+                  published_at: new Date(dto.published_at),
+                },
+              })
+              .catch((error) => {
+                this.logger.error(
+                  'Failed to create content record',
+                  error.message,
+                );
+                throw httpToRpc(
+                  new HttpException(
+                    'Failed to create content record',
+                    HttpStatus.INTERNAL_SERVER_ERROR,
+                  ),
+                );
+              });
+
+            let thumbnail: FileDto | null = null;
+            if (dto.thumbnail) {
+              thumbnail = await tx.file
+                .create({
+                  data: {
+                    content_area_id: dto.area_id,
+                    content_id: content.content_id,
+                    filepath: dto.thumbnail,
+                    type: 'thumbnail',
+                  },
+                })
+                .catch((error) => {
+                  this.logger.error(
+                    'Failed to create thumbnail file',
+                    error.message,
+                  );
+                  throw httpToRpc(
+                    new HttpException(
+                      'Failed to create thumbnail file',
+                      HttpStatus.INTERNAL_SERVER_ERROR,
+                    ),
+                  );
+                });
+            }
+            const posts: FileDto[] = [];
+
+            const fullResponse: FullContentDto = {
+              area_id: content.area_id,
+              content_id: content.content_id,
+              creator_id: content.creator_id,
+              contents: posts,
+              published_at: content.published_at,
+              description: content.description,
+              parent_id: content.parent_id ?? undefined,
+              post_type: content.post_type,
+              comments: content.comments,
+              likes: content.likes,
+              pins: content.pins,
+              reports: content.reports,
+              title: content.title,
+              views: content.views,
+              visibilityPrivate: content.visibilityPrivate,
+              thumbnail: thumbnail,
+            };
+
+            return fullResponse;
+          })
+          .catch((error) => {
+            if (error.status) {
+              throw error;
+            }
+            this.logger.error('Transaction failed', error.message);
+            throw httpToRpc(
+              new HttpException(
+                'Failed to create content - transaction rolled back',
+                HttpStatus.INTERNAL_SERVER_ERROR,
+              ),
+            );
+          });
+
+        return result;
+      } catch (error) {
+        if (error.status) {
+          throw error;
+        }
+        this.logger.error('Failed to create content', error.message);
+        throw httpToRpc(
+          new HttpException(
+            'Failed to create content',
+            HttpStatus.INTERNAL_SERVER_ERROR,
+          ),
+        );
+      }
     }
 
     try {
@@ -70,6 +181,7 @@ export class ContentService implements IContentService {
                 parent_id: dto.parent_id ?? null,
                 title: dto.title,
                 description: dto.description,
+                visibilityPrivate: dto.visibilityPrivate,
                 post_type: dto.post_type,
                 area_id: dto.area_id,
                 published_at: new Date(dto.published_at),
@@ -88,57 +200,76 @@ export class ContentService implements IContentService {
               );
             });
 
-          const thumbnail = await tx.file
-            .create({
-              data: {
-                content_area_id: dto.area_id,
-                content_id: content.content_id,
-                filepath: dto.thumbnail,
-                type: 'thumbnail',
-              },
-            })
-            .catch((error) => {
-              this.logger.error(
-                'Failed to create thumbnail file',
-                error.message,
-              );
-              throw httpToRpc(
-                new HttpException(
-                  'Failed to create thumbnail file',
-                  HttpStatus.INTERNAL_SERVER_ERROR,
-                ),
-              );
-            });
-
-          const posts: FileDto[] = [];
-          for (const file of dto.contents) {
-            try {
-              const res = await tx.file.create({
+          let thumbnail: FileDto | null = null;
+          if (dto.thumbnail) {
+            thumbnail = await tx.file
+              .create({
                 data: {
                   content_area_id: dto.area_id,
                   content_id: content.content_id,
-                  filepath: file.filepath,
-                  type: file.type,
+                  filepath: dto.thumbnail,
+                  type: 'thumbnail',
                 },
+              })
+              .catch((error) => {
+                this.logger.error(
+                  'Failed to create thumbnail file',
+                  error.message,
+                );
+                throw httpToRpc(
+                  new HttpException(
+                    'Failed to create thumbnail file',
+                    HttpStatus.INTERNAL_SERVER_ERROR,
+                  ),
+                );
               });
-              posts.push({
-                file_id: res.file_id,
-                filepath: res.filepath,
-                content_id: content.content_id,
-                content_area_id: content.area_id,
-                type: res.type,
-              });
-            } catch (error) {
-              this.logger.error(
-                `Failed to create content file: ${file.filepath}`,
-                error.message,
-              );
-              throw httpToRpc(
-                new HttpException(
+          }
+
+          if (
+            (!dto.contents ||
+              dto.contents.length === 0 ||
+              dto.contents == null ||
+              dto.contents == undefined) &&
+            !dto.thumbnail
+          ) {
+            throw httpToRpc(
+              new HttpException(
+                'Either contents or thumbnail must be provided',
+                HttpStatus.BAD_REQUEST,
+              ),
+            );
+          }
+          const posts: FileDto[] = [];
+          if (dto.contents && dto.contents.length > 0) {
+            for (const file of dto.contents) {
+              try {
+                const res = await tx.file.create({
+                  data: {
+                    content_area_id: dto.area_id,
+                    content_id: content.content_id,
+                    filepath: file.filepath,
+                    type: file.type,
+                  },
+                });
+                posts.push({
+                  file_id: res.file_id,
+                  filepath: res.filepath,
+                  content_id: content.content_id,
+                  content_area_id: content.area_id,
+                  type: res.type,
+                });
+              } catch (error) {
+                this.logger.error(
                   `Failed to create content file: ${file.filepath}`,
-                  HttpStatus.INTERNAL_SERVER_ERROR,
-                ),
-              );
+                  error.message,
+                );
+                throw httpToRpc(
+                  new HttpException(
+                    `Failed to create content file: ${file.filepath}`,
+                    HttpStatus.INTERNAL_SERVER_ERROR,
+                  ),
+                );
+              }
             }
           }
 
@@ -147,6 +278,7 @@ export class ContentService implements IContentService {
             content_id: content.content_id,
             creator_id: content.creator_id,
             contents: posts,
+            published_at: content.published_at,
             description: content.description,
             parent_id: content.parent_id ?? undefined,
             post_type: content.post_type,
@@ -231,7 +363,11 @@ export class ContentService implements IContentService {
         .$transaction(async (tx) => {
           const contents = await tx.content
             .findMany({
-              where: { area_id, published_at: { lte: new Date() } },
+              where: {
+                area_id,
+                published_at: { lte: new Date() },
+                visibilityPrivate: false,
+              },
               orderBy: { content_id: 'asc' },
             })
             .catch((error) => {
@@ -256,8 +392,8 @@ export class ContentService implements IContentService {
               });
 
               const thumbnail = files.find((file) => file.type === 'thumbnail');
-
-              if (!thumbnail) {
+              // For posts without thumbnail, still include them (text-only posts allowed)
+              if (!thumbnail && content.post_type !== 'post') {
                 this.logger.warn(
                   `Content ${content.content_id} missing thumbnail`,
                 );
@@ -287,14 +423,17 @@ export class ContentService implements IContentService {
                 reports: content.reports,
                 title: content.title,
                 views: content.views,
+                published_at: content.published_at,
                 visibilityPrivate: content.visibilityPrivate,
-                thumbnail: {
-                  file_id: thumbnail.file_id,
-                  filepath: thumbnail.filepath,
-                  content_id: thumbnail.content_id,
-                  content_area_id: thumbnail.content_area_id,
-                  type: thumbnail.type,
-                },
+                thumbnail: thumbnail
+                  ? {
+                      file_id: thumbnail.file_id,
+                      filepath: thumbnail.filepath,
+                      content_id: thumbnail.content_id,
+                      content_area_id: thumbnail.content_area_id,
+                      type: thumbnail.type,
+                    }
+                  : null,
                 contents: mappedFiles,
               };
 
@@ -390,7 +529,8 @@ export class ContentService implements IContentService {
             });
 
           const thumbnail = files.find((file) => file.type === 'thumbnail');
-          if (!thumbnail) {
+          // For posts without thumbnail, still allow them (text-only posts)
+          if (!thumbnail && content.post_type !== 'post') {
             throw httpToRpc(
               new HttpException('Thumbnail not found', HttpStatus.NOT_FOUND),
             );
@@ -407,26 +547,29 @@ export class ContentService implements IContentService {
             }));
 
           const fullContent: FullContentDto = {
+            area_id: content.area_id,
             content_id: content.content_id,
             creator_id: content.creator_id,
-            parent_id: content.parent_id ?? undefined,
-            area_id: content.area_id,
-            title: content.title,
             description: content.description,
+            parent_id: content.parent_id ?? undefined,
             post_type: content.post_type,
-            visibilityPrivate: content.visibilityPrivate,
-            views: content.views,
-            likes: content.likes,
             comments: content.comments,
+            likes: content.likes,
             pins: content.pins,
             reports: content.reports,
-            thumbnail: {
-              file_id: thumbnail.file_id,
-              filepath: thumbnail.filepath,
-              content_id: thumbnail.content_id,
-              content_area_id: thumbnail.content_area_id,
-              type: thumbnail.type,
-            },
+            title: content.title,
+            views: content.views,
+            published_at: content.published_at,
+            visibilityPrivate: content.visibilityPrivate,
+            thumbnail: thumbnail
+              ? {
+                  file_id: thumbnail.file_id,
+                  filepath: thumbnail.filepath,
+                  content_id: thumbnail.content_id,
+                  content_area_id: thumbnail.content_area_id,
+                  type: thumbnail.type,
+                }
+              : null,
             contents: mappedFiles,
           };
 
@@ -466,7 +609,11 @@ export class ContentService implements IContentService {
         .$transaction(async (tx) => {
           const contents = await tx.content
             .findMany({
-              where: { creator_id, published_at: { lte: new Date() } },
+              where: {
+                creator_id,
+                published_at: { lte: new Date() },
+                visibilityPrivate: false,
+              },
               orderBy: { created_at: 'desc' },
             })
             .catch((error) => {
@@ -491,7 +638,124 @@ export class ContentService implements IContentService {
               });
 
               const thumbnail = files.find((file) => file.type === 'thumbnail');
-              if (!thumbnail) {
+              if (!thumbnail && content.post_type !== 'post') {
+                this.logger.warn(
+                  `Content ${content.content_id} missing thumbnail`,
+                );
+                continue;
+              }
+
+              const mappedFiles: FileDto[] = files
+                .filter((file) => file.type !== 'thumbnail')
+                .map((file) => ({
+                  file_id: file.file_id,
+                  filepath: file.filepath,
+                  content_id: file.content_id,
+                  content_area_id: file.content_area_id,
+                  type: file.type,
+                }));
+
+              allContents.push({
+                content_id: content.content_id,
+                creator_id: content.creator_id,
+                parent_id: content.parent_id ?? undefined,
+                area_id: content.area_id,
+                title: content.title,
+                published_at: content.published_at,
+                description: content.description,
+                post_type: content.post_type,
+                visibilityPrivate: content.visibilityPrivate,
+                views: content.views,
+                likes: content.likes,
+                comments: content.comments,
+                pins: content.pins,
+                reports: content.reports,
+                thumbnail: thumbnail
+                  ? {
+                      file_id: thumbnail.file_id,
+                      filepath: thumbnail.filepath,
+                      content_id: thumbnail.content_id,
+                      content_area_id: thumbnail.content_area_id,
+                      type: thumbnail.type,
+                    }
+                  : null,
+                contents: mappedFiles,
+              });
+            } catch (error) {
+              this.logger.error(
+                `Failed to fetch files for content ${content.content_id}`,
+                error.message,
+              );
+              throw httpToRpc(
+                new HttpException(
+                  `Failed to fetch files for content ${content.content_id}`,
+                  HttpStatus.INTERNAL_SERVER_ERROR,
+                ),
+              );
+            }
+          }
+
+          return allContents;
+        })
+        .catch((error) => {
+          if (error.status) {
+            throw error;
+          }
+          this.logger.error('Transaction failed', error.message);
+          throw httpToRpc(
+            new HttpException(
+              'Failed to fetch user contents - transaction rolled back',
+              HttpStatus.INTERNAL_SERVER_ERROR,
+            ),
+          );
+        });
+
+      return result;
+    } catch (error) {
+      if (error.status) {
+        throw error;
+      }
+      this.logger.error('Failed to fetch user contents', error.message);
+      throw httpToRpc(
+        new HttpException(
+          'Failed to fetch user contents',
+          HttpStatus.INTERNAL_SERVER_ERROR,
+        ),
+      );
+    }
+  }
+  async getByUserAll(creator_id: number): Promise<FullContentDto[]> {
+    try {
+      const result = await this.prisma
+        .$transaction(async (tx) => {
+          const contents = await tx.content
+            .findMany({
+              where: { creator_id },
+              orderBy: { created_at: 'desc' },
+            })
+            .catch((error) => {
+              this.logger.error('Failed to fetch user contents', error.message);
+              throw httpToRpc(
+                new HttpException(
+                  'Failed to fetch user contents',
+                  HttpStatus.INTERNAL_SERVER_ERROR,
+                ),
+              );
+            });
+
+          const allContents: FullContentDto[] = [];
+
+          for (const content of contents) {
+            try {
+              const files = await tx.file.findMany({
+                where: {
+                  content_id: content.content_id,
+                  content_area_id: content.area_id,
+                },
+              });
+
+              const thumbnail = files.find((file) => file.type === 'thumbnail');
+              if (!thumbnail && content.post_type !== 'post') {
                 this.logger.warn(
                   `Content ${content.content_id} missing thumbnail`,
                 );
@@ -515,6 +779,7 @@ export class ContentService implements IContentService {
                 area_id: content.area_id,
                 title: content.title,
                 description: content.description,
+                published_at: content.published_at,
                 post_type: content.post_type,
                 visibilityPrivate: content.visibilityPrivate,
                 views: content.views,
@@ -522,13 +787,137 @@ export class ContentService implements IContentService {
                 comments: content.comments,
                 pins: content.pins,
                 reports: content.reports,
-                thumbnail: {
-                  file_id: thumbnail.file_id,
-                  filepath: thumbnail.filepath,
-                  content_id: thumbnail.content_id,
-                  content_area_id: thumbnail.content_area_id,
-                  type: thumbnail.type,
+                thumbnail: thumbnail
+                  ? {
+                      file_id: thumbnail.file_id,
+                      filepath: thumbnail.filepath,
+                      content_id: thumbnail.content_id,
+                      content_area_id: thumbnail.content_area_id,
+                      type: thumbnail.type,
+                    }
+                  : null,
+                contents: mappedFiles,
+              });
+            } catch (error) {
+              this.logger.error(
+                `Failed to fetch files for content ${content.content_id}`,
+                error.message,
+              );
+              throw httpToRpc(
+                new HttpException(
+                  `Failed to fetch files for content ${content.content_id}`,
+                  HttpStatus.INTERNAL_SERVER_ERROR,
+                ),
+              );
+            }
+          }
+
+          return allContents;
+        })
+        .catch((error) => {
+          if (error.status) {
+            throw error;
+          }
+          this.logger.error('Transaction failed', error.message);
+          throw httpToRpc(
+            new HttpException(
+              'Failed to fetch user contents - transaction rolled back',
+              HttpStatus.INTERNAL_SERVER_ERROR,
+            ),
+          );
+        });
+
+      return result;
+    } catch (error) {
+      if (error.status) {
+        throw error;
+      }
+      this.logger.error('Failed to fetch user contents', error.message);
+      throw httpToRpc(
+        new HttpException(
+          'Failed to fetch user contents',
+          HttpStatus.INTERNAL_SERVER_ERROR,
+        ),
+      );
+    }
+  }
+
+  async getByUserAllPublic(creator_id: number): Promise<FullContentDto[]> {
+    try {
+      const result = await this.prisma
+        .$transaction(async (tx) => {
+          const contents = await tx.content
+            .findMany({
+              where: {
+                creator_id,
+                published_at: { lte: new Date() },
+                visibilityPrivate: false,
+              },
+              orderBy: { created_at: 'desc' },
+            })
+            .catch((error) => {
+              this.logger.error('Failed to fetch user contents', error.message);
+              throw httpToRpc(
+                new HttpException(
+                  'Failed to fetch user contents',
+                  HttpStatus.INTERNAL_SERVER_ERROR,
+                ),
+              );
+            });
+
+          const allContents: FullContentDto[] = [];
+
+          for (const content of contents) {
+            try {
+              const files = await tx.file.findMany({
+                where: {
+                  content_id: content.content_id,
+                  content_area_id: content.area_id,
                 },
+              });
+
+              const thumbnail = files.find((file) => file.type === 'thumbnail');
+              if (!thumbnail && content.post_type !== 'post') {
+                this.logger.warn(
+                  `Content ${content.content_id} missing thumbnail`,
+                );
+                continue;
+              }
+
+              const mappedFiles: FileDto[] = files
+                .filter((file) => file.type !== 'thumbnail')
+                .map((file) => ({
+                  file_id: file.file_id,
+                  filepath: file.filepath,
+                  content_id: file.content_id,
+                  content_area_id: file.content_area_id,
+                  type: file.type,
+                }));
+
+              allContents.push({
+                content_id: content.content_id,
+                creator_id: content.creator_id,
+                parent_id: content.parent_id ?? undefined,
+                area_id: content.area_id,
+                title: content.title,
+                description: content.description,
+                published_at: content.published_at,
+                post_type: content.post_type,
+                visibilityPrivate: content.visibilityPrivate,
+                views: content.views,
+                likes: content.likes,
+                comments: content.comments,
+                pins: content.pins,
+                reports: content.reports,
+                thumbnail: thumbnail
+                  ? {
+                      file_id: thumbnail.file_id,
+                      filepath: thumbnail.filepath,
+                      content_id: thumbnail.content_id,
+                      content_area_id: thumbnail.content_area_id,
+                      type: thumbnail.type,
+                    }
+                  : null,
                 contents: mappedFiles,
               });
             } catch (error) {
@@ -917,7 +1306,7 @@ export class ContentService implements IContentService {
               });
 
               const thumbnail = files.find((file) => file.type === 'thumbnail');
-              if (!thumbnail) {
+              if (!thumbnail && content.post_type !== 'post') {
                 this.logger.warn(
                   `Content ${content.content_id} missing thumbnail`,
                 );
@@ -941,6 +1330,7 @@ export class ContentService implements IContentService {
                 area_id: content.area_id,
                 title: content.title,
                 description: content.description,
+                published_at: content.published_at,
                 post_type: content.post_type,
                 visibilityPrivate: content.visibilityPrivate,
                 views: content.views,
@@ -948,13 +1338,15 @@ export class ContentService implements IContentService {
                 comments: content.comments,
                 pins: content.pins,
                 reports: content.reports,
-                thumbnail: {
-                  file_id: thumbnail.file_id,
-                  filepath: thumbnail.filepath,
-                  content_id: thumbnail.content_id,
-                  content_area_id: thumbnail.content_area_id,
-                  type: thumbnail.type,
-                },
+                thumbnail: thumbnail
+                  ? {
+                      file_id: thumbnail.file_id,
+                      filepath: thumbnail.filepath,
+                      content_id: thumbnail.content_id,
+                      content_area_id: thumbnail.content_area_id,
+                      type: thumbnail.type,
+                    }
+                  : null,
                 contents: mappedFiles,
               });
             } catch (error) {
@@ -1052,7 +1444,7 @@ export class ContentService implements IContentService {
               });
 
               const thumbnail = files.find((file) => file.type === 'thumbnail');
-              if (!thumbnail) {
+              if (!thumbnail && content.post_type !== 'post') {
                 this.logger.warn(
                   `Content ${content.content_id} missing thumbnail`,
                 );
@@ -1081,15 +1473,18 @@ export class ContentService implements IContentService {
                 views: content.views,
                 likes: content.likes,
                 comments: content.comments,
+                published_at: content.published_at,
                 pins: content.pins,
                 reports: content.reports,
-                thumbnail: {
-                  file_id: thumbnail.file_id,
-                  filepath: thumbnail.filepath,
-                  content_id: thumbnail.content_id,
-                  content_area_id: thumbnail.content_area_id,
-                  type: thumbnail.type,
-                },
+                thumbnail: thumbnail
+                  ? {
+                      file_id: thumbnail.file_id,
+                      filepath: thumbnail.filepath,
+                      content_id: thumbnail.content_id,
+                      content_area_id: thumbnail.content_area_id,
+                      type: thumbnail.type,
+                    }
+                  : null,
                 contents: mappedFiles,
               });
             } catch (error) {
@@ -1191,7 +1586,7 @@ export class ContentService implements IContentService {
               });
 
               const thumbnail = files.find((file) => file.type === 'thumbnail');
-              if (!thumbnail) {
+              if (!thumbnail && content.post_type !== 'post') {
                 this.logger.warn(
                   `Content ${content.content_id} missing thumbnail`,
                 );
@@ -1216,19 +1611,22 @@ export class ContentService implements IContentService {
                 title: content.title,
                 description: content.description,
                 post_type: content.post_type,
+                published_at: content.published_at,
                 visibilityPrivate: content.visibilityPrivate,
                 views: content.views,
                 likes: content.likes,
                 comments: content.comments,
                 pins: content.pins,
                 reports: content.reports,
-                thumbnail: {
-                  file_id: thumbnail.file_id,
-                  filepath: thumbnail.filepath,
-                  content_id: thumbnail.content_id,
-                  content_area_id: thumbnail.content_area_id,
-                  type: thumbnail.type,
-                },
+                thumbnail: thumbnail
+                  ? {
+                      file_id: thumbnail.file_id,
+                      filepath: thumbnail.filepath,
+                      content_id: thumbnail.content_id,
+                      content_area_id: thumbnail.content_area_id,
+                      type: thumbnail.type,
+                    }
+                  : null,
                 contents: mappedFiles,
               });
             } catch (error) {
@@ -1321,7 +1719,7 @@ export class ContentService implements IContentService {
               });
 
               const thumbnail = files.find((file) => file.type === 'thumbnail');
-              if (!thumbnail) {
+              if (!thumbnail && content.post_type !== 'post') {
                 this.logger.warn(
                   `Content ${content.content_id} missing thumbnail`,
                 );
@@ -1345,6 +1743,7 @@ export class ContentService implements IContentService {
                 area_id: content.area_id,
                 title: content.title,
                 description: content.description,
+                published_at: content.published_at,
                 post_type: content.post_type,
                 visibilityPrivate: content.visibilityPrivate,
                 views: content.views,
@@ -1352,13 +1751,15 @@ export class ContentService implements IContentService {
                 comments: content.comments,
                 pins: content.pins,
                 reports: content.reports,
-                thumbnail: {
-                  file_id: thumbnail.file_id,
-                  filepath: thumbnail.filepath,
-                  content_id: thumbnail.content_id,
-                  content_area_id: thumbnail.content_area_id,
-                  type: thumbnail.type,
-                },
+                thumbnail: thumbnail
+                  ? {
+                      file_id: thumbnail.file_id,
+                      filepath: thumbnail.filepath,
+                      content_id: thumbnail.content_id,
+                      content_area_id: thumbnail.content_area_id,
+                      type: thumbnail.type,
+                    }
+                  : null,
                 contents: mappedFiles,
               });
             } catch (error) {
@@ -1397,6 +1798,388 @@ export class ContentService implements IContentService {
       }
       this.logger.warn('No pinned contents found or error occurred');
       return [];
+    }
+  }
+
+  async buildAncestorPostTree(
+    posts: FullContentDto[],
+    contentId: number,
+  ): Promise<FullContentDto[]> {
+    const map = new Map<number, FullContentDto>();
+    posts.forEach((post) => map.set(post.content_id!, post));
+
+    const chain: FullContentDto[] = [];
+    let current = map.get(contentId);
+
+    while (current) {
+      chain.push(current);
+
+      if (!current.parent_id || current.parent_id === 0) {
+        break;
+      }
+
+      current = map.get(current.parent_id);
+
+      if (!current) {
+        break;
+      }
+    }
+
+    return chain;
+  }
+
+  async getAncestorPost(
+    contentId: number,
+    areaId: number,
+  ): Promise<FullContentDto[]> {
+    if (areaId <= 0 || areaId > 3) {
+      throw httpToRpc(
+        new HttpException('Invalid area ID', HttpStatus.BAD_REQUEST),
+      );
+    }
+
+    try {
+      const content = await this.prisma.content.findUnique({
+        where: {
+          content_id_area_id: { content_id: contentId, area_id: areaId },
+        },
+      });
+
+      if (!content) {
+        throw httpToRpc(
+          new HttpException('Content not found', HttpStatus.NOT_FOUND),
+        );
+      }
+
+      if (!content.parent_id || content.parent_id === 0) {
+        return [];
+      }
+
+      const ancestors: any[] = [];
+      let current = content;
+
+      while (current && current.parent_id && current.parent_id !== 0) {
+        const parent = await this.prisma.content.findUnique({
+          where: {
+            content_id_area_id: {
+              content_id: current.parent_id,
+              area_id: areaId,
+            },
+          },
+        });
+
+        if (!parent) {
+          break;
+        }
+
+        ancestors.push(parent);
+        current = parent;
+      }
+
+      const result: FullContentDto[] = [];
+      for (const ancestor of ancestors) {
+        const fullContent = await this.findOne(ancestor.content_id, areaId);
+        result.push(fullContent);
+      }
+
+      return result;
+    } catch (error) {
+      if (error.status) {
+        throw error;
+      }
+      this.logger.error('Failed to fetch ancestor posts', error.message);
+      throw httpToRpc(
+        new HttpException(
+          'Failed to fetch ancestor posts',
+          HttpStatus.INTERNAL_SERVER_ERROR,
+        ),
+      );
+    }
+  }
+
+  async getFullPost(
+    contentId: number,
+    areaId: number,
+  ): Promise<FullContentDto> {
+    return await this.findOne(contentId, areaId);
+  }
+
+  async getChildPost(parent_id: number): Promise<FullContentDto[]> {
+    try {
+      const result = await this.prisma
+        .$transaction(async (tx) => {
+          const contents = await tx.content
+            .findMany({
+              where: {
+                post_type: 'post',
+                parent_id: parent_id,
+                published_at: { lte: new Date() },
+                visibilityPrivate: false,
+              },
+              orderBy: { created_at: 'desc' },
+            })
+            .catch((error) => {
+              this.logger.error('Failed to fetch child posts', error.message);
+              throw httpToRpc(
+                new HttpException(
+                  'Failed to fetch child posts',
+                  HttpStatus.INTERNAL_SERVER_ERROR,
+                ),
+              );
+            });
+
+          const allContents: FullContentDto[] = [];
+
+          for (const content of contents) {
+            try {
+              const files = await tx.file.findMany({
+                where: {
+                  content_id: content.content_id,
+                  content_area_id: content.area_id,
+                },
+              });
+
+              const thumbnail = files.find((file) => file.type === 'thumbnail');
+              if (!thumbnail && content.post_type !== 'post') {
+                this.logger.warn(
+                  `Content ${content.content_id} missing thumbnail`,
+                );
+                continue;
+              }
+
+              const mappedFiles: FileDto[] = files
+                .filter((file) => file.type !== 'thumbnail')
+                .map((file) => ({
+                  file_id: file.file_id,
+                  filepath: file.filepath,
+                  content_id: file.content_id,
+                  content_area_id: file.content_area_id,
+                  type: file.type,
+                }));
+
+              allContents.push({
+                content_id: content.content_id,
+                creator_id: content.creator_id,
+                parent_id: content.parent_id ?? undefined,
+                area_id: content.area_id,
+                title: content.title,
+                description: content.description,
+                post_type: content.post_type,
+                published_at: content.published_at,
+                visibilityPrivate: content.visibilityPrivate,
+                views: content.views,
+                likes: content.likes,
+                comments: content.comments,
+                pins: content.pins,
+                reports: content.reports,
+                thumbnail: thumbnail
+                  ? {
+                      file_id: thumbnail.file_id,
+                      filepath: thumbnail.filepath,
+                      content_id: thumbnail.content_id,
+                      content_area_id: thumbnail.content_area_id,
+                      type: thumbnail.type,
+                    }
+                  : null,
+                contents: mappedFiles,
+              });
+            } catch (error) {
+              this.logger.error(
+                `Failed to fetch files for content ${content.content_id}`,
+                error.message,
+              );
+              throw httpToRpc(
+                new HttpException(
+                  `Failed to fetch files for content ${content.content_id}`,
+                  HttpStatus.INTERNAL_SERVER_ERROR,
+                ),
+              );
+            }
+          }
+
+          return allContents.filter((content) => content.parent_id !== null);
+        })
+        .catch((error) => {
+          if (error.status) {
+            throw error;
+          }
+          this.logger.error('Transaction failed', error.message);
+          throw httpToRpc(
+            new HttpException(
+              'Failed to fetch child posts - transaction rolled back',
+              HttpStatus.INTERNAL_SERVER_ERROR,
+            ),
+          );
+        });
+
+      return result;
+    } catch (error) {
+      if (error.status) {
+        throw error;
+      }
+      this.logger.error('Failed to fetch child posts', error.message);
+      throw httpToRpc(
+        new HttpException(
+          'Failed to fetch child posts',
+          HttpStatus.INTERNAL_SERVER_ERROR,
+        ),
+      );
+    }
+  }
+
+  async findAllPage(
+    area_id: number,
+    page: number,
+    limit: number,
+  ): Promise<PageContentRes> {
+    if (area_id <= 0 || area_id > 3)
+      throw httpToRpc(
+        new HttpException('Invalid area ID', HttpStatus.BAD_REQUEST),
+      );
+
+    try {
+      const result = await this.prisma
+        .$transaction(async (tx) => {
+          const cursor =
+            page > 0
+              ? {
+                  content_id_area_id: {
+                    area_id: area_id,
+                    content_id: page,
+                  },
+                }
+              : undefined;
+
+          const contents = await tx.content
+            .findMany({
+              where: {
+                area_id,
+                published_at: { lte: new Date() },
+                visibilityPrivate: false,
+              },
+              skip: cursor ? 1 : 0,
+              take: limit,
+              orderBy: { content_id: 'asc' },
+              ...(cursor && { cursor }),
+            })
+            .catch((error) => {
+              this.logger.error('Failed to fetch content list', error.message);
+              throw httpToRpc(
+                new HttpException(
+                  'Failed to fetch content list',
+                  HttpStatus.INTERNAL_SERVER_ERROR,
+                ),
+              );
+            });
+
+          if (!contents || contents.length === 0) {
+            return [];
+          }
+
+          const allContents: FullContentDto[] = [];
+
+          for (const content of contents) {
+            try {
+              const files = await tx.file.findMany({
+                where: {
+                  content_area_id: area_id,
+                  content_id: content.content_id,
+                },
+              });
+
+              const thumbnail = files.find((file) => file.type === 'thumbnail');
+              if (!thumbnail && content.post_type !== 'post') {
+                this.logger.warn(
+                  `Content ${content.content_id} missing thumbnail`,
+                );
+                continue;
+              }
+
+              const mappedFiles: FileDto[] = files
+                .filter((file) => file.type !== 'thumbnail')
+                .map((file) => ({
+                  file_id: file.file_id,
+                  filepath: file.filepath,
+                  content_id: file.content_id,
+                  content_area_id: file.content_area_id,
+                  type: file.type,
+                }));
+
+              const fullContent: FullContentDto = {
+                area_id: content.area_id,
+                content_id: content.content_id,
+                creator_id: content.creator_id,
+                description: content.description,
+                parent_id: content.parent_id ?? undefined,
+                post_type: content.post_type,
+                comments: content.comments,
+                likes: content.likes,
+                pins: content.pins,
+                reports: content.reports,
+                title: content.title,
+                views: content.views,
+                published_at: content.published_at,
+                visibilityPrivate: content.visibilityPrivate,
+                thumbnail: thumbnail
+                  ? {
+                      file_id: thumbnail.file_id,
+                      filepath: thumbnail.filepath,
+                      content_id: thumbnail.content_id,
+                      content_area_id: thumbnail.content_area_id,
+                      type: thumbnail.type,
+                    }
+                  : null,
+                contents: mappedFiles,
+              };
+
+              allContents.push(fullContent);
+            } catch (error) {
+              this.logger.error(
+                `Failed to fetch files for content ${content.content_id}`,
+                error.message,
+              );
+              throw httpToRpc(
+                new HttpException(
+                  `Failed to fetch files for content ${content.content_id}`,
+                  HttpStatus.INTERNAL_SERVER_ERROR,
+                ),
+              );
+            }
+          }
+
+          return allContents;
+        })
+        .catch((error) => {
+          if (error.status) {
+            throw error;
+          }
+          this.logger.error('Transaction failed', error.message);
+          throw httpToRpc(
+            new HttpException(
+              'Failed to fetch content list - transaction rolled back',
+              HttpStatus.INTERNAL_SERVER_ERROR,
+            ),
+          );
+        });
+
+      const nextCursor =
+        result.length > 0 ? result[result.length - 1].content_id : 0;
+
+      return {
+        contents: result,
+        currentPage: nextCursor,
+      };
+    } catch (error) {
+      if (error.status) {
+        throw error;
+      }
+      this.logger.error('Failed to fetch content list', error.message);
+      throw httpToRpc(
+        new HttpException(
+          'Failed to fetch content list',
+          HttpStatus.INTERNAL_SERVER_ERROR,
+        ),
+      );
     }
   }
 }

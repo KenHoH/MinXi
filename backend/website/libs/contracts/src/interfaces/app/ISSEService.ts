@@ -7,7 +7,6 @@ import { Observable } from 'rxjs';
 export interface ISSEService {
   subscribeToRoom(roomId: string): Promise<Observable<MessageEvent>>;
   sendBroadcast(roomId: string, dto: BroadcastMsgReq): Promise<Ack>;
-  sendNotification(userId: number, dto: BroadcastNotifReq): Promise<Ack>;
   removeRoomConnection(roomId: string);
   getConnectionStats(): Promise<ConnectionStatsRes>;
 }

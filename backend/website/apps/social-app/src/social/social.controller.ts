@@ -19,63 +19,103 @@ export class SocialController {
   constructor(private readonly socialService: SocialService) {}
   logger = new Logger(SocialService.name);
   @MessagePattern(SOCIAL_MSG.createRoom)
-  createRoom(@Payload() dto: CreateRoomDto) {
+  async createRoom(@Payload() dto: CreateRoomDto) {
     this.logger.log(`Creating room with dto: ${JSON.stringify(dto)}`);
     return this.socialService.createRoom(dto);
   }
 
   @MessagePattern(SOCIAL_MSG.getRoomInfo)
-  getRoomInfo(@Payload() dto: GetRoomInfoDto) {
+  async getRoomInfo(@Payload() dto: GetRoomInfoDto) {
     return this.socialService.getRoomInfo(dto);
   }
 
   @MessagePattern(SOCIAL_MSG.getAllRoomID)
-  getAllRoomID(@Payload() dto: GetAllRoomsDto) {
+  async getAllRoomID(@Payload() dto: GetAllRoomsDto) {
     return this.socialService.getAllRoomID(dto);
   }
 
   @MessagePattern(SOCIAL_MSG.addUserToRoom)
-  addUserToRoom(@Payload() dto: AddUserToRoomDto) {
+  async addUserToRoom(@Payload() dto: AddUserToRoomDto) {
     return this.socialService.addUserToRoom(dto);
   }
 
   @MessagePattern(SOCIAL_MSG.removeUserFromRoom)
-  removeUserFromRoom(@Payload() dto: RemoveUserFromRoomDto) {
+  async removeUserFromRoom(@Payload() dto: RemoveUserFromRoomDto) {
     return this.socialService.removeUserFromRoom(dto);
   }
 
   @MessagePattern(SOCIAL_MSG.updateParticipantRole)
-  updateParticipantRole(@Payload() dto: UpdateParticipantRoleDto) {
+  async updateParticipantRole(@Payload() dto: UpdateParticipantRoleDto) {
     return this.socialService.updateParticipantRole(dto);
   }
 
   @MessagePattern(SOCIAL_MSG.getTotalParticipants)
-  getTotalParticipants(@Payload() dto: GetTotalParticipantsDto) {
+  async getTotalParticipants(@Payload() dto: GetTotalParticipantsDto) {
     return this.socialService.getTotalParticipant(dto);
   }
 
   @MessagePattern(SOCIAL_MSG.getParticipantDM)
-  getParticipant(@Payload() roomId: string) {
+  async getParticipant(@Payload() roomId: string) {
     return this.socialService.getParticipant(roomId);
   }
 
   @MessagePattern(SOCIAL_MSG.sendMessage)
-  sendMessage(@Payload() dto: SendMessageDto) {
+  async sendMessage(@Payload() dto: SendMessageDto) {
     return this.socialService.sendMessage(dto);
   }
 
   @MessagePattern(SOCIAL_MSG.getMessage)
-  getMessage(@Payload() dto: GetMessagesDto) {
+  async getMessage(@Payload() dto: GetMessagesDto) {
     return this.socialService.getMessage(dto);
   }
 
+  @MessagePattern(SOCIAL_MSG.deleteMessageByRoom)
+  async deleteMessageByRoom(@Payload() roomId: string) {
+    return this.socialService.deleteMessageByRoom(roomId);
+  }
+
+  @MessagePattern(SOCIAL_MSG.deleteMessage)
+  async deleteMessage(@Payload() id: string) {
+    return this.socialService.delete(id);
+  }
+
+  @MessagePattern(SOCIAL_MSG.deleteRoom)
+  async deleteRoom(@Payload() roomId: string) {
+    return this.socialService.deleteRoom(roomId);
+  }
+
   @MessagePattern(SOCIAL_MSG.findDM)
-  findDM(@Payload() dto: FindDmDto) {
+  async findDM(@Payload() dto: FindDmDto) {
     return this.socialService.findDM(dto);
   }
 
   @MessagePattern(SOCIAL_MSG.getMedia)
-  getMedia(@Payload() dto: GetMediaDto) {
+  async getMedia(@Payload() dto: GetMediaDto) {
     return this.socialService.getMedia(dto);
+  }
+
+  @MessagePattern(SOCIAL_MSG.getRoomDMByUserId)
+  async getRoomDMByUserId(@Payload() userId: number) {
+    return this.socialService.getRoomDMByUserId(userId);
+  }
+
+  @MessagePattern(SOCIAL_MSG.getRoomGroupJoinedByUserId)
+  async getRoomGroupJoinedByUserId(@Payload() userId: number) {
+    return this.socialService.getRoomGroupJoinedByUserId(userId);
+  }
+
+  @MessagePattern(SOCIAL_MSG.getRoomGroupAll)
+  async getRoomGroupAll() {
+    return this.socialService.getRoomGroupAll();
+  }
+
+  @MessagePattern(SOCIAL_MSG.getRoomCommunityJoinedByUserId)
+  async getRoomCommunityJoinedByUserId(@Payload() userId: number) {
+    return this.socialService.getRoomCommunityJoinedByUserId(userId);
+  }
+
+  @MessagePattern(SOCIAL_MSG.getRoomCommunityAll)
+  async getRoomCommunityAll() {
+    return this.socialService.getRoomCommunityAll();
   }
 }

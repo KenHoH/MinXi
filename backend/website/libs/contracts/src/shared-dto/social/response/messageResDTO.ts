@@ -10,6 +10,9 @@ export class MessageResponseDto {
   @ApiProperty({ description: 'Message content', example: 'Hello!' })
   content: string;
 
+  @ApiProperty({ description: 'Type metadata', example: 'TEXT' })
+  type: string;
+
   @ApiProperty({
     required: false,
     description: 'Media URL',

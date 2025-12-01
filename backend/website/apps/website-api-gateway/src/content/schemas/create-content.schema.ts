@@ -4,7 +4,7 @@ export const createContentSchema = {
     thumbnail: {
       type: 'string',
       format: 'binary',
-      description: 'Thumbnail image file (required)',
+      description: 'Thumbnail image file (required for content creation)',
     },
     contents: {
       type: 'array',
@@ -39,6 +39,11 @@ export const createContentSchema = {
       description: 'Content description',
       example: 'This is a great content',
     },
+    visibilityPrivate: {
+      type: 'boolean',
+      description: 'Visibility of the content (private or not)',
+      example: false,
+    },
     parent_id: {
       type: 'number',
       description: 'Parent content ID (optional)',
@@ -51,8 +56,6 @@ export const createContentSchema = {
     },
   },
   required: [
-    'thumbnail',
-    'contents',
     'creator_id',
     'area_id',
     'post_type',

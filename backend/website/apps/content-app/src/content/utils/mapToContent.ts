@@ -16,4 +16,5 @@ export const mapToContent = (content: any): FullContentDto => ({
   area_id: content.area_id,
   thumbnail: content.thumbnail,
   contents: content.contents || [],
+  published_at: content.published_at,
 });

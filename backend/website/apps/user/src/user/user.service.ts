@@ -237,6 +237,7 @@ export class UserService implements IUserService {
         username: result.username,
         password: result.password,
         user_id: result.user_id,
+        area_id: result.area_id,
       };
     } catch (error) {
       this.logger.error(`Failed to find user by name: ${error.message}`);
@@ -245,6 +246,36 @@ export class UserService implements IUserService {
           'Failed to find user by name',
           HttpStatus.BAD_REQUEST,
         ),
+      );
+    }
+  }
+
+  async findOneByName(dto: NameRequest): Promise<UserDto> {
+    this.logger.log('findOneByName dto:', dto);
+    this.logger.log('findOneByName name:', dto.name);
+    this.logger.log('findOneByName area_id:', dto.area_id);
+    try {
+      const user = await this.repo.findOneByName(dto.name, dto.area_id);
+      if (!user) {
+        throw httpToRpc(new NotFoundException('User not found'));
+      }
+      return mapToDto(user);
+    } catch (error) {
+      throw httpToRpc(
+        new HttpException('Failed to find user', HttpStatus.BAD_REQUEST),
+      );
+    }
+  }
+  async findOneById(id: number): Promise<UserDto> {
+    try {
+      const user = await this.repo.findOne(id);
+      if (!user) {
+        throw httpToRpc(new NotFoundException('User not found'));
+      }
+      return mapToDto(user);
+    } catch (error) {
+      throw httpToRpc(
+        new HttpException('Failed to find user', HttpStatus.BAD_REQUEST),
       );
     }
   }

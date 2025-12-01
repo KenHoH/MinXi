@@ -35,6 +35,7 @@ import { LogInterceptor } from '@app/common/interceptor/log/log.interceptor';
 import { Public } from '@app/common/decorators/public.decorator';
 import { FileDtoReq } from '@app/contracts/shared-dto/content/req/FIleDto.req';
 import { FileDto } from '@app/contracts/shared-dto/content/res/file.dto';
+import { PageContentRes } from '@app/contracts/shared-dto/content/res/page.content.dto';
 
 @Controller('content')
 @UseGuards(JwtAuthGuard)
@@ -46,7 +47,6 @@ export class ContentController {
   private readonly logger = new Logger(ContentController.name);
 
   @Post()
-  @Public()
   @ApiConsumes('multipart/form-data')
   @ApiBody({
     description: 'Create content with thumbnail and file uploads',
@@ -86,6 +86,7 @@ export class ContentController {
     const description = body.description;
     const post_type = body.post_type;
     const published_at = body.published_at;
+    const visibilityPrivate = body.visibilityPrivate === 'true';
 
     if (isNaN(creator_id) || isNaN(area_id)) {
       throw new BadRequestException(
@@ -99,24 +100,21 @@ export class ContentController {
       );
     }
 
-    if (!published_at) {
-      throw new BadRequestException('published_at is required');
-    }
-
-    const publishedDate = new Date(published_at);
-    if (isNaN(publishedDate.getTime())) {
-      throw new BadRequestException(
-        'published_at must be a valid date in ISO 8601 format (e.g., 2024-01-01T00:00:00Z)',
-      );
+    let publishedDate = new Date();
+    if (published_at) {
+      publishedDate = new Date(published_at);
+      if (isNaN(publishedDate.getTime())) {
+        throw new BadRequestException(
+          'published_at must be a valid date in ISO 8601 format (e.g., 2024-01-01T00:00:00Z)',
+        );
+      }
     }
 
     const thumbnailFile = files.thumbnail ? files.thumbnail[0] : null;
 
-    if (!thumbnailFile) {
-      throw new BadRequestException('Thumbnail file is required');
-    }
-
-    const thumbnailPath = `http://localhost:3000/uploads/thumbnail/${thumbnailFile.filename}`;
+    const thumbnailPath = thumbnailFile
+      ? `http://localhost:3000/uploads/thumbnail/${thumbnailFile.filename}`
+      : null;
 
     const posts: FileDtoReq[] =
       files.contents?.map((file) => ({
@@ -125,8 +123,12 @@ export class ContentController {
         filepath: `http://localhost:3000/uploads/content/${file.filename}`,
       })) || [];
 
-    if (posts.length === 0) {
-      throw new BadRequestException('At least one content file is required');
+    if (post_type !== 'post') {
+      if (!thumbnailPath || posts.length === 0) {
+        throw new BadRequestException(
+          `Post type '${post_type}' requires both thumbnail and content files`,
+        );
+      }
     }
 
     const createDto: CreatePostDto = {
@@ -134,11 +136,12 @@ export class ContentController {
       area_id,
       parent_id,
       thumbnail: thumbnailPath,
-      contents: posts as FileDto[],
+      contents: posts.length > 0 ? (posts as FileDto[]) : undefined,
       title,
       description,
       post_type,
-      published_at: body.published_at,
+      visibilityPrivate,
+      published_at: publishedDate.toISOString(),
     };
 
     return await this.contentService.create(createDto);
@@ -151,6 +154,41 @@ export class ContentController {
   ): Promise<FullContentDto[]> {
     this.logger.log(typeof creator_id);
     return this.contentService.getByUser(creator_id);
+  }
+
+  @Public()
+  @Get('childpost/:parent_id')
+  getChildPost(
+    @Param('parent_id', ParseIntPipe) parent_id: number,
+  ): Promise<FullContentDto[]> {
+    return this.contentService.getChildPost(parent_id);
+  }
+
+  @Public()
+  @Get('user/:creator_id/all')
+  @ApiResponse({
+    status: 200,
+    description: 'Get all content by user (including private)',
+    type: [FullContentDto],
+  })
+  getByUserAll(
+    @Param('creator_id', ParseIntPipe) creator_id: number,
+  ): Promise<FullContentDto[]> {
+    this.logger.log(`Fetching all content by user ID ${creator_id}`);
+    return this.contentService.getByUserAll(creator_id);
+  }
+  @Public()
+  @Get('user/:creator_id/all/public')
+  @ApiResponse({
+    status: 200,
+    description: 'Get all content by user (including private)',
+    type: [FullContentDto],
+  })
+  getByUserAllPublic(
+    @Param('creator_id', ParseIntPipe) creator_id: number,
+  ): Promise<FullContentDto[]> {
+    this.logger.log(`Fetching all public content by user ID ${creator_id}`);
+    return this.contentService.getByUserAllPublic(creator_id);
   }
 
   @Public()
@@ -190,6 +228,24 @@ export class ContentController {
   }
 
   @Public()
+  @Get(':content_id/:area_id/ancestorPost')
+  getAncestorPost(
+    @Param('content_id', ParseIntPipe) content_id: number,
+    @Param('area_id', ParseIntPipe) area_id: number,
+  ): Promise<FullContentDto[]> {
+    return this.contentService.getAncestorPost(content_id, area_id);
+  }
+
+  @Public()
+  @Get(':content_id/:area_id/fullPost')
+  getFullPost(
+    @Param('content_id', ParseIntPipe) content_id: number,
+    @Param('area_id', ParseIntPipe) area_id: number,
+  ): Promise<FullContentDto> {
+    return this.contentService.getFullPost(content_id, area_id);
+  }
+
+  @Public()
   @Get(':area_id')
   findAll(
     @Param('area_id', ParseIntPipe) area_id: number,
@@ -204,6 +260,16 @@ export class ContentController {
     @Param('area_id', ParseIntPipe) area_id: number,
   ): Promise<FullContentDto> {
     return this.contentService.findOne(content_id, area_id);
+  }
+
+  @Public()
+  @Get(':area_id/:page/:limit')
+  findAllPage(
+    @Param('area_id', ParseIntPipe) area_id: number,
+    @Param('page', ParseIntPipe) page: number,
+    @Param('limit', ParseIntPipe) limit: number,
+  ): Promise<PageContentRes> {
+    return this.contentService.findAllPage(area_id, page, limit);
   }
 
   @Patch(':content_id/:area_id/view')

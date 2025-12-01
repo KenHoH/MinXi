@@ -12,6 +12,8 @@ export const MulterConfiguration = {
         destPath += 'content';
       } else if (file.fieldname === 'profile') {
         destPath += 'profile';
+      } else if (file.fieldname === 'metadata') {
+        destPath += 'metadata';
       }
 
       callback(null, destPath);

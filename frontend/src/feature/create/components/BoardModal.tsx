@@ -4,10 +4,10 @@ import { Masonry } from "@/shared/components/Masonry";
 import { ContentComponent } from "@/feature/content/components/ContentComponent/ContentComponent";
 import { PostComponent } from "@/feature/content/components/PostComponent/PostComponent";
 import { useState } from "react";
-import type Board from "@/feature/content/object/Board";
+import type { BoardDto } from "@/service/api";
 
 interface BoardModalProps {
-  board: Board;
+  board: BoardDto;
   onClose: () => void;
   onDelete: (boardId: number) => void;
   onRemoveItem?: (contentId: number) => void;

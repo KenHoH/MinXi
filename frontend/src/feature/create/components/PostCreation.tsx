@@ -3,19 +3,30 @@ import { Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Masonry } from "@/shared/components/Masonry";
 import { PostComponent } from "@/feature/content/components/PostComponent/PostComponent";
-import { CreatePostModal } from "@/feature/content/components/CreatePostModal";
+import { CreatePostModal } from "@/feature/create/components/CreatePost/CreatePostModal";
 import { useAuthContext } from "@/feature/auth/context/AuthContext";
-import type Post from "@/feature/content/object/Post";
+import type { FullContentDto } from "@/service/api";
+import useContentService from "@/shared/hooks/useContentService";
 
 interface PostCreationProps {
-  items: Post[];
+  items: FullContentDto[];
+  onRefreshChild: () => void;
   onDelete: (id: number) => void;
 }
 
-export function PostCreation({ items, onDelete }: PostCreationProps) {
+export function PostCreation({
+  items,
+  onRefreshChild,
+  onDelete,
+}: PostCreationProps) {
   const [showCreateModal, setShowCreateModal] = useState(false);
   const { user } = useAuthContext();
   const currentUserId = user?.user_id || 0;
+  const currentAreaId = user?.area_id || 0;
+  const { updateComment } = useContentService();
+  const handleUpdateComment = async (conteId: number, areaId: number) => {
+    await updateComment(conteId, areaId, { delta: 1 });
+  };
 
   return (
     <div className="space-y-6">
@@ -27,9 +38,12 @@ export function PostCreation({ items, onDelete }: PostCreationProps) {
         Create New Post
       </Button>
       <CreatePostModal
+        onRefreshChild={onRefreshChild}
+        onUpdateComment={handleUpdateComment}
         isOpen={showCreateModal}
         onClose={() => setShowCreateModal(false)}
         currentUserId={currentUserId}
+        currentAreaId={currentAreaId}
       />
       <Masonry columns={4}>
         {items.map((item) => (

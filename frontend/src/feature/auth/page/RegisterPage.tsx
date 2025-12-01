@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Link } from "react-router";
 import useUserService from "@/shared/hooks/useUserService";
+import { useToast } from "@/shared/context/ToastContext";
 
 const areas = [
   { id: 1, name: "China" },
@@ -21,25 +22,26 @@ export default function RegisterPage() {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [areaId, setAreaId] = useState(1);
-  const { createUser, error } = useUserService();
+  const { create } = useUserService();
+  const { showToast } = useToast();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (password !== confirmPassword) {
+      showToast("Passwords do not match");
       return;
     }
-
     if (!username || !password) {
+      showToast("Username and password are required");
       return;
     }
-    try {
-    } catch (error) {}
-    await createUser({
+    await create({
       area_id: areaId,
       username: username,
       password: password,
     });
+    showToast("Account created successfully! Please log in.");
   };
   return (
     <div className="min-h-screen flex items-center justify-center bg-background p-4">
@@ -49,11 +51,6 @@ export default function RegisterPage() {
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
-            {error && (
-              <div className="p-3 bg-destructive/10 border border-destructive rounded text-destructive text-sm">
-                {error}
-              </div>
-            )}
             <div>
               <label className="block text-sm font-medium text-foreground mb-2">
                 Username

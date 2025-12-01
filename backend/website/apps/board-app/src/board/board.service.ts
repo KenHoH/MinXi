@@ -8,33 +8,150 @@ import { RemoveContentDto } from '@app/contracts/shared-dto/board/request/remove
 import { UpdateContentDto } from '@app/contracts/shared-dto/board/request/update-content.dto';
 import { BoardDto } from '@app/contracts/shared-dto/board/response/board.dto';
 import { ContentIdsResDto } from '@app/contracts/shared-dto/content/res/content-ids.res.dto';
-import { HttpException, HttpStatus, Injectable, Logger } from '@nestjs/common';
+import {
+  HttpException,
+  HttpStatus,
+  Inject,
+  Injectable,
+  Logger,
+} from '@nestjs/common';
 import { mapBoardToDto } from './utils/mapBoardToDTO';
+import { ClientProxy } from '@nestjs/microservices';
+import { FullContentDto } from '@app/contracts/shared-dto/content/res/full.content.dto';
+import { FileDto } from '@app/contracts/shared-dto/content/res/file.dto';
+import { CONTENT_MSG } from '@app/common/constants/messageEvent';
+import { firstValueFrom } from 'rxjs';
+import { CONTENT_SERVICES } from '@app/common/constants/services';
 
 @Injectable()
 export class BoardService implements IBoardService {
   private readonly logger = new Logger(BoardService.name);
-  constructor(private readonly prisma: ContentDatabaseConnection) {}
+  constructor(
+    private readonly prisma: ContentDatabaseConnection,
+    @Inject(CONTENT_SERVICES.CLIENT)
+    private readonly contentClient: ClientProxy,
+  ) {}
+
+  private async buildBoardDto(board: any, area_id?: number): Promise<BoardDto> {
+    let fullContents: FullContentDto[] = [];
+
+    if (board.contents && board.contents.length > 0 && area_id) {
+      try {
+        const contentIds = board.contents.map((bc: any) => bc.content_id);
+        fullContents = await firstValueFrom(
+          this.contentClient.send(CONTENT_MSG.findAll, area_id),
+        );
+        fullContents = fullContents.filter((content) =>
+          contentIds.includes(content.content_id),
+        );
+      } catch (error) {
+        this.logger.warn('Failed to fetch full content details', error.message);
+        fullContents = [];
+      }
+    }
+
+    const boardDto: BoardDto = {
+      board_id: board.board_id,
+      title: board.title,
+      description: board.description,
+      creator_id: board.creator_id,
+      visibilityPrivate: board.visibilityPrivate,
+      created_at: board.created_at,
+      updated_at: board.updated_at,
+      board_thumbnail: board.board_thumbnail,
+      contents: fullContents,
+    };
+    return boardDto;
+  }
 
   async create(dto: CreateBoardDto): Promise<BoardDto> {
     try {
-      const { contents, ...boardData } = dto;
+      const { contents = [], area_id, ...boardData } = dto;
 
-      const board = await this.prisma.board.create({
-        data: {
-          ...boardData,
-          contents: {
-            create: contents.map((content_id) => ({
-              content_id,
-            })),
+      if (contents.length <= 0) {
+        const board = await this.prisma.board.create({
+          data: {
+            ...boardData,
           },
-        },
-        include: {
-          contents: true,
-        },
-      });
+        });
+        const boardDto: BoardDto = {
+          board_id: board.board_id,
+          title: board.title,
+          description: board.description,
+          creator_id: board.creator_id,
+          visibilityPrivate: board.visibilityPrivate,
+          created_at: board.created_at,
+          updated_at: board.updated_at,
+          board_thumbnail: board.board_thumbnail,
+          contents: [] as FullContentDto[],
+        };
+        return boardDto;
+      }
 
-      return mapBoardToDto(board);
+      const result = await this.prisma.$transaction(async (tx) => {
+        const board = await tx.board.create({
+          data: {
+            ...boardData,
+            contents: {
+              create: contents.map((content_id) => ({
+                content_id,
+              })),
+            },
+          },
+          include: {
+            contents: true,
+          },
+        });
+
+        let fullContents: FullContentDto[] = [];
+        if (contents.length > 0) {
+          try {
+            this.logger.debug(
+              `Fetching full content details for area_id: ${area_id}`,
+            );
+            fullContents = await firstValueFrom(
+              this.contentClient.send(CONTENT_MSG.findAll, area_id),
+            );
+            fullContents = fullContents.filter((content) =>
+              contents.includes(content.content_id),
+            );
+          } catch (error) {
+            this.logger.warn(
+              'Failed to fetch full content details',
+              error.message,
+            );
+            fullContents = [];
+          }
+        }
+
+        if (fullContents.length !== contents.length) {
+          const foundIds = fullContents.map((c) => c.content_id);
+          const missingIds = contents.filter((id) => !foundIds.includes(id));
+          this.logger.warn(
+            `Content IDs not found: ${JSON.stringify(missingIds)}`,
+          );
+          throw httpToRpc(
+            new HttpException(
+              `The following content IDs do not exist: ${missingIds.join(', ')}`,
+              HttpStatus.BAD_REQUEST,
+            ),
+          );
+        }
+
+        const boardDto: BoardDto = {
+          board_id: board.board_id,
+          title: board.title,
+          description: board.description,
+          creator_id: board.creator_id,
+          visibilityPrivate: board.visibilityPrivate,
+          created_at: board.created_at,
+          updated_at: board.updated_at,
+          board_thumbnail: board.board_thumbnail,
+          contents: fullContents,
+        };
+        return boardDto;
+      });
+      return result;
     } catch (error) {
       this.logger.error('Failed to create board', error.message);
       if (error.code === 'P2002') {
@@ -124,7 +241,11 @@ export class BoardService implements IBoardService {
     }
   }
 
-  async addContent(boardId: number, dto: AddContentDto): Promise<Ack> {
+  async addContent(
+    boardId: number,
+    area_id: number,
+    dto: AddContentDto,
+  ): Promise<Ack> {
     try {
       const board = await this.prisma.board.findUnique({
         where: { board_id: boardId },
@@ -133,6 +254,24 @@ export class BoardService implements IBoardService {
       if (!board) {
         throw httpToRpc(
           new HttpException('Board not found', HttpStatus.NOT_FOUND),
+        );
+      }
+
+      const contentExists = await this.prisma.content.findUnique({
+        where: {
+          content_id_area_id: {
+            content_id: dto.content_id,
+            area_id: area_id,
+          },
+        },
+      });
+
+      if (!contentExists) {
+        throw httpToRpc(
+          new HttpException(
+            `Content with ID ${dto.content_id} does not exist in area ${area_id}`,
+            HttpStatus.NOT_FOUND,
+          ),
         );
       }
 
@@ -165,7 +304,11 @@ export class BoardService implements IBoardService {
     }
   }
 
-  async removeContent(boardId: number, dto: RemoveContentDto): Promise<Ack> {
+  async removeContent(
+    boardId: number,
+    area_id: number,
+    dto: RemoveContentDto,
+  ): Promise<Ack> {
     try {
       const board = await this.prisma.board.findUnique({
         where: { board_id: boardId },
@@ -174,6 +317,24 @@ export class BoardService implements IBoardService {
       if (!board) {
         throw httpToRpc(
           new HttpException('Board not found', HttpStatus.NOT_FOUND),
+        );
+      }
+
+      const contentExists = await this.prisma.content.findUnique({
+        where: {
+          content_id_area_id: {
+            content_id: dto.content_id,
+            area_id: area_id,
+          },
+        },
+      });
+
+      if (!contentExists) {
+        throw httpToRpc(
+          new HttpException(
+            `Content with ID ${dto.content_id} does not exist in area ${area_id}`,
+            HttpStatus.NOT_FOUND,
+          ),
         );
       }
 
@@ -210,11 +371,15 @@ export class BoardService implements IBoardService {
 
   async updateContent(
     boardId: number,
+    area_id: number,
     dto: UpdateContentDto,
   ): Promise<BoardDto> {
     try {
       const board = await this.prisma.board.findUnique({
         where: { board_id: boardId },
+        include: {
+          contents: true,
+        },
       });
 
       if (!board) {
@@ -235,7 +400,8 @@ export class BoardService implements IBoardService {
           contents: true,
         },
       });
-      return mapBoardToDto(updatedBoard);
+
+      return await this.buildBoardDto(updatedBoard, area_id);
     } catch (error) {
       if (error instanceof HttpException) {
         throw error;
@@ -282,7 +448,7 @@ export class BoardService implements IBoardService {
     }
   }
 
-  async getBoardByUser(userId: number): Promise<BoardDto[]> {
+  async getBoardByUser(userId: number, area_id: number): Promise<BoardDto[]> {
     try {
       const boards = await this.prisma.board.findMany({
         where: {
@@ -292,7 +458,10 @@ export class BoardService implements IBoardService {
           contents: true,
         },
       });
-      return boards.map((board) => mapBoardToDto(board));
+
+      return Promise.all(
+        boards.map((board) => this.buildBoardDto(board, area_id)),
+      );
     } catch (error) {
       this.logger.error('Failed to fetch boards by user', error.message);
       throw httpToRpc(
@@ -339,6 +508,145 @@ export class BoardService implements IBoardService {
           HttpStatus.INTERNAL_SERVER_ERROR,
         ),
       );
+    }
+  }
+  async getContentByBoardId(
+    boardId: number,
+    area_id: number,
+  ): Promise<FullContentDto[]> {
+    try {
+      const result = await this.prisma
+        .$transaction(async (tx) => {
+          const board = await tx.board.findUnique({
+            where: { board_id: boardId },
+          });
+
+          if (!board) {
+            throw httpToRpc(
+              new HttpException('Board not found', HttpStatus.NOT_FOUND),
+            );
+          }
+
+          const boardContents = await tx.boardContent.findMany({
+            where: { board_id: boardId },
+            select: { content_id: true },
+          });
+
+          if (boardContents.length === 0) {
+            return [];
+          }
+
+          const contentIds = boardContents.map((bc) => bc.content_id);
+
+          const contents = await tx.content
+            .findMany({
+              where: {
+                AND: [{ content_id: { in: contentIds } }, { area_id: area_id }],
+              },
+              orderBy: { created_at: 'desc' },
+            })
+            .catch((error) => {
+              this.logger.error(
+                'Failed to fetch board contents',
+                error.message,
+              );
+              throw httpToRpc(
+                new HttpException(
+                  'Failed to fetch board contents',
+                  HttpStatus.INTERNAL_SERVER_ERROR,
+                ),
+              );
+            });
+
+          const allContents: FullContentDto[] = [];
+
+          for (const content of contents) {
+            try {
+              const files = await tx.file.findMany({
+                where: {
+                  content_id: content.content_id,
+                  content_area_id: content.area_id,
+                },
+              });
+
+              const thumbnail = files.find((file) => file.type === 'thumbnail');
+              if (!thumbnail) {
+                this.logger.warn(
+                  `Content ${content.content_id} missing thumbnail`,
+                );
+                continue;
+              }
+
+              const mappedFiles: FileDto[] = files
+                .filter((file) => file.type !== 'thumbnail')
+                .map((file) => ({
+                  file_id: file.file_id,
+                  filepath: file.filepath,
+                  content_id: file.content_id,
+                  content_area_id: file.content_area_id,
+                  type: file.type,
+                }));
+
+              allContents.push({
+                content_id: content.content_id,
+                creator_id: content.creator_id,
+                parent_id: content.parent_id ?? undefined,
+                area_id: content.area_id,
+                title: content.title,
+                description: content.description,
+                post_type: content.post_type,
+                published_at: content.published_at,
+                visibilityPrivate: content.visibilityPrivate,
+                views: content.views,
+                likes: content.likes,
+                comments: content.comments,
+                pins: content.pins,
+                reports: content.reports,
+                thumbnail: {
+                  file_id: thumbnail.file_id,
+                  filepath: thumbnail.filepath,
+                  content_id: thumbnail.content_id,
+                  content_area_id: thumbnail.content_area_id,
+                  type: thumbnail.type,
+                },
+                contents: mappedFiles,
+              });
+            } catch (error) {
+              this.logger.error(
+                `Failed to fetch files for content ${content.content_id}`,
+                error.message,
+              );
+              throw httpToRpc(
+                new HttpException(
+                  `Failed to fetch files for content ${content.content_id}`,
+                  HttpStatus.INTERNAL_SERVER_ERROR,
+                ),
+              );
+            }
+          }
+
+          return allContents;
+        })
+        .catch((error) => {
+          if (error.status) {
+            throw error;
+          }
+          this.logger.error('Transaction failed', error.message);
+          throw httpToRpc(
+            new HttpException(
+              'Failed to fetch board contents - transaction rolled back',
+              HttpStatus.INTERNAL_SERVER_ERROR,
+            ),
+          );
+        });
+
+      return result;
+    } catch (error) {
+      if (error.status) {
+        throw error;
+      }
+      this.logger.warn('No board contents found or error occurred');
+      return [];
     }
   }
 }

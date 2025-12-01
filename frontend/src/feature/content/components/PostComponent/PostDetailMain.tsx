@@ -1,4 +1,4 @@
-import { Heart, MessageCircle, Share2, Reply } from "lucide-react";
+import { Heart, MessageCircle, Share2, Reply, Pin, Flag } from "lucide-react";
 
 interface PostDetailMainProps {
   title: string;
@@ -6,7 +6,12 @@ interface PostDetailMainProps {
   likes: number;
   comments: number;
   liked: boolean;
+  pinned: boolean;
+  pins: number;
+  reported: boolean;
   onLikeClick: () => void;
+  onPinClick: () => void;
+  onReportClick: () => void;
   onReplyClick: () => void;
 }
 
@@ -16,7 +21,12 @@ export function PostDetailMain({
   likes,
   comments,
   liked,
+  pinned,
+  pins,
+  reported,
   onLikeClick,
+  onPinClick,
+  onReportClick,
   onReplyClick,
 }: PostDetailMainProps) {
   return (
@@ -32,11 +42,9 @@ export function PostDetailMain({
           className="flex items-center gap-2 px-4 py-2 rounded-lg hover:bg-dark-700 transition-colors text-gray-300 hover:text-burgundy-400"
         >
           <Heart
-            className={`w-5 h-5 ${
-              liked ? "fill-burgundy-500 text-burgundy-500" : ""
-            }`}
+            className={`w-5 h-5 ${liked ? "fill-red-500 text-red-500 " : ""}`}
           />
-          <span className="text-sm font-medium">{likes + (liked ? 1 : 0)}</span>
+          <span className="text-sm font-medium">{likes}</span>
         </button>
 
         <button className="flex items-center gap-2 px-4 py-2 rounded-lg hover:bg-dark-700 transition-colors text-gray-300 hover:text-burgundy-400">
@@ -44,8 +52,25 @@ export function PostDetailMain({
           <span className="text-sm font-medium">{comments}</span>
         </button>
 
-        <button className="flex items-center gap-2 px-4 py-2 rounded-lg hover:bg-dark-700 transition-colors text-gray-300 hover:text-burgundy-400">
-          <Share2 className="w-5 h-5" />
+        <button
+          onClick={onPinClick}
+          className="flex items-center gap-2 px-4 py-2 rounded-lg hover:bg-dark-700 transition-colors text-gray-300 hover:text-yellow-400"
+        >
+          <Pin
+            className={`w-5 h-5 ${
+              pinned ? "fill-yellow-500 text-yellow-500" : ""
+            }`}
+          />
+          <span className="text-sm font-medium">{pins}</span>
+        </button>
+
+        <button
+          onClick={onReportClick}
+          className="flex items-center gap-2 px-4 py-2 rounded-lg hover:bg-dark-700 transition-colors text-gray-300 hover:text-red-400"
+        >
+          <Flag
+            className={`w-5 h-5 ${reported ? "fill-red-500 text-red-500" : ""}`}
+          />
         </button>
 
         <button

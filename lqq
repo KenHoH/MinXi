@@ -1,0 +1,60 @@
+[33m5cf8a77[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mfeature[m[33m, [m[1;32mfix[m[33m)[m fix backendn
+[33m25aa2fe[m checkpoint
+[33m0fed3e9[m add new page
+[33mb2e6973[m adding create post and create contnet
+[33md4bf7fa[m fix cookies errro, reason forgot to change the axios in request.ts
+[33m89dca1b[m fix cookies errro, reason forgot to change the axios in request.ts
+[33m063f87d[m fix error cookie
+[33m5d9c4e1[m fix error cookie func
+[33m6656def[m checkpoint frontend
+[33md7bfcec[m checkpoint
+[33mc6e1bae[m eaaaa frontend
+[33mc64ecaa[m fixing the user service eaaaa
+[33mb7f5b88[m add api response
+[33md27096a[m add new area id for userDto
+[33m2848f45[m add new content service and ui
+[33m66738be[m fix error done
+[33m521f68d[m fix error
+[33m5240d23[m fixing http missing error
+[33m39b6fe8[m fix: fix https
+[33mc466fa0[m feat: add 2 new endpoint content service and fix user service
+[33m3f36690[m frontend UI done
+[33m7bc629a[m fix: cookies is secure and must use https
+[33mded0bb9[m feat: cookies passing to frontend
+[33mebe7194[m fix: auth service error done, login register page done
+[33mab24cfd[m feat: adding UI to the frontend, register page done
+[33mee80ed8[m err: auth service and user service MAJOR
+[33m7ca755f[m feat: getfollowing content and friend content
+[33m344913f[m[33m ([m[1;31morigin/main[m[33m, [m[1;31morigin/feature[m[33m, [m[1;32mmain[m[33m)[m feat: cookie settings done
+[33m6d499c1[m feat: notification service done
+[33mfbbdcb8[m feat: sse service
+[33m1fb2cbf[m feat: message and social service clear and we change some configuration
+[33m7b49273[m feat: tested comment service and change handler catch error
+[33m82b3c92[m test: checking message service and comment service
+[33m2b9f07a[m feat: chat, group, communities done but unchecked, SSE haven't touch it yet
+[33m463cce4[m feat: algo service done
+[33mcb157ac[m feat: report service done
+[33md1e7c47[m feat: connection service done
+[33me5cc9f4[m feat: board service done
+[33m9dbd553[m feat: history service done
+[33m6d877d8[m feat: Content-service done
+[33m7b153af[m info: testing upload file image and video
+[33m16624b6[m update: prisma update
+[33mae3ed06[m feat: partition user done
+[33m60f045f[m feat: log service probabilites
+[33md2d1828[m feat: log service
+[33ma0347de[m feat: log service done
+[33md3c5541[m feat: admin guard
+[33m91918f6[m progress: Admin guard
+[33m44af213[m feat & fix: guard and passport bug, auth feature done
+[33m7210985[m fix: bug token
+[33mef0771f[m feat: login, logout, refresh Auth service
+[33m346e8ce[m feat: findByName (user) and Auth Init
+[33mfa550bc[m feat: hash pass
+[33m6a51a4d[m feat: CRUD user tested, adding HttpException handler
+[33mfc3c8ef[m feat: errro exception handling
+[33m534873e[m info: error CRUD user service :(
+[33m0515cfc[m feat: http and Rpc filter exception
+[33mc1c254b[m init commit
+[33md25e572[m feat: update user service and repo
+[33m64cd3d1[m initial commit

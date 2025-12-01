@@ -1,17 +1,14 @@
 import { createContext, useContext, useState, useEffect } from "react";
-import {
-  AuthService,
-  UserService,
-  type CredentialRes,
-  type LoginDto,
-  type LogoutRequest,
-} from "../../../services/api";
 import { useToast } from "../../../shared/context/ToastContext";
 import { useLoading } from "../../../shared/context/LoadingContext";
+import type { CredentialRes } from "@/service/api/models/CredentialRes";
+import type { LoginDto, LogoutRequest } from "@/service/api";
+import { AuthService, UserService } from "@/service/api";
+import { useNavigate } from "react-router";
 
 interface AuthContextType {
   user: CredentialRes | null;
-  login: (dto: LoginDto) => Promise<void>;
+  login: (dto: LoginDto) => Promise<CredentialRes | null>;
   logout: (dto: LogoutRequest) => Promise<void>;
   isLoading: boolean;
 }
@@ -51,7 +48,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     getUserData();
   }, []);
 
-  const login = async (dto: LoginDto) => {
+  const navigate = useNavigate();
+
+  const login = async (dto: LoginDto): Promise<CredentialRes | null> => {
     showLoading();
     try {
       await AuthService.authControllerLogin(dto);
@@ -62,13 +61,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         });
       setUser(userData);
       showToast("Login successful!");
+      return userData;
     } catch (error: any) {
       setUser(null);
       const errorMessage =
         error?.body?.errorMessage || "Login failed. Please try again.";
       showToast(errorMessage);
+      return null;
     } finally {
       hideLoading();
+      navigate("/feed");
     }
   };
 

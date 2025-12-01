@@ -10,6 +10,7 @@ import { FileDto } from '@app/contracts/shared-dto/content/res/file.dto';
 import { FullContentDto } from '@app/contracts/shared-dto/content/res/full.content.dto';
 import { deltaDto } from '@app/contracts/shared-dto/user/delta.dto';
 import { ValidationPipe } from '@nestjs/common';
+import { PageContentRes } from '@app/contracts/shared-dto/content/res/page.content.dto';
 
 @Controller()
 export class ContentController {
@@ -34,6 +35,17 @@ export class ContentController {
     this.logger.log(`Fetching all content for area_id: ${area_id}`);
     return this.contentService.findAll(area_id);
   }
+  @MessagePattern(CONTENT_MSG.findAllPage)
+  async findAllPage(
+    @Payload() payload: { area_id: number; page: number; limit: number },
+  ): Promise<PageContentRes> {
+    this.logger.log(`Fetching all content for area_id: ${payload.area_id}`);
+    return this.contentService.findAllPage(
+      payload.area_id,
+      payload.page,
+      payload.limit,
+    );
+  }
 
   @MessagePattern(CONTENT_MSG.findOne)
   async findOne(
@@ -47,6 +59,19 @@ export class ContentController {
   async getByUser(@Payload() creator_id: number): Promise<FullContentDto[]> {
     this.logger.log(`Fetching content by user ID ${creator_id}`);
     return this.contentService.getByUser(creator_id);
+  }
+
+  @MessagePattern(CONTENT_MSG.getByUserAll)
+  async getByUserAll(@Payload() creator_id: number): Promise<FullContentDto[]> {
+    this.logger.log(`Fetching all content by user ID ${creator_id}`);
+    return this.contentService.getByUserAll(creator_id);
+  }
+  @MessagePattern(CONTENT_MSG.getByUserAllPublic)
+  async getByUserAllPublic(
+    @Payload() creator_id: number,
+  ): Promise<FullContentDto[]> {
+    this.logger.log(`Fetching all public content by user ID ${creator_id}`);
+    return this.contentService.getByUserAllPublic(creator_id);
   }
 
   @MessagePattern(CONTENT_MSG.remove)
@@ -201,5 +226,23 @@ export class ContentController {
   async getPinnedByUser(@Payload() userId: number): Promise<FullContentDto[]> {
     this.logger.log(`Fetching Pinned content by user ID ${userId}`);
     return this.contentService.getPinnedByUser(userId);
+  }
+  @MessagePattern(CONTENT_MSG.getAncestorPost)
+  async getAncestorPost(
+    @Payload() dto: { contentId: number; areaId: number },
+  ): Promise<FullContentDto[]> {
+    return this.contentService.getAncestorPost(dto.contentId, dto.areaId);
+  }
+  @MessagePattern(CONTENT_MSG.getChildPost)
+  async getChildPost(@Payload() parentId: number): Promise<FullContentDto[]> {
+    this.logger.log(`Fetching child posts for parent ID ${parentId}`);
+    return this.contentService.getChildPost(parentId);
+  }
+
+  @MessagePattern(CONTENT_MSG.getFullPost)
+  async getFullPost(
+    @Payload() dto: { contentId: number; areaId: number },
+  ): Promise<FullContentDto> {
+    return this.contentService.getFullPost(dto.contentId, dto.areaId);
   }
 }

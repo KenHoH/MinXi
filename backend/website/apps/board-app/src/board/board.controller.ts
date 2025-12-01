@@ -9,6 +9,7 @@ import { UpdateContentDto } from '@app/contracts/shared-dto/board/request/update
 import { BoardDto } from '@app/contracts/shared-dto/board/response/board.dto';
 import { Ack } from '@app/contracts/shared-dto/ack.dto';
 import { ContentIdsResDto } from '@app/contracts/shared-dto/content/res/content-ids.res.dto';
+import { FullContentDto } from '@app/contracts/shared-dto/content/res/full.content.dto';
 
 @Controller()
 @UsePipes(new ValidationPipe())
@@ -34,23 +35,50 @@ export class BoardController {
 
   @MessagePattern(BOARD_MSG.addContent)
   async addContent(
-    @Payload() payload: { boardId: number; dto: AddContentDto },
+    @Payload()
+    payload: {
+      boardId: number;
+      area_id: number;
+      dto: AddContentDto;
+    },
   ): Promise<Ack> {
-    return this.boardService.addContent(payload.boardId, payload.dto);
+    return this.boardService.addContent(
+      payload.boardId,
+      payload.area_id,
+      payload.dto,
+    );
   }
 
   @MessagePattern(BOARD_MSG.removeContent)
   async removeContent(
-    @Payload() payload: { boardId: number; dto: RemoveContentDto },
+    @Payload()
+    payload: {
+      boardId: number;
+      area_id: number;
+      dto: RemoveContentDto;
+    },
   ): Promise<Ack> {
-    return this.boardService.removeContent(payload.boardId, payload.dto);
+    return this.boardService.removeContent(
+      payload.boardId,
+      payload.area_id,
+      payload.dto,
+    );
   }
 
   @MessagePattern(BOARD_MSG.updateContent)
   async updateContent(
-    @Payload() payload: { boardId: number; dto: UpdateContentDto },
+    @Payload()
+    payload: {
+      boardId: number;
+      area_id: number;
+      dto: UpdateContentDto;
+    },
   ): Promise<BoardDto> {
-    return this.boardService.updateContent(payload.boardId, payload.dto);
+    return this.boardService.updateContent(
+      payload.boardId,
+      payload.area_id,
+      payload.dto,
+    );
   }
 
   @MessagePattern(BOARD_MSG.deleteBoard)
@@ -59,8 +87,10 @@ export class BoardController {
   }
 
   @MessagePattern(BOARD_MSG.getBoardByUser)
-  async getBoardByUser(@Payload() userId: number): Promise<BoardDto[]> {
-    return this.boardService.getBoardByUser(userId);
+  async getBoardByUser(
+    @Payload() payload: { userId: number; area_id: number },
+  ): Promise<BoardDto[]> {
+    return this.boardService.getBoardByUser(payload.userId, payload.area_id);
   }
 
   @MessagePattern(BOARD_MSG.getContentIdsByBoardId)
@@ -68,5 +98,14 @@ export class BoardController {
     @Payload() payload: { boardId: number },
   ): Promise<ContentIdsResDto> {
     return this.boardService.getContentIdsByBoardId(payload.boardId);
+  }
+  @MessagePattern(BOARD_MSG.getContentByBoardId)
+  async getContentByBoardId(
+    @Payload() payload: { boardId: number; areaId: number },
+  ): Promise<FullContentDto[]> {
+    return this.boardService.getContentByBoardId(
+      payload.boardId,
+      payload.areaId,
+    );
   }
 }

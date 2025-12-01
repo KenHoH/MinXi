@@ -1,5 +1,11 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsInt, IsString, IsOptional, IsArray } from 'class-validator';
+import {
+  IsInt,
+  IsString,
+  IsOptional,
+  IsArray,
+  IsBoolean,
+} from 'class-validator';
 import { Transform } from 'class-transformer';
 import { FileDto } from '../res/file.dto';
 
@@ -24,6 +30,11 @@ export class CreatePostDto {
   @IsInt()
   parent_id?: number;
 
+  @ApiProperty({ required: false })
+  @IsOptional()
+  @IsBoolean()
+  visibilityPrivate?: boolean;
+
   @ApiProperty()
   @IsString()
   title: string;
@@ -34,11 +45,13 @@ export class CreatePostDto {
 
   @ApiProperty()
   @IsString()
-  thumbnail: string;
+  @IsOptional()
+  thumbnail: string | null;
 
   @ApiProperty({ type: [FileDto], isArray: true })
   @IsArray()
-  contents: FileDto[];
+  @IsOptional()
+  contents?: FileDto[];
 
   @ApiProperty()
   @IsString()

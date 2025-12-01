@@ -2,6 +2,7 @@ import { COMMENT_MSG } from '@app/common/constants/messageEvent';
 import { COMMENT_SERVICES } from '@app/common/constants/services';
 import { ICommentService } from '@app/contracts/interfaces/app/ICommentService';
 import { CommentReq } from '@app/contracts/shared-dto/comment/req/CommentReq';
+import { CommentFullRes } from '@app/contracts/shared-dto/comment/res/CommentFullRes';
 import { CommentRes } from '@app/contracts/shared-dto/comment/res/CommentRes';
 import { DeleteCommentRes } from '@app/contracts/shared-dto/comment/res/DeleteCommenRes';
 import { Inject, Injectable } from '@nestjs/common';
@@ -16,7 +17,7 @@ export class CommentService implements ICommentService {
   async create(dto: CommentReq): Promise<CommentRes> {
     return await firstValueFrom(this.client.send(COMMENT_MSG.create, dto));
   }
-  async getComment(contentId: number): Promise<CommentRes[]> {
+  async getComment(contentId: number): Promise<CommentFullRes[]> {
     return await firstValueFrom(
       this.client.send(COMMENT_MSG.getComment, contentId),
     );

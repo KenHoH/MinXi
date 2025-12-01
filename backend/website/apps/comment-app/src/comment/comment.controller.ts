@@ -5,6 +5,7 @@ import { ICommentService } from '@app/contracts/interfaces/app/ICommentService';
 import { CommentRes } from '@app/contracts/shared-dto/comment/res/CommentRes';
 import { COMMENT_MSG } from '@app/common/constants/messageEvent';
 import { CommentReq } from '@app/contracts/shared-dto/comment/req/CommentReq';
+import { CommentFullRes } from '@app/contracts/shared-dto/comment/res/CommentFullRes';
 
 @Controller()
 export class CommentController {
@@ -16,7 +17,7 @@ export class CommentController {
   }
 
   @MessagePattern(COMMENT_MSG.getComment)
-  async getComment(@Payload() contentId: number): Promise<CommentRes[]> {
+  async getComment(@Payload() contentId: number): Promise<CommentFullRes[]> {
     return this.commentService.getComment(contentId);
   }
 

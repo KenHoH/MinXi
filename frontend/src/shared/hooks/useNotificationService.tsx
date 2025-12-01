@@ -1,127 +1,33 @@
-import { useState, useCallback } from "react";
-import {
-  NotificationService,
-  type NotificationReq,
-  type NotificationRes,
-  type DeleteNotificationRes,
-} from "@/services/api";
-import { useToast } from "../context/ToastContext";
-import { useLoading } from "../context/LoadingContext";
+import { NotificationService } from "../../service/api/services/NotificationService";
+import type { NotificationReq } from "../../service/api/models/NotificationReq";
+import type { NotificationRes } from "../../service/api/models/NotificationRes";
+import type { DeleteNotificationRes } from "../../service/api/models/DeleteNotificationRes";
+import useApiCall from "./useApiCall";
 
-interface UseNotificationServiceReturn {
-  // State - typed DTOs
-  notificationData: NotificationRes | null;
-  notificationsData: NotificationRes[] | null;
-  deleteNotificationData: DeleteNotificationRes | null;
-  error: string | null;
-  isLoading: boolean;
+export default function useNotificationService() {
+  const { call, data, loading, error } = useApiCall();
 
-  // Methods
-  createNotification: (dto: NotificationReq) => Promise<NotificationRes>;
-  getNotifications: (userId: number) => Promise<NotificationRes[]>;
-  removeNotification: (
-    notificationId: number
-  ) => Promise<DeleteNotificationRes>;
-  resetError: () => void;
-}
+  const create = (dto: NotificationReq) =>
+    call<NotificationRes>(() =>
+      NotificationService.notificationControllerCreate(dto)
+    );
 
-export default function useNotificationService(): UseNotificationServiceReturn {
-  const { showToast } = useToast();
-  const { showLoading, hideLoading } = useLoading();
+  const getNotif = (userId: number) =>
+    call<NotificationRes[]>(() =>
+      NotificationService.notificationControllerGetNotif(userId)
+    );
 
-  const [notificationData, setNotificationData] =
-    useState<NotificationRes | null>(null);
-  const [notificationsData, setNotificationsData] = useState<
-    NotificationRes[] | null
-  >(null);
-  const [deleteNotificationData, setDeleteNotificationData] =
-    useState<DeleteNotificationRes | null>(null);
-  const [error, setError] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
-
-  const resetError = useCallback(() => setError(null), []);
-
-  const handleError = useCallback(
-    (err: unknown, defaultMessage: string) => {
-      const message = err instanceof Error ? err.message : defaultMessage;
-      setError(message);
-      showToast(message);
-    },
-    [showToast]
-  );
-
-  const createNotification = useCallback(
-    async (dto: NotificationReq): Promise<NotificationRes> => {
-      setIsLoading(true);
-      resetError();
-      try {
-        const result = await NotificationService.notificationControllerCreate(
-          dto
-        );
-        setNotificationData(result);
-        return result;
-      } catch (err) {
-        handleError(err, "Failed to create notification. Please try again.");
-        throw err;
-      } finally {
-        setIsLoading(false);
-      }
-    },
-    [resetError, handleError]
-  );
-
-  const getNotifications = useCallback(
-    async (userId: number): Promise<NotificationRes[]> => {
-      setIsLoading(true);
-      showLoading();
-      resetError();
-      try {
-        const result = await NotificationService.notificationControllerGetNotif(
-          userId
-        );
-        setNotificationsData(result);
-        return result;
-      } catch (err) {
-        handleError(err, "Failed to fetch notifications. Please try again.");
-        throw err;
-      } finally {
-        setIsLoading(false);
-        hideLoading();
-      }
-    },
-    [showLoading, hideLoading, resetError, handleError]
-  );
-
-  const removeNotification = useCallback(
-    async (notificationId: number): Promise<DeleteNotificationRes> => {
-      setIsLoading(true);
-      resetError();
-      try {
-        const result = await NotificationService.notificationControllerRemove(
-          notificationId
-        );
-        setDeleteNotificationData(result);
-        showToast("Notification removed");
-        return result;
-      } catch (err) {
-        handleError(err, "Failed to remove notification. Please try again.");
-        throw err;
-      } finally {
-        setIsLoading(false);
-      }
-    },
-    [resetError, handleError, showToast]
-  );
+  const remove = (notificationId: number) =>
+    call<DeleteNotificationRes>(() =>
+      NotificationService.notificationControllerRemove(notificationId)
+    );
 
   return {
-    notificationData,
-    notificationsData,
-    deleteNotificationData,
+    create,
+    getNotif,
+    remove,
+    result: data,
+    loading,
     error,
-    isLoading,
-    createNotification,
-    getNotifications,
-    removeNotification,
-    resetError,
   };
 }

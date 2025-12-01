@@ -25,4 +25,5 @@ export interface IUserService {
   updateFollow(id: number, delta: number): Promise<Ack>;
   remove(id: number): Promise<Ack>;
   findByName(dto: NameRequest): Promise<CredentialRes>;
+  findOneByName(dto: NameRequest): Promise<UserDto>;
 }

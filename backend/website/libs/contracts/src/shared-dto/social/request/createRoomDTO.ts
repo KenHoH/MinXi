@@ -18,10 +18,10 @@ export enum RoomType {
 export class CreateRoomDto {
   @ApiProperty({
     description: 'Array of user IDs to add to the room',
-    example: [1, 2, 3],
+    example: [1, 2],
   })
   @IsArray()
-  @ArrayMinSize(2)
+  @ArrayMinSize(1)
   @ArrayMaxSize(100)
   userIds: number[];
 
@@ -46,5 +46,5 @@ export class CreateRoomDto {
 
   @ApiProperty()
   @IsString()
-  pictureUrl: string;
+  pictureUrl?: string;
 }

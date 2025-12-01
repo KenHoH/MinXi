@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Card,
   CardContent,
@@ -11,25 +11,99 @@ import {
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import RootLayout from "@/app/LayoutPage";
+import useUserService from "@/shared/hooks/useUserService";
+import { useAuthContext } from "@/feature/auth/context/AuthContext";
+import { useToast } from "@/shared/context/ToastContext";
 
 export default function SettingsPage() {
   const [settings, setSettings] = useState({
     privateContent: false,
     privatePinned: false,
     privateLiked: false,
-    notificationsEnabled: true,
-    emailUpdates: true,
   });
+  const [profileImage, setProfileImage] = useState<File | null>(null);
+  const [profileImagePreview, setProfileImagePreview] = useState<string>("");
+  const [description, setDescription] = useState("");
+  const [isUpdating, setIsUpdating] = useState(false);
 
-  const handleToggle = (key: keyof typeof settings) => {
-    setSettings((prev) => ({ ...prev, [key]: !prev[key] }));
+  const { user } = useAuthContext();
+  const { findOneByUsername, updatePrivacySettings, update } = useUserService();
+  const { showToast } = useToast();
+
+  const handleToggle = async (key: keyof typeof settings) => {
+    const newSettings = { ...settings, [key]: !settings[key] };
+    setSettings(newSettings);
+
+    if (!user) return;
+    await updatePrivacySettings(
+      user.user_id,
+      newSettings.privateContent,
+      newSettings.privateLiked,
+      newSettings.privatePinned
+    );
+    showToast("Privacy settings updated");
   };
+
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setProfileImage(file);
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setProfileImagePreview(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleProfileUpdate = async () => {
+    if (!user || (!profileImage && !description)) {
+      showToast("Please select an image or enter a description");
+      return;
+    }
+
+    setIsUpdating(true);
+    try {
+      const formData = {
+        profile: profileImage || new Blob(),
+        creator_id: user.user_id,
+        description: description,
+      };
+
+      await update(formData);
+      showToast("Profile updated successfully");
+      setProfileImage(null);
+      setProfileImagePreview("");
+      setDescription("");
+    } catch (error) {
+      console.error("Failed to update profile:", error);
+      showToast("Failed to update profile");
+    } finally {
+      setIsUpdating(false);
+    }
+  };
+
+  useEffect(() => {
+    if (!user) return;
+    const fetchUserData = async () => {
+      const userData = await findOneByUsername(user.username, user.area_id);
+
+      if (!userData) return;
+      setSettings({
+        privateContent: userData.content_visibilityPrivate,
+        privatePinned: userData.pinned_visibilityPrivate,
+        privateLiked: userData.liked_visibilityPrivate,
+      });
+      setDescription(userData.desc || "");
+    };
+    fetchUserData();
+  }, [user]);
 
   return (
     <RootLayout>
       <div className="flex">
         <main className="ml-64 flex-1 p-8">
-          <div className="max-w-2xl mx-auto">
+          <div className="max-w-2xl ml-10">
             <h1 className="text-3xl font-bold text-foreground mb-8">
               Settings
             </h1>
@@ -54,7 +128,7 @@ export default function SettingsPage() {
                   </div>
                   <Switch
                     checked={settings.privateContent}
-                    onChange={() => handleToggle("privateContent")}
+                    onCheckedChange={() => handleToggle("privateContent")}
                   />
                 </div>
                 <div className="flex items-center justify-between">
@@ -68,7 +142,7 @@ export default function SettingsPage() {
                   </div>
                   <Switch
                     checked={settings.privatePinned}
-                    onChange={() => handleToggle("privatePinned")}
+                    onCheckedChange={() => handleToggle("privatePinned")}
                   />
                 </div>
                 <div className="flex items-center justify-between">
@@ -80,64 +154,71 @@ export default function SettingsPage() {
                   </div>
                   <Switch
                     checked={settings.privateLiked}
-                    onChange={() => handleToggle("privateLiked")}
+                    onCheckedChange={() => handleToggle("privateLiked")}
                   />
                 </div>
               </CardContent>
             </Card>
-
-            {/* Notification Settings */}
-            <Card className="border-border">
+            {/* Profile Settings */}
+            <Card className="border-border mb-6">
               <CardHeader>
-                <CardTitle>Notifications</CardTitle>
+                <CardTitle>Profile Settings</CardTitle>
                 <CardDescription>
-                  Manage how you receive updates
+                  Update your profile information
                 </CardDescription>
               </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="font-medium text-foreground">
-                      Push Notifications
-                    </p>
-                    <p className="text-sm text-muted-foreground">
-                      Receive in-app notifications
-                    </p>
+              <CardContent className="space-y-6">
+                {/* Profile Image Upload */}
+                <div>
+                  <label className="block text-sm font-medium text-foreground mb-2">
+                    Profile Image
+                  </label>
+                  <div className="flex items-center gap-4">
+                    {profileImagePreview && (
+                      <div className="w-20 h-20 rounded-full overflow-hidden border border-dark-700">
+                        <img
+                          src={profileImagePreview}
+                          alt="Profile preview"
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
+                    )}
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={handleImageChange}
+                      className="flex-1 px-3 py-2 border border-dark-700 rounded-md bg-dark-800 text-foreground text-sm cursor-pointer hover:border-burgundy-600"
+                    />
                   </div>
-                  <Switch
-                    checked={settings.notificationsEnabled}
-                    onChange={() => handleToggle("notificationsEnabled")}
-                  />
+                  <p className="text-xs text-muted-foreground mt-2">
+                    Supported formats: JPG, PNG, GIF (Max 5MB)
+                  </p>
                 </div>
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="font-medium text-foreground">Email Updates</p>
-                    <p className="text-sm text-muted-foreground">
-                      Receive email notifications
-                    </p>
-                  </div>
-                  <Switch
-                    checked={settings.emailUpdates}
-                    onChange={() => handleToggle("emailUpdates")}
-                  />
-                </div>
-              </CardContent>
-            </Card>
 
-            {/* Danger Zone */}
-            <Card className="border-border mt-6 border-destructive/50">
-              <CardHeader>
-                <CardTitle className="text-destructive">Danger Zone</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                <Button className="w-full bg-destructive text-destructive-foreground hover:opacity-90">
-                  Log Out
-                </Button>
+                {/* Description */}
+                <div>
+                  <label className="block text-sm font-medium text-foreground mb-2">
+                    Bio/Description
+                  </label>
+                  <textarea
+                    value={description}
+                    onChange={(e) => setDescription(e.target.value)}
+                    placeholder="Write something about yourself..."
+                    className="w-full px-3 py-2 border border-dark-700 rounded-md bg-dark-800 text-foreground text-sm placeholder-gray-500 focus:outline-none focus:border-burgundy-600 resize-none"
+                    rows={4}
+                  />
+                  <p className="text-xs text-muted-foreground mt-2">
+                    {description.length}/200 characters
+                  </p>
+                </div>
+
+                {/* Update Button */}
                 <Button
-                  variant="outline"
-                  className="w-full border-destructive text-destructive hover:bg-destructive/10 bg-transparent"
+                  onClick={handleProfileUpdate}
+                  disabled={isUpdating || (!profileImage && !description)}
+                  className="w-full bg-burgundy-600 hover:bg-red-400 text-white "
                 >
-                  Delete Account
+                  {isUpdating ? "Updating..." : "Update Profile"}
                 </Button>
               </CardContent>
             </Card>

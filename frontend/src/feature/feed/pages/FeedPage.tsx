@@ -1,87 +1,157 @@
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import FeedList from "@/feature/feed/components/FeedList";
 import { TopFeedBar } from "@/feature/feed/components/TopFeedBar";
 import RootLayout from "@/app/LayoutPage";
-
-const generateMockItems = (page: number, filter: string) => {
-  const items = [];
-  const startId = (page - 1) * 12;
-
-  for (let i = 0; i < 12; i++) {
-    const id = startId + i;
-    let isPost = id % 3 === 0;
-
-    // Filter logic based on selected filter
-    let creatorId = Math.floor(Math.random() * 100);
-
-    if (filter === "Followed") {
-      // Simulate followed creators (IDs 1-20)
-      creatorId = Math.floor(Math.random() * 20) + 1;
-      isPost = Math.random() > 0.5; // Mix of posts and content
-    } else if (filter === "Friends") {
-      // Simulate friend creators (IDs 21-50)
-      creatorId = Math.floor(Math.random() * 30) + 21;
-      isPost = Math.random() > 0.7; // Mostly content from friends
-    } else if (filter.startsWith("Board:")) {
-      // Own board content (high creator IDs for user boards)
-      creatorId = 999; // User's own ID
-      isPost = Math.random() > 0.3; // Mix with preference for posts
-    }
-    // "All" uses default random mix
-
-    if (isPost) {
-      items.push({
-        content_id: id,
-        creator_id: creatorId,
-        title: `Post ${id}: Amazing content from ${filter}`,
-        description: `This is a detailed description for post ${id}. It can have multiple lines of text.`,
-        likes: Math.floor(Math.random() * 5000),
-        comments: Math.floor(Math.random() * 500),
-        post_type: "post" as const,
-        parent_id: id === 3 ? 1 : id === 6 ? 3 : id === 9 ? 7 : undefined,
-      });
-    } else {
-      items.push({
-        content_id: id,
-        creator_id: creatorId,
-        title: `Media ${id} - ${filter}`,
-        post_type: id % 2 === 0 ? ("image" as const) : ("video" as const),
-        likes: Math.floor(Math.random() * 10000),
-        comments: Math.floor(Math.random() * 1000),
-        views: Math.floor(Math.random() * 100000),
-      });
-    }
-  }
-
-  return items;
-};
+import type { FullContentDto } from "@/service/api/models/FullContentDto";
+import { useAuthContext } from "@/feature/auth/context/AuthContext";
+import useBoardService from "@/shared/hooks/useBoardService";
+import type { UserDto, BoardDto } from "@/service/api";
+import useUserService from "@/shared/hooks/useUserService";
+import useContentService from "@/shared/hooks/useContentService";
+import useAlgorithmService from "@/shared/hooks/useAlgorithmService";
 
 export default function FeedPage() {
   const [currentFilter, setCurrentFilter] = useState("All");
-  const userBoards = ["Design", "Photography", "Travel"];
+  const [userBoards, setUserBoards] = useState<BoardDto[]>([]);
+  const [boardContentsMap, setBoardContentsMap] = useState<
+    Map<number, FullContentDto[]>
+  >(new Map());
+  const [loggedUser, setLoggedUser] = useState<UserDto | null>(null);
 
-  const handleLoadMore = useCallback(
-    async (page: number) => {
-      await new Promise((resolve) => setTimeout(resolve, 500));
-      return generateMockItems(page, currentFilter);
+  const { user } = useAuthContext();
+  const { getBoardByUser, getContentByBoardId } = useBoardService();
+  const { findUserById } = useUserService();
+  const { findAll, getFollowingContent, getFriendContent } =
+    useContentService();
+  const { findFyp } = useAlgorithmService();
+
+  const fetchUserData = useCallback(async () => {
+    if (user) {
+      const res = await findUserById(user.user_id);
+      if (res) {
+        setLoggedUser(res);
+      }
+    }
+  }, [user]);
+
+  const fetchUserBoards = useCallback(async () => {
+    if (loggedUser) {
+      const boards = await getBoardByUser(
+        loggedUser.user_id,
+        loggedUser.area_id
+      );
+      if (boards && boards.length > 0) {
+        setUserBoards(boards);
+      } else {
+        setUserBoards([]);
+      }
+    }
+  }, [loggedUser]);
+
+  const fetchBoardContent = useCallback(
+    async (boardId: number) => {
+      if (loggedUser) {
+        const content = await getContentByBoardId(boardId, loggedUser.area_id);
+        if (content) {
+          setBoardContentsMap((prev) => new Map(prev).set(boardId, content));
+        }
+      }
     },
-    [currentFilter]
+    [loggedUser, getContentByBoardId]
   );
+
+  const filters = useMemo(() => {
+    if (!loggedUser) return ["All"];
+
+    const boardNames = userBoards.map((board) => board.title);
+    return ["All", "Following", "Friends", ...boardNames];
+  }, [loggedUser, userBoards]);
 
   const handleFilterChange = (filter: string) => {
     setCurrentFilter(filter);
+
+    // If switching to a board filter, refetch its content to ensure it's up-to-date
+    if (filter !== "All" && filter !== "Following" && filter !== "Friends") {
+      const board = userBoards.find((b) => b.title === filter);
+      if (board) {
+        fetchBoardContent(board.board_id);
+      }
+    }
   };
+
+  const handleLoadMore = useCallback(async () => {
+    if (!loggedUser) {
+      const allContent = await findAll(1); //TODO: pagination, currently fetching from one area id only
+      return allContent || [];
+    }
+
+    let result: FullContentDto[] | null = [];
+
+    if (currentFilter === "All") {
+      result = await findFyp(loggedUser.user_id, loggedUser.area_id);
+    } else if (currentFilter === "Following") {
+      result = await getFollowingContent(loggedUser.user_id);
+    } else if (currentFilter === "Friends") {
+      result = await getFriendContent(loggedUser.user_id);
+    } else {
+      const board = userBoards.find((b) => b.title === currentFilter);
+      console.log("Loading content for board filter:", currentFilter, board);
+      if (board) {
+        result = boardContentsMap.get(board.board_id) || [];
+      }
+    }
+
+    return result || [];
+  }, [
+    loggedUser,
+    currentFilter,
+    userBoards,
+    boardContentsMap,
+    findFyp,
+    findAll,
+    getFollowingContent,
+    getFriendContent,
+  ]);
+
+  const isBoardFilter = userBoards.some((b) => b.title === currentFilter);
+  const enableInfiniteScroll = !isBoardFilter;
+
+  useEffect(() => {
+    fetchUserData();
+  }, [fetchUserData]);
+
+  useEffect(() => {
+    if (loggedUser) {
+      fetchUserBoards();
+    }
+  }, [loggedUser]);
+
+  useEffect(() => {
+    if (userBoards.length > 0) {
+      userBoards.forEach((board) => {
+        if (board.board_id) {
+          // Always refetch to ensure content is up-to-date
+          fetchBoardContent(board.board_id);
+        }
+      });
+    }
+  }, [userBoards]);
+
+  useEffect(() => {
+    console.log("Current filter changed to:", currentFilter);
+  }, [currentFilter]);
 
   return (
     <RootLayout>
       <div className="w-full h-full bg-dark-900 flex flex-col justify-start items-center">
         <div className="w-3/4 pt-4">
-          <TopFeedBar
-            userBoards={userBoards}
-            onFilterChange={handleFilterChange}
-          />
+          <TopFeedBar filters={filters} onFilterChange={handleFilterChange} />
         </div>
-        <FeedList onLoadMore={handleLoadMore} />
+        <FeedList
+          onLoadMore={handleLoadMore}
+          currentFilter={currentFilter}
+          enableInfiniteScroll={enableInfiniteScroll}
+        />
       </div>
     </RootLayout>
   );

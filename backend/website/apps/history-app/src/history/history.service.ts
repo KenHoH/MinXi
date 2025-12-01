@@ -65,4 +65,24 @@ export class HistoryService implements IHistoryService {
       );
     }
   }
+
+  async getByUserAndContent(
+    user_id: number,
+    content_id: number,
+  ): Promise<CreateHistoryDto[]> {
+    try {
+      const result = await this.prisma.historyContent.findMany({
+        where: {
+          user_id: user_id,
+          content_id: content_id,
+        },
+      });
+      return result.map(mapToCreateHistoryDto);
+    } catch (error) {
+      this.logger.log('Failed to get histories', error.message);
+      throw httpToRpc(
+        new HttpException('Failed to get histories', HttpStatus.BAD_REQUEST),
+      );
+    }
+  }
 }
