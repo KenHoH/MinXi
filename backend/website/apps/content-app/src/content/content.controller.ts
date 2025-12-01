@@ -10,6 +10,7 @@ import { FileDto } from '@app/contracts/shared-dto/content/res/file.dto';
 import { FullContentDto } from '@app/contracts/shared-dto/content/res/full.content.dto';
 import { deltaDto } from '@app/contracts/shared-dto/user/delta.dto';
 import { ValidationPipe } from '@nestjs/common';
+import { PageContentRes } from '@app/contracts/shared-dto/content/res/page.content.dto';
 
 @Controller()
 export class ContentController {
@@ -33,6 +34,17 @@ export class ContentController {
   async findAll(@Payload() area_id: number): Promise<FullContentDto[]> {
     this.logger.log(`Fetching all content for area_id: ${area_id}`);
     return this.contentService.findAll(area_id);
+  }
+  @MessagePattern(CONTENT_MSG.findAllPage)
+  async findAllPage(
+    @Payload() payload: { area_id: number; page: number; limit: number },
+  ): Promise<PageContentRes> {
+    this.logger.log(`Fetching all content for area_id: ${payload.area_id}`);
+    return this.contentService.findAllPage(
+      payload.area_id,
+      payload.page,
+      payload.limit,
+    );
   }
 
   @MessagePattern(CONTENT_MSG.findOne)

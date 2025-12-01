@@ -26,6 +26,7 @@ import {
   HISTORY_MSG,
 } from '@app/common/constants/messageEvent';
 import { mapToContent } from './utils/mapToContent';
+import { PageContentRes } from '@app/contracts/shared-dto/content/res/page.content.dto';
 
 @Injectable()
 export class ContentService implements IContentService {
@@ -2020,6 +2021,162 @@ export class ContentService implements IContentService {
       throw httpToRpc(
         new HttpException(
           'Failed to fetch child posts',
+          HttpStatus.INTERNAL_SERVER_ERROR,
+        ),
+      );
+    }
+  }
+
+  async findAllPage(
+    area_id: number,
+    page: number,
+    limit: number,
+  ): Promise<PageContentRes> {
+    if (area_id <= 0 || area_id > 3)
+      throw httpToRpc(
+        new HttpException('Invalid area ID', HttpStatus.BAD_REQUEST),
+      );
+
+    try {
+      const result = await this.prisma
+        .$transaction(async (tx) => {
+          const cursor =
+            page > 0
+              ? {
+                  content_id_area_id: {
+                    area_id: area_id,
+                    content_id: page,
+                  },
+                }
+              : undefined;
+
+          const contents = await tx.content
+            .findMany({
+              where: {
+                area_id,
+                published_at: { lte: new Date() },
+                visibilityPrivate: false,
+              },
+              skip: cursor ? 1 : 0,
+              take: limit,
+              orderBy: { content_id: 'asc' },
+              ...(cursor && { cursor }),
+            })
+            .catch((error) => {
+              this.logger.error('Failed to fetch content list', error.message);
+              throw httpToRpc(
+                new HttpException(
+                  'Failed to fetch content list',
+                  HttpStatus.INTERNAL_SERVER_ERROR,
+                ),
+              );
+            });
+
+          if (!contents || contents.length === 0) {
+            return [];
+          }
+
+          const allContents: FullContentDto[] = [];
+
+          for (const content of contents) {
+            try {
+              const files = await tx.file.findMany({
+                where: {
+                  content_area_id: area_id,
+                  content_id: content.content_id,
+                },
+              });
+
+              const thumbnail = files.find((file) => file.type === 'thumbnail');
+              if (!thumbnail && content.post_type !== 'post') {
+                this.logger.warn(
+                  `Content ${content.content_id} missing thumbnail`,
+                );
+                continue;
+              }
+
+              const mappedFiles: FileDto[] = files
+                .filter((file) => file.type !== 'thumbnail')
+                .map((file) => ({
+                  file_id: file.file_id,
+                  filepath: file.filepath,
+                  content_id: file.content_id,
+                  content_area_id: file.content_area_id,
+                  type: file.type,
+                }));
+
+              const fullContent: FullContentDto = {
+                area_id: content.area_id,
+                content_id: content.content_id,
+                creator_id: content.creator_id,
+                description: content.description,
+                parent_id: content.parent_id ?? undefined,
+                post_type: content.post_type,
+                comments: content.comments,
+                likes: content.likes,
+                pins: content.pins,
+                reports: content.reports,
+                title: content.title,
+                views: content.views,
+                published_at: content.published_at,
+                visibilityPrivate: content.visibilityPrivate,
+                thumbnail: thumbnail
+                  ? {
+                      file_id: thumbnail.file_id,
+                      filepath: thumbnail.filepath,
+                      content_id: thumbnail.content_id,
+                      content_area_id: thumbnail.content_area_id,
+                      type: thumbnail.type,
+                    }
+                  : null,
+                contents: mappedFiles,
+              };
+
+              allContents.push(fullContent);
+            } catch (error) {
+              this.logger.error(
+                `Failed to fetch files for content ${content.content_id}`,
+                error.message,
+              );
+              throw httpToRpc(
+                new HttpException(
+                  `Failed to fetch files for content ${content.content_id}`,
+                  HttpStatus.INTERNAL_SERVER_ERROR,
+                ),
+              );
+            }
+          }
+
+          return allContents;
+        })
+        .catch((error) => {
+          if (error.status) {
+            throw error;
+          }
+          this.logger.error('Transaction failed', error.message);
+          throw httpToRpc(
+            new HttpException(
+              'Failed to fetch content list - transaction rolled back',
+              HttpStatus.INTERNAL_SERVER_ERROR,
+            ),
+          );
+        });
+
+      const nextCursor =
+        result.length > 0 ? result[result.length - 1].content_id : 0;
+
+      return {
+        contents: result,
+        currentPage: nextCursor,
+      };
+    } catch (error) {
+      if (error.status) {
+        throw error;
+      }
+      this.logger.error('Failed to fetch content list', error.message);
+      throw httpToRpc(
+        new HttpException(
+          'Failed to fetch content list',
           HttpStatus.INTERNAL_SERVER_ERROR,
         ),
       );

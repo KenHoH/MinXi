@@ -38,6 +38,7 @@ export const CONTENT_MSG = {
   setPrivate: 'content.private',
   setPublic: 'content.public',
   findAll: 'content.findAll',
+  findAllPage: 'content.findAllPage',
   findOne: 'content.findOne',
   getStats: 'content.getStats',
   getByUser: 'content.getByUser',

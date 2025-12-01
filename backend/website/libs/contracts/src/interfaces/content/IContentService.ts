@@ -5,6 +5,7 @@ import { FileRes } from '@app/contracts/shared-dto/content/res/file.res.dto';
 import { FileDto } from '@app/contracts/shared-dto/content/res/file.dto';
 import { FullContentDto } from '@app/contracts/shared-dto/content/res/full.content.dto';
 import { deltaDto } from '@app/contracts/shared-dto/user/delta.dto';
+import { PageContentRes } from '@app/contracts/shared-dto/content/res/page.content.dto';
 
 export interface IContentService {
   create(dto: CreatePostDto): Promise<FullContentDto>;
@@ -25,6 +26,13 @@ export interface IContentService {
   setPrivate(content_id: number, area_id: number): Promise<Ack>;
   setPublic(content_id: number, area_id: number): Promise<Ack>;
   findAll(area_id: number): Promise<FullContentDto[]>;
+
+  findAllPage(
+    area_id: number,
+    page: number,
+    limit: number,
+  ): Promise<PageContentRes>;
+
   findOne(content_id: number, area_id: number): Promise<FullContentDto>;
   getByUser(creator_id: number): Promise<FullContentDto[]>;
   getByUserAll(creator_id: number): Promise<FullContentDto[]>;

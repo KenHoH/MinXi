@@ -11,6 +11,7 @@ import { Inject, Injectable } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
 import { firstValueFrom } from 'rxjs';
 import { IContentService } from '@app/contracts/interfaces/content/IContentService';
+import { PageContentRes } from '@app/contracts/shared-dto/content/res/page.content.dto';
 
 @Injectable()
 export class ContentService implements IContentService {
@@ -43,6 +44,20 @@ export class ContentService implements IContentService {
   async findAll(area_id: number): Promise<FullContentDto[]> {
     return await firstValueFrom(
       this.contentClient.send(CONTENT_MSG.findAll, area_id),
+    );
+  }
+
+  async findAllPage(
+    area_id: number,
+    page: number,
+    limit: number,
+  ): Promise<PageContentRes> {
+    return await firstValueFrom(
+      this.contentClient.send(CONTENT_MSG.findAllPage, {
+        area_id,
+        page,
+        limit,
+      }),
     );
   }
 

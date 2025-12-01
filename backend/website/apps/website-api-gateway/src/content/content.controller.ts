@@ -35,6 +35,7 @@ import { LogInterceptor } from '@app/common/interceptor/log/log.interceptor';
 import { Public } from '@app/common/decorators/public.decorator';
 import { FileDtoReq } from '@app/contracts/shared-dto/content/req/FIleDto.req';
 import { FileDto } from '@app/contracts/shared-dto/content/res/file.dto';
+import { PageContentRes } from '@app/contracts/shared-dto/content/res/page.content.dto';
 
 @Controller('content')
 @UseGuards(JwtAuthGuard)
@@ -259,6 +260,16 @@ export class ContentController {
     @Param('area_id', ParseIntPipe) area_id: number,
   ): Promise<FullContentDto> {
     return this.contentService.findOne(content_id, area_id);
+  }
+
+  @Public()
+  @Get(':area_id/:page/:limit')
+  findAllPage(
+    @Param('area_id', ParseIntPipe) area_id: number,
+    @Param('page', ParseIntPipe) page: number,
+    @Param('limit', ParseIntPipe) limit: number,
+  ): Promise<PageContentRes> {
+    return this.contentService.findAllPage(area_id, page, limit);
   }
 
   @Patch(':content_id/:area_id/view')
