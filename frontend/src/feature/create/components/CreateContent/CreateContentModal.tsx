@@ -15,7 +15,7 @@ import { Input } from "@/components/ui/input";
 import type { UserDto } from "@/service/api";
 import useUserService from "@/shared/hooks/useUserService";
 import { Calendar } from "lucide-react";
-
+import { Switch } from "@/components/ui/switch";
 interface CreateContentModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -227,19 +227,16 @@ export function CreateContentModal({
             </div>
 
             <div className="flex items-center gap-3 p-4 bg-dark-700 rounded-lg border border-dark-600">
-              <input
-                type="checkbox"
-                id="private"
-                checked={isPrivate}
-                onChange={(e) => setIsPrivate(e.target.checked)}
-                className="w-4 h-4 bg-dark-600 border border-dark-600 rounded accent-burgundy-600 cursor-pointer"
-              />
               <label
                 htmlFor="private"
                 className="flex-1 text-sm text-gray-300 cursor-pointer"
               >
-                Make this board private (Only you can see it)
+                Make this Content private (Only you can see it)
               </label>
+              <Switch
+                checked={isPrivate}
+                onCheckedChange={() => setIsPrivate((prev) => !prev)}
+              />
             </div>
 
             {/* Content Type Selector */}

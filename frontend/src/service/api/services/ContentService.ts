@@ -5,6 +5,7 @@
 import type { Ack } from '../models/Ack';
 import type { deltaDto } from '../models/deltaDto';
 import type { FullContentDto } from '../models/FullContentDto';
+import type { PageContentRes } from '../models/PageContentRes';
 import type { CancelablePromise } from '../core/CancelablePromise';
 import { OpenAPI } from '../core/OpenAPI';
 import { request as __request } from '../core/request';
@@ -285,6 +286,28 @@ export class ContentService {
             path: {
                 'content_id': contentId,
                 'area_id': areaId,
+            },
+        });
+    }
+    /**
+     * @param areaId
+     * @param page
+     * @param limit
+     * @returns PageContentRes
+     * @throws ApiError
+     */
+    public static contentControllerFindAllPage(
+        areaId: number,
+        page: number,
+        limit: number,
+    ): CancelablePromise<PageContentRes> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/content/{area_id}/{page}/{limit}',
+            path: {
+                'area_id': areaId,
+                'page': page,
+                'limit': limit,
             },
         });
     }

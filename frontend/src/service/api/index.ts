@@ -37,6 +37,7 @@ export type { MessageResponseDto } from './models/MessageResponseDto';
 export type { NameRequest } from './models/NameRequest';
 export type { NotificationReq } from './models/NotificationReq';
 export type { NotificationRes } from './models/NotificationRes';
+export type { PageContentRes } from './models/PageContentRes';
 export { ParticipantResponseDto } from './models/ParticipantResponseDto';
 export type { ParticipantTotalResDTO } from './models/ParticipantTotalResDTO';
 export type { RefreshTokenRequestDto } from './models/RefreshTokenRequestDto';

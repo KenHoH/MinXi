@@ -20,6 +20,9 @@ export default function SettingsPage() {
     privateContent: false,
     privatePinned: false,
     privateLiked: false,
+    likeDisable: false,
+    commentDisable: false,
+    followDisable: false,
   });
   const [profileImage, setProfileImage] = useState<File | null>(null);
   const [profileImagePreview, setProfileImagePreview] = useState<string>("");
@@ -39,7 +42,10 @@ export default function SettingsPage() {
       user.user_id,
       newSettings.privateContent,
       newSettings.privateLiked,
-      newSettings.privatePinned
+      newSettings.privatePinned,
+      newSettings.likeDisable,
+      newSettings.commentDisable,
+      newSettings.followDisable
     );
     showToast("Privacy settings updated");
   };
@@ -93,6 +99,9 @@ export default function SettingsPage() {
         privateContent: userData.content_visibilityPrivate,
         privatePinned: userData.pinned_visibilityPrivate,
         privateLiked: userData.liked_visibilityPrivate,
+        likeDisable: userData.liked_notification_disabled,
+        commentDisable: userData.comments_notification_disabled,
+        followDisable: userData.followers_notification_disabled,
       });
       setDescription(userData.desc || "");
     };
@@ -102,8 +111,8 @@ export default function SettingsPage() {
   return (
     <RootLayout>
       <div className="flex">
-        <main className="ml-64 flex-1 p-8">
-          <div className="max-w-2xl ml-10">
+        <main className="flex-1 p-8 justify-center flex">
+          <div className="max-w-2xl w-2xl">
             <h1 className="text-3xl font-bold text-foreground mb-8">
               Settings
             </h1>
@@ -155,6 +164,56 @@ export default function SettingsPage() {
                   <Switch
                     checked={settings.privateLiked}
                     onCheckedChange={() => handleToggle("privateLiked")}
+                  />
+                </div>
+              </CardContent>
+            </Card>
+            {/* Notification Settings */}
+            <Card className="border-border mb-6">
+              <CardHeader>
+                <CardTitle>Push Notification Settings</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="font-medium text-foreground">
+                      Like Notifications
+                    </p>
+                    <p className="text-sm text-muted-foreground">
+                      Disabled notifications for likes
+                    </p>
+                  </div>
+                  <Switch
+                    checked={settings.likeDisable}
+                    onCheckedChange={() => handleToggle("likeDisable")}
+                  />
+                </div>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="font-medium text-foreground">
+                      Comment Notifications
+                    </p>
+                    <p className="text-sm text-muted-foreground">
+                      Disabled notifications for comments
+                    </p>
+                  </div>
+                  <Switch
+                    checked={settings.commentDisable}
+                    onCheckedChange={() => handleToggle("commentDisable")}
+                  />
+                </div>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="font-medium text-foreground">
+                      Following Notifications
+                    </p>
+                    <p className="text-sm text-muted-foreground">
+                      Disable following notifications
+                    </p>
+                  </div>
+                  <Switch
+                    checked={settings.followDisable}
+                    onCheckedChange={() => handleToggle("followDisable")}
                   />
                 </div>
               </CardContent>

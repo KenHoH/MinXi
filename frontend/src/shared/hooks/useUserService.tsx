@@ -41,13 +41,19 @@ export default function useUserService() {
     id: number,
     content_visibility: boolean,
     liked_visibility: boolean,
-    pinned_visibility: boolean
+    pinned_visibility: boolean,
+    likeDisable: boolean,
+    commentDisable: boolean,
+    followDisable: boolean
   ) =>
     call(() =>
       UserService.userControllerUpdateRestriction(id, {
         content_visibility,
         liked_visibility,
         pinned_visibility,
+        liked_notification_disabled: likeDisable,
+        comments_notification_disabled: commentDisable,
+        followers_notification_disabled: followDisable,
       })
     );
 
