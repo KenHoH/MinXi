@@ -45,6 +45,10 @@ export class ContentService {
              */
             description: string;
             /**
+             * Visibility of the content (private or not)
+             */
+            visibilityPrivate?: boolean;
+            /**
              * Parent content ID (optional)
              */
             parent_id?: number;

@@ -44,6 +44,7 @@ export class SseController {
     return this.sseService.subscribeToRoom(roomId);
   }
 
+  @Public()
   @Post('sendBroadcastToRoom')
   @ApiConsumes('multipart/form-data')
   @ApiBody({
@@ -76,6 +77,8 @@ export class SseController {
     const roomId = body.room_id;
     const authorId = parseInt(body.author_id, 10);
     const message = body.message;
+    const authorName = body.author_name;
+    const authorProfileUrl = body.author_profile_url;
     const metadataFile = files.metadata ? files.metadata[0] : null;
 
     if (!roomId || typeof roomId !== 'string') {
@@ -107,6 +110,8 @@ export class SseController {
       mediaUrl: profilePath,
       id: '',
       type: typeMetadata,
+      authorName: authorName,
+      authorProfileUrl: authorProfileUrl,
     };
 
     return this.sseService.sendBroadcast(dto.roomId, dto);

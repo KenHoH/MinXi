@@ -61,6 +61,22 @@ export class UserService {
         });
     }
     /**
+     * @param id
+     * @returns UserDto
+     * @throws ApiError
+     */
+    public static userControllerFindOneById(
+        id: number,
+    ): CancelablePromise<UserDto> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/user/user/full/{id}',
+            path: {
+                'id': id,
+            },
+        });
+    }
+    /**
      * @param formData Update profile
      * @returns UserDto
      * @throws ApiError

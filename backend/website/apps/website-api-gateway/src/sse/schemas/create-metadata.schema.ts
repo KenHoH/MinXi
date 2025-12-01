@@ -21,6 +21,16 @@ export const createMetadataSchema = {
       description: 'Message description',
       example: 'Hello Testing Metadata',
     },
+    author_name: {
+      type: 'string',
+      description: 'Author name',
+      example: 'Hello Testing Metadata',
+    },
+    author_profile_url: {
+      type: 'string',
+      description: 'Author profile URL',
+      example: 'Hello Testing Metadata',
+    },
   },
   required: ['room_id', 'author_id', 'message'],
 };
