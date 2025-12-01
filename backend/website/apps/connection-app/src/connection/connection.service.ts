@@ -22,7 +22,7 @@ import {
 import { SOCIAL_SERVICES, USER_SERVICES } from '@app/common/constants/services';
 import { ClientProxy } from '@nestjs/microservices/client/client-proxy';
 import { firstValueFrom } from 'rxjs';
-import { SOCIAL_MSG } from '@app/common/constants/messageEvent';
+import { SOCIAL_MSG, USER_MSG } from '@app/common/constants/messageEvent';
 import { FindDmDto } from '@app/contracts/shared-dto/social/request/findDMDTO';
 import {
   CreateRoomDto,
@@ -390,7 +390,7 @@ export class ConnectionService implements IConnectionService {
     try {
       const count = await this.prisma.follow.count({
         where: {
-          creator_id: user_id,
+          follower_id: user_id,
         },
       });
 
@@ -418,7 +418,7 @@ export class ConnectionService implements IConnectionService {
       for (const id of followerIds) {
         try {
           const user = await firstValueFrom(
-            this.userClient.send('user.getUserById', id),
+            this.userClient.send(USER_MSG.findOneById, id),
           );
           users.push(user);
         } catch (error) {
@@ -449,7 +449,7 @@ export class ConnectionService implements IConnectionService {
       for (const id of followingIds) {
         try {
           const user = await firstValueFrom(
-            this.userClient.send('user.getUserById', id),
+            this.userClient.send(USER_MSG.findOneById, id),
           );
           users.push(user);
         } catch (error) {
@@ -481,7 +481,7 @@ export class ConnectionService implements IConnectionService {
       for (const id of friendIds) {
         try {
           const user = await firstValueFrom(
-            this.userClient.send('user.getUserById', id),
+            this.userClient.send(USER_MSG.findOneById, id),
           );
           users.push(user);
         } catch (error) {
