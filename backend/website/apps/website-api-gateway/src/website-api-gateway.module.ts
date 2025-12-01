@@ -12,6 +12,7 @@ import { SseModule } from './sse/sse.module';
 import { SocialModule } from './social/social.module';
 import { CommentModule } from './comment/comment.module';
 import { NotificationModule } from './notification/notification.module';
+import { AppController } from './app.controller';
 
 @Module({
   imports: [
@@ -29,7 +30,7 @@ import { NotificationModule } from './notification/notification.module';
     CommentModule,
     NotificationModule,
   ],
-  controllers: [],
+  controllers: [AppController],
   providers: [],
 })
 export class WebsiteApiGatewayModule {}

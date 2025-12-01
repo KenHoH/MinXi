@@ -16,6 +16,7 @@ import {
   FriendDto,
   FollowingDto,
 } from '@app/contracts/shared-dto/connection/response';
+import { UserDto } from '@app/contracts/shared-dto/user/user.dto';
 import { Inject, Injectable } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
 import { firstValueFrom } from 'rxjs';
@@ -114,6 +115,36 @@ export class ConnectionService {
     payload.user_id = user_id;
     return await firstValueFrom(
       this.connectClient.send(CONNECTION_MSG.deleteFollow, payload),
+    );
+  }
+
+  async getFollowingCount(user_id: number): Promise<number> {
+    return await firstValueFrom(
+      this.connectClient.send(CONNECTION_MSG.getFollowingCount, user_id),
+    );
+  }
+
+  async getFollowersInstanceByCreator(creator_id: number): Promise<UserDto[]> {
+    return await firstValueFrom(
+      this.connectClient.send(
+        CONNECTION_MSG.getFollowersInstanceByCreator,
+        creator_id,
+      ),
+    );
+  }
+
+  async getFriendsInstanceByUser(user_id: number): Promise<UserDto[]> {
+    return await firstValueFrom(
+      this.connectClient.send(CONNECTION_MSG.getFriendsInstanceByUser, user_id),
+    );
+  }
+
+  async getFollowingInstanceByUser(user_id: number): Promise<UserDto[]> {
+    return await firstValueFrom(
+      this.connectClient.send(
+        CONNECTION_MSG.getFollowingInstanceByUser,
+        user_id,
+      ),
     );
   }
 }

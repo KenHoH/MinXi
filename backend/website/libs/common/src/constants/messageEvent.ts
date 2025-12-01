@@ -86,6 +86,11 @@ export const CONNECTION_MSG = {
   getFollowingByUser: 'connection.getFollowingByUser',
   deleteFriend: 'connection.deleteFriend',
   deleteFollow: 'connection.deleteFollow',
+
+  getFollowingCount: 'connection.getFollowingCount',
+  getFollowersInstanceByCreator: 'connection.getFollowersInstanceByCreator',
+  getFriendsInstanceByUser: 'connection.getFriendsInstanceByUser',
+  getFollowingInstanceByUser: 'connection.getFollowingInstanceByUser',
 };
 
 export const REPORT_MSG = {

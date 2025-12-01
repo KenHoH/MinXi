@@ -19,7 +19,7 @@ import {
   mapFriendToDto,
   mapFollowingToDto,
 } from './utils/mapToDTO';
-import { SOCIAL_SERVICES } from '@app/common/constants/services';
+import { SOCIAL_SERVICES, USER_SERVICES } from '@app/common/constants/services';
 import { ClientProxy } from '@nestjs/microservices/client/client-proxy';
 import { firstValueFrom } from 'rxjs';
 import { SOCIAL_MSG } from '@app/common/constants/messageEvent';
@@ -28,6 +28,7 @@ import {
   CreateRoomDto,
   RoomType,
 } from '@app/contracts/shared-dto/social/request/createRoomDTO';
+import { UserDto } from '@app/contracts/shared-dto/user/user.dto';
 
 @Injectable()
 export class ConnectionService implements IConnectionService {
@@ -36,6 +37,7 @@ export class ConnectionService implements IConnectionService {
   constructor(
     private readonly prisma: UserDatabaseConnection,
     @Inject(SOCIAL_SERVICES.CLIENT) private readonly socialClient: ClientProxy,
+    @Inject(USER_SERVICES.CLIENT) private readonly userClient: ClientProxy,
   ) {}
 
   async createFollow(creator_id: number, follower_id: number): Promise<Ack> {
@@ -378,6 +380,120 @@ export class ConnectionService implements IConnectionService {
       throw httpToRpc(
         new HttpException(
           'Failed to delete follow',
+          HttpStatus.INTERNAL_SERVER_ERROR,
+        ),
+      );
+    }
+  }
+
+  async getFollowingCount(user_id: number): Promise<number> {
+    try {
+      const count = await this.prisma.follow.count({
+        where: {
+          creator_id: user_id,
+        },
+      });
+
+      return count;
+    } catch (error) {
+      this.logger.error('Failed to delete follow', error.message);
+      throw httpToRpc(
+        new HttpException(
+          'Failed to get following count',
+          HttpStatus.INTERNAL_SERVER_ERROR,
+        ),
+      );
+    }
+  }
+
+  async getFollowersInstanceByCreator(creator_id: number): Promise<UserDto[]> {
+    try {
+      const followers = await this.prisma.follow.findMany({
+        where: {
+          creator_id,
+        },
+      });
+      const followerIds = followers.map((f) => f.follower_id);
+      const users: UserDto[] = [];
+      for (const id of followerIds) {
+        try {
+          const user = await firstValueFrom(
+            this.userClient.send('user.getUserById', id),
+          );
+          users.push(user);
+        } catch (error) {
+          this.logger.warn(`Failed to fetch user with ID ${id}`);
+        }
+      }
+      return users;
+    } catch (error) {
+      this.logger.error('Failed to get followers instance', error.message);
+      throw httpToRpc(
+        new HttpException(
+          'Failed to get followers instance',
+          HttpStatus.INTERNAL_SERVER_ERROR,
+        ),
+      );
+    }
+  }
+
+  async getFollowingInstanceByUser(user_id: number): Promise<UserDto[]> {
+    try {
+      const following = await this.prisma.follow.findMany({
+        where: {
+          follower_id: user_id,
+        },
+      });
+      const followingIds = following.map((f) => f.creator_id);
+      const users: UserDto[] = [];
+      for (const id of followingIds) {
+        try {
+          const user = await firstValueFrom(
+            this.userClient.send('user.getUserById', id),
+          );
+          users.push(user);
+        } catch (error) {
+          this.logger.warn(`Failed to fetch user with ID ${id}`);
+        }
+      }
+      return users;
+    } catch (error) {
+      this.logger.error('Failed to get following instance', error.message);
+      throw httpToRpc(
+        new HttpException(
+          'Failed to get following instance',
+          HttpStatus.INTERNAL_SERVER_ERROR,
+        ),
+      );
+    }
+  }
+
+  async getFriendsInstanceByUser(user_id: number): Promise<UserDto[]> {
+    try {
+      const friends = await this.prisma.friend.findMany({
+        where: {
+          user_id,
+        },
+      });
+      const friendIds = friends.map((f) => f.friend_id);
+      const users: UserDto[] = [];
+
+      for (const id of friendIds) {
+        try {
+          const user = await firstValueFrom(
+            this.userClient.send('user.getUserById', id),
+          );
+          users.push(user);
+        } catch (error) {
+          this.logger.warn(`Failed to fetch user with ID ${id}`);
+        }
+      }
+      return users;
+    } catch (error) {
+      this.logger.error('Failed to get friends instance', error.message);
+      throw httpToRpc(
+        new HttpException(
+          'Failed to get friends instance',
           HttpStatus.INTERNAL_SERVER_ERROR,
         ),
       );
