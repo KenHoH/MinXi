@@ -1,3 +1,5 @@
+// used as a response for the sse service
+
 import { ApiProperty } from '@nestjs/swagger';
 import { IsEnum, IsNumber, IsOptional, IsString } from 'class-validator';
 export class MessageResponseDto {

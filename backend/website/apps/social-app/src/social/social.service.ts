@@ -312,6 +312,8 @@ export class SocialService implements ISocialService {
           authorId: Number(dto.authorId),
           mediaUrl: dto.mediaUrl,
           type: dto.type,
+          authorName: dto.authorName,
+          authorProfileUrl: dto.authorProfileUrl,
         },
       });
 
