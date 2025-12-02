@@ -1,3 +1,5 @@
+import { get } from 'http';
+
 export const USER_MSG = {
   create: 'user.createUser',
   findAll: 'user.findAllUser',
@@ -133,6 +135,7 @@ export const SOCIAL_MSG = {
   getRoomGroupAll: 'social.getRoomGroupAll',
   getRoomCommunityJoinedByUserId: 'social.getRoomCommunityJoinedByUserId',
   getRoomCommunityAll: 'social.getRoomCommunityAll',
+  getInstanceParticipant: 'social.getInstanceParticipant',
 
   getMedia: 'social.getMedia',
   deleteMessageByRoom: 'social.deleteMessageByRoom',

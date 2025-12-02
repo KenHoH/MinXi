@@ -256,6 +256,12 @@ export class SocialService implements ISocialService {
     }
   }
 
+  /**
+   *
+   * @param roomId
+   * @returns
+   * @deprecated Use getInstanceParticipant instead
+   */
   async getParticipant(roomId: string): Promise<ParticipantResponseDto> {
     try {
       const roomType = await this.socialClient.room.findFirst({
@@ -278,9 +284,47 @@ export class SocialService implements ISocialService {
     }
   }
 
-  async getMedia(dto: GetMediaDto): Promise<MessageResponseDto> {
+  async getInstanceParticipant(roomId: string): Promise<UserDto[]> {
     try {
-      const media = await this.messageClient.message.findFirst({
+      const roomType = await this.socialClient.room.findFirst({
+        where: { id: roomId },
+      });
+
+      if (!roomType || roomType.type === RoomType.DIRECT) {
+        throw new HttpException(
+          'Group or Community not found',
+          HttpStatus.NOT_FOUND,
+        );
+      }
+
+      const participants = await this.socialClient.participant.findMany({
+        where: { roomId: roomId },
+      });
+
+      const users: UserDto[] = [];
+      for (const participant of participants) {
+        const user = await firstValueFrom(
+          this.userClient.send<UserDto>(
+            USER_MSG.findOneById,
+            participant.userId,
+          ),
+        );
+
+        users.push(user);
+      }
+
+      return users;
+    } catch (error) {
+      throw new HttpException(
+        'Failed to get instance participants',
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+  }
+
+  async getMedia(dto: GetMediaDto): Promise<MessageResponseDto[]> {
+    try {
+      const media = await this.messageClient.message.findMany({
         where: { roomId: dto.roomId, mediaUrl: { not: null } },
         orderBy: { createdAt: 'desc' },
       });
@@ -289,7 +333,7 @@ export class SocialService implements ISocialService {
         throw new HttpException('No media found', HttpStatus.NOT_FOUND);
       }
 
-      return mapMessageToResponse(media);
+      return media.map(mapMessageToResponse);
     } catch (error: any) {
       throw httpToRpc(
         error instanceof HttpException

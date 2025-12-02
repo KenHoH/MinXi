@@ -58,6 +58,10 @@ export class SocialController {
   async getParticipant(@Payload() roomId: string) {
     return this.socialService.getParticipant(roomId);
   }
+  @MessagePattern(SOCIAL_MSG.getInstanceParticipant)
+  async getInstanceParticipant(@Payload() roomId: string) {
+    return this.socialService.getInstanceParticipant(roomId);
+  }
 
   @MessagePattern(SOCIAL_MSG.sendMessage)
   async sendMessage(@Payload() dto: SendMessageDto) {
