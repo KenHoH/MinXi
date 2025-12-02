@@ -15,13 +15,15 @@ datasource db {
 }
 
 model Message {
-  id        String   @id @default(uuid())
-  roomId    String
-  content   String // text content
-  mediaUrl  String? // image or video URL 
-  type      String   @default("TEXT") // TEXT, IMAGE, VIDEO
-  createdAt DateTime @default(now())
-  authorId  Int
+  id               String   @id @default(uuid())
+  roomId           String
+  content          String
+  mediaUrl         String?
+  type             String   @default("TEXT")
+  createdAt        DateTime @default(now())
+  authorName       String?
+  authorProfileUrl String?
+  authorId         Int
 
   @@index([roomId])
   @@index([roomId, createdAt])

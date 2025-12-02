@@ -160,8 +160,25 @@ export default function ChatPage() {
       if (selectedRoom) {
         const res = await getMessage(selectedRoom, 100);
         if (res && Array.isArray(res)) {
-          setMessageList(res);
-          console.log("Messages for room", selectedRoom, ":", res);
+          // Transform MessageResponseDto to RoomMessage format
+          const transformedMessages = res.map((msg: any) => ({
+            id: msg.id,
+            authorId: msg.authorId,
+            content: msg.content,
+            mediaUrl: msg.mediaUrl || "",
+            createdAt: msg.createdAt,
+            roomId: msg.roomId,
+            type: msg.type,
+            authorName: msg.authorName || "",
+            authorProfileUrl: msg.authorProfileUrl || "",
+          }));
+          setMessageList(transformedMessages);
+          console.log(
+            "Messages for room",
+            selectedRoom,
+            ":",
+            transformedMessages
+          );
         }
       } else {
         setMessageList([]);

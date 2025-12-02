@@ -24,4 +24,12 @@ export class SendMessageDto {
   @IsOptional()
   @IsString()
   mediaUrl?: string;
+
+  @ApiProperty({ description: 'Author name', example: 'John Doe' })
+  authorName?: string;
+  @ApiProperty({
+    description: 'Author profile URL',
+    example: 'https://example.com/profile.jpg',
+  })
+  authorProfileUrl?: string;
 }

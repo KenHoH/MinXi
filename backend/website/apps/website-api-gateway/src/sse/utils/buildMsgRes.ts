@@ -10,5 +10,7 @@ export function buildMessageResponse(dto: any): MessageResponseDto {
     createdAt: new Date(),
     roomId: dto.roomId,
     type: dto.type || 'TEXT',
+    authorName: dto.authorName,
+    authorProfileUrl: dto.authorProfileUrl,
   };
 }

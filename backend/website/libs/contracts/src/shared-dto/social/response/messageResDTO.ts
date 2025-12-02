@@ -28,4 +28,12 @@ export class MessageResponseDto {
 
   @ApiProperty({ description: 'Author user ID', example: 1 })
   authorId: number;
+
+  @ApiProperty({ description: 'Author name', example: 'John Doe' })
+  authorName?: string;
+  @ApiProperty({
+    description: 'Author profile URL',
+    example: 'https://example.com/profile.jpg',
+  })
+  authorProfileUrl?: string;
 }

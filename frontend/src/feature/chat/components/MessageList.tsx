@@ -1,10 +1,10 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import type { MessageResponseDto } from "@/service/api";
+import type { RoomMessage } from "@/shared/api/models/sse/sseResponse";
 
 interface MessageListProps {
-  messages: MessageResponseDto[];
+  messages: RoomMessage[];
   loggedUserId?: number;
 }
 
@@ -56,6 +56,28 @@ export default function MessageList({
             isUserMessage(message.authorId) ? "items-end" : "items-start"
           } gap-2`}
         >
+          {/* User info (username and profile picture) - only show for other users */}
+          {!isUserMessage(message.authorId) && (
+            <div className="flex items-center gap-2">
+              {message.authorProfileUrl && (
+                <img
+                  src={message.authorProfileUrl}
+                  alt={message.authorName || "User"}
+                  className="w-6 h-6 rounded-full object-cover"
+                  onError={(e) => {
+                    e.currentTarget.src =
+                      "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor'%3E%3Ccircle cx='12' cy='12' r='10'/%3E%3Cpath d='M12 12c2.2 0 4-1.8 4-4s-1.8-4-4-4-4 1.8-4 4 1.8 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z'/%3E%3C/svg%3E";
+                  }}
+                />
+              )}
+              {message.authorName && (
+                <span className="text-xs font-semibold text-foreground">
+                  {message.authorName}
+                </span>
+              )}
+            </div>
+          )}
+
           {/* Render media outside message box */}
           {message.type === "IMAGE" && message.mediaUrl && (
             <img

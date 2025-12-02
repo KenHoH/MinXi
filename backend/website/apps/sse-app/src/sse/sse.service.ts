@@ -46,29 +46,17 @@ export class SseService implements ISSEService {
       );
     }
 
-    const message = this.buildMessageResponse(dto);
+    const message = dto;
 
     connection.next({
       type: 'NEW_MESSAGE',
-      data: message,
+      data: message, // BroadcastMsgReq
     });
 
     await this.forwardMessage(dto);
     return {
       Valid: true,
       Msg: 'Successfully sent message',
-    };
-  }
-
-  private buildMessageResponse(dto: BroadcastMsgReq): MessageResponseDto {
-    return {
-      id: dto.id,
-      authorId: dto.authorId,
-      content: dto.content,
-      mediaUrl: dto.mediaUrl,
-      createdAt: new Date(),
-      roomId: dto.roomId,
-      type: dto.type || 'TEXT',
     };
   }
 
@@ -99,6 +87,8 @@ export class SseService implements ISSEService {
       mediaUrl: dto.mediaUrl,
       roomId: dto.roomId,
       type: dto.type || 'TEXT',
+      authorName: dto.authorName,
+      authorProfileUrl: dto.authorProfileUrl,
     };
 
     try {
