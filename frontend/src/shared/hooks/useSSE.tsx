@@ -38,18 +38,22 @@ export function useSSE(roomId: string) {
           const payload: SSEPayload = JSON.parse(event.data);
 
           console.log("SSE Event Received:", payload);
+
           if (payload.type === "NEW_MESSAGE") {
             const data = payload.data;
 
             if ("authorId" in data && "roomId" in data) {
               console.log("New Room Message:", data);
-              setMessages((prev) => [...prev, data as RoomMessage]);
+              const message = data as RoomMessage;
+              message.id = `msg-${Date.now()}-${Math.random()}`;
+              setMessages((prev) => [...prev, message]);
               return;
             }
 
             if ("userId" in data && "title" in data) {
               console.log("New User Notification:", data);
-              setNotifications((prev) => [...prev, data as UserNotification]);
+              const notif = data as UserNotification;
+              setNotifications((prev) => [...prev, notif]);
               return;
             }
 

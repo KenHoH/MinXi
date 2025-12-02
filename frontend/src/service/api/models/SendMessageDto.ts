@@ -20,5 +20,13 @@ export type SendMessageDto = {
      */
     authorId: number;
     mediaUrl?: string;
+    /**
+     * Author name
+     */
+    authorName: string;
+    /**
+     * Author profile URL
+     */
+    authorProfileUrl: string;
 };
 

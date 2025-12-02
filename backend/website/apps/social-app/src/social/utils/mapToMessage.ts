@@ -9,5 +9,7 @@ export function mapMessageToResponse(message: any): MessageResponseDto {
     createdAt: message.createdAt,
     authorId: message.authorId,
     type: message.type,
+    authorName: message.authorName,
+    authorProfileUrl: message.authorProfileUrl,
   };
 }

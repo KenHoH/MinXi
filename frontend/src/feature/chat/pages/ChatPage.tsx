@@ -194,6 +194,8 @@ export default function ChatPage() {
         room_id: currentRoom.id,
         message: content,
         metadata: fileBlob,
+        author_name: loggedUser.username,
+        author_profile_url: loggedUser.profile_picture,
       });
     }
   };
