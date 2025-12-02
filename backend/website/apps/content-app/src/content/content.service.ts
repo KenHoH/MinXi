@@ -28,6 +28,7 @@ import {
 import { mapToContent } from './utils/mapToContent';
 import { PageContentRes } from '@app/contracts/shared-dto/content/res/page.content.dto';
 import { UpdateScoreDto } from '@app/contracts/shared-dto/content/req/UpdateScore.req.dto';
+import { GlobalPageDto } from '@app/contracts/shared-dto/content/res/page.global.all.dto';
 
 @Injectable()
 export class ContentService implements IContentService {
@@ -2273,6 +2274,146 @@ export class ContentService implements IContentService {
         ),
       );
     }
+  }
+
+  private async fetchAreaPage(
+    area_id: number,
+    cursor: number,
+    limit: number,
+  ): Promise<PageContentRes> {
+    try {
+      const contents = await this.prisma.content.findMany({
+        where: {
+          area_id,
+          published_at: { lte: new Date() },
+          visibilityPrivate: false,
+        },
+        take: limit,
+        skip: cursor ? 1 : 0,
+        cursor: cursor
+          ? { content_id_area_id: { area_id, content_id: cursor } }
+          : undefined,
+        orderBy: [{ score: 'desc' }, { content_id: 'desc' }],
+      });
+
+      if (contents.length === 0) {
+        return { contents: [], currentPage: 0, area_id: area_id };
+      }
+
+      const allContents: FullContentDto[] = [];
+
+      for (const content of contents) {
+        try {
+          const files = await this.prisma.file.findMany({
+            where: {
+              content_area_id: area_id,
+              content_id: content.content_id,
+            },
+          });
+
+          const thumbnail = files.find((file) => file.type === 'thumbnail');
+          if (!thumbnail && content.post_type !== 'post') {
+            this.logger.warn(`Content ${content.content_id} missing thumbnail`);
+            continue;
+          }
+
+          const mappedFiles: FileDto[] = files
+            .filter((file) => file.type !== 'thumbnail')
+            .map((file) => ({
+              file_id: file.file_id,
+              filepath: file.filepath,
+              content_id: file.content_id,
+              content_area_id: file.content_area_id,
+              type: file.type,
+            }));
+
+          const fullContent: FullContentDto = {
+            area_id: content.area_id,
+            content_id: content.content_id,
+            creator_id: content.creator_id,
+            description: content.description,
+            parent_id: content.parent_id ?? undefined,
+            post_type: content.post_type,
+            comments: content.comments,
+            likes: content.likes,
+            pins: content.pins,
+            reports: content.reports,
+            title: content.title,
+            views: content.views,
+            published_at: content.published_at,
+            score: content.score,
+            visibilityPrivate: content.visibilityPrivate,
+            thumbnail: thumbnail
+              ? {
+                  file_id: thumbnail.file_id,
+                  filepath: thumbnail.filepath,
+                  content_id: thumbnail.content_id,
+                  content_area_id: thumbnail.content_area_id,
+                  type: thumbnail.type,
+                }
+              : null,
+            contents: mappedFiles,
+          };
+
+          allContents.push(fullContent);
+        } catch (error) {
+          this.logger.error(
+            `Failed to fetch files for content ${content.content_id}`,
+            error.message,
+          );
+          throw httpToRpc(
+            new HttpException(
+              `Failed to fetch files for content ${content.content_id}`,
+              HttpStatus.INTERNAL_SERVER_ERROR,
+            ),
+          );
+        }
+      }
+      const nextCursor = allContents[allContents.length - 1].content_id;
+
+      return {
+        contents: allContents,
+        currentPage: nextCursor,
+        area_id: area_id,
+      };
+    } catch (error) {
+      this.logger.error('Failed to fetch content list', error.message);
+      throw httpToRpc(
+        new HttpException(
+          'Failed to fetch content list',
+          HttpStatus.INTERNAL_SERVER_ERROR,
+        ),
+      );
+    }
+  }
+
+  async findAllGlobalPage(dto: GlobalPageDto): Promise<PageContentRes> {
+    const { area_id, cursor, limit } = dto;
+
+    if (area_id <= 0 || area_id > 3)
+      throw httpToRpc(
+        new HttpException('Invalid area ID', HttpStatus.BAD_REQUEST),
+      );
+
+    const result = await this.fetchAreaPage(area_id, cursor, limit);
+
+    if (result.contents.length > 0) {
+      return result;
+    }
+
+    if (area_id < 3) {
+      return await this.findAllGlobalPage({
+        area_id: area_id + 1,
+        cursor: 0,
+        limit,
+      });
+    }
+
+    return {
+      contents: [],
+      currentPage: 0,
+      area_id: 3,
+    };
   }
 
   async findGlobal(): Promise<FullContentDto[]> {

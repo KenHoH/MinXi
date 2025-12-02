@@ -5,7 +5,7 @@ import RootLayout from "@/app/LayoutPage";
 import type { FullContentDto } from "@/service/api/models/FullContentDto";
 import { useAuthContext } from "@/feature/auth/context/AuthContext";
 import useBoardService from "@/shared/hooks/useBoardService";
-import type { UserDto, BoardDto } from "@/service/api";
+import type { UserDto, BoardDto, PageContentRes } from "@/service/api";
 import useUserService from "@/shared/hooks/useUserService";
 import useContentService from "@/shared/hooks/useContentService";
 import useAlgorithmService from "@/shared/hooks/useAlgorithmService";
@@ -18,10 +18,14 @@ export default function FeedPage() {
   >(new Map());
   const [loggedUser, setLoggedUser] = useState<UserDto | null>(null);
 
+  const [fypCursor, setFypCursor] = useState(0);
+  const [friendCursor, setFriendCursor] = useState(0);
+  const [followingCursor, setFollowingCursor] = useState(0);
+
   const { user } = useAuthContext();
   const { getBoardByUser, getContentByBoardId } = useBoardService();
   const { findUserById } = useUserService();
-  const { findAll, getFollowingContent, getFriendContent } =
+  const { findAllPage, getFollowingContent, getFriendContent } =
     useContentService();
   const { findFyp } = useAlgorithmService();
 
@@ -81,14 +85,20 @@ export default function FeedPage() {
 
   const handleLoadMore = useCallback(async () => {
     if (!loggedUser) {
-      const allContent = await findAll(1); //TODO: pagination, currently fetching from one area id only
+      const allContent = await findAllPage();
       return allContent || [];
     }
 
     let result: FullContentDto[] | null = [];
-
+    let response: PageContentRes | null = null;
     if (currentFilter === "All") {
-      result = await findFyp(loggedUser.user_id, loggedUser.area_id);
+      response = await findFyp(loggedUser.area_id, fypCursor).then(
+        (res) => res || null
+      );
+      if (response) {
+        result = response.contents;
+        setFypCursor(response.currentPage || 0);
+      }
     } else if (currentFilter === "Following") {
       result = await getFollowingContent(loggedUser.user_id);
     } else if (currentFilter === "Friends") {

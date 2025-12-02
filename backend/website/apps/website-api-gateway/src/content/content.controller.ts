@@ -12,6 +12,7 @@ import {
   Logger,
   UseGuards,
   BadRequestException,
+  Query,
 } from '@nestjs/common';
 import { ContentService } from './content.service';
 import {
@@ -200,6 +201,21 @@ export class ContentController {
     return this.contentService.getByUserAllPublic(creator_id);
   }
 
+  @Public()
+  @Get('global')
+  findGlobalAll(): Promise<FullContentDto[]> {
+    return this.contentService.findGlobal();
+  }
+
+  @Public()
+  @Get('global/page')
+  findAllGlobalPage(
+    @Query('area_id', new ParseIntPipe({ optional: true })) area_id: number = 1,
+    @Query('cursor', new ParseIntPipe({ optional: true })) cursor: number = 0,
+    @Query('limit', new ParseIntPipe({ optional: true })) limit: number = 10,
+  ): Promise<PageContentRes> {
+    return this.contentService.findAllGlobalPage(area_id, cursor, limit);
+  }
   @Public()
   @Get('user/:userId/:areaId/:page/following')
   getFollowingContent(

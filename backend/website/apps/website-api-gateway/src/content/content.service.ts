@@ -77,6 +77,19 @@ export class ContentService implements IContentService {
       }),
     );
   }
+  async findAllGlobalPage(
+    area_id: number,
+    cursor: number,
+    limit: number,
+  ): Promise<PageContentRes> {
+    return await firstValueFrom(
+      this.contentClient.send(CONTENT_MSG.findAllGlobalPage, {
+        area_id,
+        cursor,
+        limit,
+      }),
+    );
+  }
 
   async findGlobal(): Promise<FullContentDto[]> {
     return await firstValueFrom(

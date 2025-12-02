@@ -268,4 +268,14 @@ export class ContentController {
   ): Promise<FullContentDto> {
     return this.contentService.getFullPost(dto.contentId, dto.areaId);
   }
+
+  @MessagePattern(CONTENT_MSG.findAllGlobalPage)
+  async findAllGlobalPage(
+    @Payload() payload: { area_id: number; cursor: number; limit: number },
+  ): Promise<PageContentRes> {
+    this.logger.log(
+      `Fetching global paginated content starting from area ${payload.area_id}`,
+    );
+    return this.contentService.findAllGlobalPage(payload);
+  }
 }
