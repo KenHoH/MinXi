@@ -602,6 +602,7 @@ export class BoardService implements IBoardService {
                 comments: content.comments,
                 pins: content.pins,
                 reports: content.reports,
+                score: content.score,
                 thumbnail: {
                   file_id: thumbnail.file_id,
                   filepath: thumbnail.filepath,

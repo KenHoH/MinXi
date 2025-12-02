@@ -40,6 +40,7 @@ export const CONTENT_MSG = {
   setPublic: 'content.public',
   findAll: 'content.findAll',
   findAllPage: 'content.findAllPage',
+  findGlobal: 'content.findGlobal',
   findOne: 'content.findOne',
   getStats: 'content.getStats',
   getByUser: 'content.getByUser',

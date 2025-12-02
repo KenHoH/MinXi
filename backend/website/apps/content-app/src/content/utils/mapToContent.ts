@@ -17,4 +17,5 @@ export const mapToContent = (content: any): FullContentDto => ({
   thumbnail: content.thumbnail,
   contents: content.contents || [],
   published_at: content.published_at,
+  score: content.score,
 });

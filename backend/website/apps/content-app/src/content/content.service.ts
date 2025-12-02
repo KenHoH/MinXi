@@ -27,6 +27,7 @@ import {
 } from '@app/common/constants/messageEvent';
 import { mapToContent } from './utils/mapToContent';
 import { PageContentRes } from '@app/contracts/shared-dto/content/res/page.content.dto';
+import { UpdateScoreDto } from '@app/contracts/shared-dto/content/req/UpdateScore.req.dto';
 
 @Injectable()
 export class ContentService implements IContentService {
@@ -1023,25 +1024,23 @@ export class ContentService implements IContentService {
     }
   }
 
-  async updateScore(
-    content_id: number,
-    area_id: number,
-    score: number,
-  ): Promise<Ack> {
-    if (area_id <= 0 || area_id > 3)
-      throw httpToRpc(
-        new HttpException('Invalid area ID', HttpStatus.BAD_REQUEST),
-      );
+  async updateScore(dto: UpdateScoreDto): Promise<Ack> {
     try {
-      await this.prisma.content.update({
-        where: {
-          content_id_area_id: {
-            content_id: content_id,
-            area_id: area_id,
-          },
-        },
-        data: { score: score },
-      });
+      await this.prisma.$transaction(
+        dto.scores.map((item) =>
+          this.prisma.content.update({
+            where: {
+              content_id_area_id: {
+                content_id: item.content_id,
+                area_id: item.area_id,
+              },
+            },
+            data: {
+              score: item.score,
+            },
+          }),
+        ),
+      );
       return { Valid: true, Msg: 'Score updated' };
     } catch (error) {
       this.logger.error('Failed to update score', error);
@@ -1286,8 +1285,13 @@ export class ContentService implements IContentService {
     }
   }
 
-  async getFollowingContent(userId: number): Promise<FullContentDto[]> {
+  async getFollowingContent(
+    userId: number,
+    areaId: number,
+    page: number,
+  ): Promise<PageContentRes> {
     this.logger.log(`User ${userId} is following`);
+    let lastCursor = 0;
     try {
       const result = await this.prisma
         .$transaction(async (tx) => {
@@ -1310,14 +1314,25 @@ export class ContentService implements IContentService {
           );
           const followingIds = followings.map((f) => f.creator_id);
           this.logger.log(followingIds[0]);
-
+          const cursor =
+            page > 0
+              ? {
+                  content_id_area_id: {
+                    area_id: areaId,
+                    content_id: page,
+                  },
+                }
+              : undefined;
           const contents = await tx.content
             .findMany({
               where: {
                 creator_id: { in: followingIds },
                 published_at: { lte: new Date() },
               },
-              orderBy: { created_at: 'desc' },
+              take: 10,
+              skip: cursor ? 1 : 0,
+              cursor: cursor,
+              orderBy: [{ created_at: 'desc' }, { score: 'desc' }],
             })
             .catch((error) => {
               this.logger.error(
@@ -1334,6 +1349,11 @@ export class ContentService implements IContentService {
 
           const allContents: FullContentDto[] = [];
 
+          if (contents.length === 0) {
+            return allContents;
+          }
+
+          lastCursor = contents[contents.length - 1].content_id;
           for (const content of contents) {
             try {
               const files = await tx.file.findMany({
@@ -1417,7 +1437,10 @@ export class ContentService implements IContentService {
           );
         });
 
-      return result;
+      return {
+        contents: result,
+        currentPage: lastCursor,
+      };
     } catch (error) {
       if (error.status) {
         throw error;
@@ -1430,8 +1453,13 @@ export class ContentService implements IContentService {
       );
     }
   }
-  async getFriendContent(userId: number): Promise<FullContentDto[]> {
+  async getFriendContent(
+    userId: number,
+    areaId: number,
+    page: number,
+  ): Promise<PageContentRes> {
     try {
+      let lastCursor = 0;
       const result = await this.prisma
         .$transaction(async (tx) => {
           const friends = await firstValueFrom(
@@ -1449,14 +1477,25 @@ export class ContentService implements IContentService {
           });
 
           const friendIds = friends.map((f) => f.friend_id);
-
+          const cursor =
+            page > 0
+              ? {
+                  content_id_area_id: {
+                    area_id: areaId,
+                    content_id: page,
+                  },
+                }
+              : undefined;
           const contents = await tx.content
             .findMany({
               where: {
                 creator_id: { in: friendIds },
                 published_at: { lte: new Date() },
               },
-              orderBy: { created_at: 'desc' },
+              take: 10,
+              skip: cursor ? 1 : 0,
+              orderBy: [{ created_at: 'desc' }, { score: 'desc' }],
+              cursor: cursor,
             })
             .catch((error) => {
               this.logger.error(
@@ -1472,6 +1511,12 @@ export class ContentService implements IContentService {
             });
 
           const allContents: FullContentDto[] = [];
+
+          if (contents.length === 0) {
+            return allContents;
+          }
+
+          lastCursor = contents[contents.length - 1].content_id;
 
           for (const content of contents) {
             try {
@@ -1556,7 +1601,10 @@ export class ContentService implements IContentService {
           );
         });
 
-      return result;
+      return {
+        contents: result,
+        currentPage: lastCursor,
+      };
     } catch (error) {
       if (error.status) {
         throw error;
@@ -2102,8 +2150,8 @@ export class ContentService implements IContentService {
               },
               skip: cursor ? 1 : 0,
               take: limit,
-              orderBy: { content_id: 'asc' },
-              ...(cursor && { cursor }),
+              orderBy: { score: 'desc' },
+              cursor,
             })
             .catch((error) => {
               this.logger.error('Failed to fetch content list', error.message);
@@ -2213,6 +2261,130 @@ export class ContentService implements IContentService {
         contents: result,
         currentPage: nextCursor,
       };
+    } catch (error) {
+      if (error.status) {
+        throw error;
+      }
+      this.logger.error('Failed to fetch content list', error.message);
+      throw httpToRpc(
+        new HttpException(
+          'Failed to fetch content list',
+          HttpStatus.INTERNAL_SERVER_ERROR,
+        ),
+      );
+    }
+  }
+
+  async findGlobal(): Promise<FullContentDto[]> {
+    try {
+      const result = await this.prisma
+        .$transaction(async (tx) => {
+          const contents = await tx.content
+            .findMany({
+              where: {
+                published_at: { lte: new Date() },
+                visibilityPrivate: false,
+              },
+              orderBy: { content_id: 'asc' },
+            })
+            .catch((error) => {
+              this.logger.error('Failed to fetch content list', error.message);
+              throw httpToRpc(
+                new HttpException(
+                  'Failed to fetch content list',
+                  HttpStatus.INTERNAL_SERVER_ERROR,
+                ),
+              );
+            });
+
+          const allContents: FullContentDto[] = [];
+
+          for (const content of contents) {
+            try {
+              const files = await tx.file.findMany({
+                where: {
+                  content_id: content.content_id,
+                },
+              });
+
+              const thumbnail = files.find((file) => file.type === 'thumbnail');
+              // For posts without thumbnail, still include them (text-only posts allowed)
+              if (!thumbnail && content.post_type !== 'post') {
+                this.logger.warn(
+                  `Content ${content.content_id} missing thumbnail`,
+                );
+                continue;
+              }
+
+              const mappedFiles: FileDto[] = files
+                .filter((file) => file.type !== 'thumbnail')
+                .map((file) => ({
+                  file_id: file.file_id,
+                  filepath: file.filepath,
+                  content_id: file.content_id,
+                  content_area_id: file.content_area_id,
+                  type: file.type,
+                }));
+
+              const fullContent: FullContentDto = {
+                area_id: content.area_id,
+                content_id: content.content_id,
+                creator_id: content.creator_id,
+                description: content.description,
+                parent_id: content.parent_id ?? undefined,
+                post_type: content.post_type,
+                comments: content.comments,
+                likes: content.likes,
+                pins: content.pins,
+                reports: content.reports,
+                title: content.title,
+                views: content.views,
+                published_at: content.published_at,
+                visibilityPrivate: content.visibilityPrivate,
+                score: content.score,
+                thumbnail: thumbnail
+                  ? {
+                      file_id: thumbnail.file_id,
+                      filepath: thumbnail.filepath,
+                      content_id: thumbnail.content_id,
+                      content_area_id: thumbnail.content_area_id,
+                      type: thumbnail.type,
+                    }
+                  : null,
+                contents: mappedFiles,
+              };
+
+              allContents.push(fullContent);
+            } catch (error) {
+              this.logger.error(
+                `Failed to fetch files for content ${content.content_id}`,
+                error.message,
+              );
+              throw httpToRpc(
+                new HttpException(
+                  `Failed to fetch files for content ${content.content_id}`,
+                  HttpStatus.INTERNAL_SERVER_ERROR,
+                ),
+              );
+            }
+          }
+
+          return allContents;
+        })
+        .catch((error) => {
+          if (error.status) {
+            throw error;
+          }
+          this.logger.error('Transaction failed', error.message);
+          throw httpToRpc(
+            new HttpException(
+              'Failed to fetch content list - transaction rolled back',
+              HttpStatus.INTERNAL_SERVER_ERROR,
+            ),
+          );
+        });
+
+      return result;
     } catch (error) {
       if (error.status) {
         throw error;

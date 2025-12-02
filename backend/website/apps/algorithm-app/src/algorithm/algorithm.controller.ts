@@ -9,8 +9,10 @@ export class AlgorithmController {
   constructor(private readonly algorithmService: AlgorithmService) {}
 
   @MessagePattern(ALGO_MSG.findFYP)
-  async findFYP(@Payload() payload: { userId: number; areaId: number }) {
-    return await this.algorithmService.findFYP(payload.userId, payload.areaId);
+  async findFYP(
+    @Payload() payload: { userId: number; areaId: number; page: number },
+  ) {
+    return await this.algorithmService.findFYP(payload.areaId, payload.page);
   }
 
   @MessagePattern(ALGO_MSG.searchContent)

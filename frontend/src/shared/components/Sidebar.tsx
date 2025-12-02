@@ -62,6 +62,7 @@ export function Sidebar() {
   }, [user]);
 
   useEffect(() => {
+    if (notifications.length === 0) return;
     notifications.forEach((notification) => {
       showToast(notification.title);
     });

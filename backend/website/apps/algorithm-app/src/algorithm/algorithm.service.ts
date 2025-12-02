@@ -18,6 +18,8 @@ import { ClientProxy } from '@nestjs/microservices';
 import { mapToContent } from 'apps/content-app/src/content/utils/mapToContent';
 import { firstValueFrom, max } from 'rxjs';
 import { levenshteinDistance } from './utils/levenshtein';
+import { Cron, CronExpression } from '@nestjs/schedule';
+import { PageContentRes } from '@app/contracts/shared-dto/content/res/page.content.dto';
 
 @Injectable()
 export class AlgorithmService implements IAlgoService {
@@ -85,66 +87,61 @@ export class AlgorithmService implements IAlgoService {
       );
     }
   }
-  async findFYP(
-    userId: number,
-    areaId: number,
-    page: number,
-  ): Promise<FullContentDto[]> {
+
+  @Cron(CronExpression.EVERY_5_MINUTES)
+  async updateScore() {
+    this.logger.log(`Updating content scores...`);
+
+    let contents: FullContentDto[] = [];
+
+    contents = await firstValueFrom(
+      this.contentClient.send(CONTENT_MSG.findGlobal, {}),
+    );
+
+    const contentScores: { content: FullContentDto; score: number }[] =
+      contents.map((content) => {
+        let score = 0;
+
+        score =
+          3 * (content.likes / 100) +
+          4 * (content.comments / 100) +
+          5 * (content.pins / 20) +
+          0.8 * (content.views / 80) -
+          6 * (content.reports / 20);
+        this.logger.log(`Content ID: ${content.content_id}, Score: ${score}`);
+        return {
+          content: content,
+          score: score,
+        };
+      });
+
+    await firstValueFrom(
+      this.contentClient.send(CONTENT_MSG.updateScore, {
+        scores: contentScores.map((cs) => ({
+          content_id: cs.content.content_id,
+          area_id: cs.content.area_id,
+          score: cs.score,
+        })),
+      }),
+    );
+    this.logger.log(`Content scores updated successfully.`);
+  }
+
+  async findFYP(areaId: number, page: number): Promise<PageContentRes> {
     try {
-      this.logger.error(`Finding FYP for user ${userId} in area ${areaId}`);
-      const contents: FullContentDto[] = await firstValueFrom(
+      const contents: PageContentRes = await firstValueFrom(
         this.contentClient.send(CONTENT_MSG.findAllPage, {
           area_id: areaId,
           page,
-          limit: 10,
+          limit: 7,
         }),
       );
 
-      this.logger.error(`Total contents fetched: ${contents.length}`);
-
-      const history: CreateHistoryDto[] = await firstValueFrom(
-        this.historyClient.send(HISTORY_MSG.getByUser, userId),
-      );
-
-      this.logger.error(`User history fetched: ${history.length}`);
-
-      if (contents.length === 0 || contents == null || contents === undefined) {
-        throw httpToRpc(
-          new HttpException('No content found', HttpStatus.NOT_FOUND),
-        );
-      }
-
-      const contentScores: { content: FullContentDto; score: number }[] =
-        contents
-          .filter((content) => content.visibilityPrivate === false)
-          .map((content) => {
-            let score = 0;
-
-            let exist = history.find(
-              (h) => h.content_id === content.content_id,
-            );
-            score =
-              3 * (content.likes / 100) +
-              4 * (content.comments / 50) +
-              5 * (content.pins / 20) +
-              0.3 * (content.views / 500) -
-              8 * (content.reports / 20) -
-              4 * ((exist?.reps ?? 0) / 10);
-            this.logger.log(
-              `Content ID: ${content.content_id}, Score: ${score}`,
-            );
-            return {
-              content: content,
-              score: score,
-            };
-          });
-
-      contentScores.sort((a, b) => b.score - a.score);
-      const SCORE_THRESHOLD = 10;
-
-      return contentScores
-        .filter((cs) => cs.score > SCORE_THRESHOLD)
-        .map((cs) => mapToContent(cs.content));
+      const SCORE_THRESHOLD = 0.5;
+      return {
+        contents: contents.contents.filter((c) => c.score >= SCORE_THRESHOLD),
+        currentPage: contents.currentPage,
+      };
     } catch (error) {
       throw httpToRpc(
         new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR),
