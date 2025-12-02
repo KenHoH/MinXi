@@ -12,6 +12,9 @@ export default function useUserService() {
   const findUserById = (userId: number) =>
     call(() => UserService.userControllerFindOne(userId));
 
+  const findUserByIdFull = (userId: number) =>
+    call(() => UserService.userControllerFindOneById(userId));
+
   const findByUsername = (username: string, areaId: number) =>
     call(() =>
       UserService.userControllerFindByName({
@@ -27,6 +30,9 @@ export default function useUserService() {
         area_id: areaId,
       })
     );
+
+  const findAll = (areaId: number) =>
+    call(() => UserService.userControllerFindAll(areaId));
 
   const updateLikeUser = (id: number, req: deltaDto) =>
     call(() => UserService.userControllerUpdateLike(id, req));
@@ -63,9 +69,14 @@ export default function useUserService() {
     description: string;
   }) => call(() => UserService.userControllerUpdate(formData));
 
+  const removeUser = (id: number) =>
+    call(() => UserService.userControllerRemove(id));
+
   return {
     create,
     findUserById,
+    findUserByIdFull,
+    findAll,
     findByUsername,
     findOneByUsername,
     updateLikeUser,
@@ -73,6 +84,7 @@ export default function useUserService() {
     updateReportUser,
     updatePrivacySettings,
     update,
+    removeUser,
     result: data,
     loading,
     error,

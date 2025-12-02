@@ -6,6 +6,7 @@ import type { Ack } from '../models/Ack';
 import type { deltaDto } from '../models/deltaDto';
 import type { FullContentDto } from '../models/FullContentDto';
 import type { PageContentRes } from '../models/PageContentRes';
+import type { UpdateScoreDto } from '../models/UpdateScoreDto';
 import type { CancelablePromise } from '../core/CancelablePromise';
 import { OpenAPI } from '../core/OpenAPI';
 import { request as __request } from '../core/request';
@@ -67,6 +68,21 @@ export class ContentService {
             errors: {
                 400: `Bad request - missing required files or fields`,
             },
+        });
+    }
+    /**
+     * @param requestBody
+     * @returns Ack
+     * @throws ApiError
+     */
+    public static contentControllerUpdateScore(
+        requestBody: UpdateScoreDto,
+    ): CancelablePromise<Ack> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/content/updateScore',
+            body: requestBody,
+            mediaType: 'application/json',
         });
     }
     /**
@@ -135,33 +151,45 @@ export class ContentService {
     }
     /**
      * @param userId
-     * @returns FullContentDto
+     * @param areaId
+     * @param page
+     * @returns PageContentRes
      * @throws ApiError
      */
     public static contentControllerGetFollowingContent(
         userId: number,
-    ): CancelablePromise<Array<FullContentDto>> {
+        areaId: number,
+        page: number,
+    ): CancelablePromise<PageContentRes> {
         return __request(OpenAPI, {
             method: 'GET',
-            url: '/content/user/{userId}/following',
+            url: '/content/user/{userId}/{areaId}/{page}/following',
             path: {
                 'userId': userId,
+                'areaId': areaId,
+                'page': page,
             },
         });
     }
     /**
      * @param userId
-     * @returns FullContentDto
+     * @param areaId
+     * @param page
+     * @returns PageContentRes
      * @throws ApiError
      */
     public static contentControllerGetFriendContent(
         userId: number,
-    ): CancelablePromise<Array<FullContentDto>> {
+        areaId: number,
+        page: number,
+    ): CancelablePromise<PageContentRes> {
         return __request(OpenAPI, {
             method: 'GET',
-            url: '/content/user/{userId}/friends',
+            url: '/content/user/{userId}/{areaId}/{page}/friends',
             path: {
                 'userId': userId,
+                'areaId': areaId,
+                'page': page,
             },
         });
     }
@@ -424,44 +452,6 @@ export class ContentService {
             },
             body: requestBody,
             mediaType: 'application/json',
-        });
-    }
-    /**
-     * @param contentId
-     * @param areaId
-     * @returns Ack
-     * @throws ApiError
-     */
-    public static contentControllerSetPrivate(
-        contentId: number,
-        areaId: number,
-    ): CancelablePromise<Ack> {
-        return __request(OpenAPI, {
-            method: 'PATCH',
-            url: '/content/{content_id}/{area_id}/private',
-            path: {
-                'content_id': contentId,
-                'area_id': areaId,
-            },
-        });
-    }
-    /**
-     * @param contentId
-     * @param areaId
-     * @returns Ack
-     * @throws ApiError
-     */
-    public static contentControllerSetPublic(
-        contentId: number,
-        areaId: number,
-    ): CancelablePromise<Ack> {
-        return __request(OpenAPI, {
-            method: 'PATCH',
-            url: '/content/{content_id}/{area_id}/public',
-            path: {
-                'content_id': contentId,
-                'area_id': areaId,
-            },
         });
     }
 }

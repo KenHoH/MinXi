@@ -329,4 +329,12 @@ export class ContentController {
   ): Promise<Ack> {
     return this.contentService.updateReport(content_id, area_id, dto);
   }
+
+  @Delete(':content_id/:area_id')
+  remove(
+    @Param('content_id', ParseIntPipe) content_id: number,
+    @Param('area_id', ParseIntPipe) area_id: number,
+  ): Promise<Ack> {
+    return this.contentService.remove(content_id, area_id);
+  }
 }

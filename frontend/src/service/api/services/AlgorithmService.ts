@@ -3,26 +3,27 @@
 /* tslint:disable */
 /* eslint-disable */
 import type { FullContentDto } from '../models/FullContentDto';
+import type { PageContentRes } from '../models/PageContentRes';
 import type { CancelablePromise } from '../core/CancelablePromise';
 import { OpenAPI } from '../core/OpenAPI';
 import { request as __request } from '../core/request';
 export class AlgorithmService {
     /**
-     * @param userId
      * @param areaId
-     * @returns FullContentDto
+     * @param page
+     * @returns PageContentRes
      * @throws ApiError
      */
     public static algorithmControllerFindFyp(
-        userId: number,
         areaId: number,
-    ): CancelablePromise<Array<FullContentDto>> {
+        page: number,
+    ): CancelablePromise<PageContentRes> {
         return __request(OpenAPI, {
             method: 'GET',
             url: '/algorithm/fyp',
             query: {
-                'userId': userId,
                 'areaId': areaId,
+                'page': page,
             },
         });
     }

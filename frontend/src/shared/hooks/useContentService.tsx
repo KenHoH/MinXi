@@ -3,6 +3,7 @@ import type { FullContentDto } from "../../service/api/models/FullContentDto";
 import type { deltaDto } from "../../service/api/models/deltaDto";
 import type { Ack } from "../../service/api/models/Ack";
 import useApiCall from "./useApiCall";
+import type { PageContentRes } from "@/service/api";
 
 interface CreateContentFormData {
   thumbnail?: Blob;
@@ -35,14 +36,14 @@ export default function useContentService() {
       ContentService.contentControllerGetByUserAll(creatorId)
     );
 
-  const getFollowingContent = (userId: number) =>
-    call<FullContentDto[]>(() =>
-      ContentService.contentControllerGetFollowingContent(userId)
+  const getFollowingContent = (userId: number, areaId: number, page: number) =>
+    call<PageContentRes>(() =>
+      ContentService.contentControllerGetFollowingContent(userId, areaId, page)
     );
 
-  const getFriendContent = (userId: number) =>
-    call<FullContentDto[]>(() =>
-      ContentService.contentControllerGetFriendContent(userId)
+  const getFriendContent = (userId: number, areaId: number, page: number) =>
+    call<PageContentRes>(() =>
+      ContentService.contentControllerGetFriendContent(userId, areaId, page)
     );
 
   const getLikedByUser = (userId: number) =>
@@ -107,20 +108,24 @@ export default function useContentService() {
       ContentService.contentControllerUpdateReport(contentId, areaId, dto)
     );
 
-  const setPrivate = (contentId: number, areaId: number) =>
-    call<Ack>(() =>
-      ContentService.contentControllerSetPrivate(contentId, areaId)
+  const updateScore = (dto: any) =>
+    call<Ack>(() => ContentService.contentControllerUpdateScore(dto));
+
+  const getByUserAllPublic = (creatorId: number) =>
+    call<FullContentDto[]>(() =>
+      ContentService.contentControllerGetByUserAllPublic(creatorId)
     );
 
-  const setPublic = (contentId: number, areaId: number) =>
-    call<Ack>(() =>
-      ContentService.contentControllerSetPublic(contentId, areaId)
+  const findAllPage = (areaId: number, page: number, limit: number) =>
+    call<any>(() =>
+      ContentService.contentControllerFindAllPage(areaId, page, limit)
     );
 
   return {
     create,
     getByUser,
     getByUserAll,
+    getByUserAllPublic,
     getFollowingContent,
     getFriendContent,
     getLikedByUser,
@@ -129,6 +134,7 @@ export default function useContentService() {
     getFullPost,
     getChildPost,
     findAll,
+    findAllPage,
     findOne,
     remove,
     updateView,
@@ -136,8 +142,7 @@ export default function useContentService() {
     updatePin,
     updateComment,
     updateReport,
-    setPrivate,
-    setPublic,
+    updateScore,
     result: data,
     loading,
     error,

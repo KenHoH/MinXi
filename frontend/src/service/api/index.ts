@@ -51,6 +51,8 @@ export type { TokenResponseDto } from './models/TokenResponseDto';
 export type { UpdateContentDto } from './models/UpdateContentDto';
 export { UpdateParticipantRoleDto } from './models/UpdateParticipantRoleDto';
 export type { UpdateRestriction } from './models/UpdateRestriction';
+export type { UpdateScoreDto } from './models/UpdateScoreDto';
+export type { UpdateScoreItemDto } from './models/UpdateScoreItemDto';
 export type { UserDto } from './models/UserDto';
 export type { UserLog } from './models/UserLog';
 

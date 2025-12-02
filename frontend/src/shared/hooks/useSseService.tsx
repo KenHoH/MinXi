@@ -9,6 +9,8 @@ interface SendBroadcastFormData {
   room_id: string;
   author_id: number;
   message: string;
+  author_name?: string;
+  author_profile_url?: string;
 }
 
 export default function useSseService() {
