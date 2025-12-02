@@ -6,5 +6,6 @@ import type { FullContentDto } from './FullContentDto';
 export type PageContentRes = {
     contents: Array<FullContentDto>;
     currentPage: number;
+    area_id?: number;
 };
 

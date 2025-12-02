@@ -150,6 +150,38 @@ export class ContentService {
         });
     }
     /**
+     * @returns FullContentDto
+     * @throws ApiError
+     */
+    public static contentControllerFindGlobalAll(): CancelablePromise<Array<FullContentDto>> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/content/global',
+        });
+    }
+    /**
+     * @param areaId
+     * @param cursor
+     * @param limit
+     * @returns PageContentRes
+     * @throws ApiError
+     */
+    public static contentControllerFindAllGlobalPage(
+        areaId: number,
+        cursor: number,
+        limit: number,
+    ): CancelablePromise<PageContentRes> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/content/global/page',
+            query: {
+                'area_id': areaId,
+                'cursor': cursor,
+                'limit': limit,
+            },
+        });
+    }
+    /**
      * @param userId
      * @param areaId
      * @param page

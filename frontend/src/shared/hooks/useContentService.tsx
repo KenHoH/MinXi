@@ -117,8 +117,12 @@ export default function useContentService() {
     );
 
   const findAllPage = (areaId: number, page: number, limit: number) =>
-    call<any>(() =>
+    call<PageContentRes>(() =>
       ContentService.contentControllerFindAllPage(areaId, page, limit)
+    );
+  const findAllGlobalPage = (areaId: number, page: number, limit: number) =>
+    call<PageContentRes>(() =>
+      ContentService.contentControllerFindAllGlobalPage(areaId, page, limit)
     );
 
   return {
@@ -135,6 +139,7 @@ export default function useContentService() {
     getChildPost,
     findAll,
     findAllPage,
+    findAllGlobalPage,
     findOne,
     remove,
     updateView,

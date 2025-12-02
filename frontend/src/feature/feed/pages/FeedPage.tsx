@@ -18,6 +18,7 @@ export default function FeedPage() {
   >(new Map());
   const [loggedUser, setLoggedUser] = useState<UserDto | null>(null);
 
+  const [allCursor, setAllCursor] = useState(0);
   const [fypCursor, setFypCursor] = useState(0);
   const [friendCursor, setFriendCursor] = useState(0);
   const [followingCursor, setFollowingCursor] = useState(0);
@@ -25,7 +26,7 @@ export default function FeedPage() {
   const { user } = useAuthContext();
   const { getBoardByUser, getContentByBoardId } = useBoardService();
   const { findUserById } = useUserService();
-  const { findAllPage, getFollowingContent, getFriendContent } =
+  const { findAllGlobalPage, getFollowingContent, getFriendContent } =
     useContentService();
   const { findFyp } = useAlgorithmService();
 
@@ -74,7 +75,6 @@ export default function FeedPage() {
   const handleFilterChange = (filter: string) => {
     setCurrentFilter(filter);
 
-    // If switching to a board filter, refetch its content to ensure it's up-to-date
     if (filter !== "All" && filter !== "Following" && filter !== "Friends") {
       const board = userBoards.find((b) => b.title === filter);
       if (board) {
@@ -85,7 +85,12 @@ export default function FeedPage() {
 
   const handleLoadMore = useCallback(async () => {
     if (!loggedUser) {
-      const allContent = await findAllPage();
+      const response = await findAllGlobalPage(1, allCursor, 10);
+      let allContent: FullContentDto[] = [];
+      if (response) {
+        allContent = response.contents;
+        setAllCursor(response.currentPage || 0);
+      }
       return allContent || [];
     }
 
@@ -100,9 +105,25 @@ export default function FeedPage() {
         setFypCursor(response.currentPage || 0);
       }
     } else if (currentFilter === "Following") {
-      result = await getFollowingContent(loggedUser.user_id);
+      response = await getFollowingContent(
+        loggedUser.user_id,
+        loggedUser.area_id,
+        followingCursor
+      );
+      if (response) {
+        result = response.contents;
+        setFollowingCursor(response.currentPage || 0);
+      }
     } else if (currentFilter === "Friends") {
-      result = await getFriendContent(loggedUser.user_id);
+      response = await getFriendContent(
+        loggedUser.user_id,
+        loggedUser.area_id,
+        friendCursor
+      );
+      if (response) {
+        result = response.contents;
+        setFriendCursor(response.currentPage || 0);
+      }
     } else {
       const board = userBoards.find((b) => b.title === currentFilter);
       console.log("Loading content for board filter:", currentFilter, board);
@@ -112,23 +133,14 @@ export default function FeedPage() {
     }
 
     return result || [];
-  }, [
-    loggedUser,
-    currentFilter,
-    userBoards,
-    boardContentsMap,
-    findFyp,
-    findAll,
-    getFollowingContent,
-    getFriendContent,
-  ]);
+  }, [loggedUser, currentFilter, userBoards, boardContentsMap]);
 
   const isBoardFilter = userBoards.some((b) => b.title === currentFilter);
   const enableInfiniteScroll = !isBoardFilter;
 
   useEffect(() => {
     fetchUserData();
-  }, [fetchUserData]);
+  }, []);
 
   useEffect(() => {
     if (loggedUser) {
@@ -140,7 +152,6 @@ export default function FeedPage() {
     if (userBoards.length > 0) {
       userBoards.forEach((board) => {
         if (board.board_id) {
-          // Always refetch to ensure content is up-to-date
           fetchBoardContent(board.board_id);
         }
       });

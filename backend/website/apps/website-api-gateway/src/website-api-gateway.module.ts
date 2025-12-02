@@ -31,10 +31,7 @@ import { APP_GUARD } from '@nestjs/core/constants';
     CommentModule,
     NotificationModule,
     ThrottlerModule.forRoot({
-      throttlers: [
-        { name: 'medium', ttl: 10000, limit: 20 },
-        { name: 'long', ttl: 60000, limit: 100 },
-      ],
+      throttlers: [{ name: 'long', ttl: 60000, limit: 100 }],
     }),
   ],
   controllers: [],
