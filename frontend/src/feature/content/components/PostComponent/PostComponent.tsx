@@ -9,9 +9,10 @@ import useUserService from "@/shared/hooks/useUserService";
 
 interface PostComponentProps {
   post: FullContentDto;
+  liked: boolean;
 }
 
-export function PostComponent({ post }: PostComponentProps) {
+export function PostComponent({ post, liked }: PostComponentProps) {
   const [showDetail, setShowDetail] = useState(false);
   const heights = ["min-h-[180px]", "min-h-[220px]", "min-h-[160px]"];
   const randomHeight = heights[post.content_id % heights.length];
@@ -20,6 +21,7 @@ export function PostComponent({ post }: PostComponentProps) {
   const [likes, setLikes] = useState(post.likes);
   const [comments, setComments] = useState(post.comments);
   const [pins, setPins] = useState(post.pins);
+  const [likedState, setLikedState] = useState(liked);
 
   const { getAncestorPost, getChildPost } = useContentService();
 
@@ -63,6 +65,7 @@ export function PostComponent({ post }: PostComponentProps) {
           likes={likes}
           comments={comments}
           pins={pins}
+          liked={likedState}
           creator={loggedUserData?.username || "anonymous"}
           creatorProfile={
             loggedUserData?.profile_picture ||
@@ -81,6 +84,7 @@ export function PostComponent({ post }: PostComponentProps) {
           onLikeClick={setLikes}
           onCommentClick={setComments}
           onPinClick={setPins}
+          onLiked={setLikedState}
         />
       )}
     </>

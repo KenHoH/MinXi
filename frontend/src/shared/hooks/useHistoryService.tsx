@@ -13,7 +13,7 @@ export default function useHistoryService() {
       HistoryService.historyControllerGetByUser(userId)
     );
   const getByUserAndContent = (userId: number, contentId: number) =>
-    call<CreateHistoryDto[]>(() =>
+    call<CreateHistoryDto>(() =>
       HistoryService.historyControllerGetByUserAndContent(userId, contentId)
     );
 

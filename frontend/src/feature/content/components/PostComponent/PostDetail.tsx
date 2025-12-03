@@ -25,6 +25,7 @@ interface PostDetailComponentProps {
   onLikeClick?: (newLike: number) => void;
   onCommentClick?: (newComment: number) => void;
   onPinClick?: (newPin: number) => void;
+  onLiked: (liked: boolean) => void;
 }
 
 export function PostDetailComponent({
@@ -36,6 +37,7 @@ export function PostDetailComponent({
   onLikeClick,
   onCommentClick,
   onPinClick,
+  onLiked,
 }: PostDetailComponentProps) {
   const { user } = useAuthContext();
   const { showToast } = useToast();
@@ -112,8 +114,8 @@ export function PostDetailComponent({
     const res = await getByUserAndContent(user.user_id, post.content_id);
     if (res) {
       console.log("History fetched:", res);
-      setLiked(res.some((history) => history.liked));
-      setPinned(res.some((history) => history.pinned));
+      setLiked(res.liked);
+      setPinned(res.pinned);
     }
   };
 
@@ -151,6 +153,7 @@ export function PostDetailComponent({
           pinned,
           reps: 0,
         });
+        onLiked(newLiked);
         break;
       }
       case 2: {

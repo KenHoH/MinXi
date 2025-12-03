@@ -54,7 +54,7 @@ export class AuthService implements IAuthService {
       );
     } catch (error) {
       this.logger.fatal(error);
-      throw httpToRpc(new UnauthorizedException('User not found'));
+      throw httpToRpc(new UnauthorizedException("User Doesn't Exist"));
     }
 
     const user = await firstValueFrom(
@@ -62,11 +62,11 @@ export class AuthService implements IAuthService {
     );
 
     if (!user) this.logger.fatal('User Not Found');
-    if (!user) throw httpToRpc(new UnauthorizedException('User not found'));
+    if (!user) throw httpToRpc(new UnauthorizedException("User Doesn't Exist"));
 
     const passwordValid = await bcrypt.compare(dto.password, user.password);
     if (!passwordValid)
-      throw httpToRpc(new UnauthorizedException('Invalid credentials'));
+      throw httpToRpc(new UnauthorizedException('Invalid Password'));
 
     this.logger.warn(user.user_id);
     this.logger.warn(user.username);

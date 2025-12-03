@@ -40,7 +40,7 @@ export class HistoryController {
   getByUserAndContent(
     @Param('user_id', ParseIntPipe) user_id: number,
     @Param('content_id', ParseIntPipe) content_id: number,
-  ): Promise<CreateHistoryDto[]> {
+  ): Promise<CreateHistoryDto> {
     return this.historyService.getByUserAndContent(user_id, content_id);
   }
 }

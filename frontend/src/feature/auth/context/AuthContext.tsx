@@ -1,14 +1,13 @@
-import { createContext, useContext, useState, useEffect } from "react";
+import { createContext, useContext, useEffect, useState } from "react";
 import { useToast } from "../../../shared/context/ToastContext";
 import { useLoading } from "../../../shared/context/LoadingContext";
-import type { CredentialRes } from "@/service/api/models/CredentialRes";
-import type { LoginDto, LogoutRequest } from "@/service/api";
+import type { LoginDto, LogoutRequest, UserDto } from "@/service/api";
 import { AuthService, UserService } from "@/service/api";
 import { useNavigate } from "react-router";
 
 interface AuthContextType {
-  user: CredentialRes | null;
-  login: (dto: LoginDto) => Promise<CredentialRes | null>;
+  user: UserDto | undefined;
+  login: (dto: LoginDto) => Promise<void>;
   logout: (dto: LogoutRequest) => Promise<void>;
   isLoading: boolean;
 }
@@ -16,60 +15,64 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [user, setUser] = useState<CredentialRes | null>(null);
+  const [user, setUser] = useState<UserDto>();
   const { showToast } = useToast();
-  const [isLoading, setIsLoading] = useState(true);
   const { showLoading, hideLoading } = useLoading();
-
-  const getUserData = () => {
-    try {
-      const userDataCookie = document.cookie
-        .split("; ")
-        .find((row) => row.startsWith("user="))
-        ?.split("=")[1];
-
-      if (userDataCookie) {
-        console.log("the user data cookie ", userDataCookie);
-        const userData: CredentialRes = JSON.parse(
-          decodeURIComponent(userDataCookie)
-        );
-        console.log(userData);
-        setUser(userData);
-      }
-    } catch (error) {
-      console.error("Failed to restore user from cookie:", error);
-      setUser(null);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    getUserData();
-  }, []);
-
+  const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
 
-  const login = async (dto: LoginDto): Promise<CredentialRes | null> => {
-    showLoading();
+  useEffect(() => {
+    const raw = localStorage.getItem("user");
+    if (!raw) return;
     try {
-      await AuthService.authControllerLogin(dto);
-      const userData: CredentialRes =
-        await UserService.userControllerFindByName({
+      const data = JSON.parse(raw);
+      const getUser = async () => {
+        if (!data) return;
+        await UserService.userControllerFindOneByName({
+          area_id: data.area_id,
+          name: data.username,
+        })
+          .then((res) => setUser(res))
+          .catch(() => {
+            showToast("Session expired. Please log in again.");
+            setUser(undefined);
+          });
+      };
+      getUser();
+    } catch (error) {
+      showToast("Session Not Found");
+    }
+  }, []);
+
+  const login = async (dto: LoginDto): Promise<void> => {
+    showLoading();
+    setIsLoading(true);
+    try {
+      const [token, data] = await Promise.all([
+        await AuthService.authControllerLogin(dto),
+        await UserService.userControllerFindOneByName({
           area_id: dto.area_id,
           name: dto.username,
-        });
-      setUser(userData);
-      showToast("Login successful!");
+        }),
+      ]);
+      console.log("User logged in:", user);
+      localStorage.setItem(
+        "user",
+        JSON.stringify({
+          username: data.username,
+          user_id: data.user_id,
+          area_id: data.area_id,
+        })
+      );
+      setUser(data);
+      showToast("Login successful!", "", "success");
       navigate("/feed");
-      return userData;
     } catch (error: any) {
-      setUser(null);
       const errorMessage =
         error?.body?.errorMessage || "Login failed. Please try again.";
-      showToast(errorMessage);
-      return null;
+      showToast(errorMessage, "", "error");
     } finally {
+      setIsLoading(false);
       hideLoading();
     }
   };
@@ -78,12 +81,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     showLoading();
     try {
       await AuthService.authControllerLogout(dto);
-      setUser(null);
+      setUser(undefined);
       showToast("Logout successful!");
     } catch (error: any) {
       const errorMessage =
         error?.body?.errorMessage || "Logout failed. Please try again.";
-      showToast(errorMessage);
+      showToast(errorMessage, "", "error");
     } finally {
       hideLoading();
     }

@@ -7,6 +7,14 @@ import { useState } from "react";
 
 import { Link } from "react-router";
 import { useAuthContext } from "../context/AuthContext";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { useToast } from "@/shared/context/ToastContext";
 
 const areas = [
   { id: 1, name: "China" },
@@ -19,11 +27,13 @@ export default function LoginPage() {
   const [password, setPassword] = useState("");
   const [areaId, setAreaId] = useState(1);
   const { login } = useAuthContext();
+  const { showToast } = useToast();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (!username || !password) {
+      showToast("Username and password are required", "", "error");
       return;
     }
     await login({
@@ -69,21 +79,27 @@ export default function LoginPage() {
               <label className="block text-sm font-medium text-foreground mb-2">
                 Region
               </label>
-              <select
-                value={areaId}
-                onChange={(e) => setAreaId(Number(e.target.value))}
-                className="w-full px-3 py-2 bg-input border border-border rounded-lg text-foreground"
+
+              <Select
+                value={String(areaId)}
+                onValueChange={(value) => setAreaId(Number(value))}
               >
-                {areas.map((area) => (
-                  <option key={area.id} value={area.id}>
-                    {area.name}
-                  </option>
-                ))}
-              </select>
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Select a region" />
+                </SelectTrigger>
+
+                <SelectContent>
+                  {areas.map((area) => (
+                    <SelectItem key={area.id} value={String(area.id)}>
+                      {area.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
             <Button
               type="submit"
-              className="w-full bg-primary hover:opacity-90"
+              className="w-full bg-primary hover:opacity-60"
             >
               Sign In
             </Button>

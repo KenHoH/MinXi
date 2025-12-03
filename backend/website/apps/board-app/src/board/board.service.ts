@@ -19,9 +19,12 @@ import { mapBoardToDto } from './utils/mapBoardToDTO';
 import { ClientProxy } from '@nestjs/microservices';
 import { FullContentDto } from '@app/contracts/shared-dto/content/res/full.content.dto';
 import { FileDto } from '@app/contracts/shared-dto/content/res/file.dto';
-import { CONTENT_MSG } from '@app/common/constants/messageEvent';
+import { CONTENT_MSG, USER_MSG } from '@app/common/constants/messageEvent';
 import { firstValueFrom } from 'rxjs';
-import { CONTENT_SERVICES } from '@app/common/constants/services';
+import {
+  CONTENT_SERVICES,
+  USER_SERVICES,
+} from '@app/common/constants/services';
 
 @Injectable()
 export class BoardService implements IBoardService {
@@ -30,6 +33,8 @@ export class BoardService implements IBoardService {
     private readonly prisma: ContentDatabaseConnection,
     @Inject(CONTENT_SERVICES.CLIENT)
     private readonly contentClient: ClientProxy,
+    @Inject(USER_SERVICES.CLIENT)
+    private readonly userClient: ClientProxy,
   ) {}
 
   private async buildBoardDto(board: any, area_id?: number): Promise<BoardDto> {
@@ -587,6 +592,10 @@ export class BoardService implements IBoardService {
                   type: file.type,
                 }));
 
+              const userdata = await firstValueFrom(
+                this.userClient.send(USER_MSG.findOne, content.creator_id),
+              );
+
               allContents.push({
                 content_id: content.content_id,
                 creator_id: content.creator_id,
@@ -611,6 +620,8 @@ export class BoardService implements IBoardService {
                   type: thumbnail.type,
                 },
                 contents: mappedFiles,
+                profile_url: userdata.profile_picture,
+                username: userdata.username,
               });
             } catch (error) {
               this.logger.error(

@@ -1,11 +1,10 @@
-"use client";
-
 import { useEffect, useRef, useCallback, useState } from "react";
-import { ContentComponent } from "@/feature/content/components/ContentComponent/ContentComponent";
-import { PostComponent } from "@/feature/content/components/PostComponent/PostComponent";
 import { useLoading } from "@/shared/context/LoadingContext";
 import { Masonry } from "@/shared/components/Masonry";
-import type { FullContentDto } from "@/service/api";
+import type { CreateHistoryDto, FullContentDto } from "@/service/api";
+import { renderItem } from "../logic/useRenderContent";
+import useHistoryService from "@/shared/hooks/useHistoryService";
+import useGetHistory from "../logic/useGetHistory";
 
 interface FeedListProps {
   onLoadMore: () => Promise<FullContentDto[]>;
@@ -24,6 +23,19 @@ export default function FeedList({
   const [isLoading, setIsLoading] = useState(false);
   const [hasMore, setHasMore] = useState(true);
   const observerTarget = useRef<HTMLDivElement>(null);
+  const [histories] = useGetHistory();
+
+  const likeStatusMap = new Map<number, boolean>();
+  histories.forEach((h) => {
+    likeStatusMap.set(h.content_id, h.liked || false);
+  });
+
+  const itemsWithLikeStatus = items
+    .filter((item) => likeStatusMap.has(item.content_id))
+    .map((item) => ({
+      item,
+      liked: likeStatusMap.get(item.content_id) || false,
+    }));
 
   const loadMore = useCallback(async () => {
     if (isLoading || !hasMore || !onLoadMore) return;
@@ -83,33 +95,18 @@ export default function FeedList({
     return () => observer.disconnect();
   }, [enableInfiniteScroll, loadMore, hasMore, isLoading]);
 
-  const renderItem = (item: FullContentDto) => {
-    const isPost = item.post_type === "post";
-    const isContent = item.post_type === "image" || item.post_type === "video";
-
-    if (isContent) {
-      return <ContentComponent key={item.content_id} content={item} />;
-    } else if (isPost) {
-      return <PostComponent key={item.content_id} post={item} />;
-    }
-
-    return null;
-  };
-
   return (
     <div className="w-3/4 h-full">
       {/* Masonry Grid */}
-      {items.length === 0 ? (
+      {itemsWithLikeStatus.length === 0 ? (
         <div className="text-center py-12 text-gray-500">
           No items to display
         </div>
       ) : (
         <div className="p-4">
-          <Masonry columns={3}>
-            {items.map((item) => (
-              <div key={`${item.post_type}-${item.content_id}`}>
-                {renderItem(item)}
-              </div>
+          <Masonry columns={4}>
+            {itemsWithLikeStatus.map(({ item, liked }) => (
+              <div>{renderItem(item, liked)}</div>
             ))}
           </Masonry>
         </div>
@@ -127,7 +124,6 @@ export default function FeedList({
         </div>
       )}
 
-      {/* End of feed message */}
       {!hasMore && items.length > 0 && (
         <div className="text-center py-8 text-gray-500">
           <p>No more items to load</p>

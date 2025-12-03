@@ -18,4 +18,7 @@ export const mapToContent = (content: any): FullContentDto => ({
   contents: content.contents || [],
   published_at: content.published_at,
   score: content.score,
+  profile_url: content.profile_url,
+  username: content.username,
+  liked: content.liked,
 });

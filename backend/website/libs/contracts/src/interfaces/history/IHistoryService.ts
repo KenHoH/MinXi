@@ -6,5 +6,5 @@ export interface IHistoryService {
   getByUserAndContent(
     user_id: number,
     content_id: number,
-  ): Promise<CreateHistoryDto[]>;
+  ): Promise<CreateHistoryDto>;
 }

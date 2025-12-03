@@ -7,6 +7,7 @@ import { ClientsModule, Transport } from '@nestjs/microservices';
 import {
   CONNECT_SERVICES,
   HISTORY_SERVICES,
+  USER_SERVICES,
 } from '@app/common/constants/services';
 
 @Module({
@@ -25,6 +26,13 @@ import {
         transport: Transport.TCP,
         options: {
           port: HISTORY_SERVICES.PORT,
+        },
+      },
+      {
+        name: USER_SERVICES.CLIENT,
+        transport: Transport.TCP,
+        options: {
+          port: USER_SERVICES.PORT,
         },
       },
     ]),

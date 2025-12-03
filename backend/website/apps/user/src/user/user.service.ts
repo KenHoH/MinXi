@@ -41,10 +41,10 @@ export class UserService implements IUserService {
       };
     } catch (error) {
       this.logger.error(
-        `Failed to create user '${dto.username}': ${error.message}`,
+        `User already exists user '${dto.username}': ${error.message}`,
       );
       throw httpToRpc(
-        new HttpException('Failed to Create User', HttpStatus.BAD_REQUEST),
+        new HttpException('User already exists', HttpStatus.BAD_REQUEST),
       );
     }
   }

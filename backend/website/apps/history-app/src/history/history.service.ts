@@ -69,15 +69,17 @@ export class HistoryService implements IHistoryService {
   async getByUserAndContent(
     user_id: number,
     content_id: number,
-  ): Promise<CreateHistoryDto[]> {
+  ): Promise<CreateHistoryDto> {
     try {
-      const result = await this.prisma.historyContent.findMany({
+      const result = await this.prisma.historyContent.findUnique({
         where: {
-          user_id: user_id,
-          content_id: content_id,
+          user_id_content_id: {
+            user_id: user_id,
+            content_id: content_id,
+          },
         },
       });
-      return result.map(mapToCreateHistoryDto);
+      return mapToCreateHistoryDto(result);
     } catch (error) {
       this.logger.log('Failed to get histories', error.message);
       throw httpToRpc(

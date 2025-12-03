@@ -4,6 +4,7 @@ interface ContentDetailInfoProps {
   title: string;
   likes: number;
   comments: number;
+  liked: boolean;
   creator: string;
   creatorProfile: string;
 }
@@ -11,6 +12,7 @@ interface ContentDetailInfoProps {
 export function ContentDetailInfo({
   title,
   likes,
+  liked,
   comments,
   creator,
   creatorProfile,
@@ -34,7 +36,11 @@ export function ContentDetailInfo({
       <h3 className="font-medium text-gray-100 truncate text-sm">{title}</h3>
       <div className="flex items-center justify-start gap-3 text-xs text-gray-400">
         <span className="flex items-center gap-1 hover:text-burgundy-400 transition-colors">
-          <Heart className={`w-4 h-4 ${"text-gray-500"}`} />
+          <Heart
+            className={`w-4 h-4 ${
+              liked ? "fill-red-500 text-red-500" : " text-burgundy-400"
+            }`}
+          />
           {likes}
         </span>
         <span className="flex items-center gap-1 hover:text-burgundy-400 transition-colors">

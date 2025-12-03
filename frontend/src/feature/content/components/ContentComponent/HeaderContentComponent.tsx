@@ -1,9 +1,11 @@
-import type { UserDto } from "@/service/api";
 import { CommentParentComponent } from "../CommentComponent/CommentParentComponent";
 import { ProfilePicture } from "../ProfilePicture";
 
 interface HeaderContentComponentProps {
-  creator: UserDto;
+  creator: {
+    username: string;
+    profile_url: string;
+  };
   title: string;
   description: string;
   views: number;

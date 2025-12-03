@@ -20,7 +20,7 @@ export class HistoryService implements IHistoryService {
   async getByUserAndContent(
     user_id: number,
     content_id: number,
-  ): Promise<CreateHistoryDto[]> {
+  ): Promise<CreateHistoryDto> {
     return firstValueFrom(
       this.client.send(HISTORY_MSG.getByUserAndContent, {
         user_id,

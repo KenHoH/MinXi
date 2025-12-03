@@ -170,15 +170,6 @@ export class UserController {
   ): Promise<CredentialRes> {
     const userData = this.userService.findByName(body);
 
-    userData.then((user) => {
-      response.cookie('user', JSON.stringify(user), {
-        httpOnly: false,
-        secure: true,
-        sameSite: 'none',
-        maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
-      });
-    });
-
     return userData;
   }
   @Post('/one/name')

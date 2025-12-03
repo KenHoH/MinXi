@@ -20,7 +20,14 @@ export default function useApiCall() {
 
         return res;
       } catch (err: any) {
-        const msg = err?.body?.message ?? err?.message ?? "Error occurred";
+        const backend = err?.response?.data ?? err?.body ?? {};
+
+        const msg =
+          backend.errorMessage ||
+          backend.message ||
+          err?.message ||
+          "Something went wrong";
+
         setError(msg);
         showToast(msg);
         return null;

@@ -4,7 +4,10 @@ import { BoardController } from './board.controller';
 import { CommonModule } from '@app/common';
 import { ContentDatabaseConnection } from '@app/common/database/content-database-connection/content-database-connection';
 import { ClientsModule, Transport } from '@nestjs/microservices';
-import { CONTENT_SERVICES } from '@app/common/constants/services';
+import {
+  CONTENT_SERVICES,
+  USER_SERVICES,
+} from '@app/common/constants/services';
 
 @Module({
   imports: [
@@ -15,6 +18,13 @@ import { CONTENT_SERVICES } from '@app/common/constants/services';
         transport: Transport.TCP,
         options: {
           port: CONTENT_SERVICES.PORT,
+        },
+      },
+      {
+        name: USER_SERVICES.CLIENT,
+        transport: Transport.TCP,
+        options: {
+          port: USER_SERVICES.PORT,
         },
       },
     ]),

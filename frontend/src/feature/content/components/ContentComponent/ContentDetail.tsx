@@ -25,6 +25,7 @@ interface ContentDetailComponentProps {
   onClose: () => void;
   onLikeClick: (newLike: number) => void;
   onCommentClick: (newComment: number) => void;
+  onlikedChange: (liked: boolean) => void;
 }
 
 export function ContentDetailComponent({
@@ -32,6 +33,7 @@ export function ContentDetailComponent({
   onClose,
   onLikeClick,
   onCommentClick,
+  onlikedChange,
 }: ContentDetailComponentProps) {
   // ============ AUTH & CONTEXT ============
   const { user } = useAuthContext();
@@ -110,7 +112,7 @@ export function ContentDetailComponent({
       // Create new comment
       await create({
         content_id: content.content_id,
-        parent_id: parentId ? parentId : undefined,
+        parent_id: parentId ? parentId : 0,
         text: commentText,
         creator_id: user.user_id,
         id: 0,
@@ -162,8 +164,8 @@ export function ContentDetailComponent({
     if (!user) return;
     const res = await getByUserAndContent(user.user_id, content.content_id);
     if (res) {
-      setLiked(res.some((history) => history.liked));
-      setPinned(res.some((history) => history.pinned));
+      setLiked(res.liked);
+      setPinned(res.pinned);
     }
   };
 
@@ -199,6 +201,7 @@ export function ContentDetailComponent({
           reps: 0,
         });
         onLikeClick(totalLikes + (newLiked ? 1 : -1));
+        onlikedChange(newLiked);
         break;
       }
       case 2: {
@@ -393,7 +396,10 @@ export function ContentDetailComponent({
             <>
               <HeaderContentComponent
                 refresh={refreshComments}
-                creator={creatorData}
+                creator={{
+                  username: content.username,
+                  profile_url: content.profile_url,
+                }}
                 title={currentContent.title}
                 description={currentContent.description}
                 views={currentContent.views}

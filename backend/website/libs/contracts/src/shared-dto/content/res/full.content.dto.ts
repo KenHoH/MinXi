@@ -3,8 +3,11 @@ import { FileDto } from './file.dto';
 export class FullContentDto {
   content_id: number;
   creator_id: number;
+  username: string;
+  profile_url: string;
   parent_id?: number;
   area_id: number;
+  liked?: boolean;
 
   thumbnail: FileDto | null;
   contents: FileDto[];

@@ -8,16 +8,24 @@ interface ContentHeaderInfoProps {
 
 export function ContentHeaderInfo({
   post_type,
-  content_id,
   thumbnail,
 }: ContentHeaderInfoProps) {
   const aspectRatios = [
-    "aspect-square",
-    "aspect-video",
-    "aspect-[3/4]",
-    "aspect-[4/5]",
+    "aspect-square", // 1:1
+    "aspect-video", // 16:9
+    "aspect-[3/4]", // 3:4
+    "aspect-[4/5]", // 4:5
+    "aspect-[2/3]", // 2:3
+    "aspect-[9/16]", // 9:16
+    "aspect-[1/2]", // 1:2
+    "aspect-[5/4]", // 5:4
+    "aspect-[4/3]", // 4:3
+    "aspect-[21/9]", // 21:9 (ultrawide)
+    "aspect-[5/3]", // 5:3
+    "aspect-[7/5]", // 7:5
   ];
-  const randomAspect = aspectRatios[content_id % aspectRatios.length];
+  const randomAspect =
+    aspectRatios[Math.floor(Math.random() * aspectRatios.length)];
 
   return (
     <div

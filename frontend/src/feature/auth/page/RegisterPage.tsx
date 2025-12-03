@@ -10,6 +10,13 @@ import { Input } from "@/components/ui/input";
 import { Link } from "react-router";
 import useUserService from "@/shared/hooks/useUserService";
 import { useToast } from "@/shared/context/ToastContext";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 const areas = [
   { id: 1, name: "China" },
@@ -29,7 +36,7 @@ export default function RegisterPage() {
     e.preventDefault();
 
     if (password !== confirmPassword) {
-      showToast("Passwords do not match");
+      showToast("Passwords doesn't match");
       return;
     }
     if (!username || !password) {
@@ -41,7 +48,6 @@ export default function RegisterPage() {
       username: username,
       password: password,
     });
-    showToast("Account created successfully! Please log in.");
   };
   return (
     <div className="min-h-screen flex items-center justify-center bg-background p-4">
@@ -91,21 +97,27 @@ export default function RegisterPage() {
               <label className="block text-sm font-medium text-foreground mb-2">
                 Region
               </label>
-              <select
-                value={areaId}
-                onChange={(e) => setAreaId(Number(e.target.value))}
-                className="w-full px-3 py-2 bg-input border border-border rounded-lg text-foreground"
+
+              <Select
+                value={String(areaId)}
+                onValueChange={(value) => setAreaId(Number(value))}
               >
-                {areas.map((area) => (
-                  <option key={area.id} value={area.id}>
-                    {area.name}
-                  </option>
-                ))}
-              </select>
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Select a region" />
+                </SelectTrigger>
+
+                <SelectContent>
+                  {areas.map((area) => (
+                    <SelectItem key={area.id} value={String(area.id)}>
+                      {area.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
             <Button
               type="submit"
-              className="w-full bg-primary hover:opacity-90"
+              className="w-full bg-primary hover:opacity-60"
             >
               Create Account
             </Button>

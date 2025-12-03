@@ -18,17 +18,20 @@ import {
 import {
   CONNECT_SERVICES,
   HISTORY_SERVICES,
+  USER_SERVICES,
 } from '@app/common/constants/services';
 import { ClientProxy } from '@nestjs/microservices';
 import { firstValueFrom } from 'rxjs';
 import {
   CONNECTION_MSG,
   HISTORY_MSG,
+  USER_MSG,
 } from '@app/common/constants/messageEvent';
 import { mapToContent } from './utils/mapToContent';
 import { PageContentRes } from '@app/contracts/shared-dto/content/res/page.content.dto';
 import { UpdateScoreDto } from '@app/contracts/shared-dto/content/req/UpdateScore.req.dto';
 import { GlobalPageDto } from '@app/contracts/shared-dto/content/res/page.global.all.dto';
+import { UserDto } from '@app/contracts/shared-dto/user/user.dto';
 
 @Injectable()
 export class ContentService implements IContentService {
@@ -39,6 +42,8 @@ export class ContentService implements IContentService {
     private readonly connectionClient: ClientProxy,
     @Inject(HISTORY_SERVICES.CLIENT)
     private readonly historyClient: ClientProxy,
+    @Inject(USER_SERVICES.CLIENT)
+    private readonly userClient: ClientProxy,
   ) {}
 
   async create(dto: CreatePostDto): Promise<FullContentDto> {
@@ -72,6 +77,11 @@ export class ContentService implements IContentService {
       try {
         const result = await this.prisma
           .$transaction(async (tx) => {
+            const id = dto.creator_id;
+            const userdata: UserDto = await firstValueFrom(
+              this.userClient.send(USER_MSG.findOne, id),
+            );
+
             const content = await tx.content
               .create({
                 data: {
@@ -142,6 +152,8 @@ export class ContentService implements IContentService {
               score: content.score,
               visibilityPrivate: content.visibilityPrivate,
               thumbnail: thumbnail,
+              profile_url: userdata.profile_picture,
+              username: userdata.username,
             };
 
             return fullResponse;
@@ -276,6 +288,10 @@ export class ContentService implements IContentService {
             }
           }
 
+          const userdata = await firstValueFrom(
+            this.userClient.send(USER_MSG.findOne, content.creator_id),
+          );
+
           const fullResponse: FullContentDto = {
             area_id: content.area_id,
             content_id: content.content_id,
@@ -294,6 +310,8 @@ export class ContentService implements IContentService {
             visibilityPrivate: content.visibilityPrivate,
             thumbnail: thumbnail,
             score: content.score,
+            profile_url: userdata.profile_picture,
+            username: userdata.username,
           };
 
           return fullResponse;
@@ -395,6 +413,10 @@ export class ContentService implements IContentService {
                 },
               });
 
+              const userdata: UserDto = await firstValueFrom(
+                this.userClient.send(USER_MSG.findOne, content.creator_id),
+              );
+
               const thumbnail = files.find((file) => file.type === 'thumbnail');
               // For posts without thumbnail, still include them (text-only posts allowed)
               if (!thumbnail && content.post_type !== 'post') {
@@ -440,6 +462,8 @@ export class ContentService implements IContentService {
                     }
                   : null,
                 contents: mappedFiles,
+                profile_url: userdata.profile_picture,
+                username: userdata.username,
               };
 
               allContents.push(fullContent);
@@ -551,6 +575,10 @@ export class ContentService implements IContentService {
               type: file.type,
             }));
 
+          const userdata: UserDto = await firstValueFrom(
+            this.userClient.send(USER_MSG.findOne, content.creator_id),
+          );
+
           const fullContent: FullContentDto = {
             area_id: content.area_id,
             content_id: content.content_id,
@@ -577,6 +605,8 @@ export class ContentService implements IContentService {
                 }
               : null,
             contents: mappedFiles,
+            username: userdata.username,
+            profile_url: userdata.profile_picture,
           };
 
           return fullContent;
@@ -651,6 +681,10 @@ export class ContentService implements IContentService {
                 continue;
               }
 
+              const userdata: UserDto = await firstValueFrom(
+                this.userClient.send(USER_MSG.findOne, content.creator_id),
+              );
+
               const mappedFiles: FileDto[] = files
                 .filter((file) => file.type !== 'thumbnail')
                 .map((file) => ({
@@ -687,6 +721,8 @@ export class ContentService implements IContentService {
                     }
                   : null,
                 contents: mappedFiles,
+                username: userdata.username,
+                profile_url: userdata.profile_picture,
               });
             } catch (error) {
               this.logger.error(
@@ -761,6 +797,10 @@ export class ContentService implements IContentService {
                 },
               });
 
+              const userdata: UserDto = await firstValueFrom(
+                this.userClient.send(USER_MSG.findOne, content.creator_id),
+              );
+
               const thumbnail = files.find((file) => file.type === 'thumbnail');
               if (!thumbnail && content.post_type !== 'post') {
                 this.logger.warn(
@@ -805,6 +845,8 @@ export class ContentService implements IContentService {
                     }
                   : null,
                 contents: mappedFiles,
+                username: userdata.username,
+                profile_url: userdata.profile_picture,
               });
             } catch (error) {
               this.logger.error(
@@ -902,6 +944,10 @@ export class ContentService implements IContentService {
                   type: file.type,
                 }));
 
+              const userdata: UserDto = await firstValueFrom(
+                this.userClient.send(USER_MSG.findOne, content.creator_id),
+              );
+
               allContents.push({
                 content_id: content.content_id,
                 creator_id: content.creator_id,
@@ -928,6 +974,8 @@ export class ContentService implements IContentService {
                     }
                   : null,
                 contents: mappedFiles,
+                profile_url: userdata.profile_picture,
+                username: userdata.username,
               });
             } catch (error) {
               this.logger.error(
@@ -1382,6 +1430,10 @@ export class ContentService implements IContentService {
                   type: file.type,
                 }));
 
+              const userdata: UserDto = await firstValueFrom(
+                this.userClient.send(USER_MSG.findOne, content.creator_id),
+              );
+
               allContents.push({
                 content_id: content.content_id,
                 creator_id: content.creator_id,
@@ -1408,6 +1460,8 @@ export class ContentService implements IContentService {
                     }
                   : null,
                 contents: mappedFiles,
+                username: userdata.username,
+                profile_url: userdata.profile_picture,
               });
             } catch (error) {
               this.logger.error(
@@ -1545,6 +1599,9 @@ export class ContentService implements IContentService {
                   content_area_id: file.content_area_id,
                   type: file.type,
                 }));
+              const userdata: UserDto = await firstValueFrom(
+                this.userClient.send(USER_MSG.findOne, content.creator_id),
+              );
 
               allContents.push({
                 content_id: content.content_id,
@@ -1572,6 +1629,8 @@ export class ContentService implements IContentService {
                     }
                   : null,
                 contents: mappedFiles,
+                username: userdata.username,
+                profile_url: userdata.profile_picture,
               });
             } catch (error) {
               this.logger.error(
@@ -1691,7 +1750,9 @@ export class ContentService implements IContentService {
                   content_area_id: file.content_area_id,
                   type: file.type,
                 }));
-
+              const userdata: UserDto = await firstValueFrom(
+                this.userClient.send(USER_MSG.findOne, content.creator_id),
+              );
               allContents.push({
                 content_id: content.content_id,
                 creator_id: content.creator_id,
@@ -1718,6 +1779,8 @@ export class ContentService implements IContentService {
                     }
                   : null,
                 contents: mappedFiles,
+                username: userdata.username,
+                profile_url: userdata.profile_picture,
               });
             } catch (error) {
               this.logger.error(
@@ -1825,7 +1888,9 @@ export class ContentService implements IContentService {
                   content_area_id: file.content_area_id,
                   type: file.type,
                 }));
-
+              const userdata: UserDto = await firstValueFrom(
+                this.userClient.send(USER_MSG.findOne, content.creator_id),
+              );
               allContents.push({
                 content_id: content.content_id,
                 creator_id: content.creator_id,
@@ -1852,6 +1917,8 @@ export class ContentService implements IContentService {
                     }
                   : null,
                 contents: mappedFiles,
+                username: userdata.username,
+                profile_url: userdata.profile_picture,
               });
             } catch (error) {
               this.logger.error(
@@ -2047,7 +2114,9 @@ export class ContentService implements IContentService {
                   content_area_id: file.content_area_id,
                   type: file.type,
                 }));
-
+              const userdata: UserDto = await firstValueFrom(
+                this.userClient.send(USER_MSG.findOne, content.creator_id),
+              );
               allContents.push({
                 content_id: content.content_id,
                 creator_id: content.creator_id,
@@ -2074,6 +2143,8 @@ export class ContentService implements IContentService {
                     }
                   : null,
                 contents: mappedFiles,
+                username: userdata.username,
+                profile_url: userdata.profile_picture,
               });
             } catch (error) {
               this.logger.error(
@@ -2196,7 +2267,9 @@ export class ContentService implements IContentService {
                   content_area_id: file.content_area_id,
                   type: file.type,
                 }));
-
+              const userdata = await firstValueFrom(
+                this.userClient.send(USER_MSG.findOne, content.creator_id),
+              );
               const fullContent: FullContentDto = {
                 area_id: content.area_id,
                 content_id: content.content_id,
@@ -2223,6 +2296,8 @@ export class ContentService implements IContentService {
                     }
                   : null,
                 contents: mappedFiles,
+                username: userdata.username,
+                profile_url: userdata.profile_picture,
               };
 
               allContents.push(fullContent);
@@ -2326,7 +2401,9 @@ export class ContentService implements IContentService {
               content_area_id: file.content_area_id,
               type: file.type,
             }));
-
+          const userdata = await firstValueFrom(
+            this.userClient.send(USER_MSG.findOne, content.creator_id),
+          );
           const fullContent: FullContentDto = {
             area_id: content.area_id,
             content_id: content.content_id,
@@ -2353,6 +2430,8 @@ export class ContentService implements IContentService {
                 }
               : null,
             contents: mappedFiles,
+            username: userdata.username,
+            profile_url: userdata.profile_picture,
           };
 
           allContents.push(fullContent);
@@ -2466,7 +2545,9 @@ export class ContentService implements IContentService {
                   content_area_id: file.content_area_id,
                   type: file.type,
                 }));
-
+              const userdata = await firstValueFrom(
+                this.userClient.send(USER_MSG.findOne, content.creator_id),
+              );
               const fullContent: FullContentDto = {
                 area_id: content.area_id,
                 content_id: content.content_id,
@@ -2493,6 +2574,8 @@ export class ContentService implements IContentService {
                     }
                   : null,
                 contents: mappedFiles,
+                username: userdata.username,
+                profile_url: userdata.profile_picture,
               };
 
               allContents.push(fullContent);
