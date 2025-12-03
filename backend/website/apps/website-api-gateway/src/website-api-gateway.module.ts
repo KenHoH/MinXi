@@ -12,6 +12,8 @@ import { SseModule } from './sse/sse.module';
 import { SocialModule } from './social/social.module';
 import { CommentModule } from './comment/comment.module';
 import { NotificationModule } from './notification/notification.module';
+import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
+import { APP_GUARD } from '@nestjs/core/constants';
 
 @Module({
   imports: [
@@ -28,8 +30,16 @@ import { NotificationModule } from './notification/notification.module';
     SocialModule,
     CommentModule,
     NotificationModule,
+    ThrottlerModule.forRoot({
+      throttlers: [{ name: 'long', ttl: 60000, limit: 100 }],
+    }),
   ],
   controllers: [],
-  providers: [],
+  providers: [
+    {
+      provide: APP_GUARD,
+      useClass: ThrottlerGuard,
+    },
+  ],
 })
 export class WebsiteApiGatewayModule {}

@@ -1,7 +1,13 @@
+import { useState } from "react";
 import { MoreVertical } from "lucide-react";
 import MessageList from "./MessageList";
 import MessageInput from "./MessageInput";
-import type { MessageResponseDto, RoomResponseDto } from "@/service/api";
+import ChatHeaderPopover from "./ChatHeaderPopover";
+import type {
+  MessageResponseDto,
+  RoomResponseDto,
+  UserRoleDto,
+} from "@/service/api";
 
 interface ChatAreaProps {
   room: RoomResponseDto;
@@ -9,6 +15,8 @@ interface ChatAreaProps {
   onSendMessage: (content: string, fileBlob?: Blob) => void;
   isConnected: boolean;
   loggedUserId?: number;
+  members?: UserRoleDto[];
+  currentUserRole?: string;
 }
 
 export default function ChatArea({
@@ -17,7 +25,16 @@ export default function ChatArea({
   onSendMessage,
   isConnected,
   loggedUserId,
+  members = [],
+  currentUserRole = "MEMBER",
 }: ChatAreaProps) {
+  const [showPopover, setShowPopover] = useState(false);
+
+  const mediaUrls = messages
+    .filter(
+      (msg) => msg.mediaUrl && (msg.type === "IMAGE" || msg.type === "VIDEO")
+    )
+    .map((msg) => msg);
   return (
     <div className="flex-1 flex flex-col bg-background">
       {/* Chat Header */}
@@ -37,10 +54,23 @@ export default function ChatArea({
             </p>
           </div>
         </div>
-        <button className="p-2 hover:bg-muted rounded-lg transition-colors">
+        <button
+          onClick={() => setShowPopover(true)}
+          className="p-2 hover:bg-muted rounded-lg transition-colors"
+        >
           <MoreVertical className="w-5 h-5 text-foreground" />
         </button>
       </div>
+
+      <ChatHeaderPopover
+        isOpen={showPopover}
+        onClose={() => setShowPopover(false)}
+        room={room}
+        currentUserRole={currentUserRole}
+        members={members}
+        mediaUrls={mediaUrls}
+        currentUser={loggedUserId ?? 0}
+      />
 
       {/* Messages */}
       <MessageList messages={messages} loggedUserId={loggedUserId} />

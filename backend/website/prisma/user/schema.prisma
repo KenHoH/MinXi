@@ -27,6 +27,9 @@ model User {
   content_visibilityPrivate Boolean @default(false)
   pinned_visibilityPrivate Boolean @default(false)
   liked_visibilityPrivate Boolean @default(false)
+  liked_notification_disabled Boolean @default(false)
+  comments_notification_disabled Boolean @default(false)
+  followers_notification_disabled Boolean @default(false)
 
   area_id Int
   @@unique([username, area_id])

@@ -1,5 +1,4 @@
 import { MessageResponseDto } from '@app/contracts/shared-dto/social/response/messageResDTO';
-import { BroadcastMsgReq } from '@app/contracts/shared-dto/sse/req/BroadcastMsgReq';
 
 export function buildMessageResponse(dto: any): MessageResponseDto {
   return {
@@ -10,5 +9,7 @@ export function buildMessageResponse(dto: any): MessageResponseDto {
     createdAt: new Date(),
     roomId: dto.roomId,
     type: dto.type || 'TEXT',
+    authorName: dto.authorName,
+    authorProfileUrl: dto.authorProfileUrl,
   };
 }

@@ -11,6 +11,7 @@ import { FullContentDto } from '@app/contracts/shared-dto/content/res/full.conte
 import { deltaDto } from '@app/contracts/shared-dto/user/delta.dto';
 import { ValidationPipe } from '@nestjs/common';
 import { PageContentRes } from '@app/contracts/shared-dto/content/res/page.content.dto';
+import { UpdateScoreDto } from '@app/contracts/shared-dto/content/req/UpdateScore.req.dto';
 
 @Controller()
 export class ContentController {
@@ -45,6 +46,11 @@ export class ContentController {
       payload.page,
       payload.limit,
     );
+  }
+  @MessagePattern(CONTENT_MSG.findGlobal)
+  async findGlobal(): Promise<FullContentDto[]> {
+    this.logger.log(`Fetching all global content`);
+    return this.contentService.findGlobal();
   }
 
   @MessagePattern(CONTENT_MSG.findOne)
@@ -97,6 +103,13 @@ export class ContentController {
       payload.area_id,
       payload.dto,
     );
+  }
+  @MessagePattern(CONTENT_MSG.updateScore)
+  async updateScore(
+    @Payload()
+    dto: UpdateScoreDto,
+  ): Promise<Ack> {
+    return this.contentService.updateScore(dto);
   }
 
   @MessagePattern(CONTENT_MSG.updateLike)
@@ -205,16 +218,26 @@ export class ContentController {
 
   @MessagePattern(CONTENT_MSG.getFollowingContent)
   async getFollowingContent(
-    @Payload() userId: number,
-  ): Promise<FullContentDto[]> {
-    this.logger.log(`Fetching Following content by user ID ${userId}`);
-    return this.contentService.getFollowingContent(userId);
+    @Payload() payload: { userId: number; areaId: number; page: number },
+  ): Promise<PageContentRes> {
+    this.logger.log(`Fetching Following content by user ID ${payload.userId}`);
+    return this.contentService.getFollowingContent(
+      payload.userId,
+      payload.areaId,
+      payload.page,
+    );
   }
 
   @MessagePattern(CONTENT_MSG.getFriendContent)
-  async getFriendContent(@Payload() userId: number): Promise<FullContentDto[]> {
-    this.logger.log(`Fetching Friend content by user ID ${userId}`);
-    return this.contentService.getFriendContent(userId);
+  async getFriendContent(
+    @Payload() payload: { userId: number; areaId: number; page: number },
+  ): Promise<PageContentRes> {
+    this.logger.log(`Fetching Friend content by user ID ${payload.userId}`);
+    return this.contentService.getFriendContent(
+      payload.userId,
+      payload.areaId,
+      payload.page,
+    );
   }
   @MessagePattern(CONTENT_MSG.getLikedByUser)
   async getLikedByUser(@Payload() userId: number): Promise<FullContentDto[]> {
@@ -244,5 +267,15 @@ export class ContentController {
     @Payload() dto: { contentId: number; areaId: number },
   ): Promise<FullContentDto> {
     return this.contentService.getFullPost(dto.contentId, dto.areaId);
+  }
+
+  @MessagePattern(CONTENT_MSG.findAllGlobalPage)
+  async findAllGlobalPage(
+    @Payload() payload: { area_id: number; cursor: number; limit: number },
+  ): Promise<PageContentRes> {
+    this.logger.log(
+      `Fetching global paginated content starting from area ${payload.area_id}`,
+    );
+    return this.contentService.findAllGlobalPage(payload);
   }
 }

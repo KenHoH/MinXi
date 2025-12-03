@@ -6,6 +6,7 @@ import {
   CONTENT_SERVICES,
   HISTORY_SERVICES,
 } from '@app/common/constants/services';
+import { ScheduleModule } from '@nestjs/schedule';
 
 @Module({
   imports: [
@@ -25,6 +26,7 @@ import {
         },
       },
     ]),
+    ScheduleModule.forRoot(),
   ],
   controllers: [AlgorithmController],
   providers: [AlgorithmService],

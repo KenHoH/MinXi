@@ -12,6 +12,7 @@ import { ClientProxy } from '@nestjs/microservices';
 import { firstValueFrom } from 'rxjs';
 import { IContentService } from '@app/contracts/interfaces/content/IContentService';
 import { PageContentRes } from '@app/contracts/shared-dto/content/res/page.content.dto';
+import { UpdateScoreDto } from '@app/contracts/shared-dto/content/req/UpdateScore.req.dto';
 
 @Injectable()
 export class ContentService implements IContentService {
@@ -19,14 +20,30 @@ export class ContentService implements IContentService {
     @Inject(CONTENT_SERVICES.CLIENT)
     private readonly contentClient: ClientProxy,
   ) {}
-  async getFollowingContent(userId: number): Promise<FullContentDto[]> {
+  async getFollowingContent(
+    userId: number,
+    areaId: number,
+    page: number,
+  ): Promise<PageContentRes> {
     return await firstValueFrom(
-      this.contentClient.send(CONTENT_MSG.getFollowingContent, userId),
+      this.contentClient.send(CONTENT_MSG.getFollowingContent, {
+        userId,
+        areaId,
+        page,
+      }),
     );
   }
-  async getFriendContent(userId: number): Promise<FullContentDto[]> {
+  async getFriendContent(
+    userId: number,
+    areaId: number,
+    page: number,
+  ): Promise<PageContentRes> {
     return await firstValueFrom(
-      this.contentClient.send(CONTENT_MSG.getFriendContent, userId),
+      this.contentClient.send(CONTENT_MSG.getFriendContent, {
+        userId,
+        areaId,
+        page,
+      }),
     );
   }
   async create(dto: CreatePostDto): Promise<FullContentDto> {
@@ -60,7 +77,25 @@ export class ContentService implements IContentService {
       }),
     );
   }
+  async findAllGlobalPage(
+    area_id: number,
+    cursor: number,
+    limit: number,
+  ): Promise<PageContentRes> {
+    return await firstValueFrom(
+      this.contentClient.send(CONTENT_MSG.findAllGlobalPage, {
+        area_id,
+        cursor,
+        limit,
+      }),
+    );
+  }
 
+  async findGlobal(): Promise<FullContentDto[]> {
+    return await firstValueFrom(
+      this.contentClient.send(CONTENT_MSG.findGlobal, {}),
+    );
+  }
   async findOne(content_id: number, area_id: number): Promise<FullContentDto> {
     return await firstValueFrom(
       this.contentClient.send(CONTENT_MSG.findOne, { content_id, area_id }),
@@ -157,6 +192,12 @@ export class ContentService implements IContentService {
         area_id,
         dto,
       }),
+    );
+  }
+
+  async updateScore(dto: UpdateScoreDto): Promise<Ack> {
+    return await firstValueFrom(
+      this.contentClient.send(CONTENT_MSG.updateScore, dto),
     );
   }
 

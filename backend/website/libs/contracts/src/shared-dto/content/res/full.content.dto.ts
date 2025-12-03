@@ -19,4 +19,6 @@ export class FullContentDto {
   pins: number;
   reports: number;
   published_at: Date;
+
+  score: number;
 }

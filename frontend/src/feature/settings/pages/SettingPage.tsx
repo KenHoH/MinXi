@@ -20,9 +20,14 @@ export default function SettingsPage() {
     privateContent: false,
     privatePinned: false,
     privateLiked: false,
+    likeDisable: false,
+    commentDisable: false,
+    followDisable: false,
   });
   const [profileImage, setProfileImage] = useState<File | null>(null);
   const [profileImagePreview, setProfileImagePreview] = useState<string>("");
+  const [currentProfilePicture, setCurrentProfilePicture] =
+    useState<string>("");
   const [description, setDescription] = useState("");
   const [isUpdating, setIsUpdating] = useState(false);
 
@@ -39,7 +44,10 @@ export default function SettingsPage() {
       user.user_id,
       newSettings.privateContent,
       newSettings.privateLiked,
-      newSettings.privatePinned
+      newSettings.privatePinned,
+      newSettings.likeDisable,
+      newSettings.commentDisable,
+      newSettings.followDisable
     );
     showToast("Privacy settings updated");
   };
@@ -93,8 +101,12 @@ export default function SettingsPage() {
         privateContent: userData.content_visibilityPrivate,
         privatePinned: userData.pinned_visibilityPrivate,
         privateLiked: userData.liked_visibilityPrivate,
+        likeDisable: userData.liked_notification_disabled,
+        commentDisable: userData.comments_notification_disabled,
+        followDisable: userData.followers_notification_disabled,
       });
       setDescription(userData.desc || "");
+      setCurrentProfilePicture(userData.profile_picture || "");
     };
     fetchUserData();
   }, [user]);
@@ -102,8 +114,8 @@ export default function SettingsPage() {
   return (
     <RootLayout>
       <div className="flex">
-        <main className="ml-64 flex-1 p-8">
-          <div className="max-w-2xl ml-10">
+        <main className="flex-1 p-8 justify-center flex">
+          <div className="max-w-2xl w-2xl">
             <h1 className="text-3xl font-bold text-foreground mb-8">
               Settings
             </h1>
@@ -159,6 +171,56 @@ export default function SettingsPage() {
                 </div>
               </CardContent>
             </Card>
+            {/* Notification Settings */}
+            <Card className="border-border mb-6">
+              <CardHeader>
+                <CardTitle>Push Notification Settings</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="font-medium text-foreground">
+                      Like Notifications
+                    </p>
+                    <p className="text-sm text-muted-foreground">
+                      Disabled notifications for likes
+                    </p>
+                  </div>
+                  <Switch
+                    checked={settings.likeDisable}
+                    onCheckedChange={() => handleToggle("likeDisable")}
+                  />
+                </div>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="font-medium text-foreground">
+                      Comment Notifications
+                    </p>
+                    <p className="text-sm text-muted-foreground">
+                      Disabled notifications for comments
+                    </p>
+                  </div>
+                  <Switch
+                    checked={settings.commentDisable}
+                    onCheckedChange={() => handleToggle("commentDisable")}
+                  />
+                </div>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="font-medium text-foreground">
+                      Following Notifications
+                    </p>
+                    <p className="text-sm text-muted-foreground">
+                      Disable following notifications
+                    </p>
+                  </div>
+                  <Switch
+                    checked={settings.followDisable}
+                    onCheckedChange={() => handleToggle("followDisable")}
+                  />
+                </div>
+              </CardContent>
+            </Card>
             {/* Profile Settings */}
             <Card className="border-border mb-6">
               <CardHeader>
@@ -170,27 +232,52 @@ export default function SettingsPage() {
               <CardContent className="space-y-6">
                 {/* Profile Image Upload */}
                 <div>
-                  <label className="block text-sm font-medium text-foreground mb-2">
-                    Profile Image
+                  <label className="block text-sm font-medium text-foreground mb-4">
+                    Profile Picture
                   </label>
-                  <div className="flex items-center gap-4">
+                  <div className="flex flex-col items-center gap-6">
+                    {/* Current or Preview Image */}
+                    <div className="relative group">
+                      <img
+                        src={profileImagePreview || currentProfilePicture}
+                        alt="Profile picture"
+                        className="w-32 h-32 rounded-full object-cover border-4 border-border cursor-pointer group-hover:opacity-80 transition-opacity"
+                      />
+                      <div className="absolute inset-0 flex items-center justify-center rounded-full bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <label className="cursor-pointer">
+                          <input
+                            type="file"
+                            accept="image/*"
+                            onChange={handleImageChange}
+                            className="hidden"
+                          />
+                          <span className="text-white text-sm font-medium">
+                            Click to change
+                          </span>
+                        </label>
+                      </div>
+                    </div>
+
+                    {/* Image Info */}
                     {profileImagePreview && (
-                      <div className="w-20 h-20 rounded-full overflow-hidden border border-dark-700">
-                        <img
-                          src={profileImagePreview}
-                          alt="Profile preview"
-                          className="w-full h-full object-cover"
-                        />
+                      <div className="text-center">
+                        <p className="text-sm text-muted-foreground mb-2">
+                          New image selected
+                        </p>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => {
+                            setProfileImage(null);
+                            setProfileImagePreview("");
+                          }}
+                        >
+                          Clear Selection
+                        </Button>
                       </div>
                     )}
-                    <input
-                      type="file"
-                      accept="image/*"
-                      onChange={handleImageChange}
-                      className="flex-1 px-3 py-2 border border-dark-700 rounded-md bg-dark-800 text-foreground text-sm cursor-pointer hover:border-burgundy-600"
-                    />
                   </div>
-                  <p className="text-xs text-muted-foreground mt-2">
+                  <p className="text-xs text-muted-foreground mt-4 text-center">
                     Supported formats: JPG, PNG, GIF (Max 5MB)
                   </p>
                 </div>

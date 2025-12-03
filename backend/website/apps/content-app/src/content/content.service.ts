@@ -27,6 +27,8 @@ import {
 } from '@app/common/constants/messageEvent';
 import { mapToContent } from './utils/mapToContent';
 import { PageContentRes } from '@app/contracts/shared-dto/content/res/page.content.dto';
+import { UpdateScoreDto } from '@app/contracts/shared-dto/content/req/UpdateScore.req.dto';
+import { GlobalPageDto } from '@app/contracts/shared-dto/content/res/page.global.all.dto';
 
 @Injectable()
 export class ContentService implements IContentService {
@@ -137,6 +139,7 @@ export class ContentService implements IContentService {
               reports: content.reports,
               title: content.title,
               views: content.views,
+              score: content.score,
               visibilityPrivate: content.visibilityPrivate,
               thumbnail: thumbnail,
             };
@@ -290,6 +293,7 @@ export class ContentService implements IContentService {
             views: content.views,
             visibilityPrivate: content.visibilityPrivate,
             thumbnail: thumbnail,
+            score: content.score,
           };
 
           return fullResponse;
@@ -425,6 +429,7 @@ export class ContentService implements IContentService {
                 views: content.views,
                 published_at: content.published_at,
                 visibilityPrivate: content.visibilityPrivate,
+                score: content.score,
                 thumbnail: thumbnail
                   ? {
                       file_id: thumbnail.file_id,
@@ -561,6 +566,7 @@ export class ContentService implements IContentService {
             views: content.views,
             published_at: content.published_at,
             visibilityPrivate: content.visibilityPrivate,
+            score: content.score,
             thumbnail: thumbnail
               ? {
                   file_id: thumbnail.file_id,
@@ -670,6 +676,7 @@ export class ContentService implements IContentService {
                 comments: content.comments,
                 pins: content.pins,
                 reports: content.reports,
+                score: content.score,
                 thumbnail: thumbnail
                   ? {
                       file_id: thumbnail.file_id,
@@ -787,6 +794,7 @@ export class ContentService implements IContentService {
                 comments: content.comments,
                 pins: content.pins,
                 reports: content.reports,
+                score: content.score,
                 thumbnail: thumbnail
                   ? {
                       file_id: thumbnail.file_id,
@@ -909,6 +917,7 @@ export class ContentService implements IContentService {
                 comments: content.comments,
                 pins: content.pins,
                 reports: content.reports,
+                score: content.score,
                 thumbnail: thumbnail
                   ? {
                       file_id: thumbnail.file_id,
@@ -1010,6 +1019,35 @@ export class ContentService implements IContentService {
       throw httpToRpc(
         new HttpException(
           'Failed to update view count',
+          HttpStatus.INTERNAL_SERVER_ERROR,
+        ),
+      );
+    }
+  }
+
+  async updateScore(dto: UpdateScoreDto): Promise<Ack> {
+    try {
+      await this.prisma.$transaction(
+        dto.scores.map((item) =>
+          this.prisma.content.update({
+            where: {
+              content_id_area_id: {
+                content_id: item.content_id,
+                area_id: item.area_id,
+              },
+            },
+            data: {
+              score: item.score,
+            },
+          }),
+        ),
+      );
+      return { Valid: true, Msg: 'Score updated' };
+    } catch (error) {
+      this.logger.error('Failed to update score', error);
+      throw httpToRpc(
+        new HttpException(
+          'Failed to update score',
           HttpStatus.INTERNAL_SERVER_ERROR,
         ),
       );
@@ -1248,8 +1286,13 @@ export class ContentService implements IContentService {
     }
   }
 
-  async getFollowingContent(userId: number): Promise<FullContentDto[]> {
+  async getFollowingContent(
+    userId: number,
+    areaId: number,
+    page: number,
+  ): Promise<PageContentRes> {
     this.logger.log(`User ${userId} is following`);
+    let lastCursor = 0;
     try {
       const result = await this.prisma
         .$transaction(async (tx) => {
@@ -1272,14 +1315,25 @@ export class ContentService implements IContentService {
           );
           const followingIds = followings.map((f) => f.creator_id);
           this.logger.log(followingIds[0]);
-
+          const cursor =
+            page > 0
+              ? {
+                  content_id_area_id: {
+                    area_id: areaId,
+                    content_id: page,
+                  },
+                }
+              : undefined;
           const contents = await tx.content
             .findMany({
               where: {
                 creator_id: { in: followingIds },
                 published_at: { lte: new Date() },
               },
-              orderBy: { created_at: 'desc' },
+              take: 10,
+              skip: cursor ? 1 : 0,
+              cursor: cursor,
+              orderBy: [{ created_at: 'desc' }, { score: 'desc' }],
             })
             .catch((error) => {
               this.logger.error(
@@ -1296,6 +1350,11 @@ export class ContentService implements IContentService {
 
           const allContents: FullContentDto[] = [];
 
+          if (contents.length === 0) {
+            return allContents;
+          }
+
+          lastCursor = contents[contents.length - 1].content_id;
           for (const content of contents) {
             try {
               const files = await tx.file.findMany({
@@ -1338,6 +1397,7 @@ export class ContentService implements IContentService {
                 comments: content.comments,
                 pins: content.pins,
                 reports: content.reports,
+                score: content.score,
                 thumbnail: thumbnail
                   ? {
                       file_id: thumbnail.file_id,
@@ -1378,7 +1438,10 @@ export class ContentService implements IContentService {
           );
         });
 
-      return result;
+      return {
+        contents: result,
+        currentPage: lastCursor,
+      };
     } catch (error) {
       if (error.status) {
         throw error;
@@ -1391,8 +1454,13 @@ export class ContentService implements IContentService {
       );
     }
   }
-  async getFriendContent(userId: number): Promise<FullContentDto[]> {
+  async getFriendContent(
+    userId: number,
+    areaId: number,
+    page: number,
+  ): Promise<PageContentRes> {
     try {
+      let lastCursor = 0;
       const result = await this.prisma
         .$transaction(async (tx) => {
           const friends = await firstValueFrom(
@@ -1410,14 +1478,25 @@ export class ContentService implements IContentService {
           });
 
           const friendIds = friends.map((f) => f.friend_id);
-
+          const cursor =
+            page > 0
+              ? {
+                  content_id_area_id: {
+                    area_id: areaId,
+                    content_id: page,
+                  },
+                }
+              : undefined;
           const contents = await tx.content
             .findMany({
               where: {
                 creator_id: { in: friendIds },
                 published_at: { lte: new Date() },
               },
-              orderBy: { created_at: 'desc' },
+              take: 10,
+              skip: cursor ? 1 : 0,
+              orderBy: [{ created_at: 'desc' }, { score: 'desc' }],
+              cursor: cursor,
             })
             .catch((error) => {
               this.logger.error(
@@ -1433,6 +1512,12 @@ export class ContentService implements IContentService {
             });
 
           const allContents: FullContentDto[] = [];
+
+          if (contents.length === 0) {
+            return allContents;
+          }
+
+          lastCursor = contents[contents.length - 1].content_id;
 
           for (const content of contents) {
             try {
@@ -1476,6 +1561,7 @@ export class ContentService implements IContentService {
                 published_at: content.published_at,
                 pins: content.pins,
                 reports: content.reports,
+                score: content.score,
                 thumbnail: thumbnail
                   ? {
                       file_id: thumbnail.file_id,
@@ -1516,7 +1602,10 @@ export class ContentService implements IContentService {
           );
         });
 
-      return result;
+      return {
+        contents: result,
+        currentPage: lastCursor,
+      };
     } catch (error) {
       if (error.status) {
         throw error;
@@ -1618,6 +1707,7 @@ export class ContentService implements IContentService {
                 comments: content.comments,
                 pins: content.pins,
                 reports: content.reports,
+                score: content.score,
                 thumbnail: thumbnail
                   ? {
                       file_id: thumbnail.file_id,
@@ -1751,6 +1841,7 @@ export class ContentService implements IContentService {
                 comments: content.comments,
                 pins: content.pins,
                 reports: content.reports,
+                score: content.score,
                 thumbnail: thumbnail
                   ? {
                       file_id: thumbnail.file_id,
@@ -1972,6 +2063,7 @@ export class ContentService implements IContentService {
                 comments: content.comments,
                 pins: content.pins,
                 reports: content.reports,
+                score: content.score,
                 thumbnail: thumbnail
                   ? {
                       file_id: thumbnail.file_id,
@@ -2059,8 +2151,8 @@ export class ContentService implements IContentService {
               },
               skip: cursor ? 1 : 0,
               take: limit,
-              orderBy: { content_id: 'asc' },
-              ...(cursor && { cursor }),
+              orderBy: { score: 'desc' },
+              cursor,
             })
             .catch((error) => {
               this.logger.error('Failed to fetch content list', error.message);
@@ -2119,6 +2211,7 @@ export class ContentService implements IContentService {
                 title: content.title,
                 views: content.views,
                 published_at: content.published_at,
+                score: content.score,
                 visibilityPrivate: content.visibilityPrivate,
                 thumbnail: thumbnail
                   ? {
@@ -2169,6 +2262,270 @@ export class ContentService implements IContentService {
         contents: result,
         currentPage: nextCursor,
       };
+    } catch (error) {
+      if (error.status) {
+        throw error;
+      }
+      this.logger.error('Failed to fetch content list', error.message);
+      throw httpToRpc(
+        new HttpException(
+          'Failed to fetch content list',
+          HttpStatus.INTERNAL_SERVER_ERROR,
+        ),
+      );
+    }
+  }
+
+  private async fetchAreaPage(
+    area_id: number,
+    cursor: number,
+    limit: number,
+  ): Promise<PageContentRes> {
+    try {
+      const contents = await this.prisma.content.findMany({
+        where: {
+          area_id,
+          published_at: { lte: new Date() },
+          visibilityPrivate: false,
+        },
+        take: limit,
+        skip: cursor ? 1 : 0,
+        cursor: cursor
+          ? { content_id_area_id: { area_id, content_id: cursor } }
+          : undefined,
+        orderBy: [{ score: 'desc' }, { content_id: 'desc' }],
+      });
+
+      if (contents.length === 0) {
+        return { contents: [], currentPage: 0, area_id: area_id };
+      }
+
+      const allContents: FullContentDto[] = [];
+
+      for (const content of contents) {
+        try {
+          const files = await this.prisma.file.findMany({
+            where: {
+              content_area_id: area_id,
+              content_id: content.content_id,
+            },
+          });
+
+          const thumbnail = files.find((file) => file.type === 'thumbnail');
+          if (!thumbnail && content.post_type !== 'post') {
+            this.logger.warn(`Content ${content.content_id} missing thumbnail`);
+            continue;
+          }
+
+          const mappedFiles: FileDto[] = files
+            .filter((file) => file.type !== 'thumbnail')
+            .map((file) => ({
+              file_id: file.file_id,
+              filepath: file.filepath,
+              content_id: file.content_id,
+              content_area_id: file.content_area_id,
+              type: file.type,
+            }));
+
+          const fullContent: FullContentDto = {
+            area_id: content.area_id,
+            content_id: content.content_id,
+            creator_id: content.creator_id,
+            description: content.description,
+            parent_id: content.parent_id ?? undefined,
+            post_type: content.post_type,
+            comments: content.comments,
+            likes: content.likes,
+            pins: content.pins,
+            reports: content.reports,
+            title: content.title,
+            views: content.views,
+            published_at: content.published_at,
+            score: content.score,
+            visibilityPrivate: content.visibilityPrivate,
+            thumbnail: thumbnail
+              ? {
+                  file_id: thumbnail.file_id,
+                  filepath: thumbnail.filepath,
+                  content_id: thumbnail.content_id,
+                  content_area_id: thumbnail.content_area_id,
+                  type: thumbnail.type,
+                }
+              : null,
+            contents: mappedFiles,
+          };
+
+          allContents.push(fullContent);
+        } catch (error) {
+          this.logger.error(
+            `Failed to fetch files for content ${content.content_id}`,
+            error.message,
+          );
+          throw httpToRpc(
+            new HttpException(
+              `Failed to fetch files for content ${content.content_id}`,
+              HttpStatus.INTERNAL_SERVER_ERROR,
+            ),
+          );
+        }
+      }
+      const nextCursor = allContents[allContents.length - 1].content_id;
+
+      return {
+        contents: allContents,
+        currentPage: nextCursor,
+        area_id: area_id,
+      };
+    } catch (error) {
+      this.logger.error('Failed to fetch content list', error.message);
+      throw httpToRpc(
+        new HttpException(
+          'Failed to fetch content list',
+          HttpStatus.INTERNAL_SERVER_ERROR,
+        ),
+      );
+    }
+  }
+
+  async findAllGlobalPage(dto: GlobalPageDto): Promise<PageContentRes> {
+    const { area_id, cursor, limit } = dto;
+
+    if (area_id <= 0 || area_id > 3)
+      throw httpToRpc(
+        new HttpException('Invalid area ID', HttpStatus.BAD_REQUEST),
+      );
+
+    const result = await this.fetchAreaPage(area_id, cursor, limit);
+
+    if (result.contents.length > 0) {
+      return result;
+    }
+
+    if (area_id < 3) {
+      return await this.findAllGlobalPage({
+        area_id: area_id + 1,
+        cursor: 0,
+        limit,
+      });
+    }
+
+    return {
+      contents: [],
+      currentPage: 0,
+      area_id: 3,
+    };
+  }
+
+  async findGlobal(): Promise<FullContentDto[]> {
+    try {
+      const result = await this.prisma
+        .$transaction(async (tx) => {
+          const contents = await tx.content
+            .findMany({
+              where: {
+                published_at: { lte: new Date() },
+                visibilityPrivate: false,
+              },
+              orderBy: { content_id: 'asc' },
+            })
+            .catch((error) => {
+              this.logger.error('Failed to fetch content list', error.message);
+              throw httpToRpc(
+                new HttpException(
+                  'Failed to fetch content list',
+                  HttpStatus.INTERNAL_SERVER_ERROR,
+                ),
+              );
+            });
+
+          const allContents: FullContentDto[] = [];
+
+          for (const content of contents) {
+            try {
+              const files = await tx.file.findMany({
+                where: {
+                  content_id: content.content_id,
+                },
+              });
+
+              const thumbnail = files.find((file) => file.type === 'thumbnail');
+              // For posts without thumbnail, still include them (text-only posts allowed)
+              if (!thumbnail && content.post_type !== 'post') {
+                this.logger.warn(
+                  `Content ${content.content_id} missing thumbnail`,
+                );
+                continue;
+              }
+
+              const mappedFiles: FileDto[] = files
+                .filter((file) => file.type !== 'thumbnail')
+                .map((file) => ({
+                  file_id: file.file_id,
+                  filepath: file.filepath,
+                  content_id: file.content_id,
+                  content_area_id: file.content_area_id,
+                  type: file.type,
+                }));
+
+              const fullContent: FullContentDto = {
+                area_id: content.area_id,
+                content_id: content.content_id,
+                creator_id: content.creator_id,
+                description: content.description,
+                parent_id: content.parent_id ?? undefined,
+                post_type: content.post_type,
+                comments: content.comments,
+                likes: content.likes,
+                pins: content.pins,
+                reports: content.reports,
+                title: content.title,
+                views: content.views,
+                published_at: content.published_at,
+                visibilityPrivate: content.visibilityPrivate,
+                score: content.score,
+                thumbnail: thumbnail
+                  ? {
+                      file_id: thumbnail.file_id,
+                      filepath: thumbnail.filepath,
+                      content_id: thumbnail.content_id,
+                      content_area_id: thumbnail.content_area_id,
+                      type: thumbnail.type,
+                    }
+                  : null,
+                contents: mappedFiles,
+              };
+
+              allContents.push(fullContent);
+            } catch (error) {
+              this.logger.error(
+                `Failed to fetch files for content ${content.content_id}`,
+                error.message,
+              );
+              throw httpToRpc(
+                new HttpException(
+                  `Failed to fetch files for content ${content.content_id}`,
+                  HttpStatus.INTERNAL_SERVER_ERROR,
+                ),
+              );
+            }
+          }
+
+          return allContents;
+        })
+        .catch((error) => {
+          if (error.status) {
+            throw error;
+          }
+          this.logger.error('Transaction failed', error.message);
+          throw httpToRpc(
+            new HttpException(
+              'Failed to fetch content list - transaction rolled back',
+              HttpStatus.INTERNAL_SERVER_ERROR,
+            ),
+          );
+        });
+
+      return result;
     } catch (error) {
       if (error.status) {
         throw error;

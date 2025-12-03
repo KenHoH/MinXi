@@ -16,4 +16,11 @@ export class UpdateRestriction extends PartialType(UserDto) {
   liked_visibility?: boolean | undefined;
   @ApiProperty()
   pinned_visibility?: boolean | undefined;
+
+  @ApiProperty()
+  liked_notification_disabled?: boolean | undefined;
+  @ApiProperty()
+  comments_notification_disabled?: boolean | undefined;
+  @ApiProperty()
+  followers_notification_disabled?: boolean | undefined;
 }

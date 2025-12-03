@@ -24,12 +24,12 @@ export const createMetadataSchema = {
     author_name: {
       type: 'string',
       description: 'Author name',
-      example: 'Hello Testing Metadata',
+      example: 'John Doe',
     },
     author_profile_url: {
       type: 'string',
       description: 'Author profile URL',
-      example: 'Hello Testing Metadata',
+      example: 'https://example.com/profile.jpg',
     },
   },
   required: ['room_id', 'author_id', 'message'],

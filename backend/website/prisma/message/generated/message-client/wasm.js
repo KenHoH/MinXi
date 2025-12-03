@@ -127,6 +127,8 @@ exports.Prisma.MessageScalarFieldEnum = {
   mediaUrl: 'mediaUrl',
   type: 'type',
   createdAt: 'createdAt',
+  authorName: 'authorName',
+  authorProfileUrl: 'authorProfileUrl',
   authorId: 'authorId'
 };
 
@@ -145,7 +147,9 @@ exports.Prisma.MessageOrderByRelevanceFieldEnum = {
   roomId: 'roomId',
   content: 'content',
   mediaUrl: 'mediaUrl',
-  type: 'type'
+  type: 'type',
+  authorName: 'authorName',
+  authorProfileUrl: 'authorProfileUrl'
 };
 
 

@@ -20,5 +20,6 @@ export type FullContentDto = {
     pins: number;
     reports: number;
     published_at: string;
+    score: number;
 };
 

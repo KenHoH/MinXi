@@ -1,3 +1,5 @@
+import { get } from 'http';
+
 export const USER_MSG = {
   create: 'user.createUser',
   findAll: 'user.findAllUser',
@@ -35,10 +37,13 @@ export const CONTENT_MSG = {
   updatePin: 'content.pin',
   updateComment: 'content.comment',
   updateReport: 'content.report',
+  updateScore: 'content.score',
   setPrivate: 'content.private',
   setPublic: 'content.public',
   findAll: 'content.findAll',
   findAllPage: 'content.findAllPage',
+  findAllGlobalPage: 'content.findAllGlobalPage',
+  findGlobal: 'content.findGlobal',
   findOne: 'content.findOne',
   getStats: 'content.getStats',
   getByUser: 'content.getByUser',
@@ -86,6 +91,11 @@ export const CONNECTION_MSG = {
   getFollowingByUser: 'connection.getFollowingByUser',
   deleteFriend: 'connection.deleteFriend',
   deleteFollow: 'connection.deleteFollow',
+
+  getFollowingCount: 'connection.getFollowingCount',
+  getFollowersInstanceByCreator: 'connection.getFollowersInstanceByCreator',
+  getFriendsInstanceByUser: 'connection.getFriendsInstanceByUser',
+  getFollowingInstanceByUser: 'connection.getFollowingInstanceByUser',
 };
 
 export const REPORT_MSG = {
@@ -108,8 +118,11 @@ export const SOCIAL_MSG = {
   getRoomInfo: 'social.getRoomInfo',
   searchRooms: 'social.searchRooms',
   getAllRoomID: 'social.getAllRoomID',
+  getAllGroupFromCommunities: 'social.getAllGroupFromCommunities',
 
   addUserToRoom: 'social.addUserToRoom',
+  addGroupToCommunities: 'social.addGroupToCommunities',
+  removeGroupFromCommunities: 'social.removeGroupFromCommunities',
   removeUserFromRoom: 'social.removeUserFromRoom',
   updateParticipantRole: 'social.updateParticipantRole',
   getTotalParticipants: 'social.getTotalParticipants',
@@ -125,6 +138,7 @@ export const SOCIAL_MSG = {
   getRoomGroupAll: 'social.getRoomGroupAll',
   getRoomCommunityJoinedByUserId: 'social.getRoomCommunityJoinedByUserId',
   getRoomCommunityAll: 'social.getRoomCommunityAll',
+  getInstanceParticipant: 'social.getInstanceParticipant',
 
   getMedia: 'social.getMedia',
   deleteMessageByRoom: 'social.deleteMessageByRoom',

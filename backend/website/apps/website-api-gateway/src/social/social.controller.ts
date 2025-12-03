@@ -41,6 +41,10 @@ import { createRoomSchema } from './schemas/create-room.schema';
 import { FileFieldsInterceptor } from '@nestjs/platform-express/multer/interceptors/file-fields.interceptor';
 import { MulterConfiguration } from '@app/common/config/multer.config';
 import { Ack } from '@app/contracts/shared-dto/ack.dto';
+import { UserDto } from '@app/contracts/shared-dto/user/user.dto';
+import { UserRoleDto } from '@app/contracts/shared-dto/social/response/userRole.dto';
+import { GroupFromCommunitiesDto } from '@app/contracts/shared-dto/social/request/GroupToCommunities';
+import { GroupCommunitiesResponseDto } from '@app/contracts/shared-dto/social/response/GroupCommunities.dto';
 
 @Controller('social')
 @UseGuards(JwtAuthGuard)
@@ -156,6 +160,20 @@ export class SocialController {
   getRoomInfo(@Param('roomId') roomId: string): Promise<RoomResponseDto> {
     return this.socialService.getRoomInfo({ roomId });
   }
+  @Public()
+  @Get('group/community/instance/:roomId')
+  getInstanceParticipant(
+    @Param('roomId') roomId: string,
+  ): Promise<UserRoleDto[]> {
+    return this.socialService.getInstanceParticipant(roomId);
+  }
+  @Public()
+  @Get('comunity/group/:roomId')
+  getGroupFromCommunities(
+    @Param('roomId') roomId: string,
+  ): Promise<RoomResponseDto[]> {
+    return this.socialService.getGroupFromCommunities(roomId);
+  }
 
   @Public()
   @Get('rooms/user/:userId')
@@ -179,6 +197,23 @@ export class SocialController {
     return this.socialService.removeUserFromRoom(dto);
   }
 
+  @Post('communities/add-group')
+  addGroupToCommunities(
+    @Body() dto: GroupFromCommunitiesDto,
+  ): Promise<GroupCommunitiesResponseDto> {
+    return this.socialService.addGroupToRoom(dto.communitiesId, dto.groupId);
+  }
+
+  @Delete('communities/remove-group')
+  removeGroupFromCommunities(
+    @Body() dto: GroupFromCommunitiesDto,
+  ): Promise<GroupCommunitiesResponseDto> {
+    return this.socialService.removeGroupFromCommunities(
+      dto.communitiesId,
+      dto.groupId,
+    );
+  }
+
   @Patch('room/update-role')
   updateParticipantRole(
     @Body() dto: UpdateParticipantRoleDto,
@@ -193,7 +228,11 @@ export class SocialController {
   ): Promise<ParticipantTotalResDTO> {
     return this.socialService.getTotalParticipant({ roomId });
   }
-
+  /**
+   * @param roomId
+   * @returns
+   * @deprecated Use getInstanceParticipant instead
+   */
   @Public()
   @Get('room/:roomId/participantDM')
   getParticipant(
@@ -204,7 +243,7 @@ export class SocialController {
 
   @Public()
   @Get('room/:roomId/media')
-  getMedia(@Param('roomId') roomId: string): Promise<MessageResponseDto> {
+  getMedia(@Param('roomId') roomId: string): Promise<MessageResponseDto[]> {
     return this.socialService.getMedia({ roomId });
   }
 

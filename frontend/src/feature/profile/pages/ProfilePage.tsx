@@ -11,6 +11,8 @@ import { useAuthContext } from "@/feature/auth/context/AuthContext";
 import type { BoardDto, FullContentDto, UserDto } from "@/service/api";
 import UserNotFoundPage from "@/feature/not-found/UserNotFoundPage";
 import { useToast } from "@/shared/context/ToastContext";
+import useConnectionService from "@/shared/hooks/useConnectionService";
+import { ConnectionModal } from "@/feature/profile/components/ConnectionModal";
 
 export default function ProfilePage() {
   const { user } = useAuthContext();
@@ -21,10 +23,20 @@ export default function ProfilePage() {
     useContentService();
   const { getBoardByUser, getContentByBoardId } = useBoardService();
   const { showToast } = useToast();
+  const {
+    getFollowingCount,
+    getFollowersInstanceByCreator,
+    getFollowingInstanceByUser,
+    getFriendsInstanceByUser,
+  } = useConnectionService();
   const navigate = useNavigate();
 
   const [loggedUserData, setLoggedUserData] = useState<UserDto | null>(null);
   const [creatorUserData, setCreatorUserData] = useState<UserDto | null>(null);
+  const [followerData, setFollowerData] = useState<UserDto[]>([]);
+  const [followingData, setFollowingData] = useState<UserDto[]>([]);
+  const [friendData, setFriendData] = useState<UserDto[]>([]);
+  const [totalFollowing, setTotalFollowing] = useState(0);
   const [owned, setOwned] = useState(false);
 
   const [contentItems, setContentItems] = useState<FullContentDto[] | []>([]);
@@ -32,6 +44,7 @@ export default function ProfilePage() {
   const [likedItems, setLikedItems] = useState<FullContentDto[] | []>([]);
   const [boards, setBoards] = useState<BoardDto[] | []>([]);
   const [boardItems, setBoardItems] = useState<FullContentDto[] | []>([]);
+  const [showConnectionModal, setShowConnectionModal] = useState(false);
 
   const goToSettings = () => {
     if (!loggedUserData) return;
@@ -56,6 +69,19 @@ export default function ProfilePage() {
       if (!user) return;
       const dto = await findUserById(user.user_id);
       if (dto) setLoggedUserData(dto);
+
+      const followingCount = await getFollowingCount(user.user_id);
+      if (followingCount) setTotalFollowing(followingCount);
+
+      const followersInstance = await getFollowersInstanceByCreator(
+        user.user_id
+      );
+      if (followersInstance) setFollowerData(followersInstance);
+
+      const followingInstance = await getFollowingInstanceByUser(user.user_id);
+      if (followingInstance) setFollowingData(followingInstance);
+      const friendsInstance = await getFriendsInstanceByUser(user.user_id);
+      if (friendsInstance) setFriendData(friendsInstance);
     };
     loadLoggedUser();
   }, [user]);
@@ -247,12 +273,22 @@ export default function ProfilePage() {
                         </p>
                         <p className="text-muted-foreground">Reports</p>
                       </div>
-                      <div>
+                      <button
+                        onClick={() => setShowConnectionModal(true)}
+                        className="cursor-pointer hover:opacity-80 transition-opacity"
+                      >
                         <p className="text-lg font-bold">
                           {creatorUserData.follower}
                         </p>
                         <p className="text-muted-foreground">Followers</p>
-                      </div>
+                      </button>
+                      <button
+                        onClick={() => setShowConnectionModal(true)}
+                        className="cursor-pointer hover:opacity-80 transition-opacity"
+                      >
+                        <p className="text-lg font-bold">{totalFollowing}</p>
+                        <p className="text-muted-foreground">Followings</p>
+                      </button>
                       <div>
                         <p className="text-lg font-bold">
                           {creatorUserData.total_like}
@@ -295,6 +331,15 @@ export default function ProfilePage() {
           </div>
         </main>
       </div>
+
+      {/* Connection Modal */}
+      <ConnectionModal
+        isOpen={showConnectionModal}
+        onClose={() => setShowConnectionModal(false)}
+        followerData={followerData}
+        followingData={followingData}
+        friendData={friendData}
+      />
     </RootLayout>
   );
 }

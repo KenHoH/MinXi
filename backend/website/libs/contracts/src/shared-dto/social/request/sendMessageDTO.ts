@@ -1,3 +1,5 @@
+// used in social service 
+
 import { ApiProperty } from '@nestjs/swagger';
 import { IsEnum, IsNumber, IsOptional, IsString } from 'class-validator';
 export class SendMessageDto {
@@ -24,4 +26,12 @@ export class SendMessageDto {
   @IsOptional()
   @IsString()
   mediaUrl?: string;
+
+  @ApiProperty({ description: 'Author name', example: 'John Doe' })
+  authorName?: string;
+  @ApiProperty({
+    description: 'Author profile URL',
+    example: 'https://example.com/profile.jpg',
+  })
+  authorProfileUrl?: string;
 }

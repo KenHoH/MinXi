@@ -12,6 +12,9 @@ export default function useUserService() {
   const findUserById = (userId: number) =>
     call(() => UserService.userControllerFindOne(userId));
 
+  const findUserByIdFull = (userId: number) =>
+    call(() => UserService.userControllerFindOneById(userId));
+
   const findByUsername = (username: string, areaId: number) =>
     call(() =>
       UserService.userControllerFindByName({
@@ -28,6 +31,9 @@ export default function useUserService() {
       })
     );
 
+  const findAll = (areaId: number) =>
+    call(() => UserService.userControllerFindAll(areaId));
+
   const updateLikeUser = (id: number, req: deltaDto) =>
     call(() => UserService.userControllerUpdateLike(id, req));
 
@@ -41,13 +47,19 @@ export default function useUserService() {
     id: number,
     content_visibility: boolean,
     liked_visibility: boolean,
-    pinned_visibility: boolean
+    pinned_visibility: boolean,
+    likeDisable: boolean,
+    commentDisable: boolean,
+    followDisable: boolean
   ) =>
     call(() =>
       UserService.userControllerUpdateRestriction(id, {
         content_visibility,
         liked_visibility,
         pinned_visibility,
+        liked_notification_disabled: likeDisable,
+        comments_notification_disabled: commentDisable,
+        followers_notification_disabled: followDisable,
       })
     );
 
@@ -57,9 +69,14 @@ export default function useUserService() {
     description: string;
   }) => call(() => UserService.userControllerUpdate(formData));
 
+  const removeUser = (id: number) =>
+    call(() => UserService.userControllerRemove(id));
+
   return {
     create,
     findUserById,
+    findUserByIdFull,
+    findAll,
     findByUsername,
     findOneByUsername,
     updateLikeUser,
@@ -67,6 +84,7 @@ export default function useUserService() {
     updateReportUser,
     updatePrivacySettings,
     update,
+    removeUser,
     result: data,
     loading,
     error,

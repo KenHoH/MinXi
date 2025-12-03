@@ -61,6 +61,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         });
       setUser(userData);
       showToast("Login successful!");
+      navigate("/feed");
       return userData;
     } catch (error: any) {
       setUser(null);
@@ -70,7 +71,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       return null;
     } finally {
       hideLoading();
-      navigate("/feed");
     }
   };
 

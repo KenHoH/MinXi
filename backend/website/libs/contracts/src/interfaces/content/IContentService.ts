@@ -6,6 +6,7 @@ import { FileDto } from '@app/contracts/shared-dto/content/res/file.dto';
 import { FullContentDto } from '@app/contracts/shared-dto/content/res/full.content.dto';
 import { deltaDto } from '@app/contracts/shared-dto/user/delta.dto';
 import { PageContentRes } from '@app/contracts/shared-dto/content/res/page.content.dto';
+import { UpdateScoreDto } from '@app/contracts/shared-dto/content/req/UpdateScore.req.dto';
 
 export interface IContentService {
   create(dto: CreatePostDto): Promise<FullContentDto>;
@@ -23,6 +24,8 @@ export interface IContentService {
     area_id: number,
     dto: deltaDto,
   ): Promise<Ack>;
+
+  updateScore(dto: UpdateScoreDto): Promise<Ack>;
   setPrivate(content_id: number, area_id: number): Promise<Ack>;
   setPublic(content_id: number, area_id: number): Promise<Ack>;
   findAll(area_id: number): Promise<FullContentDto[]>;
@@ -42,8 +45,16 @@ export interface IContentService {
 
   getAncestorPost(contentId: number, areaId: number): Promise<FullContentDto[]>;
   getFullPost(contentId: number, areaId: number): Promise<FullContentDto>;
-  getFollowingContent(userId: number): Promise<FullContentDto[]>;
-  getFriendContent(userId: number): Promise<FullContentDto[]>;
+  getFollowingContent(
+    userId: number,
+    areaId: number,
+    page: number,
+  ): Promise<PageContentRes>;
+  getFriendContent(
+    userId: number,
+    areaId: number,
+    page: number,
+  ): Promise<PageContentRes>;
   getLikedByUser(userId: number): Promise<FullContentDto[]>;
   getPinnedByUser(userId: number): Promise<FullContentDto[]>;
   getChildPost(parent_id: number): Promise<FullContentDto[]>;

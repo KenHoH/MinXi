@@ -12,6 +12,7 @@ import {
   Logger,
   UseGuards,
   BadRequestException,
+  Query,
 } from '@nestjs/common';
 import { ContentService } from './content.service';
 import {
@@ -36,7 +37,11 @@ import { Public } from '@app/common/decorators/public.decorator';
 import { FileDtoReq } from '@app/contracts/shared-dto/content/req/FIleDto.req';
 import { FileDto } from '@app/contracts/shared-dto/content/res/file.dto';
 import { PageContentRes } from '@app/contracts/shared-dto/content/res/page.content.dto';
+import { UpdateScoreDto } from '@app/contracts/shared-dto/content/req/UpdateScore.req.dto';
 
+@Controller('content')
+@UseGuards(JwtAuthGuard)
+@UseInterceptors(LogInterceptor)
 @Controller('content')
 @UseGuards(JwtAuthGuard)
 @UseInterceptors(LogInterceptor)
@@ -147,6 +152,11 @@ export class ContentController {
     return await this.contentService.create(createDto);
   }
 
+  @Post('updateScore')
+  updateScore(@Body() dto: UpdateScoreDto): Promise<Ack> {
+    return this.contentService.updateScore(dto);
+  }
+
   @Public()
   @Get('user/:creator_id')
   getByUser(
@@ -192,21 +202,40 @@ export class ContentController {
   }
 
   @Public()
-  @Get('user/:userId/following')
-  getFollowingContent(
-    @Param('userId', ParseIntPipe) userId: number,
-  ): Promise<FullContentDto[]> {
-    this.logger.log(typeof userId);
-    return this.contentService.getFollowingContent(userId);
+  @Get('global')
+  findGlobalAll(): Promise<FullContentDto[]> {
+    return this.contentService.findGlobal();
   }
 
   @Public()
-  @Get('user/:userId/friends')
+  @Get('global/page')
+  findAllGlobalPage(
+    @Query('area_id', new ParseIntPipe({ optional: true })) area_id: number = 1,
+    @Query('cursor', new ParseIntPipe({ optional: true })) cursor: number = 0,
+    @Query('limit', new ParseIntPipe({ optional: true })) limit: number = 10,
+  ): Promise<PageContentRes> {
+    return this.contentService.findAllGlobalPage(area_id, cursor, limit);
+  }
+  @Public()
+  @Get('user/:userId/:areaId/:page/following')
+  getFollowingContent(
+    @Param('userId', ParseIntPipe) userId: number,
+    @Param('areaId', ParseIntPipe) areaId: number,
+    @Param('page', ParseIntPipe) page: number,
+  ): Promise<PageContentRes> {
+    this.logger.log(typeof userId);
+    return this.contentService.getFollowingContent(userId, areaId, page);
+  }
+
+  @Public()
+  @Get('user/:userId/:areaId/:page/friends')
   getFriendContent(
     @Param('userId', ParseIntPipe) userId: number,
-  ): Promise<FullContentDto[]> {
+    @Param('areaId', ParseIntPipe) areaId: number,
+    @Param('page', ParseIntPipe) page: number,
+  ): Promise<PageContentRes> {
     this.logger.log(typeof userId);
-    return this.contentService.getFriendContent(userId);
+    return this.contentService.getFriendContent(userId, areaId, page);
   }
 
   @Public()
@@ -315,22 +344,6 @@ export class ContentController {
     @Body() dto: deltaDto,
   ): Promise<Ack> {
     return this.contentService.updateReport(content_id, area_id, dto);
-  }
-
-  @Patch(':content_id/:area_id/private')
-  setPrivate(
-    @Param('content_id', ParseIntPipe) content_id: number,
-    @Param('area_id', ParseIntPipe) area_id: number,
-  ): Promise<Ack> {
-    return this.contentService.setPrivate(content_id, area_id);
-  }
-
-  @Patch(':content_id/:area_id/public')
-  setPublic(
-    @Param('content_id', ParseIntPipe) content_id: number,
-    @Param('area_id', ParseIntPipe) area_id: number,
-  ): Promise<Ack> {
-    return this.contentService.setPublic(content_id, area_id);
   }
 
   @Delete(':content_id/:area_id')

@@ -71,7 +71,7 @@ export class SseService implements ISSEService {
       data: message,
     });
 
-    await this.forwardMessage(dto);
+    await this.forwardMessage(dto); // send to message database
     return {
       Valid: true,
       Msg: 'Successfully sent message',
@@ -106,6 +106,8 @@ export class SseService implements ISSEService {
       mediaUrl: dto.mediaUrl,
       roomId: dto.roomId,
       type: dto.type || 'TEXT',
+      authorName: dto.authorName,
+      authorProfileUrl: dto.authorProfileUrl,
     };
 
     const logger = new Logger(this.constructor.name);

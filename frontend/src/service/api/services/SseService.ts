@@ -48,6 +48,14 @@ export class SseService {
              * Message description
              */
             message: string;
+            /**
+             * Author name
+             */
+            author_name?: string;
+            /**
+             * Author profile URL
+             */
+            author_profile_url?: string;
         },
     ): CancelablePromise<Ack> {
         return __request(OpenAPI, {

@@ -3,6 +3,7 @@ import type { Ack } from "../../service/api/models/Ack";
 import type { FollowerDto } from "../../service/api/models/FollowerDto";
 import type { FollowingDto } from "../../service/api/models/FollowingDto";
 import type { FriendDto } from "../../service/api/models/FriendDto";
+import type { UserDto } from "../../service/api/models/UserDto";
 import useApiCall from "./useApiCall";
 
 export default function useConnectionService() {
@@ -58,6 +59,28 @@ export default function useConnectionService() {
       ConnectionService.connectionControllerGetFriendsbyUser(userId)
     );
 
+  const getFollowingCount = (userId: number) =>
+    call<number>(() =>
+      ConnectionService.connectionControllerGetFollowingCount(userId)
+    );
+
+  const getFollowersInstanceByCreator = (creatorId: number) =>
+    call<UserDto[]>(() =>
+      ConnectionService.connectionControllerGetFollowersInstanceByCreator(
+        creatorId
+      )
+    );
+
+  const getFriendsInstanceByUser = (userId: number) =>
+    call<UserDto[]>(() =>
+      ConnectionService.connectionControllerGetFriendsInstanceByUser(userId)
+    );
+
+  const getFollowingInstanceByUser = (userId: number) =>
+    call<UserDto[]>(() =>
+      ConnectionService.connectionControllerGetFollowingInstanceByUser(userId)
+    );
+
   return {
     createFollow,
     createFriend,
@@ -69,6 +92,10 @@ export default function useConnectionService() {
     getFollowersByCreator,
     getFollowingByUser,
     getFriendsByUser,
+    getFollowingCount,
+    getFollowersInstanceByCreator,
+    getFriendsInstanceByUser,
+    getFollowingInstanceByUser,
     result: data,
     loading,
     error,

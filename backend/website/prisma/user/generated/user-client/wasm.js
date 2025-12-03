@@ -132,6 +132,9 @@ exports.Prisma.UserScalarFieldEnum = {
   content_visibilityPrivate: 'content_visibilityPrivate',
   pinned_visibilityPrivate: 'pinned_visibilityPrivate',
   liked_visibilityPrivate: 'liked_visibilityPrivate',
+  liked_notification_disabled: 'liked_notification_disabled',
+  comments_notification_disabled: 'comments_notification_disabled',
+  followers_notification_disabled: 'followers_notification_disabled',
   area_id: 'area_id'
 };
 

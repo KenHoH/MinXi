@@ -888,6 +888,8 @@ export namespace Prisma {
     mediaUrl: string | null
     type: string | null
     createdAt: Date | null
+    authorName: string | null
+    authorProfileUrl: string | null
     authorId: number | null
   }
 
@@ -898,6 +900,8 @@ export namespace Prisma {
     mediaUrl: string | null
     type: string | null
     createdAt: Date | null
+    authorName: string | null
+    authorProfileUrl: string | null
     authorId: number | null
   }
 
@@ -908,6 +912,8 @@ export namespace Prisma {
     mediaUrl: number
     type: number
     createdAt: number
+    authorName: number
+    authorProfileUrl: number
     authorId: number
     _all: number
   }
@@ -928,6 +934,8 @@ export namespace Prisma {
     mediaUrl?: true
     type?: true
     createdAt?: true
+    authorName?: true
+    authorProfileUrl?: true
     authorId?: true
   }
 
@@ -938,6 +946,8 @@ export namespace Prisma {
     mediaUrl?: true
     type?: true
     createdAt?: true
+    authorName?: true
+    authorProfileUrl?: true
     authorId?: true
   }
 
@@ -948,6 +958,8 @@ export namespace Prisma {
     mediaUrl?: true
     type?: true
     createdAt?: true
+    authorName?: true
+    authorProfileUrl?: true
     authorId?: true
     _all?: true
   }
@@ -1045,6 +1057,8 @@ export namespace Prisma {
     mediaUrl: string | null
     type: string
     createdAt: Date
+    authorName: string | null
+    authorProfileUrl: string | null
     authorId: number
     _count: MessageCountAggregateOutputType | null
     _avg: MessageAvgAggregateOutputType | null
@@ -1074,6 +1088,8 @@ export namespace Prisma {
     mediaUrl?: boolean
     type?: boolean
     createdAt?: boolean
+    authorName?: boolean
+    authorProfileUrl?: boolean
     authorId?: boolean
   }, ExtArgs["result"]["message"]>
 
@@ -1086,10 +1102,12 @@ export namespace Prisma {
     mediaUrl?: boolean
     type?: boolean
     createdAt?: boolean
+    authorName?: boolean
+    authorProfileUrl?: boolean
     authorId?: boolean
   }
 
-  export type MessageOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "roomId" | "content" | "mediaUrl" | "type" | "createdAt" | "authorId", ExtArgs["result"]["message"]>
+  export type MessageOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "roomId" | "content" | "mediaUrl" | "type" | "createdAt" | "authorName" | "authorProfileUrl" | "authorId", ExtArgs["result"]["message"]>
 
   export type $MessagePayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     name: "Message"
@@ -1101,6 +1119,8 @@ export namespace Prisma {
       mediaUrl: string | null
       type: string
       createdAt: Date
+      authorName: string | null
+      authorProfileUrl: string | null
       authorId: number
     }, ExtArgs["result"]["message"]>
     composites: {}
@@ -1477,6 +1497,8 @@ export namespace Prisma {
     readonly mediaUrl: FieldRef<"Message", 'String'>
     readonly type: FieldRef<"Message", 'String'>
     readonly createdAt: FieldRef<"Message", 'DateTime'>
+    readonly authorName: FieldRef<"Message", 'String'>
+    readonly authorProfileUrl: FieldRef<"Message", 'String'>
     readonly authorId: FieldRef<"Message", 'Int'>
   }
     
@@ -1820,6 +1842,8 @@ export namespace Prisma {
     mediaUrl: 'mediaUrl',
     type: 'type',
     createdAt: 'createdAt',
+    authorName: 'authorName',
+    authorProfileUrl: 'authorProfileUrl',
     authorId: 'authorId'
   };
 
@@ -1847,7 +1871,9 @@ export namespace Prisma {
     roomId: 'roomId',
     content: 'content',
     mediaUrl: 'mediaUrl',
-    type: 'type'
+    type: 'type',
+    authorName: 'authorName',
+    authorProfileUrl: 'authorProfileUrl'
   };
 
   export type MessageOrderByRelevanceFieldEnum = (typeof MessageOrderByRelevanceFieldEnum)[keyof typeof MessageOrderByRelevanceFieldEnum]
@@ -1899,6 +1925,8 @@ export namespace Prisma {
     mediaUrl?: StringNullableFilter<"Message"> | string | null
     type?: StringFilter<"Message"> | string
     createdAt?: DateTimeFilter<"Message"> | Date | string
+    authorName?: StringNullableFilter<"Message"> | string | null
+    authorProfileUrl?: StringNullableFilter<"Message"> | string | null
     authorId?: IntFilter<"Message"> | number
   }
 
@@ -1909,6 +1937,8 @@ export namespace Prisma {
     mediaUrl?: SortOrderInput | SortOrder
     type?: SortOrder
     createdAt?: SortOrder
+    authorName?: SortOrderInput | SortOrder
+    authorProfileUrl?: SortOrderInput | SortOrder
     authorId?: SortOrder
     _relevance?: MessageOrderByRelevanceInput
   }
@@ -1923,6 +1953,8 @@ export namespace Prisma {
     mediaUrl?: StringNullableFilter<"Message"> | string | null
     type?: StringFilter<"Message"> | string
     createdAt?: DateTimeFilter<"Message"> | Date | string
+    authorName?: StringNullableFilter<"Message"> | string | null
+    authorProfileUrl?: StringNullableFilter<"Message"> | string | null
     authorId?: IntFilter<"Message"> | number
   }, "id">
 
@@ -1933,6 +1965,8 @@ export namespace Prisma {
     mediaUrl?: SortOrderInput | SortOrder
     type?: SortOrder
     createdAt?: SortOrder
+    authorName?: SortOrderInput | SortOrder
+    authorProfileUrl?: SortOrderInput | SortOrder
     authorId?: SortOrder
     _count?: MessageCountOrderByAggregateInput
     _avg?: MessageAvgOrderByAggregateInput
@@ -1951,6 +1985,8 @@ export namespace Prisma {
     mediaUrl?: StringNullableWithAggregatesFilter<"Message"> | string | null
     type?: StringWithAggregatesFilter<"Message"> | string
     createdAt?: DateTimeWithAggregatesFilter<"Message"> | Date | string
+    authorName?: StringNullableWithAggregatesFilter<"Message"> | string | null
+    authorProfileUrl?: StringNullableWithAggregatesFilter<"Message"> | string | null
     authorId?: IntWithAggregatesFilter<"Message"> | number
   }
 
@@ -1961,6 +1997,8 @@ export namespace Prisma {
     mediaUrl?: string | null
     type?: string
     createdAt?: Date | string
+    authorName?: string | null
+    authorProfileUrl?: string | null
     authorId: number
   }
 
@@ -1971,6 +2009,8 @@ export namespace Prisma {
     mediaUrl?: string | null
     type?: string
     createdAt?: Date | string
+    authorName?: string | null
+    authorProfileUrl?: string | null
     authorId: number
   }
 
@@ -1981,6 +2021,8 @@ export namespace Prisma {
     mediaUrl?: NullableStringFieldUpdateOperationsInput | string | null
     type?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    authorName?: NullableStringFieldUpdateOperationsInput | string | null
+    authorProfileUrl?: NullableStringFieldUpdateOperationsInput | string | null
     authorId?: IntFieldUpdateOperationsInput | number
   }
 
@@ -1991,6 +2033,8 @@ export namespace Prisma {
     mediaUrl?: NullableStringFieldUpdateOperationsInput | string | null
     type?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    authorName?: NullableStringFieldUpdateOperationsInput | string | null
+    authorProfileUrl?: NullableStringFieldUpdateOperationsInput | string | null
     authorId?: IntFieldUpdateOperationsInput | number
   }
 
@@ -2001,6 +2045,8 @@ export namespace Prisma {
     mediaUrl?: string | null
     type?: string
     createdAt?: Date | string
+    authorName?: string | null
+    authorProfileUrl?: string | null
     authorId: number
   }
 
@@ -2011,6 +2057,8 @@ export namespace Prisma {
     mediaUrl?: NullableStringFieldUpdateOperationsInput | string | null
     type?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    authorName?: NullableStringFieldUpdateOperationsInput | string | null
+    authorProfileUrl?: NullableStringFieldUpdateOperationsInput | string | null
     authorId?: IntFieldUpdateOperationsInput | number
   }
 
@@ -2021,6 +2069,8 @@ export namespace Prisma {
     mediaUrl?: NullableStringFieldUpdateOperationsInput | string | null
     type?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    authorName?: NullableStringFieldUpdateOperationsInput | string | null
+    authorProfileUrl?: NullableStringFieldUpdateOperationsInput | string | null
     authorId?: IntFieldUpdateOperationsInput | number
   }
 
@@ -2094,6 +2144,8 @@ export namespace Prisma {
     mediaUrl?: SortOrder
     type?: SortOrder
     createdAt?: SortOrder
+    authorName?: SortOrder
+    authorProfileUrl?: SortOrder
     authorId?: SortOrder
   }
 
@@ -2108,6 +2160,8 @@ export namespace Prisma {
     mediaUrl?: SortOrder
     type?: SortOrder
     createdAt?: SortOrder
+    authorName?: SortOrder
+    authorProfileUrl?: SortOrder
     authorId?: SortOrder
   }
 
@@ -2118,6 +2172,8 @@ export namespace Prisma {
     mediaUrl?: SortOrder
     type?: SortOrder
     createdAt?: SortOrder
+    authorName?: SortOrder
+    authorProfileUrl?: SortOrder
     authorId?: SortOrder
   }
 

@@ -18,6 +18,7 @@ import {
   FriendDto,
   FollowingDto,
 } from '@app/contracts/shared-dto/connection/response';
+import { UserDto } from '@app/contracts/shared-dto/user/user.dto';
 
 @Controller()
 @UsePipes(new ValidationPipe())
@@ -102,5 +103,31 @@ export class ConnectionController {
       payload.creator_id,
       payload.user_id,
     );
+  }
+
+  @MessagePattern(CONNECTION_MSG.getFollowingCount)
+  async getFollowingCount(@Payload() user_id: number): Promise<number> {
+    return this.connectionService.getFollowingCount(user_id);
+  }
+
+  @MessagePattern(CONNECTION_MSG.getFollowersInstanceByCreator)
+  async getFollowersInstanceByCreator(
+    @Payload() creator_id: number,
+  ): Promise<UserDto[]> {
+    return this.connectionService.getFollowersInstanceByCreator(creator_id);
+  }
+
+  @MessagePattern(CONNECTION_MSG.getFriendsInstanceByUser)
+  async getFriendsInstanceByUser(
+    @Payload() user_id: number,
+  ): Promise<UserDto[]> {
+    return this.connectionService.getFriendsInstanceByUser(user_id);
+  }
+
+  @MessagePattern(CONNECTION_MSG.getFollowingInstanceByUser)
+  async getFollowingInstanceByUser(
+    @Payload() user_id: number,
+  ): Promise<UserDto[]> {
+    return this.connectionService.getFollowingInstanceByUser(user_id);
   }
 }

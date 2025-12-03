@@ -33,15 +33,36 @@ export class SocialController {
   async getAllRoomID(@Payload() dto: GetAllRoomsDto) {
     return this.socialService.getAllRoomID(dto);
   }
+  @MessagePattern(SOCIAL_MSG.getAllGroupFromCommunities)
+  async getAllGroupFromCommunities(@Payload() roomId: string) {
+    return this.socialService.getGroupFromCommunities(roomId);
+  }
 
   @MessagePattern(SOCIAL_MSG.addUserToRoom)
   async addUserToRoom(@Payload() dto: AddUserToRoomDto) {
     return this.socialService.addUserToRoom(dto);
   }
+  @MessagePattern(SOCIAL_MSG.addGroupToCommunities)
+  async addGroupToCommunities(
+    @Payload() payload: { communitiesId: string; groupId: string },
+  ) {
+    const { communitiesId, groupId } = payload;
+    return this.socialService.addGroupToRoom(communitiesId, groupId);
+  }
 
   @MessagePattern(SOCIAL_MSG.removeUserFromRoom)
   async removeUserFromRoom(@Payload() dto: RemoveUserFromRoomDto) {
     return this.socialService.removeUserFromRoom(dto);
+  }
+  @MessagePattern(SOCIAL_MSG.removeGroupFromCommunities)
+  async removeGroupFromCommunities(
+    @Payload() payload: { communitiesId: string; groupId: string },
+  ) {
+    const { communitiesId, groupId } = payload;
+    return this.socialService.removeGroupFromCommunities(
+      communitiesId,
+      groupId,
+    );
   }
 
   @MessagePattern(SOCIAL_MSG.updateParticipantRole)
@@ -57,6 +78,10 @@ export class SocialController {
   @MessagePattern(SOCIAL_MSG.getParticipantDM)
   async getParticipant(@Payload() roomId: string) {
     return this.socialService.getParticipant(roomId);
+  }
+  @MessagePattern(SOCIAL_MSG.getInstanceParticipant)
+  async getInstanceParticipant(@Payload() roomId: string) {
+    return this.socialService.getInstanceParticipant(roomId);
   }
 
   @MessagePattern(SOCIAL_MSG.sendMessage)

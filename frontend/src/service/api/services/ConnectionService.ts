@@ -6,6 +6,7 @@ import type { Ack } from '../models/Ack';
 import type { FollowerDto } from '../models/FollowerDto';
 import type { FollowingDto } from '../models/FollowingDto';
 import type { FriendDto } from '../models/FriendDto';
+import type { UserDto } from '../models/UserDto';
 import type { CancelablePromise } from '../core/CancelablePromise';
 import { OpenAPI } from '../core/OpenAPI';
 import { request as __request } from '../core/request';
@@ -148,6 +149,70 @@ export class ConnectionService {
         return __request(OpenAPI, {
             method: 'GET',
             url: '/connection/following/{user_id}',
+            path: {
+                'user_id': userId,
+            },
+        });
+    }
+    /**
+     * @param userId
+     * @returns number
+     * @throws ApiError
+     */
+    public static connectionControllerGetFollowingCount(
+        userId: number,
+    ): CancelablePromise<number> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/connection/following-count/{user_id}',
+            path: {
+                'user_id': userId,
+            },
+        });
+    }
+    /**
+     * @param creatorId
+     * @returns UserDto
+     * @throws ApiError
+     */
+    public static connectionControllerGetFollowersInstanceByCreator(
+        creatorId: number,
+    ): CancelablePromise<Array<UserDto>> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/connection/followers-instance/{creator_id}',
+            path: {
+                'creator_id': creatorId,
+            },
+        });
+    }
+    /**
+     * @param userId
+     * @returns UserDto
+     * @throws ApiError
+     */
+    public static connectionControllerGetFriendsInstanceByUser(
+        userId: number,
+    ): CancelablePromise<Array<UserDto>> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/connection/friends-instance/{user_id}',
+            path: {
+                'user_id': userId,
+            },
+        });
+    }
+    /**
+     * @param userId
+     * @returns UserDto
+     * @throws ApiError
+     */
+    public static connectionControllerGetFollowingInstanceByUser(
+        userId: number,
+    ): CancelablePromise<Array<UserDto>> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/connection/following-instance/{user_id}',
             path: {
                 'user_id': userId,
             },

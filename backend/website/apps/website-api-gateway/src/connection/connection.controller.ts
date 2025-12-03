@@ -20,6 +20,7 @@ import {
   FollowingDto,
 } from '@app/contracts/shared-dto/connection/response';
 import { Public } from '@app/common/decorators/public.decorator';
+import { UserDto } from '@app/contracts/shared-dto/user/user.dto';
 
 @Controller('connection')
 @UseGuards(JwtAuthGuard)
@@ -95,6 +96,37 @@ export class ConnectionController {
     @Param('user_id', ParseIntPipe) user_id: number,
   ): Promise<FollowingDto[]> {
     return this.connectionService.getFollowingByUser(user_id);
+  }
+  @Public()
+  @Get('following-count/:user_id')
+  async getFollowingCount(
+    @Param('user_id', ParseIntPipe) user_id: number,
+  ): Promise<number> {
+    return this.connectionService.getFollowingCount(user_id);
+  }
+
+  @Public()
+  @Get('followers-instance/:creator_id')
+  async getFollowersInstanceByCreator(
+    @Param('creator_id', ParseIntPipe) creator_id: number,
+  ): Promise<UserDto[]> {
+    return this.connectionService.getFollowersInstanceByCreator(creator_id);
+  }
+
+  @Public()
+  @Get('friends-instance/:user_id')
+  async getFriendsInstanceByUser(
+    @Param('user_id', ParseIntPipe) user_id: number,
+  ): Promise<UserDto[]> {
+    return this.connectionService.getFriendsInstanceByUser(user_id);
+  }
+
+  @Public()
+  @Get('following-instance/:user_id')
+  async getFollowingInstanceByUser(
+    @Param('user_id', ParseIntPipe) user_id: number,
+  ): Promise<UserDto[]> {
+    return this.connectionService.getFollowingInstanceByUser(user_id);
   }
 
   @Delete('friend/:creator_id/:user_id')

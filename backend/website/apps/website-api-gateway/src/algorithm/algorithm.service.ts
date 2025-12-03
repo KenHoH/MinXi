@@ -1,6 +1,7 @@
 import { ALGO_MSG } from '@app/common/constants/messageEvent';
 import { ALGO_SERVICES } from '@app/common/constants/services';
 import { FullContentDto } from '@app/contracts/shared-dto/content/res/full.content.dto';
+import { PageContentRes } from '@app/contracts/shared-dto/content/res/page.content.dto';
 import { Inject, Injectable } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
 import { firstValueFrom } from 'rxjs';
@@ -11,11 +12,11 @@ export class AlgorithmService {
     @Inject(ALGO_SERVICES.CLIENT) private readonly algoClient: ClientProxy,
   ) {}
 
-  async findFYP(userId: number, areaId: number): Promise<FullContentDto[]> {
+  async findFYP(areaId: number, page: number): Promise<PageContentRes> {
     return await firstValueFrom(
-      this.algoClient.send<FullContentDto[]>(ALGO_MSG.findFYP, {
-        userId,
+      this.algoClient.send<PageContentRes>(ALGO_MSG.findFYP, {
         areaId,
+        page,
       }),
     );
   }

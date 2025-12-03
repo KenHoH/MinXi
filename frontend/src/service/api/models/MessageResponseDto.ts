@@ -31,5 +31,13 @@ export type MessageResponseDto = {
      * Author user ID
      */
     authorId: number;
+    /**
+     * Author name
+     */
+    authorName: string;
+    /**
+     * Author profile URL
+     */
+    authorProfileUrl: string;
 };
 

@@ -15,16 +15,27 @@ import { ParticipantResponseDto } from '@app/contracts/shared-dto/social/respons
 import { RoomResponseDto } from '@app/contracts/shared-dto/social/response/RoomResDTO';
 import { RoomResDmDto } from '@app/contracts/shared-dto/social/response/RoomResDmDTO';
 import { ParticipantTotalResDTO } from '@app/contracts/shared-dto/social/response/totalParticipantResDTO';
+import { UserDto } from '@app/contracts/shared-dto/user/user.dto';
+import { UserRoleDto } from '@app/contracts/shared-dto/social/response/userRole.dto';
+import { GroupCommunitiesResponseDto } from '@app/contracts/shared-dto/social/response/GroupCommunities.dto';
 
 export interface ISocialService {
   createRoom(dto: CreateRoomDto): Promise<RoomResponseDto>;
   getRoomInfo(dto: GetRoomInfoDto): Promise<RoomResponseDto>;
   getAllRoomID(dto: GetAllRoomsDto): Promise<RoomResponseDto[]>;
-
+  getGroupFromCommunities(communitiesId: string): Promise<RoomResponseDto[]>;
   addUserToRoom(dto: AddUserToRoomDto): Promise<ParticipantResponseDto>;
+  addGroupToRoom(
+    communitiesId: string,
+    groupId: string,
+  ): Promise<GroupCommunitiesResponseDto>;
   removeUserFromRoom(
     dto: RemoveUserFromRoomDto,
   ): Promise<ParticipantResponseDto>;
+  removeGroupFromCommunities(
+    communitiesId: string,
+    groupId: string,
+  ): Promise<GroupCommunitiesResponseDto>;
   updateParticipantRole(
     dto: UpdateParticipantRoleDto,
   ): Promise<ParticipantResponseDto>;
@@ -33,13 +44,15 @@ export interface ISocialService {
   ): Promise<ParticipantTotalResDTO>;
   getParticipant(roomId: string): Promise<ParticipantResponseDto>;
 
-  getMedia(dto: GetMediaDto): Promise<MessageResponseDto>;
+  getMedia(dto: GetMediaDto): Promise<MessageResponseDto[]>;
   sendMessage(dto: SendMessageDto): Promise<MessageResponseDto>;
   getMessage(dto: GetMessagesDto): Promise<MessageResponseDto[]>;
   delete(id: string): Promise<Ack>;
   deleteMessageByRoom(roomId: string): Promise<Ack>;
   deleteRoom(roomId: string): Promise<Ack>;
   findDM(dto: FindDmDto): Promise<RoomResponseDto>;
+
+  getInstanceParticipant(roomId: string): Promise<UserRoleDto[]>;
 
   getRoomDMByUserId(userId: number): Promise<RoomResDmDto[]>;
   getRoomGroupJoinedByUserId(userId: number): Promise<RoomResponseDto[]>;

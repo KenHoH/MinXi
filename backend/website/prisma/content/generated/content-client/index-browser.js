@@ -135,7 +135,8 @@ exports.Prisma.ContentScalarFieldEnum = {
   reports: 'reports',
   area_id: 'area_id',
   created_at: 'created_at',
-  published_at: 'published_at'
+  published_at: 'published_at',
+  score: 'score'
 };
 
 exports.Prisma.FileScalarFieldEnum = {

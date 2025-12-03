@@ -46,3 +46,14 @@ model Participant {
   @@index([userId])
   @@index([roomId])
 }
+
+model CommunityGroup {
+  id          String   @id @default(uuid())
+  communityId String
+  groupId     String
+  createdAt   DateTime @default(now())
+
+  @@unique([communityId, groupId])
+  @@index([communityId])
+  @@index([groupId])
+}

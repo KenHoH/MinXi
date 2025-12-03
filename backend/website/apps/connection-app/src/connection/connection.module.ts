@@ -4,7 +4,7 @@ import { ConnectionController } from './connection.controller';
 import { CommonModule } from '@app/common';
 import { UserDatabaseConnection } from '@app/common/database/user-database-connection/user-database-connection';
 import { ClientsModule, Transport } from '@nestjs/microservices';
-import { SOCIAL_SERVICES } from '@app/common/constants/services';
+import { SOCIAL_SERVICES, USER_SERVICES } from '@app/common/constants/services';
 
 @Module({
   imports: [
@@ -15,6 +15,13 @@ import { SOCIAL_SERVICES } from '@app/common/constants/services';
         transport: Transport.TCP,
         options: {
           port: SOCIAL_SERVICES.PORT,
+        },
+      },
+      {
+        name: USER_SERVICES.CLIENT,
+        transport: Transport.TCP,
+        options: {
+          port: USER_SERVICES.PORT,
         },
       },
     ]),

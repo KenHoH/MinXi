@@ -6,5 +6,8 @@ export type UpdateRestriction = {
     content_visibility?: boolean;
     liked_visibility?: boolean;
     pinned_visibility?: boolean;
+    liked_notification_disabled?: boolean;
+    comments_notification_disabled?: boolean;
+    followers_notification_disabled?: boolean;
 };
 

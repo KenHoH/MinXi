@@ -1,5 +1,6 @@
+// req for sse service
+
 import { ApiProperty } from '@nestjs/swagger';
-import { MessageResponseDto } from '../../social/response/messageResDTO';
 import { IsString } from 'class-validator';
 
 export class BroadcastMsgReq {

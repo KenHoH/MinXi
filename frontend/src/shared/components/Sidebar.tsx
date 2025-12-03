@@ -13,6 +13,7 @@ import { useToast } from "../context/ToastContext";
 import { useEffect, useState } from "react";
 import useUserService from "../hooks/useUserService";
 import type { UserDto } from "@/service/api";
+import { useSSE } from "../hooks/useSSE";
 
 export function Sidebar() {
   const { user, logout } = useAuthContext();
@@ -30,6 +31,10 @@ export function Sidebar() {
       icon: User,
     },
   ];
+
+  const { notifications } = useSSE(
+    loggedUserData?.user_id ? String(loggedUserData.user_id) : ""
+  );
 
   const handleLogout = async () => {
     const refreshToken = document.cookie
@@ -56,12 +61,19 @@ export function Sidebar() {
     fetchUserData();
   }, [user]);
 
-  const userInitials =
-    user?.username
-      ?.split(" ")
-      .map((n: string) => n[0])
-      .join("")
-      .toUpperCase() || "U";
+  useEffect(() => {
+    if (notifications.length === 0) return;
+    notifications.forEach((notification) => {
+      showToast(notification.title);
+    });
+    Notification.requestPermission().then((permission) => {
+      if (permission === "granted") {
+        new Notification(notifications[notifications.length - 1].title, {
+          body: notifications[notifications.length - 1].description,
+        });
+      }
+    });
+  }, [notifications]);
 
   return (
     <aside className="fixed left-0 top-0 h-screen w-20 bg-dark-900 border-r border-dark-700 flex flex-col">

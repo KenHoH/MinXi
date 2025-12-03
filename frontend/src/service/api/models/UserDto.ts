@@ -14,5 +14,8 @@ export type UserDto = {
     pinned_visibilityPrivate: boolean;
     liked_visibilityPrivate: boolean;
     area_id: number;
+    liked_notification_disabled: boolean;
+    comments_notification_disabled: boolean;
+    followers_notification_disabled: boolean;
 };
 
