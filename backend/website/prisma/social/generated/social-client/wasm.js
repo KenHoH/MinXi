@@ -137,6 +137,13 @@ exports.Prisma.ParticipantScalarFieldEnum = {
   joinedAt: 'joinedAt'
 };
 
+exports.Prisma.CommunityGroupScalarFieldEnum = {
+  id: 'id',
+  communityId: 'communityId',
+  groupId: 'groupId',
+  createdAt: 'createdAt'
+};
+
 exports.Prisma.SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -157,6 +164,12 @@ exports.Prisma.ParticipantOrderByRelevanceFieldEnum = {
   id: 'id',
   roomId: 'roomId'
 };
+
+exports.Prisma.CommunityGroupOrderByRelevanceFieldEnum = {
+  id: 'id',
+  communityId: 'communityId',
+  groupId: 'groupId'
+};
 exports.RoomType = exports.$Enums.RoomType = {
   DIRECT: 'DIRECT',
   GROUP: 'GROUP',
@@ -171,7 +184,8 @@ exports.ParticipantRole = exports.$Enums.ParticipantRole = {
 
 exports.Prisma.ModelName = {
   Room: 'Room',
-  Participant: 'Participant'
+  Participant: 'Participant',
+  CommunityGroup: 'CommunityGroup'
 };
 
 /**

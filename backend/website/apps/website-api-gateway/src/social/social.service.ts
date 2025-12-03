@@ -23,6 +23,7 @@ import { ClientProxy } from '@nestjs/microservices';
 import { firstValueFrom } from 'rxjs';
 import { UserDto } from '@app/contracts/shared-dto/user/user.dto';
 import { UserRoleDto } from '@app/contracts/shared-dto/social/response/userRole.dto';
+import { GroupCommunitiesResponseDto } from '@app/contracts/shared-dto/social/response/GroupCommunities.dto';
 @Injectable()
 export class SocialService implements ISocialService {
   constructor(
@@ -46,9 +47,38 @@ export class SocialService implements ISocialService {
   async getAllRoomID(dto: GetAllRoomsDto): Promise<RoomResponseDto[]> {
     return firstValueFrom(this.client.send(SOCIAL_MSG.getAllRoomID, dto));
   }
+  async getGroupFromCommunities(roomId: string): Promise<RoomResponseDto[]> {
+    return firstValueFrom(
+      this.client.send(SOCIAL_MSG.getAllGroupFromCommunities, roomId),
+    );
+  }
 
   async addUserToRoom(dto: AddUserToRoomDto): Promise<ParticipantResponseDto> {
     return firstValueFrom(this.client.send(SOCIAL_MSG.addUserToRoom, dto));
+  }
+
+  async addGroupToRoom(
+    communitiesId: string,
+    groupId: string,
+  ): Promise<GroupCommunitiesResponseDto> {
+    return firstValueFrom(
+      this.client.send(SOCIAL_MSG.addGroupToCommunities, {
+        communitiesId,
+        groupId,
+      }),
+    );
+  }
+
+  async removeGroupFromCommunities(
+    communitiesId: string,
+    groupId: string,
+  ): Promise<GroupCommunitiesResponseDto> {
+    return firstValueFrom(
+      this.client.send(SOCIAL_MSG.removeGroupFromCommunities, {
+        communitiesId,
+        groupId,
+      }),
+    );
   }
 
   async removeUserFromRoom(

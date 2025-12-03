@@ -118,8 +118,11 @@ export const SOCIAL_MSG = {
   getRoomInfo: 'social.getRoomInfo',
   searchRooms: 'social.searchRooms',
   getAllRoomID: 'social.getAllRoomID',
+  getAllGroupFromCommunities: 'social.getAllGroupFromCommunities',
 
   addUserToRoom: 'social.addUserToRoom',
+  addGroupToCommunities: 'social.addGroupToCommunities',
+  removeGroupFromCommunities: 'social.removeGroupFromCommunities',
   removeUserFromRoom: 'social.removeUserFromRoom',
   updateParticipantRole: 'social.updateParticipantRole',
   getTotalParticipants: 'social.getTotalParticipants',

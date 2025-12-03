@@ -43,6 +43,8 @@ import { MulterConfiguration } from '@app/common/config/multer.config';
 import { Ack } from '@app/contracts/shared-dto/ack.dto';
 import { UserDto } from '@app/contracts/shared-dto/user/user.dto';
 import { UserRoleDto } from '@app/contracts/shared-dto/social/response/userRole.dto';
+import { GroupFromCommunitiesDto } from '@app/contracts/shared-dto/social/request/GroupToCommunities';
+import { GroupCommunitiesResponseDto } from '@app/contracts/shared-dto/social/response/GroupCommunities.dto';
 
 @Controller('social')
 @UseGuards(JwtAuthGuard)
@@ -165,6 +167,13 @@ export class SocialController {
   ): Promise<UserRoleDto[]> {
     return this.socialService.getInstanceParticipant(roomId);
   }
+  @Public()
+  @Get('comunity/group/:roomId')
+  getGroupFromCommunities(
+    @Param('roomId') roomId: string,
+  ): Promise<RoomResponseDto[]> {
+    return this.socialService.getGroupFromCommunities(roomId);
+  }
 
   @Public()
   @Get('rooms/user/:userId')
@@ -186,6 +195,23 @@ export class SocialController {
     @Body() dto: RemoveUserFromRoomDto,
   ): Promise<ParticipantResponseDto> {
     return this.socialService.removeUserFromRoom(dto);
+  }
+
+  @Post('communities/add-group')
+  addGroupToCommunities(
+    @Body() dto: GroupFromCommunitiesDto,
+  ): Promise<GroupCommunitiesResponseDto> {
+    return this.socialService.addGroupToRoom(dto.communitiesId, dto.groupId);
+  }
+
+  @Delete('communities/remove-group')
+  removeGroupFromCommunities(
+    @Body() dto: GroupFromCommunitiesDto,
+  ): Promise<GroupCommunitiesResponseDto> {
+    return this.socialService.removeGroupFromCommunities(
+      dto.communitiesId,
+      dto.groupId,
+    );
   }
 
   @Patch('room/update-role')

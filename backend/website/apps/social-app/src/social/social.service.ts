@@ -39,6 +39,7 @@ import { firstValueFrom } from 'rxjs';
 import { USER_MSG } from '@app/common/constants/messageEvent';
 import { UserDto } from '@app/contracts/shared-dto/user/user.dto';
 import { UserRoleDto } from '@app/contracts/shared-dto/social/response/userRole.dto';
+import { GroupCommunitiesResponseDto } from '@app/contracts/shared-dto/social/response/GroupCommunities.dto';
 
 @Injectable()
 export class SocialService implements ISocialService {
@@ -158,6 +159,32 @@ export class SocialService implements ISocialService {
     }
   }
 
+  async getGroupFromCommunities(
+    communitiesId: string,
+  ): Promise<RoomResponseDto[]> {
+    try {
+      const entries = await this.socialClient.communityGroup.findMany({
+        where: { communityId: communitiesId },
+        select: { groupId: true },
+      });
+
+      const ids = entries.map((p) => p.groupId);
+
+      const rooms = await this.socialClient.room.findMany({
+        where: { id: { in: ids } },
+      });
+
+      return rooms.map(mapRoomToResponse);
+    } catch (error: any) {
+      throw httpToRpc(
+        new HttpException(
+          'Failed to fetch room list',
+          HttpStatus.INTERNAL_SERVER_ERROR,
+        ),
+      );
+    }
+  }
+
   async addUserToRoom(dto: AddUserToRoomDto): Promise<ParticipantResponseDto> {
     try {
       const participant = await this.socialClient.participant.create({
@@ -175,6 +202,136 @@ export class SocialService implements ISocialService {
           'Failed to add user to room',
           HttpStatus.INTERNAL_SERVER_ERROR,
         ),
+      );
+    }
+  }
+  async addGroupToRoom(
+    communitiesId: string,
+    groupId: string,
+  ): Promise<GroupCommunitiesResponseDto> {
+    try {
+      const result = await this.socialClient.$transaction(async (tx) => {
+        const group = await tx.room.findUnique({
+          where: { id: groupId },
+        });
+
+        if (!group) {
+          throw new HttpException('Group not found', HttpStatus.NOT_FOUND);
+        }
+
+        const groupMember = await tx.participant.findMany({
+          where: { roomId: groupId },
+        });
+
+        const existingCommunityMembers = await tx.participant.findMany({
+          where: {
+            roomId: communitiesId,
+            userId: { in: groupMember.map((m) => m.userId) },
+          },
+          select: { userId: true },
+        });
+
+        const existingUserIds = new Set(
+          existingCommunityMembers.map((m) => m.userId),
+        );
+
+        const newUsers = groupMember.filter(
+          (m) => !existingUserIds.has(m.userId),
+        );
+
+        let participantCount = 0;
+
+        if (newUsers.length > 0) {
+          await tx.participant.createMany({
+            data: newUsers.map((member) => ({
+              userId: member.userId,
+              roomId: communitiesId,
+              role: ParticipantRole.MEMBER,
+            })),
+          });
+          participantCount = newUsers.length;
+        }
+
+        const communityGroup = await tx.communityGroup.create({
+          data: {
+            communityId: communitiesId,
+            groupId: groupId,
+          },
+        });
+
+        return {
+          id: communityGroup.id,
+          communityId: communityGroup.communityId,
+          groupId: communityGroup.groupId,
+          createdAt: communityGroup.createdAt,
+          participantCount: participantCount,
+          name: group.name ?? '',
+          pictureUrl: group.pictureUrl,
+        };
+      });
+
+      return result;
+    } catch (error: any) {
+      throw httpToRpc(
+        error instanceof HttpException
+          ? error
+          : new HttpException(
+              error?.message || 'Failed to add Group to community',
+              error?.status || HttpStatus.INTERNAL_SERVER_ERROR,
+            ),
+      );
+    }
+  }
+
+  async removeGroupFromCommunities(
+    communitiesId: string,
+    groupId: string,
+  ): Promise<GroupCommunitiesResponseDto> {
+    try {
+      const result = await this.socialClient.$transaction(async (tx) => {
+        const group = await tx.room.findUnique({
+          where: { id: groupId },
+        });
+
+        if (!group) {
+          throw new HttpException('Group not found', HttpStatus.NOT_FOUND);
+        }
+
+        const communityGroup = await tx.communityGroup.findFirst({
+          where: { communityId: communitiesId, groupId: groupId },
+        });
+
+        if (!communityGroup) {
+          throw new HttpException(
+            'Group does not belong to the community',
+            HttpStatus.NOT_FOUND,
+          );
+        }
+
+        await tx.communityGroup.delete({
+          where: { id: communityGroup.id },
+        });
+
+        return {
+          id: communityGroup.id,
+          communityId: communityGroup.communityId,
+          groupId: communityGroup.groupId,
+          createdAt: communityGroup.createdAt,
+          participantCount: 0,
+          name: group.name ?? '',
+          pictureUrl: group.pictureUrl,
+        };
+      });
+
+      return result;
+    } catch (error: any) {
+      throw httpToRpc(
+        error instanceof HttpException
+          ? error
+          : new HttpException(
+              error?.message || 'Failed to remove group from community',
+              error?.status || HttpStatus.INTERNAL_SERVER_ERROR,
+            ),
       );
     }
   }
@@ -629,7 +786,11 @@ export class SocialService implements ISocialService {
     }
   }
 
-  // ============ COMMUNITY SECTION ============
+  /**
+   *
+   * @param userId
+   * @returns CommunitiesEntities
+   */
   async getRoomCommunityJoinedByUserId(
     userId: number,
   ): Promise<RoomResponseDto[]> {

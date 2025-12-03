@@ -17,16 +17,25 @@ import { RoomResDmDto } from '@app/contracts/shared-dto/social/response/RoomResD
 import { ParticipantTotalResDTO } from '@app/contracts/shared-dto/social/response/totalParticipantResDTO';
 import { UserDto } from '@app/contracts/shared-dto/user/user.dto';
 import { UserRoleDto } from '@app/contracts/shared-dto/social/response/userRole.dto';
+import { GroupCommunitiesResponseDto } from '@app/contracts/shared-dto/social/response/GroupCommunities.dto';
 
 export interface ISocialService {
   createRoom(dto: CreateRoomDto): Promise<RoomResponseDto>;
   getRoomInfo(dto: GetRoomInfoDto): Promise<RoomResponseDto>;
   getAllRoomID(dto: GetAllRoomsDto): Promise<RoomResponseDto[]>;
-
+  getGroupFromCommunities(communitiesId: string): Promise<RoomResponseDto[]>;
   addUserToRoom(dto: AddUserToRoomDto): Promise<ParticipantResponseDto>;
+  addGroupToRoom(
+    communitiesId: string,
+    groupId: string,
+  ): Promise<GroupCommunitiesResponseDto>;
   removeUserFromRoom(
     dto: RemoveUserFromRoomDto,
   ): Promise<ParticipantResponseDto>;
+  removeGroupFromCommunities(
+    communitiesId: string,
+    groupId: string,
+  ): Promise<GroupCommunitiesResponseDto>;
   updateParticipantRole(
     dto: UpdateParticipantRoleDto,
   ): Promise<ParticipantResponseDto>;
