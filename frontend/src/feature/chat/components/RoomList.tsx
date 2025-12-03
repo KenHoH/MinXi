@@ -1,4 +1,9 @@
+"use client";
+
+import { useState } from "react";
+import { Plus } from "lucide-react";
 import type { RoomResponseDto } from "@/service/api";
+import CreateRoomModal from "./CreateRoomModal";
 
 interface RoomListProps {
   rooms: RoomResponseDto[];
@@ -6,6 +11,7 @@ interface RoomListProps {
   chatType: "DIRECT" | "GROUP" | "COMMUNITY";
   onRoomSelect: (roomId: string) => void;
   onChatTypeChange: (type: "DIRECT" | "GROUP" | "COMMUNITY") => void;
+  onRoomCreated?: () => void;
 }
 
 export default function RoomList({
@@ -14,29 +20,41 @@ export default function RoomList({
   chatType,
   onRoomSelect,
   onChatTypeChange,
+  onRoomCreated,
 }: RoomListProps) {
+  const [showCreateModal, setShowCreateModal] = useState(false);
+
   return (
-    <div className="w-80 border-r border-border flex flex-col bg-card shrink-0">
+    <div className="w-90 border-r border-border flex flex-col bg-card shrink-0">
       {/* Header */}
       <div className="p-4 border-b border-border">
         <h2 className="text-2xl font-bold text-foreground">Messages</h2>
       </div>
 
-      {/* Type Filter */}
-      <div className="flex gap-2 p-4 border-b border-border">
-        {(["DIRECT", "GROUP", "COMMUNITY"] as const).map((type) => (
-          <button
-            key={type}
-            onClick={() => onChatTypeChange(type)}
-            className={`px-3 py-1 rounded-full text-sm font-medium transition-colors ${
-              chatType === type
-                ? "bg-primary text-primary-foreground"
-                : "bg-muted text-foreground hover:bg-muted/80"
-            }`}
-          >
-            {type}
-          </button>
-        ))}
+      {/* Type Filter with Create Button */}
+      <div className="flex gap-2 p-4 border-b border-border items-center justify-between">
+        <div className="flex gap-2 flex-1">
+          {(["DIRECT", "GROUP", "COMMUNITY"] as const).map((type) => (
+            <button
+              key={type}
+              onClick={() => onChatTypeChange(type)}
+              className={`px-3 py-1 rounded-full text-sm font-medium transition-colors ${
+                chatType === type
+                  ? "bg-primary text-primary-foreground"
+                  : "bg-muted text-foreground hover:bg-muted/80"
+              }`}
+            >
+              {type}
+            </button>
+          ))}
+        </div>
+        <button
+          onClick={() => setShowCreateModal(true)}
+          className={`px-3 py-1 rounded-full text-sm font-medium transition-colors flex items-center gap-1 ${"bg-muted text-foreground hover:bg-muted/80"}`}
+          title="Create new group or community"
+        >
+          <Plus className="w-4 h-4" />
+        </button>
       </div>
 
       {/* Room List */}
@@ -68,6 +86,16 @@ export default function RoomList({
           </button>
         ))}
       </div>
+
+      {/* Create Room Modal */}
+      <CreateRoomModal
+        isOpen={showCreateModal}
+        onClose={() => setShowCreateModal(false)}
+        onRoomCreated={() => {
+          setShowCreateModal(false);
+          onRoomCreated?.();
+        }}
+      />
     </div>
   );
 }

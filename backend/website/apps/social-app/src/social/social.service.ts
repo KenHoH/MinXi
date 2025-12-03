@@ -38,6 +38,7 @@ import { ClientProxy } from '@nestjs/microservices';
 import { firstValueFrom } from 'rxjs';
 import { USER_MSG } from '@app/common/constants/messageEvent';
 import { UserDto } from '@app/contracts/shared-dto/user/user.dto';
+import { UserRoleDto } from '@app/contracts/shared-dto/social/response/userRole.dto';
 
 @Injectable()
 export class SocialService implements ISocialService {
@@ -284,17 +285,14 @@ export class SocialService implements ISocialService {
     }
   }
 
-  async getInstanceParticipant(roomId: string): Promise<UserDto[]> {
+  async getInstanceParticipant(roomId: string): Promise<UserRoleDto[]> {
     try {
       const roomType = await this.socialClient.room.findFirst({
         where: { id: roomId },
       });
 
       if (!roomType || roomType.type === RoomType.DIRECT) {
-        throw new HttpException(
-          'Group or Community not found',
-          HttpStatus.NOT_FOUND,
-        );
+        return [];
       }
 
       const participants = await this.socialClient.participant.findMany({
@@ -313,7 +311,20 @@ export class SocialService implements ISocialService {
         users.push(user);
       }
 
-      return users;
+      const result: UserRoleDto[] = participants.map((participant) => {
+        const user = users.find((u) => u.user_id === participant.userId);
+        if (!user) {
+          throw new HttpException(
+            'Failed to get instance participants',
+            HttpStatus.BAD_REQUEST,
+          );
+        }
+        return {
+          ...user,
+          role: participant.role,
+        };
+      });
+      return result;
     } catch (error) {
       throw new HttpException(
         'Failed to get instance participants',

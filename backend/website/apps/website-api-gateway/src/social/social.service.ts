@@ -22,6 +22,7 @@ import { Inject, Injectable, Logger } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
 import { firstValueFrom } from 'rxjs';
 import { UserDto } from '@app/contracts/shared-dto/user/user.dto';
+import { UserRoleDto } from '@app/contracts/shared-dto/social/response/userRole.dto';
 @Injectable()
 export class SocialService implements ISocialService {
   constructor(
@@ -118,7 +119,7 @@ export class SocialService implements ISocialService {
     return firstValueFrom(this.client.send(SOCIAL_MSG.getRoomGroupAll, {}));
   }
 
-  async getInstanceParticipant(roomId: string): Promise<UserDto[]> {
+  async getInstanceParticipant(roomId: string): Promise<UserRoleDto[]> {
     return firstValueFrom(
       this.client.send(SOCIAL_MSG.getInstanceParticipant, roomId),
     );

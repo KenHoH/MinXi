@@ -11,6 +11,7 @@ import type { ParticipantTotalResDTO } from "../../service/api/models/Participan
 import type { MessageResponseDto } from "../../service/api/models/MessageResponseDto";
 import type { Ack } from "../../service/api/models/Ack";
 import useApiCall from "./useApiCall";
+import type { UserRoleDto } from "@/service/api";
 
 interface CreateRoomDtoFormData {
   thumbnail?: Blob;
@@ -60,9 +61,13 @@ export default function useSocialService() {
     call<ParticipantResponseDto>(() =>
       SocialService.socialControllerGetParticipant(roomId)
     );
+  const getParticipantInstance = (roomId: string) =>
+    call<UserRoleDto[]>(() =>
+      SocialService.socialControllerGetInstanceParticipant(roomId)
+    );
 
   const getMedia = (roomId: string) =>
-    call<MessageResponseDto>(() =>
+    call<MessageResponseDto[]>(() =>
       SocialService.socialControllerGetMedia(roomId)
     );
 
@@ -122,6 +127,7 @@ export default function useSocialService() {
     updateParticipantRole,
     getTotalParticipants,
     getParticipant,
+    getParticipantInstance,
     getMedia,
     sendMessage,
     getMessage,

@@ -42,6 +42,7 @@ import { FileFieldsInterceptor } from '@nestjs/platform-express/multer/intercept
 import { MulterConfiguration } from '@app/common/config/multer.config';
 import { Ack } from '@app/contracts/shared-dto/ack.dto';
 import { UserDto } from '@app/contracts/shared-dto/user/user.dto';
+import { UserRoleDto } from '@app/contracts/shared-dto/social/response/userRole.dto';
 
 @Controller('social')
 @UseGuards(JwtAuthGuard)
@@ -159,7 +160,9 @@ export class SocialController {
   }
   @Public()
   @Get('group/community/instance/:roomId')
-  getInstanceParticipant(@Param('roomId') roomId: string): Promise<UserDto[]> {
+  getInstanceParticipant(
+    @Param('roomId') roomId: string,
+  ): Promise<UserRoleDto[]> {
     return this.socialService.getInstanceParticipant(roomId);
   }
 

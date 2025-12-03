@@ -8,7 +8,7 @@ import { dummyMessages } from "../constants";
 import useSocialService from "@/shared/hooks/useSocialService";
 import type { RoomResponseDto } from "@/service/api/models/RoomResponseDto";
 import { useAuthContext } from "@/feature/auth/context/AuthContext";
-import type { UserDto } from "@/service/api";
+import type { UserDto, UserRoleDto } from "@/service/api";
 import useUserService from "@/shared/hooks/useUserService";
 import { useSSE } from "@/shared/hooks/useSSE";
 import useSseService from "@/shared/hooks/useSseService";
@@ -24,6 +24,8 @@ export default function ChatPage() {
   const [groups, setGroups] = useState<RoomResponseDto[]>([]);
   const [communities, setCommunities] = useState<RoomResponseDto[]>([]);
   const [loggedUser, setLoggedUser] = useState<UserDto | null>(null);
+  const [members, setMembers] = useState<UserRoleDto[]>([]);
+  const [currentUserRole, setCurrentUserRole] = useState("MEMBER");
   const { messages: sseMessages, isConnected } = useSSE(selectedRoom || "");
 
   // Hooks
@@ -35,6 +37,8 @@ export default function ChatPage() {
     getRoomCommunityJoinedByUserId,
     getRoomCommunityAll,
     getMessage,
+    getParticipantInstance,
+    getMedia,
   } = useSocialService();
   const { sendBroadcast } = useSseService();
 
@@ -200,6 +204,19 @@ export default function ChatPage() {
     }
   };
 
+  useEffect(() => {
+    const fetchParticipantsAndRole = async () => {
+      if (currentRoom && user) {
+        const members = await getParticipantInstance(currentRoom.id);
+        if (!members) return;
+        setMembers(members);
+        const currentRole = members.find((p) => p.user_id === user.user_id);
+        if (currentRole) setCurrentUserRole(currentRole.role);
+      }
+    };
+    fetchParticipantsAndRole();
+  }, [currentRoom, user]);
+
   return (
     <RootLayout>
       <div className="flex h-screen">
@@ -210,6 +227,14 @@ export default function ChatPage() {
             chatType={chatType}
             onRoomSelect={setSelectedRoom}
             onChatTypeChange={setChatType}
+            onRoomCreated={() => {
+              // Refresh rooms when a new one is created
+              if (user) {
+                getUserDM();
+                getUserGroups();
+                getUserCommunities();
+              }
+            }}
           />
 
           {currentRoom ? (
@@ -219,6 +244,8 @@ export default function ChatPage() {
               onSendMessage={handleSendMessage}
               isConnected={isConnected}
               loggedUserId={user?.user_id}
+              members={members}
+              currentUserRole={currentUserRole}
             />
           ) : (
             <div className="flex-1 flex items-center justify-center bg-background text-muted-foreground">

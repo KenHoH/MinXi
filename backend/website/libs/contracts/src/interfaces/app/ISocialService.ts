@@ -16,6 +16,7 @@ import { RoomResponseDto } from '@app/contracts/shared-dto/social/response/RoomR
 import { RoomResDmDto } from '@app/contracts/shared-dto/social/response/RoomResDmDTO';
 import { ParticipantTotalResDTO } from '@app/contracts/shared-dto/social/response/totalParticipantResDTO';
 import { UserDto } from '@app/contracts/shared-dto/user/user.dto';
+import { UserRoleDto } from '@app/contracts/shared-dto/social/response/userRole.dto';
 
 export interface ISocialService {
   createRoom(dto: CreateRoomDto): Promise<RoomResponseDto>;
@@ -42,7 +43,7 @@ export interface ISocialService {
   deleteRoom(roomId: string): Promise<Ack>;
   findDM(dto: FindDmDto): Promise<RoomResponseDto>;
 
-  getInstanceParticipant(roomId: string): Promise<UserDto[]>;
+  getInstanceParticipant(roomId: string): Promise<UserRoleDto[]>;
 
   getRoomDMByUserId(userId: number): Promise<RoomResDmDto[]>;
   getRoomGroupJoinedByUserId(userId: number): Promise<RoomResponseDto[]>;
