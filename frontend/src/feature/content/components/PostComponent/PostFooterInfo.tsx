@@ -7,6 +7,7 @@ interface PostFooterInfoProps {
   creator: string;
   creatorProfile: string;
   liked: boolean;
+  pinned: boolean;
 }
 
 export function PostFooterInfo({
@@ -16,6 +17,7 @@ export function PostFooterInfo({
   creator,
   creatorProfile,
   liked,
+  pinned,
 }: PostFooterInfoProps) {
   return (
     <div className="flex flex-col gap-3">
@@ -38,7 +40,7 @@ export function PostFooterInfo({
           <span className="flex items-center gap-1 hover:text-burgundy-400 transition-colors">
             <Heart
               className={`w-4 h-4 ${
-                liked ? "fill-red-500 text-red-500" : "text-gray-500"
+                liked ? "fill-red-400 text-red-400" : "text-gray-500"
               }`}
             />
             {likes}
@@ -46,8 +48,13 @@ export function PostFooterInfo({
           <span className="flex items-center gap-1 hover:text-burgundy-400 transition-colors">
             <MessageCircle className="w-4 h-4" /> {comments}
           </span>
-          <span className="flex items-center gap-1 hover:text-yellow-400 transition-colors">
-            <Pin className="w-4 h-4" /> {pins}
+          <span className="flex items-center gap-1 hover:text-burgundy-400 transition-colors">
+            <Pin
+              className={`w-4 h-4 ${
+                pinned ? "fill-red-400 text-red-400" : "text-gray-500"
+              }`}
+            />
+            {pins}
           </span>
         </div>
         <Share2 className="w-4 h-4 hover:text-burgundy-400 transition-colors cursor-pointer" />

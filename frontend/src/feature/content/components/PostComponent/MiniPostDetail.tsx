@@ -7,23 +7,22 @@ import {
 } from "lucide-react";
 import type { FullContentDto } from "@/service/api";
 import { useState, useEffect } from "react";
-import { PostDetailComponent } from "./PostDetail";
-import useContentService from "@/shared/hooks/useContentService";
+import type { FullContentWithHistoryProps } from "../models/FullContentWithHistory";
 
 interface MiniPostDetailProps {
-  post: FullContentDto;
+  post: FullContentWithHistoryProps;
   onRefresh?: () => void;
+  onNavigate?: (post: FullContentDto) => void;
 }
 
-export function MiniPostDetail({ post, onRefresh }: MiniPostDetailProps) {
+export function MiniPostDetail({
+  post,
+  onRefresh,
+  onNavigate,
+}: MiniPostDetailProps) {
   const [currentMediaIndex, setCurrentMediaIndex] = useState(0);
-  const [showDetail, setShowDetail] = useState(false);
-  const [ancestor, setAncestor] = useState<FullContentDto[] | null>(null);
-  const [children, setChildren] = useState<FullContentDto[] | null>(null);
   const mediaItems = post.contents || [];
   const currentMedia = mediaItems[currentMediaIndex];
-
-  const { getAncestorPost, getChildPost } = useContentService();
 
   // Reset media index when post changes
   useEffect(() => {
@@ -42,44 +41,10 @@ export function MiniPostDetail({ post, onRefresh }: MiniPostDetailProps) {
     );
   };
 
-  const handleOpenDetail = async () => {
-    setShowDetail(true);
-    // Fetch ancestors and children
-    const res1 = await getAncestorPost(post.content_id, post.area_id);
-    if (res1) setAncestor(res1);
-    const res2 = await getChildPost(post.content_id);
-    if (res2) setChildren(res2);
-  };
-
-  // Refetch ancestors and children whenever post changes
-  useEffect(() => {
-    if (!showDetail) return;
-
-    const refetchPostTree = async () => {
-      try {
-        const res1 = await getAncestorPost(post.content_id, post.area_id);
-        if (res1) setAncestor(res1);
-        const res2 = await getChildPost(post.content_id);
-        if (res2) setChildren(res2);
-      } catch (error) {
-        console.error("Failed to refetch post tree:", error);
-      }
-    };
-
-    refetchPostTree();
-  }, [
-    post.content_id,
-    post.area_id,
-    showDetail,
-    getAncestorPost,
-    getChildPost,
-  ]);
-
-  const handleRefreshChild = async () => {
-    const res = await getChildPost(post.content_id);
-    if (res) setChildren(res);
-    // Call optional refetch callback
-    onRefresh?.();
+  const handleOpenDetail = () => {
+    if (onNavigate) {
+      onNavigate(post);
+    }
   };
 
   return (
@@ -153,7 +118,7 @@ export function MiniPostDetail({ post, onRefresh }: MiniPostDetailProps) {
           <span className="flex items-center gap-1">
             <Heart
               className={`w-4 h-4 ${
-                post.likes > 0 ? "fill-red-500 text-red-500" : "text-gray-500"
+                post.liked ? "fill-red-400 text-red-400" : "text-gray-500"
               }`}
             />
             {post.likes}
@@ -165,25 +130,13 @@ export function MiniPostDetail({ post, onRefresh }: MiniPostDetailProps) {
           <span className="flex items-center gap-1">
             <Pin
               className={`w-4 h-4 ${
-                post.pins > 0
-                  ? "text-yellow-500 fill-yellow-500"
-                  : "text-gray-500"
+                post.pinned ? "fill-red-400 text-red-400" : "text-gray-500"
               }`}
             />
             {post.pins}
           </span>
         </div>
       </div>
-
-      {showDetail && (
-        <PostDetailComponent
-          post={post}
-          ancestors={ancestor}
-          children={children}
-          onRefreshChild={handleRefreshChild}
-          onClose={() => setShowDetail(false)}
-        />
-      )}
     </>
   );
 }

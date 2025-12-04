@@ -177,8 +177,6 @@ export function CreateContentModal({
 
           {/* Content */}
           <div className="p-6 space-y-4">
-            {/* User Info */}
-
             {/* Title Input */}
             <div>
               <label className="block text-sm font-medium text-gray-300 mb-2">

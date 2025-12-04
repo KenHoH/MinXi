@@ -111,6 +111,7 @@ export function CreatePostModal({
       thumbnail: thumbnailFile,
       contents: contentFiles,
       published_at: new Date().toISOString(),
+      visibilityPrivate: false,
     });
 
     if (res) showToast("Post created successfully!");

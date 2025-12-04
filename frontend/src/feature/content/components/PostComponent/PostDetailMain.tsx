@@ -42,7 +42,7 @@ export function PostDetailMain({
           className="flex items-center gap-2 px-4 py-2 rounded-lg hover:bg-dark-700 transition-colors text-gray-300 hover:text-burgundy-400"
         >
           <Heart
-            className={`w-5 h-5 ${liked ? "fill-red-500 text-red-500 " : ""}`}
+            className={`w-5 h-5 ${liked ? "fill-red-400 text-red-400 " : ""}`}
           />
           <span className="text-sm font-medium">{likes}</span>
         </button>
@@ -54,12 +54,10 @@ export function PostDetailMain({
 
         <button
           onClick={onPinClick}
-          className="flex items-center gap-2 px-4 py-2 rounded-lg hover:bg-dark-700 transition-colors text-gray-300 hover:text-yellow-400"
+          className="flex items-center gap-2 px-4 py-2 rounded-lg hover:bg-dark-700 transition-colors text-gray-300 "
         >
           <Pin
-            className={`w-5 h-5 ${
-              pinned ? "fill-yellow-500 text-yellow-500" : ""
-            }`}
+            className={`w-5 h-5 ${pinned ? "fill-red-400 text-red-400" : ""}`}
           />
           <span className="text-sm font-medium">{pins}</span>
         </button>

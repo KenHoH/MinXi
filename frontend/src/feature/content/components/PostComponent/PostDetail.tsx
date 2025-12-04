@@ -15,41 +15,58 @@ import { useToast } from "@/shared/context/ToastContext";
 import useBoardService from "@/shared/hooks/useBoardService";
 import PinModal from "../ContentComponent/PinModal";
 import useConnectionService from "@/shared/hooks/useConnectionService";
+import type { FullContentWithHistoryProps } from "../models/FullContentWithHistory";
 
 interface PostDetailComponentProps {
   post: FullContentDto;
   onClose: () => void;
-  ancestors: FullContentDto[] | null;
+  ancestors: FullContentWithHistoryProps[] | null;
   children: FullContentDto[] | null;
   onRefreshChild: () => void;
-  onLikeClick?: (newLike: number) => void;
-  onCommentClick?: (newComment: number) => void;
-  onPinClick?: (newPin: number) => void;
+  liked: boolean;
+  pinned: boolean;
+  likes: number;
+  pins: number;
+  comments: number;
+  onLikeClick: (newLike: number) => void;
+  onCommentClick: (newComment: number) => void;
+  onPinClick: (newPin: number) => void;
   onLiked: (liked: boolean) => void;
+  onPinned: (pinned: boolean) => void;
+  onPostNavigate?: (post: FullContentDto) => void;
 }
 
-export function PostDetailComponent({
-  post,
-  onClose,
-  ancestors,
-  children,
-  onRefreshChild,
-  onLikeClick,
-  onCommentClick,
-  onPinClick,
-  onLiked,
-}: PostDetailComponentProps) {
+export function PostDetailComponent(props: PostDetailComponentProps) {
+  const {
+    post,
+    onClose,
+    ancestors,
+    children,
+    onRefreshChild,
+    liked: propsLiked,
+    pinned: propsPinned,
+    likes: propsLikes,
+    pins: propsPins,
+    comments: propsComments,
+    onLikeClick,
+    onCommentClick,
+    onPinClick,
+    onLiked,
+    onPinned,
+    onPostNavigate,
+  } = props;
   const { user } = useAuthContext();
   const { showToast } = useToast();
-  const [liked, setLiked] = useState(false);
-  const [pinned, setPinned] = useState(false);
+  const [liked, setLiked] = useState(propsLiked);
+  const [pinned, setPinned] = useState(propsPinned);
   const [showCreatePost, setShowCreatePost] = useState(false);
   const [currentMediaIndex, setCurrentMediaIndex] = useState(0);
   const [userData, setUserdata] = useState<UserDto | null>(null);
   const { findUserById } = useUserService();
   const [currentPost, setCurrentPost] = useState<FullContentDto>(post);
-  const [totalLikes, setTotalLikes] = useState(post.likes);
-  const [totalPins, setTotalPins] = useState(post.pins);
+  const [totalLikes, setTotalLikes] = useState(propsLikes);
+  const [totalComments, setTotalComments] = useState(propsComments);
+  const [totalPins, setTotalPins] = useState(propsPins);
   const [showReportModal, setShowReportModal] = useState(false);
   const [showPinModal, setShowPinModal] = useState(false);
   const [followed, setFollowed] = useState(false);
@@ -57,6 +74,16 @@ export function PostDetailComponent({
   const [reported, setReported] = useState(false);
   const [userBoards, setUserBoards] = useState<BoardDto[]>([]);
   const [pinnedBoardId, setPinnedBoardId] = useState<number | null>(null);
+
+  // ============ SYNC WITH PARENT COMPONENT ============
+  useEffect(() => {
+    setLiked(propsLiked);
+    setPinned(propsPinned);
+    setTotalLikes(propsLikes);
+    setTotalPins(propsPins);
+    setTotalComments(propsComments);
+  }, [propsLiked, propsPinned, propsLikes, propsPins, propsComments]);
+
   const { upsert, getByUserAndContent } = useHistoryService();
   const { getBoardByUser, removeContent } = useBoardService();
   const {
@@ -88,7 +115,6 @@ export function PostDetailComponent({
     const boards = await getBoardByUser(userData.user_id, userData.area_id);
     setUserBoards(boards || []);
 
-    // Find which board contains this content if pinned
     if (pinned && boards) {
       for (const board of boards) {
         if (board.contents?.some((c) => c.content_id === post.content_id)) {
@@ -106,16 +132,6 @@ export function PostDetailComponent({
   const handleClickOutside = (e: React.MouseEvent) => {
     if ((e.target as HTMLElement)?.id === "post-detail-backdrop") {
       onClose();
-    }
-  };
-
-  const getHistory = async () => {
-    if (!user) return;
-    const res = await getByUserAndContent(user.user_id, post.content_id);
-    if (res) {
-      console.log("History fetched:", res);
-      setLiked(res.liked);
-      setPinned(res.pinned);
     }
   };
 
@@ -144,8 +160,14 @@ export function PostDetailComponent({
           delta: newLiked ? 1 : -1,
         });
         await updateLikeUser(post.creator_id, { delta: newLiked ? 1 : -1 });
+        const newLikeCount = totalLikes + (newLiked ? 1 : -1);
         setLiked(newLiked);
-        setTotalLikes((prev) => prev + (newLiked ? 1 : -1));
+        setTotalLikes(newLikeCount);
+
+        // Notify parent
+        onLikeClick(newLikeCount);
+        onLiked(newLiked);
+
         await upsert({
           content_id: post.content_id,
           user_id: user.user_id,
@@ -170,6 +192,9 @@ export function PostDetailComponent({
         await updateComment(post.content_id, userData?.area_id || 0, {
           delta: 1,
         });
+        const newCommentCount = totalComments + 1;
+        setTotalComments(newCommentCount);
+        onCommentClick(newCommentCount);
         break;
       }
     }
@@ -190,9 +215,14 @@ export function PostDetailComponent({
       });
 
       // Update state
-      setTotalPins((prev) => prev - 1);
+      const newPinCount = totalPins - 1;
+      setTotalPins(newPinCount);
       setPinned(false);
       setPinnedBoardId(null);
+
+      // Notify parent
+      onPinClick(newPinCount);
+      onPinned(false);
 
       await upsert({
         content_id: post.content_id,
@@ -222,30 +252,40 @@ export function PostDetailComponent({
     if (!user) return;
     await updateReportUser(post.creator_id, { delta: delta ? 1 : -1 });
   };
+  const onPinSuccess = async (boardId: number) => {
+    if (!user) return;
+    try {
+      // Update pin count
+      await updatePin(post.content_id, userData?.area_id || 0, {
+        delta: 1,
+      });
 
-  useEffect(() => {
-    const fetchFreshPost = async () => {
-      try {
-        const freshData = await findOne(post.content_id, post.area_id);
-        if (freshData) {
-          setCurrentPost(freshData);
-          setTotalLikes(freshData.likes);
-          setTotalPins(freshData.pins);
+      // Upsert history
+      await upsert({
+        content_id: post.content_id,
+        user_id: user.user_id,
+        liked,
+        pinned: true,
+        reps: 0,
+      });
 
-          if (onLikeClick) onLikeClick(freshData.likes);
-          if (onCommentClick) onCommentClick(freshData.comments);
-          if (onPinClick) onPinClick(freshData.pins);
-        }
-      } catch (error) {
-        console.error("Failed to fetch updated post:", error);
-      }
-    };
-    fetchFreshPost();
-  }, [post.content_id, post.area_id]);
+      updateBoardsWithContent(boardId);
+      const newPinCount = totalPins + 1;
+      setPinned(true);
+      setTotalPins(newPinCount);
+      setShowPinModal(false);
+
+      // Notify parent
+      onPinClick(newPinCount);
+      onPinned(true);
+    } catch (error) {
+      console.error("Failed to complete pin:", error);
+      showToast("Failed to complete pin");
+    }
+  };
 
   useEffect(() => {
     fetchUserData(post.creator_id);
-    getHistory();
 
     // Check if this is the user's own content
     if (user?.user_id === post.creator_id) {
@@ -338,7 +378,10 @@ export function PostDetailComponent({
               <div className="space-y-2">
                 {ancestors.map((ancestor, index) => (
                   <div key={ancestor.content_id}>
-                    <MiniPostDetail post={ancestor} />
+                    <MiniPostDetail
+                      post={ancestor}
+                      onNavigate={onPostNavigate}
+                    />
                     {index < ancestors.length - 1 && (
                       <div className="h-10 w-1 bg-red-400 my-2 rounded ml-4" />
                     )}
@@ -372,7 +415,7 @@ export function PostDetailComponent({
             title={currentPost.title}
             description={currentPost.description}
             likes={totalLikes}
-            comments={currentPost.comments}
+            comments={totalComments}
             pins={totalPins}
             liked={liked}
             pinned={pinned}
@@ -380,7 +423,9 @@ export function PostDetailComponent({
             onLikeClick={() => handleBtn(1)}
             onPinClick={() => (pinned ? handleBtn(2) : setShowPinModal(true))}
             onReportClick={() => setShowReportModal(true)}
-            onReplyClick={() => setShowCreatePost(true)}
+            onReplyClick={() => {
+              setShowCreatePost(true);
+            }}
           />
 
           <div className="pt-4 border-t border-dark-700 space-y-4">
@@ -389,7 +434,11 @@ export function PostDetailComponent({
               {children && children.length > 0 ? (
                 <div className="space-y-2">
                   {children.map((child) => (
-                    <MiniPostDetail key={child.content_id} post={child} />
+                    <MiniPostDetail
+                      key={child.content_id}
+                      post={child}
+                      onNavigate={onPostNavigate}
+                    />
                   ))}
                 </div>
               ) : (
@@ -408,7 +457,11 @@ export function PostDetailComponent({
         parentPostId={post.content_id}
         currentUserId={user ? user.user_id : 0}
         currentAreaId={post.area_id}
-        onUpdateComment={() => handleBtn(3)}
+        onUpdateComment={() => {
+          console.log("Updating comment count from PostDetail");
+          handleBtn(3);
+          setTotalComments(totalComments);
+        }}
       />
       <ReportModal
         isOpen={showReportModal}
@@ -427,32 +480,7 @@ export function PostDetailComponent({
         content={post}
         loggedUserData={userData}
         userBoards={userBoards}
-        onPinSuccess={async (boardId) => {
-          if (!user) return;
-          try {
-            // Update pin count
-            await updatePin(post.content_id, userData?.area_id || 0, {
-              delta: 1,
-            });
-
-            // Upsert history
-            await upsert({
-              content_id: post.content_id,
-              user_id: user.user_id,
-              liked,
-              pinned: true,
-              reps: 0,
-            });
-
-            updateBoardsWithContent(boardId);
-            setPinned(true);
-            setTotalPins((prev) => prev + 1);
-            setShowPinModal(false);
-          } catch (error) {
-            console.error("Failed to complete pin:", error);
-            showToast("Failed to complete pin");
-          }
-        }}
+        onPinSuccess={onPinSuccess}
       />
     </div>
   );
