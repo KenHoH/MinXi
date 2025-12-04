@@ -65,6 +65,9 @@ export default function FeedList({
 
   useEffect(() => {
     console.log("Filter changed to:", currentFilter);
+
+    if (authLoading) return;
+
     setItems([]);
     setHasMore(true);
     setIsLoading(false);
@@ -73,7 +76,7 @@ export default function FeedList({
       setItems(newItems);
       if (newItems.length === 0) setHasMore(false);
     });
-  }, [currentFilter, user]);
+  }, [currentFilter, user, authLoading]);
 
   useEffect(() => {
     if (!enableInfiniteScroll) return;
@@ -110,9 +113,9 @@ export default function FeedList({
         )
       ) : (
         <div className="p-4">
-          <Masonry columns={3}>
+          <Masonry columns={4}>
             {itemsWithLikeStatus.map(({ item, liked }) => (
-              <div key={item.content_id}>{renderItem(item, liked)}</div>
+              <div>{renderItem(item, liked)}</div>
             ))}
           </Masonry>
         </div>

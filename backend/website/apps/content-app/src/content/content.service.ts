@@ -1340,7 +1340,6 @@ export class ContentService implements IContentService {
     page: number,
   ): Promise<PageContentRes> {
     this.logger.log(`User ${userId} is following`);
-    let lastCursor = 0;
     try {
       const result = await this.prisma
         .$transaction(async (tx) => {
@@ -1402,7 +1401,6 @@ export class ContentService implements IContentService {
             return allContents;
           }
 
-          lastCursor = contents[contents.length - 1].content_id;
           for (const content of contents) {
             try {
               const files = await tx.file.findMany({
@@ -1492,9 +1490,12 @@ export class ContentService implements IContentService {
           );
         });
 
+      const nextCursor =
+        result.length > 0 ? result[result.length - 1].content_id : 0;
+
       return {
         contents: result,
-        currentPage: lastCursor,
+        currentPage: nextCursor,
       };
     } catch (error) {
       if (error.status) {
@@ -2467,25 +2468,22 @@ export class ContentService implements IContentService {
   }
 
   async findAllGlobalPage(dto: GlobalPageDto): Promise<PageContentRes> {
-    const { area_id, cursor, limit } = dto;
+    let { area_id, cursor, limit } = dto;
 
-    if (area_id <= 0 || area_id > 3)
+    if (area_id <= 0 || area_id > 3) {
       throw httpToRpc(
         new HttpException('Invalid area ID', HttpStatus.BAD_REQUEST),
       );
-
-    const result = await this.fetchAreaPage(area_id, cursor, limit);
-
-    if (result.contents.length > 0) {
-      return result;
     }
 
-    if (area_id < 3) {
-      return await this.findAllGlobalPage({
-        area_id: area_id + 1,
-        cursor: 0,
-        limit,
-      });
+    for (let currentArea = area_id; currentArea <= 3; currentArea++) {
+      const result = await this.fetchAreaPage(currentArea, cursor, limit);
+
+      if (result.contents.length > 0) {
+        return result;
+      }
+
+      cursor = 0;
     }
 
     return {

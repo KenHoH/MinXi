@@ -15,6 +15,7 @@ export function useFeedContent(
   const { findFyp } = useAlgorithmService();
 
   const [allCursor, setAllCursor] = useState(0);
+  const [areaId, setAreaId] = useState(1);
   const [fypCursor, setFypCursor] = useState(0);
   const [friendCursor, setFriendCursor] = useState(0);
   const [followingCursor, setFollowingCursor] = useState(0);
@@ -29,8 +30,9 @@ export function useFeedContent(
     console.log("Loading more content for filter:", currentFilter);
     console.log("User:", user);
     if (!user) {
-      const res = await findAllGlobalPage(1, allCursor, 10);
+      const res = await findAllGlobalPage(areaId, allCursor, 10);
       setAllCursor(res?.currentPage || 0);
+      setAreaId(res?.area_id || 1);
       console.log("All Cursor:", allCursor);
       console.log("Load more for guest user:", res);
       return res?.contents || [];
@@ -44,7 +46,16 @@ export function useFeedContent(
       setFypCursor(response?.currentPage || 0);
       console.log("FYP Cursor:", fypCursor);
       console.log("Load more for FYP:", response);
-      result = response?.contents || [];
+      if (!response || response.contents.length === 0) {
+        const res = await findAllGlobalPage(areaId, allCursor, 10);
+        setAllCursor(res?.currentPage || 0);
+        setAreaId(res?.area_id || 1);
+        console.log("All Cursor:", allCursor);
+        console.log("Load more for guest user:", res);
+        result = res?.contents || [];
+      } else {
+        result = response?.contents || [];
+      }
     } else if (currentFilter === "Following") {
       response = await getFollowingContent(
         user.user_id,
