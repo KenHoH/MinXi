@@ -38,7 +38,6 @@ export default function ChatPage() {
     getRoomCommunityAll,
     getMessage,
     getParticipantInstance,
-    getMedia,
   } = useSocialService();
   const { sendBroadcast } = useSseService();
 

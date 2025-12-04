@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { useAuthContext } from "@/feature/auth/context/AuthContext";
 import useContentService from "@/shared/hooks/useContentService";
 import useAlgorithmService from "@/shared/hooks/useAlgorithmService";
@@ -9,7 +9,7 @@ export function useFeedContent(
   userBoards: BoardDto[],
   boardContentsMap: Map<number, FullContentDto[]>
 ) {
-  const { user } = useAuthContext();
+  const { user, isLoading } = useAuthContext();
   const { findAllGlobalPage, getFollowingContent, getFriendContent } =
     useContentService();
   const { findFyp } = useAlgorithmService();
@@ -20,9 +20,19 @@ export function useFeedContent(
   const [followingCursor, setFollowingCursor] = useState(0);
 
   const loadMore = useCallback(async () => {
+    console.log("Attempting to load more content...", isLoading);
+    if (isLoading) {
+      console.log("User data is still loading, cannot load more content yet.");
+      return [];
+    }
+
+    console.log("Loading more content for filter:", currentFilter);
+    console.log("User:", user);
     if (!user) {
       const res = await findAllGlobalPage(1, allCursor, 10);
       setAllCursor(res?.currentPage || 0);
+      console.log("All Cursor:", allCursor);
+      console.log("Load more for guest user:", res);
       return res?.contents || [];
     }
 
@@ -32,6 +42,8 @@ export function useFeedContent(
     if (currentFilter === "All") {
       response = await findFyp(user.area_id, fypCursor);
       setFypCursor(response?.currentPage || 0);
+      console.log("FYP Cursor:", fypCursor);
+      console.log("Load more for FYP:", response);
       result = response?.contents || [];
     } else if (currentFilter === "Following") {
       response = await getFollowingContent(
@@ -40,6 +52,8 @@ export function useFeedContent(
         followingCursor
       );
       setFollowingCursor(response?.currentPage || 0);
+      console.log("Following Cursor:", followingCursor);
+      console.log("Load more for Following:", response);
       result = response?.contents || [];
     } else if (currentFilter === "Friends") {
       response = await getFriendContent(
@@ -48,10 +62,13 @@ export function useFeedContent(
         friendCursor
       );
       setFriendCursor(response?.currentPage || 0);
+      console.log("Friend Cursor:", friendCursor);
+      console.log("Load more for Friends:", response);
       result = response?.contents || [];
     } else {
       const board = userBoards.find((b) => b.title === currentFilter);
       if (board) result = boardContentsMap.get(board.board_id) || [];
+      console.log("Load more for Board:", board, result);
     }
 
     return result;
@@ -59,12 +76,17 @@ export function useFeedContent(
     currentFilter,
     user,
     allCursor,
+    isLoading,
     fypCursor,
     friendCursor,
     followingCursor,
     userBoards,
     boardContentsMap,
   ]);
+
+  useEffect(() => {
+    loadMore();
+  }, [isLoading, user]);
 
   return { loadMore };
 }

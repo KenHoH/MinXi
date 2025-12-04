@@ -21,7 +21,7 @@ export function ContentComponent({ content, liked }: ContentComponentProps) {
     <>
       <div
         onClick={() => setShowDetail(true)}
-        className="bg-dark-800 rounded-lg overflow-hidden cursor-pointer hover:shadow-lg hover:shadow-burgundy-500/20 transition-all group w-full"
+        className="bg-dark-800 rounded-lg overflow-hidden cursor-pointer hover:shadow-lg hover:shadow-burgundy-500/20 transition-all group w-full border border-dark-700"
       >
         {/* DONT CARE ABOUT THIS SHIT */}
         <ContentHeaderInfo

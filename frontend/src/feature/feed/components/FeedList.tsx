@@ -1,10 +1,10 @@
 import { useEffect, useRef, useCallback, useState } from "react";
 import { useLoading } from "@/shared/context/LoadingContext";
 import { Masonry } from "@/shared/components/Masonry";
-import type { CreateHistoryDto, FullContentDto } from "@/service/api";
+import type { FullContentDto } from "@/service/api";
 import { renderItem } from "../logic/useRenderContent";
-import useHistoryService from "@/shared/hooks/useHistoryService";
 import useGetHistory from "../logic/useGetHistory";
+import { useAuthContext } from "@/feature/auth/context/AuthContext";
 
 interface FeedListProps {
   onLoadMore: () => Promise<FullContentDto[]>;
@@ -18,24 +18,27 @@ export default function FeedList({
   enableInfiniteScroll = true,
 }: FeedListProps) {
   const { showLoading, hideLoading } = useLoading();
-
+  const { user, isLoading: authLoading } = useAuthContext();
   const [items, setItems] = useState<FullContentDto[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [hasMore, setHasMore] = useState(true);
   const observerTarget = useRef<HTMLDivElement>(null);
-  const [histories] = useGetHistory();
+  const [histories, historiesLoading] = useGetHistory();
 
   const likeStatusMap = new Map<number, boolean>();
   histories.forEach((h) => {
     likeStatusMap.set(h.content_id, h.liked || false);
   });
 
-  const itemsWithLikeStatus = items
-    .filter((item) => likeStatusMap.has(item.content_id))
-    .map((item) => ({
-      item,
-      liked: likeStatusMap.get(item.content_id) || false,
-    }));
+  const shouldFilterByHistory = !!user && histories.length > 0;
+  const itemsWithLikeStatus = (
+    shouldFilterByHistory
+      ? items.filter((item) => likeStatusMap.has(item.content_id))
+      : items
+  ).map((item) => ({
+    item,
+    liked: likeStatusMap.get(item.content_id) || false,
+  }));
 
   const loadMore = useCallback(async () => {
     if (isLoading || !hasMore || !onLoadMore) return;
@@ -61,6 +64,7 @@ export default function FeedList({
   }, [isLoading, hasMore, onLoadMore, showLoading, hideLoading]);
 
   useEffect(() => {
+    console.log("Filter changed to:", currentFilter);
     setItems([]);
     setHasMore(true);
     setIsLoading(false);
@@ -69,7 +73,7 @@ export default function FeedList({
       setItems(newItems);
       if (newItems.length === 0) setHasMore(false);
     });
-  }, [currentFilter]);
+  }, [currentFilter, user]);
 
   useEffect(() => {
     if (!enableInfiniteScroll) return;
@@ -99,14 +103,16 @@ export default function FeedList({
     <div className="w-3/4 h-full">
       {/* Masonry Grid */}
       {itemsWithLikeStatus.length === 0 ? (
-        <div className="text-center py-12 text-gray-500">
-          No items to display
-        </div>
+        authLoading || historiesLoading ? null : (
+          <div className="text-center py-12 text-gray-500">
+            No items to display
+          </div>
+        )
       ) : (
         <div className="p-4">
-          <Masonry columns={4}>
+          <Masonry columns={3}>
             {itemsWithLikeStatus.map(({ item, liked }) => (
-              <div>{renderItem(item, liked)}</div>
+              <div key={item.content_id}>{renderItem(item, liked)}</div>
             ))}
           </Masonry>
         </div>

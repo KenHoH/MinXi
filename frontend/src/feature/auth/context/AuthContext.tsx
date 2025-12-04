@@ -18,15 +18,22 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<UserDto>();
   const { showToast } = useToast();
   const { showLoading, hideLoading } = useLoading();
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const navigate = useNavigate();
 
   useEffect(() => {
+    setIsLoading(true);
+    console.log("Checking for existing user session...");
     const raw = localStorage.getItem("user");
-    if (!raw) return;
+    if (!raw) {
+      setIsLoading(false);
+      console.log("No existing user session found.");
+      return;
+    }
     try {
       const data = JSON.parse(raw);
       const getUser = async () => {
+        console.log("Fetching user data for:", data);
         if (!data) return;
         await UserService.userControllerFindOneByName({
           area_id: data.area_id,
@@ -36,9 +43,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           .catch(() => {
             showToast("Session expired. Please log in again.");
             setUser(undefined);
+          })
+          .finally(() => {
+            setIsLoading(false);
+            console.log("Finished checking for existing user session.");
+            console.log("Current user after loading:", user);
+            console.log("Is loading:", isLoading);
           });
       };
       getUser();
+      console.log("User fetch initiated.");
     } catch (error) {
       showToast("Session Not Found");
     }

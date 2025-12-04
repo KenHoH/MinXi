@@ -44,6 +44,8 @@ export function Sidebar() {
       id: user.user_id,
       refreshToken: refreshToken,
     });
+
+    localStorage.removeItem("user");
     window.location.href = "/login";
   };
 
