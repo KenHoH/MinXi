@@ -71,6 +71,7 @@ export function CreatePostModal({
     id: item.id,
     name: item.file.name,
     type: item.type,
+    preview: item.preview,
   }));
 
   const resetForm = () => {

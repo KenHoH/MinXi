@@ -29,13 +29,21 @@ export function useFeedContent(
 
     console.log("Loading more content for filter:", currentFilter);
     console.log("User:", user);
-    if (!user) {
+
+    if (!user && !isLoading) {
       const res = await findAllGlobalPage(areaId, allCursor, 10);
       setAllCursor(res?.currentPage || 0);
       setAreaId(res?.area_id || 1);
       console.log("All Cursor:", allCursor);
       console.log("Load more for guest user:", res);
       return res?.contents || [];
+    }
+
+    if (!user) {
+      console.log(
+        "No user found after loading, cannot load personalized content."
+      );
+      return [];
     }
 
     let result: FullContentDto[] = [];
@@ -50,7 +58,7 @@ export function useFeedContent(
         const res = await findAllGlobalPage(areaId, allCursor, 10);
         setAllCursor(res?.currentPage || 0);
         setAreaId(res?.area_id || 1);
-        console.log("All Cursor:", allCursor);
+        console.log("Because FYP Exhaust All Cursor:", allCursor);
         console.log("Load more for guest user:", res);
         result = res?.contents || [];
       } else {
@@ -94,10 +102,6 @@ export function useFeedContent(
     userBoards,
     boardContentsMap,
   ]);
-
-  useEffect(() => {
-    loadMore();
-  }, [isLoading, user]);
 
   return { loadMore };
 }

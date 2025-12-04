@@ -31,7 +31,7 @@ export default function SettingsPage() {
   const [description, setDescription] = useState("");
   const [isUpdating, setIsUpdating] = useState(false);
 
-  const { user } = useAuthContext();
+  const { user, updateUser } = useAuthContext();
   const { findOneByUsername, updatePrivacySettings, update } = useUserService();
   const { showToast } = useToast();
 
@@ -78,7 +78,14 @@ export default function SettingsPage() {
         description: description,
       };
 
-      await update(formData);
+      const response = await update(formData);
+
+      if (response?.profile_picture) {
+        updateUser({
+          profile_picture: response.profile_picture,
+          desc: description,
+        });
+      }
       showToast("Profile updated successfully");
       setProfileImage(null);
       setProfileImagePreview("");

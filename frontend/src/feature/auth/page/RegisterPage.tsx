@@ -43,11 +43,15 @@ export default function RegisterPage() {
       showToast("Username and password are required");
       return;
     }
-    await create({
+    const res = await create({
       area_id: areaId,
       username: username,
       password: password,
     });
+
+    if (res && res.Valid) {
+      showToast("Account created successfully! Please login.");
+    }
   };
   return (
     <div className="min-h-screen flex items-center justify-center bg-background p-4">

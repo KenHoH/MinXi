@@ -1,10 +1,12 @@
-import { Heart, MessageCircle } from "lucide-react";
+import { Heart, MessageCircle, Pin } from "lucide-react";
 
 interface ContentDetailInfoProps {
   title: string;
   likes: number;
   comments: number;
   liked: boolean;
+  pinned: boolean;
+  pins: number;
   creator: string;
   creatorProfile: string;
 }
@@ -13,6 +15,8 @@ export function ContentDetailInfo({
   title,
   likes,
   liked,
+  pinned,
+  pins,
   comments,
   creator,
   creatorProfile,
@@ -38,7 +42,7 @@ export function ContentDetailInfo({
         <span className="flex items-center gap-1 hover:text-burgundy-400 transition-colors">
           <Heart
             className={`w-4 h-4 ${
-              liked ? "fill-red-500 text-red-500" : " text-burgundy-400"
+              liked ? "fill-red-400 text-red-400" : " text-burgundy-400"
             }`}
           />
           {likes}
@@ -46,6 +50,14 @@ export function ContentDetailInfo({
         <span className="flex items-center gap-1 hover:text-burgundy-400 transition-colors">
           <MessageCircle className="w-4 h-4 " />
           {comments}
+        </span>
+        <span className="flex items-center gap-1 hover:text-burgundy-400 transition-colors">
+          <Pin
+            className={`w-4 h-4 ${
+              pinned ? "fill-red-400 text-red-400 " : " text-burgundy-400"
+            }`}
+          />
+          {pins}
         </span>
       </div>
     </div>

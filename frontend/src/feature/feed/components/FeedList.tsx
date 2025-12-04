@@ -5,6 +5,7 @@ import type { FullContentDto } from "@/service/api";
 import { renderItem } from "../logic/useRenderContent";
 import useGetHistory from "../logic/useGetHistory";
 import { useAuthContext } from "@/feature/auth/context/AuthContext";
+import type { FullContentWithHistoryProps } from "@/feature/content/components/models/FullContentWithHistory";
 
 interface FeedListProps {
   onLoadMore: () => Promise<FullContentDto[]>;
@@ -24,21 +25,22 @@ export default function FeedList({
   const [hasMore, setHasMore] = useState(true);
   const observerTarget = useRef<HTMLDivElement>(null);
   const [histories, historiesLoading] = useGetHistory();
+  const [contents, setContents] = useState<FullContentWithHistoryProps[]>([]);
 
-  const likeStatusMap = new Map<number, boolean>();
-  histories.forEach((h) => {
-    likeStatusMap.set(h.content_id, h.liked || false);
-  });
+  useEffect(() => {
+    const mergedItems = items.map((item) => {
+      const userHistory = histories.find(
+        (h) => h.content_id === item.content_id
+      );
+      return {
+        ...item,
+        liked: userHistory?.liked || false,
+        pinned: userHistory?.pinned || false,
+      };
+    });
 
-  const shouldFilterByHistory = !!user && histories.length > 0;
-  const itemsWithLikeStatus = (
-    shouldFilterByHistory
-      ? items.filter((item) => likeStatusMap.has(item.content_id))
-      : items
-  ).map((item) => ({
-    item,
-    liked: likeStatusMap.get(item.content_id) || false,
-  }));
+    setContents(mergedItems);
+  }, [histories, items]);
 
   const loadMore = useCallback(async () => {
     if (isLoading || !hasMore || !onLoadMore) return;
@@ -104,8 +106,7 @@ export default function FeedList({
 
   return (
     <div className="w-3/4 h-full">
-      {/* Masonry Grid */}
-      {itemsWithLikeStatus.length === 0 ? (
+      {contents.length === 0 ? (
         authLoading || historiesLoading ? null : (
           <div className="text-center py-12 text-gray-500">
             No items to display
@@ -114,8 +115,10 @@ export default function FeedList({
       ) : (
         <div className="p-4">
           <Masonry columns={4}>
-            {itemsWithLikeStatus.map(({ item, liked }) => (
-              <div>{renderItem(item, liked)}</div>
+            {contents.map((item) => (
+              <div key={item.content_id}>
+                {renderItem(item, item.liked || false, item.pinned || false)}
+              </div>
             ))}
           </Masonry>
         </div>

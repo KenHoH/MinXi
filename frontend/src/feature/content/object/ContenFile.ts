@@ -3,4 +3,5 @@ export default interface ContentFile {
   file: File;
   name: string;
   type: "image" | "video";
+  preview?: string;
 }

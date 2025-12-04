@@ -8,6 +8,7 @@ import { useNavigate } from "react-router";
 interface AuthContextType {
   user: UserDto | undefined;
   login: (dto: LoginDto) => Promise<void>;
+  updateUser: (updatedFields: Partial<UserDto>) => void;
   logout: (dto: LogoutRequest) => Promise<void>;
   isLoading: boolean;
 }
@@ -20,6 +21,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const { showLoading, hideLoading } = useLoading();
   const [isLoading, setIsLoading] = useState(true);
   const navigate = useNavigate();
+
+  const updateUser = (updatedFields: Partial<UserDto>) => {
+    if (user) {
+      const updatedUser = { ...user, ...updatedFields };
+      setUser(updatedUser);
+      localStorage.setItem("user", JSON.stringify(updatedUser));
+    }
+  };
 
   useEffect(() => {
     setIsLoading(true);
@@ -107,7 +116,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   return (
-    <AuthContext.Provider value={{ user, login, logout, isLoading }}>
+    <AuthContext.Provider
+      value={{ user, login, logout, isLoading, updateUser }}
+    >
       {children}
     </AuthContext.Provider>
   );

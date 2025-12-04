@@ -11,6 +11,7 @@ import type { UserDto, FileDto, BoardDto } from "@/service/api";
 import useBoardService from "@/shared/hooks/useBoardService";
 import useUserService from "@/shared/hooks/useUserService";
 import useContentService from "@/shared/hooks/useContentService";
+import { Switch } from "@/components/ui/switch";
 
 interface ContentGalleryItem {
   content_id: number;
@@ -280,19 +281,16 @@ export function CreateBoardModal({
 
             {/* Privacy Toggle */}
             <div className="flex items-center gap-3 p-4 bg-dark-700 rounded-lg border border-dark-600">
-              <input
-                type="checkbox"
-                id="private"
-                checked={isPrivate}
-                onChange={(e) => setIsPrivate(e.target.checked)}
-                className="w-4 h-4 bg-dark-600 border border-dark-600 rounded accent-burgundy-600 cursor-pointer"
-              />
               <label
                 htmlFor="private"
                 className="flex-1 text-sm text-gray-300 cursor-pointer"
               >
-                Make this board private (Only you can see it)
+                Make this Content private (Only you can see it)
               </label>
+              <Switch
+                checked={isPrivate}
+                onCheckedChange={() => setIsPrivate((prev) => !prev)}
+              />
             </div>
 
             {/* Divider */}

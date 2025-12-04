@@ -35,7 +35,7 @@ export function FooterContentComponent({
         <Heart
           className={`w-6 h-6 ${
             liked
-              ? "fill-red-500 text-red-500 "
+              ? "fill-red-400 text-red-400 "
               : "text-gray-300 group-hover:text-burgundy-400"
           }`}
         />
@@ -58,7 +58,7 @@ export function FooterContentComponent({
       >
         <Pin
           className={`w-6 h-6 ${
-            pinned ? "text-yellow-500 fill-yellow-500" : "text-gray-300"
+            pinned ? "fill-red-400 text-red-400" : "text-gray-300"
           }`}
         />
 
@@ -73,7 +73,7 @@ export function FooterContentComponent({
       >
         <Flag
           className={`w-6 h-6 ${
-            reported ? "text-red-500 fill-red-500" : "text-gray-300"
+            reported ? "fill-red-400 text-red-400" : "text-gray-300"
           }`}
         />
 

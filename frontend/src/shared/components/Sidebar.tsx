@@ -92,7 +92,6 @@ export function Sidebar() {
       <br />
       <br />
       <nav className="flex-1 flex flex-col gap-3 p-3 overflow-y-auto">
-        <p className="text-[10px] text-gray-400">Followers</p>
         {followings.map((item) => (
           <Link
             key={item.user_id}

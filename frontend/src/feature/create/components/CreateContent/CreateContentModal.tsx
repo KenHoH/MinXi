@@ -52,13 +52,19 @@ export function CreateContentModal({
 
   const handleContentFilesSelected = (files: File[]) => {
     files.forEach((file) => {
-      const newFile: ContentFile = {
-        id: `${Date.now()}-${Math.random()}`,
-        file,
-        name: file.name,
-        type: contentType === "image" ? "image" : "video",
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        const preview = event.target?.result as string;
+        const newFile: ContentFile = {
+          id: `${Date.now()}-${Math.random()}`,
+          file,
+          name: file.name,
+          type: contentType === "image" ? "image" : "video",
+          preview,
+        };
+        setContentFiles((prev) => [...prev, newFile]);
       };
-      setContentFiles((prev) => [...prev, newFile]);
+      reader.readAsDataURL(file);
     });
   };
 
@@ -93,6 +99,7 @@ export function CreateContentModal({
     id: item.id,
     name: item.name,
     type: item.type,
+    preview: item.preview,
   }));
 
   const resetForm = () => {
@@ -171,7 +178,6 @@ export function CreateContentModal({
           {/* Content */}
           <div className="p-6 space-y-4">
             {/* User Info */}
-            {user && <CreateContentUserInfo creator={user} />}
 
             {/* Title Input */}
             <div>
@@ -183,7 +189,7 @@ export function CreateContentModal({
                 value={contentTitle}
                 onChange={(e) => setContentTitle(e.target.value)}
                 placeholder="What's your content about?"
-                className="w-full px-4 py-2 bg-dark-700 border border-dark-600 rounded-lg text-gray-100 placeholder:text-gray-500 focus:outline-none focus:ring-1 focus:ring-burgundy-600"
+                className="w-full px-4 py-2 bg-dark-700 border border-dark-600 rounded-lg text-gray-100 placeholder:text-gray-500 focus:outline-none focus:ring-1 focus:ring-red-500 "
               />
             </div>
             {/* Date Input */}

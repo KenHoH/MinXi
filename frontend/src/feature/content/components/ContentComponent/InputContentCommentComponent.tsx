@@ -46,6 +46,12 @@ export function InputContentCommentComponent({
             type="text"
             value={commentText}
             onChange={(e) => onCommentChange(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") {
+                e.preventDefault();
+                onCommentSubmit(replyingTo);
+              }
+            }}
             placeholder="Add a comment..."
             className="flex-1 bg-transparent text-white text-xs placeholder-gray-500 outline-none"
           />

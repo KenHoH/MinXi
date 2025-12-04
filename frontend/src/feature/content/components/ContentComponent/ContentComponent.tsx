@@ -2,20 +2,25 @@ import { useState } from "react";
 import { ContentHeaderInfo } from "./ContentHeaderInfo";
 import { ContentDetailInfo } from "./ContentDetailInfo";
 import { ContentDetailComponent } from "./ContentDetail";
-import type { FullContentDto, UserDto } from "@/service/api";
-import { useAuthContext } from "@/feature/auth/context/AuthContext";
+import type { FullContentWithHistoryProps } from "../models/FullContentWithHistory";
 
 interface ContentComponentProps {
-  content: FullContentDto;
+  content: FullContentWithHistoryProps;
   liked: boolean;
+  pinned: boolean;
 }
 
-export function ContentComponent({ content, liked }: ContentComponentProps) {
+export function ContentComponent({
+  content,
+  liked,
+  pinned,
+}: ContentComponentProps) {
   const [showDetail, setShowDetail] = useState(false);
   const [like, setLike] = useState(content.likes);
   const [comment, setComment] = useState(content.comments);
-  const { user } = useAuthContext();
+  const [pins, setPins] = useState(content.pins);
   const [likedState, setLikedState] = useState(liked);
+  const [pinnedState, setPinnedState] = useState(pinned);
 
   return (
     <>
@@ -23,7 +28,7 @@ export function ContentComponent({ content, liked }: ContentComponentProps) {
         onClick={() => setShowDetail(true)}
         className="bg-dark-800 rounded-lg overflow-hidden cursor-pointer hover:shadow-lg hover:shadow-burgundy-500/20 transition-all group w-full border border-dark-700"
       >
-        {/* DONT CARE ABOUT THIS SHIT */}
+        {/* DONE */}
         <ContentHeaderInfo
           post_type={content.post_type}
           content_id={content.content_id}
@@ -40,10 +45,12 @@ export function ContentComponent({ content, liked }: ContentComponentProps) {
           likes={like}
           liked={likedState}
           comments={comment}
-          creator={user ? user.username : "anonymous"}
+          pinned={pinnedState}
+          pins={pins}
+          creator={content.username}
           creatorProfile={
-            user
-              ? user.profile_picture
+            content.profile_url
+              ? content.profile_url
               : "http://localhost:3000/uploads/profile/1763906830326-69740177.png"
           }
         />
@@ -55,9 +62,17 @@ export function ContentComponent({ content, liked }: ContentComponentProps) {
           onClose={() => {
             setShowDetail(false);
           }}
-          onlikedChange={setLikedState}
-          onCommentClick={setComment}
+          liked={likedState}
+          pinned={pinnedState}
+          likes={like}
+          pins={pins}
+          comments={comment}
+          reports={content.reports}
           onLikeClick={setLike}
+          onPinClick={setPins}
+          onCommentClick={setComment}
+          onlikedChange={setLikedState}
+          onpinnedChange={setPinnedState}
         />
       )}
     </>

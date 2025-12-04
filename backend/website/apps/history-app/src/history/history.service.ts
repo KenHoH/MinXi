@@ -82,9 +82,13 @@ export class HistoryService implements IHistoryService {
       return mapToCreateHistoryDto(result);
     } catch (error) {
       this.logger.log('Failed to get histories', error.message);
-      throw httpToRpc(
-        new HttpException('Failed to get histories', HttpStatus.BAD_REQUEST),
-      );
+      return {
+        content_id: content_id,
+        liked: false,
+        pinned: false,
+        reps: 0,
+        user_id: user_id,
+      };
     }
   }
 }

@@ -19,7 +19,7 @@ export function ContentTypeSelector({
           onClick={() => onTypeChange("image")}
           className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-lg border-2 transition-all ${
             selectedType === "image"
-              ? "border-burgundy-600 bg-burgundy-600/10 text-burgundy-400"
+              ? "border-burgundy-600 bg-burgundy-600/10 text-burgundy-400 shadow-lg shadow-burgundy-600/50 ring-2 ring-burgundy-600/30"
               : "border-dark-600 bg-dark-700 text-gray-300 hover:border-burgundy-600"
           }`}
         >
@@ -30,7 +30,7 @@ export function ContentTypeSelector({
           onClick={() => onTypeChange("video")}
           className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-lg border-2 transition-all ${
             selectedType === "video"
-              ? "border-burgundy-600 bg-burgundy-600/10 text-burgundy-400"
+              ? "border-burgundy-600 bg-burgundy-600/10 text-burgundy-400 shadow-lg shadow-burgundy-600/50 ring-2 ring-burgundy-600/30"
               : "border-dark-600 bg-dark-700 text-gray-300 hover:border-burgundy-600"
           }`}
         >

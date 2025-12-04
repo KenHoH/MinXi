@@ -10,9 +10,10 @@ import useUserService from "@/shared/hooks/useUserService";
 interface PostComponentProps {
   post: FullContentDto;
   liked: boolean;
+  pinned: boolean;
 }
 
-export function PostComponent({ post, liked }: PostComponentProps) {
+export function PostComponent({ post, liked, pinned }: PostComponentProps) {
   const [showDetail, setShowDetail] = useState(false);
   const heights = ["min-h-[180px]", "min-h-[220px]", "min-h-[160px]"];
   const randomHeight = heights[post.content_id % heights.length];

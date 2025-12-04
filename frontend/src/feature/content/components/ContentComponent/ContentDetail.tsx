@@ -23,38 +23,51 @@ import useConnectionService from "@/shared/hooks/useConnectionService";
 interface ContentDetailComponentProps {
   content: FullContentDto;
   onClose: () => void;
+  liked: boolean;
+  pinned: boolean;
+  likes: number;
+  pins: number;
+  comments: number;
+  reports: number;
   onLikeClick: (newLike: number) => void;
+  onPinClick: (newPin: number) => void;
   onCommentClick: (newComment: number) => void;
   onlikedChange: (liked: boolean) => void;
+  onpinnedChange: (pinned: boolean) => void;
 }
 
-export function ContentDetailComponent({
-  content,
-  onClose,
-  onLikeClick,
-  onCommentClick,
-  onlikedChange,
-}: ContentDetailComponentProps) {
-  // ============ AUTH & CONTEXT ============
+export function ContentDetailComponent(props: ContentDetailComponentProps) {
+  const {
+    content,
+    onClose,
+    onLikeClick,
+    onPinClick,
+    onCommentClick,
+    onlikedChange,
+    onpinnedChange,
+    liked: propsLiked,
+    pinned: propsPinned,
+    likes: propsLikes,
+    pins: propsPins,
+    comments: propsComments,
+    reports: propsReports,
+  } = props;
   const { user } = useAuthContext();
   const { showToast } = useToast();
   const { updateFollowUser, updateLikeUser, updateReportUser } =
     useUserService();
 
-  // ============ UI STATE ============
   const [currentMediaIndex, setCurrentMediaIndex] = useState(0);
   const [showReportModal, setShowReportModal] = useState(false);
   const [showPinModal, setShowPinModal] = useState(false);
   const [refreshComments, setRefreshComments] = useState(false);
 
-  // ============ INTERACTION STATE ============
-  const [liked, setLiked] = useState(false);
-  const [pinned, setPinned] = useState(false);
+  const [liked, setLiked] = useState(props.liked);
+  const [pinned, setPinned] = useState(props.pinned);
   const [reported, setReported] = useState(false);
   const [followed, setFollowed] = useState(false);
   const [isOwnContent, setIsOwnContent] = useState(false);
 
-  // ============ COMMENT STATE ============
   const [commentText, setCommentText] = useState("");
   const [replyingToCommentId, setReplyingToCommentId] = useState<number | null>(
     null
@@ -64,32 +77,39 @@ export function ContentDetailComponent({
     text: string;
   } | null>(null);
 
-  // ============ DATA STATE ============
   const [creatorData, setCreatorData] = useState<UserDto | null>(null);
   const [loggedUserData, setLoggedUserData] = useState<UserDto | null>(null);
-  const [currentContent, setCurrentContent] = useState<FullContentDto>(content);
-  const [totalLikes, setTotalLikes] = useState(content.likes);
-  const [totalPins, setTotalPins] = useState(content.pins);
-  const [totalReports, setTotalReports] = useState(content.reports);
+  const [totalLikes, setTotalLikes] = useState(props.likes);
+  const [totalComments, setTotalComments] = useState(props.comments);
+  const [totalPins, setTotalPins] = useState(props.pins);
+  const [totalReports, setTotalReports] = useState(props.reports);
   const [userBoards, setUserBoards] = useState<BoardDto[]>([]);
   const [pinnedBoardId, setPinnedBoardId] = useState<number | null>(null);
 
-  // ============ HOOKS ============
-  const { upsert, getByUserAndContent } = useHistoryService();
-  const {
-    updateLike,
-    updatePin,
-    updateComment,
-    findOne,
-    updateView,
-    updateReport,
-  } = useContentService();
+  useEffect(() => {
+    setLiked(propsLiked);
+    setPinned(propsPinned);
+    setTotalLikes(propsLikes);
+    setTotalPins(propsPins);
+    setTotalComments(propsComments);
+    setTotalReports(propsReports);
+  }, [
+    propsLiked,
+    propsPinned,
+    propsLikes,
+    propsPins,
+    propsComments,
+    propsReports,
+  ]);
+
+  const { upsert } = useHistoryService();
+  const { updateLike, updatePin, updateComment, updateView, updateReport } =
+    useContentService();
   const { create } = useCommentService();
   const { findUserById } = useUserService();
   const { getBoardByUser, removeContent } = useBoardService();
   const { createFollow, deleteFollow, checkFollow } = useConnectionService();
 
-  // ============ MEDIA GALLERY HANDLERS ============
   const handlePrevMedia = () => {
     setCurrentMediaIndex((prev) =>
       prev === 0 ? content.contents.length - 1 : prev - 1
@@ -102,14 +122,16 @@ export function ContentDetailComponent({
     );
   };
 
-  // ============ COMMENT HANDLERS ============
   const handleComment = async (parentId: number | null) => {
     if (!user) return;
     try {
-      // Update comment count on backend
+      if (commentText.trim() === "") {
+        showToast("Comment cannot be empty");
+        return;
+      }
+
       await updateComment(content.content_id, user.area_id, { delta: 1 });
 
-      // Create new comment
       await create({
         content_id: content.content_id,
         parent_id: parentId ? parentId : 0,
@@ -118,8 +140,12 @@ export function ContentDetailComponent({
         id: 0,
       });
 
-      // Update UI and reset form
-      onCommentClick(content.comments + 1);
+      setTotalComments((prev) => prev + 1);
+
+      if (onCommentClick) {
+        onCommentClick(totalComments + 1);
+      }
+
       setRefreshComments((prev) => !prev);
       setCommentText("");
       setReplyingToCommentId(null);
@@ -131,14 +157,12 @@ export function ContentDetailComponent({
     }
   };
 
-  // ============ MODAL HANDLERS ============
   const handleClickOutside = (e: React.MouseEvent) => {
     if ((e.target as HTMLElement)?.id === "detail-backdrop") {
       onClose();
     }
   };
 
-  // ============ INTERACTION HANDLERS ============
   const getBoards = async () => {
     if (!loggedUserData) return;
 
@@ -149,7 +173,6 @@ export function ContentDetailComponent({
     setUserBoards(boards || []);
     console.log("Fetched user boards:", boards);
 
-    // Find which board contains this content if pinned
     if (pinned && boards) {
       for (const board of boards) {
         if (board.contents?.some((c) => c.content_id === content.content_id)) {
@@ -157,15 +180,6 @@ export function ContentDetailComponent({
           break;
         }
       }
-    }
-  };
-
-  const getHistory = async () => {
-    if (!user) return;
-    const res = await getByUserAndContent(user.user_id, content.content_id);
-    if (res) {
-      setLiked(res.liked);
-      setPinned(res.pinned);
     }
   };
 
@@ -235,6 +249,36 @@ export function ContentDetailComponent({
     }
   };
 
+  const onPinSuccess = async (boardId: number) => {
+    if (!user) return;
+    try {
+      await updatePin(content.content_id, loggedUserData?.area_id || 0, {
+        delta: 1,
+      });
+
+      // Upsert history
+      await upsert({
+        content_id: content.content_id,
+        user_id: user.user_id,
+        liked,
+        pinned: true,
+        reps: 0,
+      });
+
+      const newPinCount = totalPins + 1;
+      setPinnedBoardId(boardId);
+      setPinned(true);
+      setTotalPins(newPinCount);
+      setShowPinModal(false);
+
+      onPinClick(newPinCount);
+      onpinnedChange(true);
+    } catch (error) {
+      console.error("Failed to complete pin:", error);
+      showToast("Failed to complete pin");
+    }
+  };
+
   const handleUnpin = async () => {
     if (!user || !loggedUserData || pinnedBoardId === null) return;
 
@@ -247,9 +291,13 @@ export function ContentDetailComponent({
         delta: -1,
       });
 
-      setTotalPins((prev) => prev - 1);
+      const newPinCount = totalPins - 1;
+      setTotalPins(newPinCount);
       setPinned(false);
       setPinnedBoardId(null);
+
+      onPinClick(newPinCount);
+      onpinnedChange(false);
 
       await upsert({
         content_id: content.content_id,
@@ -266,30 +314,6 @@ export function ContentDetailComponent({
     }
   };
 
-  // ============ EFFECTS ============
-  // Fetch fresh content data whenever content_id changes
-  useEffect(() => {
-    const fetchFreshContent = async () => {
-      try {
-        const freshData = await findOne(content.content_id, content.area_id);
-        if (freshData) {
-          setCurrentContent(freshData);
-          setTotalLikes(freshData.likes);
-          setTotalPins(freshData.pins);
-          setTotalReports(freshData.reports);
-
-          // Update parent component with fresh data
-          onLikeClick(freshData.likes);
-          onCommentClick(freshData.comments);
-        }
-      } catch (error) {
-        console.error("Failed to fetch updated content:", error);
-      }
-    };
-    fetchFreshContent();
-  }, [content.content_id, content.area_id]);
-
-  // Fetch creator data and interaction history on mount
   useEffect(() => {
     const getCreator = async (userId: number) => {
       try {
@@ -301,9 +325,7 @@ export function ContentDetailComponent({
       }
     };
     getCreator(content.creator_id);
-    getHistory();
 
-    // Check if this is the user's own content
     if (user?.user_id === content.creator_id) {
       setIsOwnContent(true);
     } else {
@@ -311,7 +333,6 @@ export function ContentDetailComponent({
     }
   }, [content.creator_id, content.content_id, user?.user_id]);
 
-  // Get Logged User Data
   useEffect(() => {
     const getLoggedUserData = async () => {
       if (user) {
@@ -383,12 +404,12 @@ export function ContentDetailComponent({
     >
       <div className="flex gap-6 w-full max-w-5xl h-[85vh] bg-black/80 rounded-lg overflow-hidden">
         <ContentMediaGallery
-          mediaItems={currentContent.contents}
+          mediaItems={content.contents}
           currentMediaIndex={currentMediaIndex}
           onPrevMedia={handlePrevMedia}
           onNextMedia={handleNextMedia}
           onClose={onClose}
-          title={currentContent.title}
+          title={content.title}
         />
 
         <div className="w-80 flex flex-col  border-l border-dark-700">
@@ -400,10 +421,10 @@ export function ContentDetailComponent({
                   username: content.username,
                   profile_url: content.profile_url,
                 }}
-                title={currentContent.title}
-                description={currentContent.description}
-                views={currentContent.views}
-                content_id={currentContent.content_id}
+                title={content.title}
+                description={content.description}
+                views={content.views}
+                content_id={content.content_id}
                 followed={followed}
                 isOwnContent={isOwnContent}
                 onFollowClick={() => {
@@ -438,10 +459,9 @@ export function ContentDetailComponent({
             <ContentDetailSkeleton />
           )}
 
-          {/* Footer - Interaction Stats & Actions */}
           <FooterContentComponent
             likes={totalLikes}
-            comments={currentContent.comments}
+            comments={totalComments}
             liked={liked}
             pinned={pinned}
             reported={reported}
@@ -454,7 +474,6 @@ export function ContentDetailComponent({
         </div>
       </div>
 
-      {/* Report Modal */}
       <ReportModal
         isOpen={showReportModal}
         onClose={() => setShowReportModal(false)}
@@ -472,31 +491,7 @@ export function ContentDetailComponent({
         content={content}
         loggedUserData={loggedUserData}
         userBoards={userBoards}
-        onPinSuccess={async (boardId) => {
-          if (!user) return;
-          try {
-            await updatePin(content.content_id, loggedUserData?.area_id || 0, {
-              delta: 1,
-            });
-
-            // Upsert history
-            await upsert({
-              content_id: content.content_id,
-              user_id: user.user_id,
-              liked,
-              pinned: true,
-              reps: 0,
-            });
-
-            setPinnedBoardId(boardId);
-            setPinned(true);
-            setTotalPins((prev) => prev + 1);
-            setShowPinModal(false);
-          } catch (error) {
-            console.error("Failed to complete pin:", error);
-            showToast("Failed to complete pin");
-          }
-        }}
+        onPinSuccess={onPinSuccess}
       />
     </div>
   );
