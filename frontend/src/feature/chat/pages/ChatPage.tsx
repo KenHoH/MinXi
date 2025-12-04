@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import RootLayout from "@/app/LayoutPage";
 import RoomList from "../components/RoomList";
 import ChatArea from "../components/ChatArea";
-import { dummyMessages } from "../constants";
+import CommunityModal from "../components/CommunityModal";
 import useSocialService from "@/shared/hooks/useSocialService";
 import type { RoomResponseDto } from "@/service/api/models/RoomResponseDto";
 import { useAuthContext } from "@/feature/auth/context/AuthContext";
@@ -26,6 +26,8 @@ export default function ChatPage() {
   const [loggedUser, setLoggedUser] = useState<UserDto | null>(null);
   const [members, setMembers] = useState<UserRoleDto[]>([]);
   const [currentUserRole, setCurrentUserRole] = useState("MEMBER");
+  const [selectedCommunity, setSelectedCommunity] =
+    useState<RoomResponseDto | null>(null);
   const { messages: sseMessages, isConnected } = useSSE(selectedRoom || "");
 
   // Hooks
@@ -226,8 +228,8 @@ export default function ChatPage() {
             chatType={chatType}
             onRoomSelect={setSelectedRoom}
             onChatTypeChange={setChatType}
+            onCommunityClick={setSelectedCommunity}
             onRoomCreated={() => {
-              // Refresh rooms when a new one is created
               if (user) {
                 getUserDM();
                 getUserGroups();
@@ -252,6 +254,13 @@ export default function ChatPage() {
             </div>
           )}
         </main>
+
+        {/* Community Modal */}
+        <CommunityModal
+          isOpen={!!selectedCommunity}
+          community={selectedCommunity}
+          onClose={() => setSelectedCommunity(null)}
+        />
       </div>
     </RootLayout>
   );

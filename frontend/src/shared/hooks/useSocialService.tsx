@@ -11,7 +11,11 @@ import type { ParticipantTotalResDTO } from "../../service/api/models/Participan
 import type { MessageResponseDto } from "../../service/api/models/MessageResponseDto";
 import type { Ack } from "../../service/api/models/Ack";
 import useApiCall from "./useApiCall";
-import type { UserRoleDto } from "@/service/api";
+import type {
+  GroupCommunitiesResponseDto,
+  GroupFromCommunitiesDto,
+  UserRoleDto,
+} from "@/service/api";
 
 interface CreateRoomDtoFormData {
   thumbnail?: Blob;
@@ -42,9 +46,24 @@ export default function useSocialService() {
       SocialService.socialControllerAddUserToRoom(dto)
     );
 
+  const addGroupToCommunity = (dto: GroupFromCommunitiesDto) =>
+    call<GroupCommunitiesResponseDto>(() =>
+      SocialService.socialControllerAddGroupToCommunities(dto)
+    );
+
   const removeUserFromRoom = (dto: RemoveUserFromRoomDto) =>
     call<ParticipantResponseDto>(() =>
       SocialService.socialControllerRemoveUserFromRoom(dto)
+    );
+
+  const removeGroupFromCommunity = (dto: GroupFromCommunitiesDto) =>
+    call<GroupCommunitiesResponseDto>(() =>
+      SocialService.socialControllerRemoveGroupFromCommunities(dto)
+    );
+
+  const getGroupFromCommunity = (communityId: string) =>
+    call<RoomResponseDto[]>(() =>
+      SocialService.socialControllerGetGroupFromCommunities(communityId)
     );
 
   const updateParticipantRole = (dto: UpdateParticipantRoleDto) =>
@@ -124,6 +143,9 @@ export default function useSocialService() {
     getAllRoomId,
     addUserToRoom,
     removeUserFromRoom,
+    addGroupToCommunity,
+    removeGroupFromCommunity,
+    getGroupFromCommunity,
     updateParticipantRole,
     getTotalParticipants,
     getParticipant,

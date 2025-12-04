@@ -1,9 +1,10 @@
 "use client";
 
 import { useState } from "react";
-import { Plus } from "lucide-react";
+import { Plus, Info } from "lucide-react";
 import type { RoomResponseDto } from "@/service/api";
 import CreateRoomModal from "./CreateRoomModal";
+import CommunityModal from "./CommunityModal";
 
 interface RoomListProps {
   rooms: RoomResponseDto[];
@@ -12,6 +13,7 @@ interface RoomListProps {
   onRoomSelect: (roomId: string) => void;
   onChatTypeChange: (type: "DIRECT" | "GROUP" | "COMMUNITY") => void;
   onRoomCreated?: () => void;
+  onCommunityClick?: (community: RoomResponseDto) => void;
 }
 
 export default function RoomList({
@@ -21,6 +23,7 @@ export default function RoomList({
   onRoomSelect,
   onChatTypeChange,
   onRoomCreated,
+  onCommunityClick,
 }: RoomListProps) {
   const [showCreateModal, setShowCreateModal] = useState(false);
 
@@ -60,30 +63,46 @@ export default function RoomList({
       {/* Room List */}
       <div className="flex-1 overflow-y-auto space-y-1 p-2">
         {rooms.map((room) => (
-          <button
+          <div
             key={room.id}
-            onClick={() => onRoomSelect(room.id)}
-            className={`w-full p-3 rounded-lg text-left transition-colors ${
+            className={`w-full p-3 rounded-lg transition-colors relative group ${
               selectedRoom === room.id
                 ? "bg-primary/20 border border-primary"
                 : "hover:bg-muted"
             }`}
           >
-            <div className="flex items-center gap-3 mb-2">
-              <img
-                src={room.pictureUrl}
-                alt={room.name}
-                width={40}
-                height={40}
-                className="w-10 h-10 rounded-full"
-              />
-              <div className="flex-1 min-w-0">
-                <p className="font-medium text-foreground text-sm truncate">
-                  {room.name}
-                </p>
+            <button
+              onClick={() => onRoomSelect(room.id)}
+              className="w-full text-left"
+            >
+              <div className="flex items-center gap-3">
+                <img
+                  src={room.pictureUrl}
+                  alt={room.name}
+                  width={40}
+                  height={40}
+                  className="w-10 h-10 rounded-full"
+                />
+                <div className="flex-1 min-w-0">
+                  <p className="font-medium text-foreground text-sm truncate">
+                    {room.name}
+                  </p>
+                </div>
               </div>
-            </div>
-          </button>
+            </button>
+            {chatType === "COMMUNITY" && onCommunityClick && (
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onCommunityClick(room);
+                }}
+                className="absolute right-3 top-1/2 -translate-y-1/2 p-1.5 rounded-full bg-muted/80 hover:bg-muted opacity-0 group-hover:opacity-100 transition-opacity"
+                title="View community details"
+              >
+                <Info className="w-4 h-4 text-foreground" />
+              </button>
+            )}
+          </div>
         ))}
       </div>
 
