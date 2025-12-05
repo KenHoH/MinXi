@@ -1,11 +1,9 @@
 import { CommentParentComponent } from "../CommentComponent/CommentParentComponent";
+import type { UserProfile } from "../models/UserProfile";
 import { ProfilePicture } from "../ProfilePicture";
 
 interface HeaderContentComponentProps {
-  creator: {
-    username: string;
-    profile_url: string;
-  };
+  creator: UserProfile;
   title: string;
   description: string;
   views: number;
@@ -34,7 +32,15 @@ export function HeaderContentComponent({
   return (
     <div className="flex-1 overflow-y-auto p-4 border-b border-dark-700 space-y-4">
       <div className="flex items-center gap-3">
-        <ProfilePicture creator={creator} size="md" clickable={true} />
+        <ProfilePicture
+          creator={{
+            profile_picture_url: creator.profile_picture_url,
+            username: creator.username,
+            user_id: creator.user_id,
+          }}
+          size="md"
+          clickable={true}
+        />
         <div className="flex-1">
           <p className="font-semibold text-white text-sm">
             {creator ? creator.username : `@anonymous`}

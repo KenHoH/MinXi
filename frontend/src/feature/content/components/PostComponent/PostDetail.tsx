@@ -401,7 +401,11 @@ export function PostDetailComponent(props: PostDetailComponentProps) {
 
           {userData && (
             <PostDetailHeader
-              creator={userData}
+              creator={{
+                profile_picture_url: post.profile_url,
+                username: post.username,
+                user_id: post.creator_id,
+              }}
               followed={followed}
               isOwnContent={isOwnContent}
               onFollowClick={() => {

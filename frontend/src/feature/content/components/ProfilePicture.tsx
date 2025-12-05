@@ -1,10 +1,8 @@
 import { useNavigate } from "react-router";
+import type { UserProfile } from "./models/UserProfile";
 
 interface ProfilePictureProps {
-  creator: {
-    username: string;
-    profile_url: string;
-  };
+  creator: UserProfile;
   size?: "sm" | "md" | "lg";
   clickable?: boolean;
 }
@@ -25,7 +23,7 @@ export function ProfilePicture({
     <>
       <img
         src={
-          creator?.profile_url ||
+          creator?.profile_picture_url ||
           "http://localhost:3000/uploads/profile/1763906830326-69740177.png"
         }
         alt={`Creator ${creator?.username}`}

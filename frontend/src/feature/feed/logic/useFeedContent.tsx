@@ -103,5 +103,14 @@ export function useFeedContent(
     boardContentsMap,
   ]);
 
+  useEffect(() => {
+    console.log("Filter changed to:", currentFilter);
+    setAllCursor(0);
+    setFypCursor(0);
+    setFriendCursor(0);
+    setFollowingCursor(0);
+    setAreaId(1);
+  }, [currentFilter]);
+
   return { loadMore };
 }

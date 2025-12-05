@@ -1,8 +1,8 @@
-import type { UserDto } from "@/service/api";
 import { ProfilePicture } from "../ProfilePicture";
+import type { UserProfile } from "../models/UserProfile";
 
 interface PostDetailHeaderProps {
-  creator: UserDto;
+  creator: UserProfile;
   followed: boolean;
   onFollowClick: () => void;
   isOwnContent?: boolean;

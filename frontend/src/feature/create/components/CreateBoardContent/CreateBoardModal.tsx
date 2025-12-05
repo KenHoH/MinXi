@@ -223,7 +223,11 @@ export function CreateBoardModal({
             {/* User Info */}
             <div className="flex items-center gap-3">
               <ProfilePicture
-                creator={loggedUserData || null}
+                creator={{
+                  profile_picture_url: loggedUserData?.profile_picture || "",
+                  username: loggedUserData?.username || "User",
+                  user_id: loggedUserData?.user_id || 0,
+                }}
                 size="md"
                 clickable={false}
               />
@@ -285,7 +289,7 @@ export function CreateBoardModal({
                 htmlFor="private"
                 className="flex-1 text-sm text-gray-300 cursor-pointer"
               >
-                Make this Content private (Only you can see it)
+                Make this Board private (Only you can see it)
               </label>
               <Switch
                 checked={isPrivate}

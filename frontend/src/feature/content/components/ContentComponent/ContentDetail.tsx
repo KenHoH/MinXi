@@ -419,7 +419,8 @@ export function ContentDetailComponent(props: ContentDetailComponentProps) {
                 refresh={refreshComments}
                 creator={{
                   username: content.username,
-                  profile_url: content.profile_url,
+                  profile_picture_url: content.profile_url,
+                  user_id: content.creator_id,
                 }}
                 title={content.title}
                 description={content.description}
