@@ -37,7 +37,7 @@ export function Sidebar() {
       .find((row) => row.startsWith("refreshToken="))
       ?.split("=")[1];
     if (!user || !refreshToken) {
-      showToast("Error", "You are not logged in", "error");
+      showToast("Info", "You are not logged in", "error");
       return;
     }
     await logout({

@@ -120,7 +120,7 @@ export class SseController {
   @Public()
   @Post('sendNotificationToRoom')
   sendNotification(@Body() dto: BroadcastNotifReq): Promise<Ack> {
-    return this.sseService.sendNotification(dto.userId, dto);
+    return this.sseService.sendNotification(dto.userId, dto, dto.type);
   }
 
   @Public()

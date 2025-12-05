@@ -8,5 +8,6 @@ export function buildNotifResponse(dto: BroadcastNotifReq): NotificationReq {
     title: dto.title,
     description: dto.description,
     isSeen: dto.isSeen,
+    type: dto.type,
   };
 }

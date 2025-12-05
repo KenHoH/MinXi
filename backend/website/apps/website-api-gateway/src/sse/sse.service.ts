@@ -2,11 +2,13 @@ import {
   NOTIF_MSG,
   SOCIAL_MSG,
   SSE_MSG,
+  USER_MSG,
 } from '@app/common/constants/messageEvent';
 import {
   NOTIF_SERVICES,
   SOCIAL_SERVICES,
   SSE_SERVICES,
+  USER_SERVICES,
 } from '@app/common/constants/services';
 import { httpToRpc } from '@app/common/utils/httpToRpc';
 import { ISSEService } from '@app/contracts/interfaces/app/ISSEService';
@@ -29,12 +31,14 @@ import { buildMessageResponse } from './utils/buildMsgRes';
 import { BroadcastNotifReq } from '@app/contracts/shared-dto/sse/req/BroadcastNotifReq';
 import { NotificationReq } from '@app/contracts/shared-dto/notification/req/notificiationReq';
 import { buildNotifResponse } from './utils/buildNotifRes';
+import { UserDto } from '@app/contracts/shared-dto/user/user.dto';
 
 @Injectable()
 export class SseService implements ISSEService {
   constructor(
     @Inject(SOCIAL_SERVICES.CLIENT) private readonly client: ClientProxy,
     @Inject(NOTIF_SERVICES.CLIENT) private readonly notifClient: ClientProxy,
+    @Inject(USER_SERVICES.CLIENT) private readonly userClient: ClientProxy,
   ) {}
   private roomConnections = new Map<string, Subject<any>>();
 
@@ -78,8 +82,27 @@ export class SseService implements ISSEService {
     };
   }
 
-  async sendNotification(userId: number, dto: BroadcastNotifReq): Promise<Ack> {
+  async sendNotification(
+    userId: number,
+    dto: BroadcastNotifReq,
+    type: string,
+  ): Promise<Ack> {
     const connection = this.roomConnections.get(userId.toString());
+    const id: number = userId;
+    const settings: UserDto = await firstValueFrom(
+      this.userClient.send(USER_MSG.findOne, id),
+    );
+
+    if (
+      (settings.liked_notification_disabled && type === 'LIKE') ||
+      (settings.comments_notification_disabled && type === 'COMMENT') ||
+      (settings.followers_notification_disabled && type === 'FOLLOW')
+    ) {
+      return {
+        Valid: true,
+        Msg: `User has disabled ${type.toLowerCase()} notifications`,
+      };
+    }
 
     if (!connection) {
       throw new HttpException('Connection not found', HttpStatus.NOT_FOUND);
@@ -131,6 +154,7 @@ export class SseService implements ISSEService {
       title: dto.title,
       description: dto.description,
       isSeen: dto.isSeen,
+      type: dto.type,
     };
 
     try {

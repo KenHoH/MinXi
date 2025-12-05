@@ -19,6 +19,7 @@ import { Navigate } from "react-router";
 import useBoardService from "@/shared/hooks/useBoardService";
 import PinModal from "./PinModal";
 import useConnectionService from "@/shared/hooks/useConnectionService";
+import useNotification from "@/shared/logic/useNotificatoin";
 
 interface ContentDetailComponentProps {
   content: FullContentDto;
@@ -109,6 +110,7 @@ export function ContentDetailComponent(props: ContentDetailComponentProps) {
   const { findUserById } = useUserService();
   const { getBoardByUser, removeContent } = useBoardService();
   const { createFollow, deleteFollow, checkFollow } = useConnectionService();
+  const { sendNotificatonSystem } = useNotification();
 
   const handlePrevMedia = () => {
     setCurrentMediaIndex((prev) =>
@@ -144,6 +146,14 @@ export function ContentDetailComponent(props: ContentDetailComponentProps) {
 
       if (onCommentClick) {
         onCommentClick(totalComments + 1);
+        sendNotificatonSystem(
+          content.creator_id,
+          `Your post received a new comment! from ${
+            loggedUserData?.username || "someone"
+          }`,
+          "New Comment",
+          "COMMENT"
+        );
       }
 
       setRefreshComments((prev) => !prev);
@@ -190,6 +200,12 @@ export function ContentDetailComponent(props: ContentDetailComponentProps) {
     if (delta == false) {
       await createFollow(content.creator_id, user.user_id);
       await updateFollowUser(content.creator_id, { delta: 1 });
+      sendNotificatonSystem(
+        content.creator_id,
+        `${loggedUserData.username} started following you!`,
+        "New Follower",
+        "FOLLOW"
+      );
     } else {
       await deleteFollow(content.creator_id, user.user_id);
       await updateFollowUser(content.creator_id, { delta: -1 });
@@ -201,21 +217,32 @@ export function ContentDetailComponent(props: ContentDetailComponentProps) {
     switch (typeBtn) {
       case 1: {
         const newLiked = !liked;
-        await updateLike(content.content_id, loggedUserData?.area_id || 0, {
-          delta: newLiked ? 1 : -1,
-        });
-        await updateLikeUser(content.creator_id, { delta: newLiked ? 1 : -1 });
         setLiked(newLiked);
         setTotalLikes((prev) => prev + (newLiked ? 1 : -1));
-        await upsert({
-          content_id: content.content_id,
-          user_id: user.user_id,
-          liked: newLiked,
-          pinned,
-          reps: 0,
-        });
         onLikeClick(totalLikes + (newLiked ? 1 : -1));
         onlikedChange(newLiked);
+
+        await Promise.all([
+          updateLike(content.content_id, loggedUserData?.area_id || 0, {
+            delta: newLiked ? 1 : -1,
+          }),
+          updateLikeUser(content.creator_id, { delta: newLiked ? 1 : -1 }),
+          upsert({
+            content_id: content.content_id,
+            user_id: user.user_id,
+            liked: newLiked,
+            pinned,
+            reps: 0,
+          }),
+        ]);
+        if (newLiked) {
+          sendNotificatonSystem(
+            content.creator_id,
+            `Your post was liked! by ${loggedUserData?.username || "someone"}`,
+            "Liked post",
+            "LIKE"
+          );
+        }
         break;
       }
       case 2: {
@@ -229,21 +256,23 @@ export function ContentDetailComponent(props: ContentDetailComponentProps) {
       }
       case 3: {
         const newReport = !reported;
-        await updateReport(content.content_id, loggedUserData?.area_id || 0, {
-          delta: newReport ? 1 : -1,
-        });
-        await updateReportUser(content.creator_id, {
-          delta: newReport ? 1 : -1,
-        });
+        await Promise.all([
+          updateReport(content.content_id, loggedUserData?.area_id || 0, {
+            delta: newReport ? 1 : -1,
+          }),
+          updateReportUser(content.creator_id, {
+            delta: newReport ? 1 : -1,
+          }),
+          upsert({
+            content_id: content.content_id,
+            user_id: user.user_id,
+            liked,
+            pinned,
+            reps: 0,
+          }),
+        ]);
         setReported(newReport);
         setTotalReports((prev) => prev + (newReport ? 1 : -1));
-        await upsert({
-          content_id: content.content_id,
-          user_id: user.user_id,
-          liked,
-          pinned,
-          reps: 0,
-        });
         break;
       }
     }

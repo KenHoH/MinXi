@@ -7,5 +7,6 @@ export type NotificationReq = {
     isSeen: boolean;
     title: string;
     description: string;
+    type: string;
 };
 

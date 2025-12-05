@@ -85,6 +85,7 @@ export function PostComponent({ post, liked, pinned }: PostComponentProps) {
   // Navigation handler for MiniPostDetail
   const handlePostNavigate = async (newPost: FullContentDto) => {
     console.log("Navigating to post:", newPost.content_id);
+    console.log("New Post Data:", newPost);
 
     // Fetch user history for the new post
     const histories = await getByUser(loggedUserData?.user_id || 0);
@@ -159,6 +160,7 @@ export function PostComponent({ post, liked, pinned }: PostComponentProps) {
 
       {showDetail && (
         <PostDetailComponent
+          key={currentPost.content_id}
           post={currentPost}
           ancestors={ancestor}
           children={children}

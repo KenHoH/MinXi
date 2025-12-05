@@ -17,4 +17,8 @@ export class BroadcastNotifReq {
   @ApiProperty()
   @IsString()
   description: string;
+
+  @ApiProperty()
+  @IsString()
+  type: string;
 }

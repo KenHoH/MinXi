@@ -16,6 +16,7 @@ import useBoardService from "@/shared/hooks/useBoardService";
 import PinModal from "../ContentComponent/PinModal";
 import useConnectionService from "@/shared/hooks/useConnectionService";
 import type { FullContentWithHistoryProps } from "../models/FullContentWithHistory";
+import useNotification from "@/shared/logic/useNotificatoin";
 
 interface PostDetailComponentProps {
   post: FullContentDto;
@@ -97,6 +98,7 @@ export function PostDetailComponent(props: PostDetailComponentProps) {
   const { updateLikeUser, updateFollowUser, updateReportUser } =
     useUserService();
   const { checkFollow, createFollow, deleteFollow } = useConnectionService();
+  const { sendNotificatonSystem } = useNotification();
 
   const handlePrevMedia = () => {
     setCurrentMediaIndex((prev) =>
@@ -145,6 +147,12 @@ export function PostDetailComponent(props: PostDetailComponentProps) {
       } else {
         await createFollow(post.creator_id, user.user_id);
         await updateFollowUser(post.creator_id, { delta: 1 });
+        sendNotificatonSystem(
+          post.creator_id,
+          `${userData?.username || "someone"} started following you!`,
+          "New Follower",
+          "FOLLOW"
+        );
       }
     } catch (error) {
       console.error("Failed to handle follow:", error);
@@ -156,25 +164,36 @@ export function PostDetailComponent(props: PostDetailComponentProps) {
     switch (typeBtn) {
       case 1: {
         const newLiked = !liked;
-        await updateLike(post.content_id, userData?.area_id || 0, {
-          delta: newLiked ? 1 : -1,
-        });
-        await updateLikeUser(post.creator_id, { delta: newLiked ? 1 : -1 });
         const newLikeCount = totalLikes + (newLiked ? 1 : -1);
         setLiked(newLiked);
         setTotalLikes(newLikeCount);
-
-        // Notify parent
         onLikeClick(newLikeCount);
         onLiked(newLiked);
 
-        await upsert({
-          content_id: post.content_id,
-          user_id: user.user_id,
-          liked: newLiked,
-          pinned,
-          reps: 0,
-        });
+        await Promise.all([
+          updateLike(post.content_id, userData?.area_id || 0, {
+            delta: newLiked ? 1 : -1,
+          }),
+          updateLikeUser(post.creator_id, {
+            delta: newLiked ? 1 : -1,
+          }),
+          upsert({
+            content_id: post.content_id,
+            user_id: user.user_id,
+            liked: newLiked,
+            pinned,
+            reps: 0,
+          }),
+        ]);
+        if (newLiked) {
+          sendNotificatonSystem(
+            post.creator_id,
+            "Your post was liked!",
+            "Liked post",
+            "LIKE"
+          );
+        }
+
         onLiked(newLiked);
         break;
       }
@@ -464,6 +483,12 @@ export function PostDetailComponent(props: PostDetailComponentProps) {
         onUpdateComment={() => {
           console.log("Updating comment count from PostDetail");
           handleBtn(3);
+          sendNotificatonSystem(
+            post.creator_id,
+            "Your post received a new comment!",
+            "New Comment",
+            "COMMENT"
+          );
           setTotalComments(totalComments);
         }}
       />

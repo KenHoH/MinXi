@@ -17,4 +17,8 @@ export class NotificationReq {
   @ApiProperty()
   @IsString()
   description: string;
+
+  @ApiProperty()
+  @IsString()
+  type: string;
 }

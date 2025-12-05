@@ -6,6 +6,7 @@ import {
   NOTIF_SERVICES,
   SOCIAL_SERVICES,
   SSE_SERVICES,
+  USER_SERVICES,
 } from '@app/common/constants/services';
 import { CommonModule } from '@app/common';
 import { JwtAuthGuard } from '@app/common/guard/jwt-auth-guard/jwt-auth.guard';
@@ -25,6 +26,13 @@ import { JwtAuthGuard } from '@app/common/guard/jwt-auth-guard/jwt-auth.guard';
         transport: Transport.TCP,
         options: {
           port: NOTIF_SERVICES.PORT,
+        },
+      },
+      {
+        name: USER_SERVICES.CLIENT,
+        transport: Transport.TCP,
+        options: {
+          port: USER_SERVICES.PORT,
         },
       },
     ]),

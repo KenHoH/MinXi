@@ -7,5 +7,6 @@ export type BroadcastNotifReq = {
     isSeen: boolean;
     title: string;
     description: string;
+    type: string;
 };
 

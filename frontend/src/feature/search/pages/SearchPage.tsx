@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import { Search } from "lucide-react";
 import RootLayout from "@/app/LayoutPage";
 import { ContentComponent } from "@/feature/content/components/ContentComponent/ContentComponent";
@@ -10,22 +10,31 @@ import useAlgorithmService from "@/shared/hooks/useAlgorithmService";
 import useUserService from "@/shared/hooks/useUserService";
 import { useAuthContext } from "@/feature/auth/context/AuthContext";
 import useContentService from "@/shared/hooks/useContentService";
+import { useSearchContent } from "../logic/useSearchContent";
+import type { FullContentWithHistoryProps } from "@/feature/content/components/models/FullContentWithHistory";
+import useHistoryService from "@/shared/hooks/useHistoryService";
 
 export default function SearchPage() {
   const [searchQuery, setSearchQuery] = useState("");
-  const [searchResults, setSearchResults] = useState<FullContentDto[]>([]);
+  const [searchResults, setSearchResults] = useState<
+    FullContentWithHistoryProps[]
+  >([]);
   const [isSearchLoading, setIsSearchLoading] = useState(false);
   const [searchDebounceTimer, setSearchDebounceTimer] =
     useState<NodeJS.Timeout | null>(null);
 
   const [loggedUser, setLoggedUser] = useState<UserDto | null>(null);
-  const { user } = useAuthContext();
+  const { user, isLoading: authLoading } = useAuthContext();
   const { findUserById } = useUserService();
-  const { searchContent, findFyp } = useAlgorithmService();
-  const { findAll } = useContentService();
+  const { searchContent } = useAlgorithmService();
+  const { getByUser } = useHistoryService();
 
-  const [allContent, setAllContent] = useState<FullContentDto[]>([]);
+  const [allContent, setAllContent] = useState<FullContentWithHistoryProps[]>(
+    []
+  );
   const [isAllContentLoading, setIsAllContentLoading] = useState(false);
+  const [hasMore, setHasMore] = useState(true);
+  const { loadMore, resetCursor } = useSearchContent();
 
   const searchObserverTarget = useRef<HTMLDivElement>(null);
   const allContentObserverTarget = useRef<HTMLDivElement>(null);
@@ -34,20 +43,52 @@ export default function SearchPage() {
     if (!loggedUser) return;
     const res = await searchContent(query, loggedUser.area_id);
     if (res) {
-      setSearchResults(res);
+      // Merge with user history if user is logged in
+      if (user) {
+        const histories = await getByUser(user.user_id);
+        if (histories) {
+          const mergedResults = res.map((item) => {
+            const userHistory = histories.find(
+              (h) => h.content_id === item.content_id
+            );
+            return {
+              ...item,
+              liked: userHistory?.liked || false,
+              pinned: userHistory?.pinned || false,
+            };
+          });
+          setSearchResults(mergedResults);
+          console.log("Search results with history:", mergedResults);
+          return;
+        }
+      }
+      // Set results without history if no user or no history
+      setSearchResults(
+        res.map((item) => ({ ...item, liked: false, pinned: false }))
+      );
     }
     console.log("Search results:", res);
   };
 
-  const fetchAllContent = async () => {
-    if (!loggedUser) return;
+  const loadMoreContent = useCallback(async () => {
+    if (isAllContentLoading || !hasMore) return;
+
     setIsAllContentLoading(true);
-    const res = await findAll(loggedUser.area_id);
-    if (res) {
-      setAllContent(res);
+    try {
+      const newItems = await loadMore();
+
+      if (newItems.length === 0) {
+        setHasMore(false);
+      } else {
+        setAllContent((prev) => [...prev, ...newItems]);
+      }
+    } catch (error) {
+      console.error("Failed to load more items:", error);
+      setHasMore(false);
+    } finally {
+      setIsAllContentLoading(false);
     }
-    setIsAllContentLoading(false);
-  };
+  }, [isAllContentLoading, hasMore, loadMore]);
 
   const handleSearchChange = async (query: string) => {
     setSearchQuery(query);
@@ -66,20 +107,26 @@ export default function SearchPage() {
     }
   };
 
-  const renderItem = (item: FullContentDto) => {
+  const renderItem = (item: FullContentWithHistoryProps) => {
     const isPost = item.post_type === "post";
     const isContent = item.post_type === "image" || item.post_type === "video";
 
     if (isContent) {
       return (
         <ContentComponent
-          key={item.content_id}
-          content={item as FullContentDto}
+          content={item}
+          liked={item.liked ?? false}
+          pinned={item.pinned ?? false}
         />
       );
     } else if (isPost) {
       return (
-        <PostComponent key={item.content_id} post={item as FullContentDto} />
+        <PostComponent
+          key={item.content_id}
+          post={item}
+          liked={item.liked ?? false}
+          pinned={item.pinned ?? false}
+        />
       );
     }
 
@@ -99,10 +146,37 @@ export default function SearchPage() {
   }, [user]);
 
   useEffect(() => {
-    if (loggedUser) {
-      fetchAllContent();
+    if (!authLoading) {
+      // Reset and load initial content
+      setAllContent([]);
+      setHasMore(true);
+      resetCursor();
+      loadMoreContent();
     }
-  }, [loggedUser]);
+  }, [user, authLoading]);
+
+  // Infinite scroll observer for all content
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (
+          entries[0].isIntersecting &&
+          hasMore &&
+          !isAllContentLoading &&
+          allContent.length !== 0
+        ) {
+          loadMoreContent();
+        }
+      },
+      { threshold: 0.2, rootMargin: "100px" }
+    );
+
+    if (allContentObserverTarget.current) {
+      observer.observe(allContentObserverTarget.current);
+    }
+
+    return () => observer.disconnect();
+  }, [loadMoreContent, hasMore, isAllContentLoading, allContent.length]);
 
   return (
     <RootLayout>
