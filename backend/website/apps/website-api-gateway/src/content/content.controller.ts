@@ -13,6 +13,7 @@ import {
   UseGuards,
   BadRequestException,
   Query,
+  ParseBoolPipe,
 } from '@nestjs/common';
 import { ContentService } from './content.service';
 import {
@@ -299,6 +300,14 @@ export class ContentController {
     @Param('limit', ParseIntPipe) limit: number,
   ): Promise<PageContentRes> {
     return this.contentService.findAllPage(area_id, page, limit);
+  }
+
+  @Patch(':creator_id/content/:isPrivate')
+  setUserContentPrivacy(
+    @Param('creator_id', ParseIntPipe) creator_id: number,
+    @Param('isPrivate', ParseBoolPipe) isPrivate: boolean,
+  ): Promise<number> {
+    return this.contentService.setUserContentPrivacy(creator_id, isPrivate);
   }
 
   @Patch(':content_id/:area_id/view')

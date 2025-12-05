@@ -10,8 +10,12 @@ export function useFeedContent(
   boardContentsMap: Map<number, FullContentDto[]>
 ) {
   const { user, isLoading } = useAuthContext();
-  const { findAllGlobalPage, getFollowingContent, getFriendContent } =
-    useContentService();
+  const {
+    findAllGlobalPage,
+    getFollowingContent,
+    getFriendContent,
+    findAllPage,
+  } = useContentService();
   const { findFyp } = useAlgorithmService();
 
   const [allCursor, setAllCursor] = useState(0);
@@ -19,6 +23,7 @@ export function useFeedContent(
   const [fypCursor, setFypCursor] = useState(0);
   const [friendCursor, setFriendCursor] = useState(0);
   const [followingCursor, setFollowingCursor] = useState(0);
+  const [allCertainAreaCursor, setAllCertainAreaCursor] = useState(0);
 
   const loadMore = useCallback(async () => {
     console.log("Attempting to load more content...", isLoading);
@@ -53,12 +58,14 @@ export function useFeedContent(
       response = await findFyp(user.area_id, fypCursor);
       setFypCursor(response?.currentPage || 0);
       console.log("FYP Cursor:", fypCursor);
-      console.log("Load more for FYP:", response);
+      console.log("Load more for FYP:", response?.contents.length);
       if (!response || response.contents.length === 0) {
-        const res = await findAllGlobalPage(areaId, allCursor, 10);
-        setAllCursor(res?.currentPage || 0);
-        setAreaId(res?.area_id || 1);
-        console.log("Because FYP Exhaust All Cursor:", allCursor);
+        // const res = await findAllGlobalPage(areaId, allCursor, 10);
+        // setAllCursor(res?.currentPage || 0);
+        // setAreaId(res?.area_id || 1);
+        const res = await findAllPage(user.area_id, allCertainAreaCursor, 10);
+        setAllCertainAreaCursor(res?.currentPage || 0);
+        console.log("All Certain Area Cursor:", allCertainAreaCursor);
         console.log("Load more for guest user:", res);
         result = res?.contents || [];
       } else {
@@ -109,6 +116,7 @@ export function useFeedContent(
     setFypCursor(0);
     setFriendCursor(0);
     setFollowingCursor(0);
+    setAllCertainAreaCursor(0);
     setAreaId(1);
   }, [currentFilter]);
 

@@ -111,6 +111,14 @@ export default function useContentService() {
   const updateScore = (dto: any) =>
     call<Ack>(() => ContentService.contentControllerUpdateScore(dto));
 
+  const setUserContentPrivacy = (creatorId: number, isPrivate: boolean) =>
+    call<Number>(() =>
+      ContentService.contentControllerSetUserContentPrivacy(
+        creatorId,
+        isPrivate
+      )
+    );
+
   const getByUserAllPublic = (creatorId: number) =>
     call<FullContentDto[]>(() =>
       ContentService.contentControllerGetByUserAllPublic(creatorId)
@@ -137,6 +145,7 @@ export default function useContentService() {
     getAncestorPost,
     getFullPost,
     getChildPost,
+    setUserContentPrivacy,
     findAll,
     findAllPage,
     findAllGlobalPage,

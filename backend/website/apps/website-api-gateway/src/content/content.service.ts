@@ -261,4 +261,16 @@ export class ContentService implements IContentService {
       this.contentClient.send(CONTENT_MSG.getFullPost, { contentId, areaId }),
     );
   }
+
+  async setUserContentPrivacy(
+    creator_id: number,
+    isPrivate: boolean,
+  ): Promise<number> {
+    return firstValueFrom(
+      this.contentClient.send(CONTENT_MSG.setUserContentPrivacy, {
+        creator_id,
+        isPrivate,
+      }),
+    );
+  }
 }

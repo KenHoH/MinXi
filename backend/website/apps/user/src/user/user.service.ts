@@ -104,7 +104,13 @@ export class UserService implements IUserService {
 
   async updateRestriction(id: number, dto: UpdateRestriction): Promise<Ack> {
     try {
+      
       await this.repo.updateRestriction(id, dto);
+
+
+      
+
+
       return { Msg: 'Restriction updated successfully', Valid: true };
     } catch (error) {
       this.logger.error(

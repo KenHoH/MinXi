@@ -54,7 +54,12 @@ export default function FeedList({
       if (newItems.length === 0) {
         setHasMore(false);
       } else {
-        setItems((prev) => [...prev, ...newItems]);
+        setItems((prev) => [
+          ...prev,
+          ...newItems.filter(
+            (item) => !prev.some((p) => p.content_id === item.content_id)
+          ),
+        ]);
       }
     } catch (error) {
       console.error("Failed to load more items:", error);

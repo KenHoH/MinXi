@@ -372,6 +372,25 @@ export class ContentService {
         });
     }
     /**
+     * @param creatorId
+     * @param isPrivate
+     * @returns number
+     * @throws ApiError
+     */
+    public static contentControllerSetUserContentPrivacy(
+        creatorId: number,
+        isPrivate: boolean,
+    ): CancelablePromise<number> {
+        return __request(OpenAPI, {
+            method: 'PATCH',
+            url: '/content/{creator_id}/content/{isPrivate}',
+            path: {
+                'creator_id': creatorId,
+                'isPrivate': isPrivate,
+            },
+        });
+    }
+    /**
      * @param contentId
      * @param areaId
      * @param requestBody

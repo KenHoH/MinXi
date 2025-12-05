@@ -25,6 +25,10 @@ export interface IContentService {
     dto: deltaDto,
   ): Promise<Ack>;
 
+  setUserContentPrivacy(
+    creator_id: number,
+    isPrivate: boolean,
+  ): Promise<number>;
   updateScore(dto: UpdateScoreDto): Promise<Ack>;
   setPrivate(content_id: number, area_id: number): Promise<Ack>;
   setPublic(content_id: number, area_id: number): Promise<Ack>;

@@ -2620,4 +2620,30 @@ export class ContentService implements IContentService {
       );
     }
   }
+
+  async setUserContentPrivacy(
+    creator_id: number,
+    isPrivate: boolean,
+  ): Promise<number> {
+    try {
+      const result = await this.prisma.content.updateMany({
+        where: {
+          creator_id: creator_id,
+        },
+        data: {
+          visibilityPrivate: isPrivate,
+        },
+      });
+
+      return result.count;
+    } catch (error) {
+      this.logger.error('Failed to update content privacy', error.message);
+      throw httpToRpc(
+        new HttpException(
+          `Failed to update ${creator_id} content list`,
+          HttpStatus.INTERNAL_SERVER_ERROR,
+        ),
+      );
+    }
+  }
 }

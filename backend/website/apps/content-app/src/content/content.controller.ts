@@ -278,4 +278,14 @@ export class ContentController {
     );
     return this.contentService.findAllGlobalPage(payload);
   }
+
+  @MessagePattern(CONTENT_MSG.setUserContentPrivacy)
+  async setUserContentPrivacy(
+    @Payload() dto: { creator_id: number; isPrivate: boolean },
+  ): Promise<Number> {
+    return this.contentService.setUserContentPrivacy(
+      dto.creator_id,
+      dto.isPrivate,
+    );
+  }
 }

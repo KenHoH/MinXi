@@ -38,6 +38,7 @@ export const CONTENT_MSG = {
   updateComment: 'content.comment',
   updateReport: 'content.report',
   updateScore: 'content.score',
+  setUserContentPrivacy: 'content.userContentPrivacy',
   setPrivate: 'content.private',
   setPublic: 'content.public',
   findAll: 'content.findAll',

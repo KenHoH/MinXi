@@ -14,6 +14,7 @@ import RootLayout from "@/app/LayoutPage";
 import useUserService from "@/shared/hooks/useUserService";
 import { useAuthContext } from "@/feature/auth/context/AuthContext";
 import { useToast } from "@/shared/context/ToastContext";
+import useContentService from "@/shared/hooks/useContentService";
 
 export default function SettingsPage() {
   const [settings, setSettings] = useState({
@@ -33,6 +34,7 @@ export default function SettingsPage() {
 
   const { user, updateUser } = useAuthContext();
   const { findOneByUsername, updatePrivacySettings, update } = useUserService();
+  const { setUserContentPrivacy } = useContentService();
   const { showToast } = useToast();
 
   const handleToggle = async (key: keyof typeof settings) => {
@@ -40,15 +42,18 @@ export default function SettingsPage() {
     setSettings(newSettings);
 
     if (!user) return;
-    await updatePrivacySettings(
-      user.user_id,
-      newSettings.privateContent,
-      newSettings.privateLiked,
-      newSettings.privatePinned,
-      newSettings.likeDisable,
-      newSettings.commentDisable,
-      newSettings.followDisable
-    );
+    await Promise.all([
+      await updatePrivacySettings(
+        user.user_id,
+        newSettings.privateContent,
+        newSettings.privateLiked,
+        newSettings.privatePinned,
+        newSettings.likeDisable,
+        newSettings.commentDisable,
+        newSettings.followDisable
+      ),
+      await setUserContentPrivacy(user.user_id, newSettings.privateContent),
+    ]);
     showToast("Privacy settings updated");
   };
 
