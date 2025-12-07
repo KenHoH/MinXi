@@ -32,6 +32,8 @@ export class NotificationService implements INotifService {
         return {
           id: 0,
           userId: dto.userId,
+          username: settings.username,
+          profilePicture: settings.profile_picture,
           isSeen: dto.isSeen,
           title: dto.title,
           description: dto.description,
@@ -47,7 +49,16 @@ export class NotificationService implements INotifService {
           description: dto.description,
         },
       });
-      return notification;
+      return {
+        id: 0,
+        userId: notification.userId,
+        username: settings.username,
+        profilePicture: settings.profile_picture,
+        isSeen: notification.isSeen,
+        title: notification.title,
+        description: notification.description,
+        createdAt: notification.createdAt,
+      };
     } catch (error) {
       throw httpToRpc(
         new HttpException('Failed to Send Notification', HttpStatus.NOT_FOUND),
@@ -56,12 +67,33 @@ export class NotificationService implements INotifService {
   }
   async getNotification(userId: number): Promise<NotificationRes[]> {
     try {
-      const notifications = await this.prisma.notification.findMany({
-        where: {
-          userId: userId,
-        },
+      const result = await this.prisma.$transaction(async (prisma) => {
+        const notifications = await prisma.notification.findMany({
+          where: {
+            userId: userId,
+          },
+          orderBy: {
+            createdAt: 'desc',
+          },
+        });
+        const userInstance: UserDto = await firstValueFrom(
+          this.userClient.send(USER_MSG.findOne, userId),
+        );
+        const notificationsWithUser: NotificationRes[] = notifications.map(
+          (notification) => ({
+            id: notification.id,
+            userId: notification.userId,
+            username: userInstance.username,
+            profilePicture: userInstance.profile_picture,
+            isSeen: notification.isSeen,
+            title: notification.title,
+            description: notification.description,
+            createdAt: notification.createdAt,
+          }),
+        );
+        return notificationsWithUser;
       });
-      return notifications;
+      return result;
     } catch (error) {
       throw httpToRpc(
         new HttpException('No Notifications', HttpStatus.NOT_FOUND),

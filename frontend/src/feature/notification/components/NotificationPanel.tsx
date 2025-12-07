@@ -60,26 +60,51 @@ export function NotificationPanel({
             <div className="divide-y divide-dark-700">
               {filteredNotifications.map((notification) => (
                 <div
+                  key={notification.id}
                   className={`p-4 hover:bg-dark-800 transition-colors cursor-pointer ${
                     !notification.isSeen ? "bg-dark-800/50" : ""
                   }`}
                 >
-                  {/* Content */}
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-start justify-between gap-2">
-                      <div className="flex-1">
-                        <p className="text-sm text-gray-200">
-                          <span className="font-semibold text-white">
+                  <div className="flex gap-3">
+                    {/* User Avatar */}
+                    <div className="relative flex-shrink-0">
+                      <img
+                        src={
+                          notification.profilePicture ||
+                          "http://localhost:3000/uploads/profile/1763906830326-69740177.png"
+                        }
+                        alt={notification.username}
+                        className="w-12 h-12 rounded-full object-cover"
+                      />
+                    </div>
+
+                    {/* Content */}
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-start justify-between gap-2">
+                        <div className="flex-1">
+                          <p className="text-sm text-gray-200">
+                            <span className="font-semibold text-white">
+                              {notification.username}
+                            </span>{" "}
                             {notification.title}
-                          </span>{" "}
-                          {notification.description}
-                        </p>
-                        <p className="text-xs text-gray-500 mt-1">
-                          {formatTime(notification.createdAt)}
-                        </p>
+                          </p>
+                          <p className="text-xs text-gray-400 mt-1">
+                            {notification.description}
+                          </p>
+                          <p className="text-xs text-gray-500 mt-1">
+                            {formatTime(notification.createdAt)}
+                          </p>
+                        </div>
                       </div>
                     </div>
                   </div>
+
+                  {/* Unread indicator */}
+                  {!notification.isSeen && (
+                    <div className="mt-2 flex justify-end">
+                      <div className="w-2 h-2 bg-burgundy-600 rounded-full" />
+                    </div>
+                  )}
                 </div>
               ))}
             </div>

@@ -3,11 +3,12 @@
 /* tslint:disable */
 /* eslint-disable */
 export type NotificationRes = {
-    id: number;
-    userId: number;
-    isSeen: boolean;
-    title: string;
-    description: string;
-    createdAt: string;
+  id: number;
+  userId: number;
+  username: string;
+  profilePicture: string;
+  isSeen: boolean;
+  title: string;
+  description: string;
+  createdAt: string;
 };
-

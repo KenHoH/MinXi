@@ -11,6 +11,14 @@ export class NotificationRes {
   userId: number;
 
   @ApiProperty()
+  @IsString()
+  username: string;
+
+  @ApiProperty()
+  @IsString()
+  profilePicture: string;
+
+  @ApiProperty()
   @IsBoolean()
   isSeen: boolean;
 
