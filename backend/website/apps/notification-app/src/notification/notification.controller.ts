@@ -19,7 +19,7 @@ export class NotificationController {
   }
 
   @MessagePattern(NOTIF_MSG.deleteNotif)
-  async remove(@Payload() notificationId: number) {
-    return this.notificationService.deleteNotification(notificationId);
+  async remove(@Payload() userId: number) {
+    return this.notificationService.deleteNotification(userId);
   }
 }

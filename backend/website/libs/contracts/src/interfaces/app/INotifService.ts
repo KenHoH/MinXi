@@ -5,5 +5,5 @@ import { NotificationRes } from '@app/contracts/shared-dto/notification/res/noti
 export interface INotifService {
   create(dto: NotificationReq): Promise<NotificationRes>;
   getNotification(userId: number): Promise<NotificationRes[]>;
-  deleteNotification(notificationId: number): Promise<DeleteNotificationRes>;
+  deleteNotification(userId: number): Promise<number>;
 }

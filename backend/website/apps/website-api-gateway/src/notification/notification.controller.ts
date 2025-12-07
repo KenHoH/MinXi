@@ -34,9 +34,7 @@ export class NotificationController {
   }
 
   @Delete(':notificationId')
-  remove(
-    @Param('notificationId') notificationId: number,
-  ): Promise<DeleteNotificationRes> {
+  remove(@Param('notificationId') notificationId: number): Promise<number> {
     return this.notificationService.deleteNotification(notificationId);
   }
 }

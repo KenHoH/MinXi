@@ -5,6 +5,7 @@ import { BroadcastNotifReq } from '@app/contracts/shared-dto/sse/req/BroadcastNo
 export function buildNotifResponse(dto: BroadcastNotifReq): NotificationReq {
   return {
     userId: dto.userId,
+    sendId: dto.sendId,
     title: dto.title,
     description: dto.description,
     isSeen: dto.isSeen,

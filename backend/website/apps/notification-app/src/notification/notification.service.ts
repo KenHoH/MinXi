@@ -7,7 +7,13 @@ import { NotificationReq } from '@app/contracts/shared-dto/notification/req/noti
 import { DeleteNotificationRes } from '@app/contracts/shared-dto/notification/res/deleteNotification';
 import { NotificationRes } from '@app/contracts/shared-dto/notification/res/notificationRes';
 import { UserDto } from '@app/contracts/shared-dto/user/user.dto';
-import { HttpException, HttpStatus, Inject, Injectable } from '@nestjs/common';
+import {
+  HttpException,
+  HttpStatus,
+  Inject,
+  Injectable,
+  Logger,
+} from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
 import { firstValueFrom } from 'rxjs';
 
@@ -17,13 +23,19 @@ export class NotificationService implements INotifService {
     private readonly prisma: LogDatabaseConnection,
     @Inject(USER_SERVICES.CLIENT) private readonly userClient: ClientProxy,
   ) {}
+  log = new Logger('NotificationService');
   async create(dto: NotificationReq): Promise<NotificationRes> {
     try {
       const id: number = dto.userId;
       const settings: UserDto = await firstValueFrom(
         this.userClient.send(USER_MSG.findOne, id),
       );
-
+      const sender: UserDto = await firstValueFrom(
+        this.userClient.send(USER_MSG.findOne, dto.sendId),
+      );
+      dto.title = `${sender.username} ${dto.title}`;
+      dto.description = `${dto.description}`;
+      this.log.debug(`User sender = ${sender.username}`);
       if (
         (settings.liked_notification_disabled && dto.type === 'LIKE') ||
         (settings.comments_notification_disabled && dto.type === 'COMMENT') ||
@@ -32,8 +44,8 @@ export class NotificationService implements INotifService {
         return {
           id: 0,
           userId: dto.userId,
-          username: settings.username,
-          profilePicture: settings.profile_picture,
+          username: sender.username,
+          profilePicture: sender.profile_picture,
           isSeen: dto.isSeen,
           title: dto.title,
           description: dto.description,
@@ -44,6 +56,7 @@ export class NotificationService implements INotifService {
       const notification = await this.prisma.notification.create({
         data: {
           userId: dto.userId,
+          sendId: dto.sendId,
           isSeen: dto.isSeen,
           title: dto.title,
           description: dto.description,
@@ -52,8 +65,8 @@ export class NotificationService implements INotifService {
       return {
         id: 0,
         userId: notification.userId,
-        username: settings.username,
-        profilePicture: settings.profile_picture,
+        username: sender.username,
+        profilePicture: sender.profile_picture,
         isSeen: notification.isSeen,
         title: notification.title,
         description: notification.description,
@@ -76,20 +89,39 @@ export class NotificationService implements INotifService {
             createdAt: 'desc',
           },
         });
+
         const userInstance: UserDto = await firstValueFrom(
           this.userClient.send(USER_MSG.findOne, userId),
         );
+        this.log.debug(
+          `Fetched user instance for area ID: ${userInstance.area_id}`,
+        );
+        const allInstance = await firstValueFrom(
+          this.userClient.send(USER_MSG.findAll, userInstance.area_id),
+        );
+
         const notificationsWithUser: NotificationRes[] = notifications.map(
-          (notification) => ({
-            id: notification.id,
-            userId: notification.userId,
-            username: userInstance.username,
-            profilePicture: userInstance.profile_picture,
-            isSeen: notification.isSeen,
-            title: notification.title,
-            description: notification.description,
-            createdAt: notification.createdAt,
-          }),
+          (notification) => {
+            this.log.debug(`Mapping notification ID: ${notification.sendId}`);
+            const sender = allInstance.find(
+              (user: UserDto) => user.user_id === notification.sendId,
+            );
+            this.log.debug(
+              `Found sender: ${sender?.username} for notification ID: ${notification.sendId}`,
+            );
+            return {
+              id: notification.id,
+              userId: notification.userId,
+              username: sender?.username || 'Unknown',
+              profilePicture:
+                sender?.profile_picture ||
+                'http://localhost:3000/uploads/profile/1763906830326-69740177.png',
+              isSeen: notification.isSeen,
+              title: notification.title,
+              description: notification.description,
+              createdAt: notification.createdAt,
+            };
+          },
         );
         return notificationsWithUser;
       });
@@ -100,16 +132,14 @@ export class NotificationService implements INotifService {
       );
     }
   }
-  async deleteNotification(
-    notificationId: number,
-  ): Promise<DeleteNotificationRes> {
+  async deleteNotification(userId: number): Promise<number> {
     try {
-      const notification = await this.prisma.notification.delete({
+      const notification = await this.prisma.notification.deleteMany({
         where: {
-          id: notificationId,
+          userId: userId,
         },
       });
-      return notification;
+      return notification.count;
     } catch (error) {
       throw httpToRpc(
         new HttpException(

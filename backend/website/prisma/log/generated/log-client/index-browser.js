@@ -142,6 +142,7 @@ exports.Prisma.ReportScalarFieldEnum = {
 exports.Prisma.NotificationScalarFieldEnum = {
   id: 'id',
   userId: 'userId',
+  sendId: 'sendId',
   isSeen: 'isSeen',
   title: 'title',
   description: 'description',

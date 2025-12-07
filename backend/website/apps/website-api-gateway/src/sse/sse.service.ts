@@ -75,7 +75,7 @@ export class SseService implements ISSEService {
       data: message,
     });
 
-    await this.forwardMessage(dto); // send to message database
+    await this.forwardMessage(dto);
     return {
       Valid: true,
       Msg: 'Successfully sent message',
@@ -151,6 +151,7 @@ export class SseService implements ISSEService {
   private async forwardNotification(dto: BroadcastNotifReq) {
     const payload: NotificationReq = {
       userId: dto.userId,
+      sendId: dto.sendId,
       title: dto.title,
       description: dto.description,
       isSeen: dto.isSeen,

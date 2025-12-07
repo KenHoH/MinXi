@@ -1,10 +1,15 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsBoolean, IsInt, IsString } from 'class-validator';
+import { IsBoolean, IsInt, IsOptional, IsString } from 'class-validator';
 
 export class BroadcastNotifReq {
   @ApiProperty()
   @IsInt()
   userId: number;
+
+  @ApiProperty({ required: false })
+  @IsInt()
+  @IsOptional()
+  sendId?: number;
 
   @ApiProperty()
   @IsBoolean()

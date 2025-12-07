@@ -2915,16 +2915,19 @@ export namespace Prisma {
   export type NotificationAvgAggregateOutputType = {
     id: number | null
     userId: number | null
+    sendId: number | null
   }
 
   export type NotificationSumAggregateOutputType = {
     id: number | null
     userId: number | null
+    sendId: number | null
   }
 
   export type NotificationMinAggregateOutputType = {
     id: number | null
     userId: number | null
+    sendId: number | null
     isSeen: boolean | null
     title: string | null
     description: string | null
@@ -2934,6 +2937,7 @@ export namespace Prisma {
   export type NotificationMaxAggregateOutputType = {
     id: number | null
     userId: number | null
+    sendId: number | null
     isSeen: boolean | null
     title: string | null
     description: string | null
@@ -2943,6 +2947,7 @@ export namespace Prisma {
   export type NotificationCountAggregateOutputType = {
     id: number
     userId: number
+    sendId: number
     isSeen: number
     title: number
     description: number
@@ -2954,16 +2959,19 @@ export namespace Prisma {
   export type NotificationAvgAggregateInputType = {
     id?: true
     userId?: true
+    sendId?: true
   }
 
   export type NotificationSumAggregateInputType = {
     id?: true
     userId?: true
+    sendId?: true
   }
 
   export type NotificationMinAggregateInputType = {
     id?: true
     userId?: true
+    sendId?: true
     isSeen?: true
     title?: true
     description?: true
@@ -2973,6 +2981,7 @@ export namespace Prisma {
   export type NotificationMaxAggregateInputType = {
     id?: true
     userId?: true
+    sendId?: true
     isSeen?: true
     title?: true
     description?: true
@@ -2982,6 +2991,7 @@ export namespace Prisma {
   export type NotificationCountAggregateInputType = {
     id?: true
     userId?: true
+    sendId?: true
     isSeen?: true
     title?: true
     description?: true
@@ -3078,6 +3088,7 @@ export namespace Prisma {
   export type NotificationGroupByOutputType = {
     id: number
     userId: number
+    sendId: number | null
     isSeen: boolean
     title: string
     description: string
@@ -3106,6 +3117,7 @@ export namespace Prisma {
   export type NotificationSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
     id?: boolean
     userId?: boolean
+    sendId?: boolean
     isSeen?: boolean
     title?: boolean
     description?: boolean
@@ -3117,13 +3129,14 @@ export namespace Prisma {
   export type NotificationSelectScalar = {
     id?: boolean
     userId?: boolean
+    sendId?: boolean
     isSeen?: boolean
     title?: boolean
     description?: boolean
     createdAt?: boolean
   }
 
-  export type NotificationOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "userId" | "isSeen" | "title" | "description" | "createdAt", ExtArgs["result"]["notification"]>
+  export type NotificationOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "userId" | "sendId" | "isSeen" | "title" | "description" | "createdAt", ExtArgs["result"]["notification"]>
 
   export type $NotificationPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     name: "Notification"
@@ -3131,6 +3144,7 @@ export namespace Prisma {
     scalars: $Extensions.GetPayloadResult<{
       id: number
       userId: number
+      sendId: number | null
       isSeen: boolean
       title: string
       description: string
@@ -3506,6 +3520,7 @@ export namespace Prisma {
   interface NotificationFieldRefs {
     readonly id: FieldRef<"Notification", 'Int'>
     readonly userId: FieldRef<"Notification", 'Int'>
+    readonly sendId: FieldRef<"Notification", 'Int'>
     readonly isSeen: FieldRef<"Notification", 'Boolean'>
     readonly title: FieldRef<"Notification", 'String'>
     readonly description: FieldRef<"Notification", 'String'>
@@ -3873,6 +3888,7 @@ export namespace Prisma {
   export const NotificationScalarFieldEnum: {
     id: 'id',
     userId: 'userId',
+    sendId: 'sendId',
     isSeen: 'isSeen',
     title: 'title',
     description: 'description',
@@ -4136,6 +4152,7 @@ export namespace Prisma {
     NOT?: NotificationWhereInput | NotificationWhereInput[]
     id?: IntFilter<"Notification"> | number
     userId?: IntFilter<"Notification"> | number
+    sendId?: IntNullableFilter<"Notification"> | number | null
     isSeen?: BoolFilter<"Notification"> | boolean
     title?: StringFilter<"Notification"> | string
     description?: StringFilter<"Notification"> | string
@@ -4145,6 +4162,7 @@ export namespace Prisma {
   export type NotificationOrderByWithRelationInput = {
     id?: SortOrder
     userId?: SortOrder
+    sendId?: SortOrderInput | SortOrder
     isSeen?: SortOrder
     title?: SortOrder
     description?: SortOrder
@@ -4158,6 +4176,7 @@ export namespace Prisma {
     OR?: NotificationWhereInput[]
     NOT?: NotificationWhereInput | NotificationWhereInput[]
     userId?: IntFilter<"Notification"> | number
+    sendId?: IntNullableFilter<"Notification"> | number | null
     isSeen?: BoolFilter<"Notification"> | boolean
     title?: StringFilter<"Notification"> | string
     description?: StringFilter<"Notification"> | string
@@ -4167,6 +4186,7 @@ export namespace Prisma {
   export type NotificationOrderByWithAggregationInput = {
     id?: SortOrder
     userId?: SortOrder
+    sendId?: SortOrderInput | SortOrder
     isSeen?: SortOrder
     title?: SortOrder
     description?: SortOrder
@@ -4184,6 +4204,7 @@ export namespace Prisma {
     NOT?: NotificationScalarWhereWithAggregatesInput | NotificationScalarWhereWithAggregatesInput[]
     id?: IntWithAggregatesFilter<"Notification"> | number
     userId?: IntWithAggregatesFilter<"Notification"> | number
+    sendId?: IntNullableWithAggregatesFilter<"Notification"> | number | null
     isSeen?: BoolWithAggregatesFilter<"Notification"> | boolean
     title?: StringWithAggregatesFilter<"Notification"> | string
     description?: StringWithAggregatesFilter<"Notification"> | string
@@ -4319,6 +4340,7 @@ export namespace Prisma {
 
   export type NotificationCreateInput = {
     userId: number
+    sendId?: number | null
     isSeen?: boolean
     title: string
     description: string
@@ -4328,6 +4350,7 @@ export namespace Prisma {
   export type NotificationUncheckedCreateInput = {
     id?: number
     userId: number
+    sendId?: number | null
     isSeen?: boolean
     title: string
     description: string
@@ -4336,6 +4359,7 @@ export namespace Prisma {
 
   export type NotificationUpdateInput = {
     userId?: IntFieldUpdateOperationsInput | number
+    sendId?: NullableIntFieldUpdateOperationsInput | number | null
     isSeen?: BoolFieldUpdateOperationsInput | boolean
     title?: StringFieldUpdateOperationsInput | string
     description?: StringFieldUpdateOperationsInput | string
@@ -4345,6 +4369,7 @@ export namespace Prisma {
   export type NotificationUncheckedUpdateInput = {
     id?: IntFieldUpdateOperationsInput | number
     userId?: IntFieldUpdateOperationsInput | number
+    sendId?: NullableIntFieldUpdateOperationsInput | number | null
     isSeen?: BoolFieldUpdateOperationsInput | boolean
     title?: StringFieldUpdateOperationsInput | string
     description?: StringFieldUpdateOperationsInput | string
@@ -4354,6 +4379,7 @@ export namespace Prisma {
   export type NotificationCreateManyInput = {
     id?: number
     userId: number
+    sendId?: number | null
     isSeen?: boolean
     title: string
     description: string
@@ -4362,6 +4388,7 @@ export namespace Prisma {
 
   export type NotificationUpdateManyMutationInput = {
     userId?: IntFieldUpdateOperationsInput | number
+    sendId?: NullableIntFieldUpdateOperationsInput | number | null
     isSeen?: BoolFieldUpdateOperationsInput | boolean
     title?: StringFieldUpdateOperationsInput | string
     description?: StringFieldUpdateOperationsInput | string
@@ -4371,6 +4398,7 @@ export namespace Prisma {
   export type NotificationUncheckedUpdateManyInput = {
     id?: IntFieldUpdateOperationsInput | number
     userId?: IntFieldUpdateOperationsInput | number
+    sendId?: NullableIntFieldUpdateOperationsInput | number | null
     isSeen?: BoolFieldUpdateOperationsInput | boolean
     title?: StringFieldUpdateOperationsInput | string
     description?: StringFieldUpdateOperationsInput | string
@@ -4624,6 +4652,17 @@ export namespace Prisma {
     _max?: NestedBoolFilter<$PrismaModel>
   }
 
+  export type IntNullableFilter<$PrismaModel = never> = {
+    equals?: number | IntFieldRefInput<$PrismaModel> | null
+    in?: number[] | null
+    notIn?: number[] | null
+    lt?: number | IntFieldRefInput<$PrismaModel>
+    lte?: number | IntFieldRefInput<$PrismaModel>
+    gt?: number | IntFieldRefInput<$PrismaModel>
+    gte?: number | IntFieldRefInput<$PrismaModel>
+    not?: NestedIntNullableFilter<$PrismaModel> | number | null
+  }
+
   export type NotificationOrderByRelevanceInput = {
     fields: NotificationOrderByRelevanceFieldEnum | NotificationOrderByRelevanceFieldEnum[]
     sort: SortOrder
@@ -4633,6 +4672,7 @@ export namespace Prisma {
   export type NotificationCountOrderByAggregateInput = {
     id?: SortOrder
     userId?: SortOrder
+    sendId?: SortOrder
     isSeen?: SortOrder
     title?: SortOrder
     description?: SortOrder
@@ -4642,11 +4682,13 @@ export namespace Prisma {
   export type NotificationAvgOrderByAggregateInput = {
     id?: SortOrder
     userId?: SortOrder
+    sendId?: SortOrder
   }
 
   export type NotificationMaxOrderByAggregateInput = {
     id?: SortOrder
     userId?: SortOrder
+    sendId?: SortOrder
     isSeen?: SortOrder
     title?: SortOrder
     description?: SortOrder
@@ -4656,6 +4698,7 @@ export namespace Prisma {
   export type NotificationMinOrderByAggregateInput = {
     id?: SortOrder
     userId?: SortOrder
+    sendId?: SortOrder
     isSeen?: SortOrder
     title?: SortOrder
     description?: SortOrder
@@ -4665,6 +4708,23 @@ export namespace Prisma {
   export type NotificationSumOrderByAggregateInput = {
     id?: SortOrder
     userId?: SortOrder
+    sendId?: SortOrder
+  }
+
+  export type IntNullableWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: number | IntFieldRefInput<$PrismaModel> | null
+    in?: number[] | null
+    notIn?: number[] | null
+    lt?: number | IntFieldRefInput<$PrismaModel>
+    lte?: number | IntFieldRefInput<$PrismaModel>
+    gt?: number | IntFieldRefInput<$PrismaModel>
+    gte?: number | IntFieldRefInput<$PrismaModel>
+    not?: NestedIntNullableWithAggregatesFilter<$PrismaModel> | number | null
+    _count?: NestedIntNullableFilter<$PrismaModel>
+    _avg?: NestedFloatNullableFilter<$PrismaModel>
+    _sum?: NestedIntNullableFilter<$PrismaModel>
+    _min?: NestedIntNullableFilter<$PrismaModel>
+    _max?: NestedIntNullableFilter<$PrismaModel>
   }
 
   export type IntFieldUpdateOperationsInput = {
@@ -4685,6 +4745,14 @@ export namespace Prisma {
 
   export type BoolFieldUpdateOperationsInput = {
     set?: boolean
+  }
+
+  export type NullableIntFieldUpdateOperationsInput = {
+    set?: number | null
+    increment?: number
+    decrement?: number
+    multiply?: number
+    divide?: number
   }
 
   export type NestedIntFilter<$PrismaModel = never> = {
@@ -4828,6 +4896,33 @@ export namespace Prisma {
     _count?: NestedIntFilter<$PrismaModel>
     _min?: NestedBoolFilter<$PrismaModel>
     _max?: NestedBoolFilter<$PrismaModel>
+  }
+
+  export type NestedIntNullableWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: number | IntFieldRefInput<$PrismaModel> | null
+    in?: number[] | null
+    notIn?: number[] | null
+    lt?: number | IntFieldRefInput<$PrismaModel>
+    lte?: number | IntFieldRefInput<$PrismaModel>
+    gt?: number | IntFieldRefInput<$PrismaModel>
+    gte?: number | IntFieldRefInput<$PrismaModel>
+    not?: NestedIntNullableWithAggregatesFilter<$PrismaModel> | number | null
+    _count?: NestedIntNullableFilter<$PrismaModel>
+    _avg?: NestedFloatNullableFilter<$PrismaModel>
+    _sum?: NestedIntNullableFilter<$PrismaModel>
+    _min?: NestedIntNullableFilter<$PrismaModel>
+    _max?: NestedIntNullableFilter<$PrismaModel>
+  }
+
+  export type NestedFloatNullableFilter<$PrismaModel = never> = {
+    equals?: number | FloatFieldRefInput<$PrismaModel> | null
+    in?: number[] | null
+    notIn?: number[] | null
+    lt?: number | FloatFieldRefInput<$PrismaModel>
+    lte?: number | FloatFieldRefInput<$PrismaModel>
+    gt?: number | FloatFieldRefInput<$PrismaModel>
+    gte?: number | FloatFieldRefInput<$PrismaModel>
+    not?: NestedFloatNullableFilter<$PrismaModel> | number | null
   }
 
 

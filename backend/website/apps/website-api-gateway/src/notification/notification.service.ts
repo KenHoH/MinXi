@@ -19,11 +19,9 @@ export class NotificationService implements INotifService {
   async getNotification(userId: number): Promise<NotificationRes[]> {
     return await firstValueFrom(this.client.send(NOTIF_MSG.getNotif, userId));
   }
-  async deleteNotification(
-    notificationId: number,
-  ): Promise<DeleteNotificationRes> {
+  async deleteNotification(userId: number): Promise<number> {
     return await firstValueFrom(
-      this.client.send(NOTIF_MSG.deleteNotif, notificationId),
+      this.client.send(NOTIF_MSG.deleteNotif, userId),
     );
   }
 }
