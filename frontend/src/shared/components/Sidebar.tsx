@@ -12,10 +12,10 @@ import { useAuthContext } from "@/feature/auth/context/AuthContext";
 import { useToast } from "../context/ToastContext";
 import useNotification from "../logic/useNotificatoin";
 import useGetUserConnection from "../logic/useGetUserConnection";
-import { useEffect, useState } from "react";
 import { NotificationPanel } from "@/feature/notification/components/NotificationPanel";
 import useNotificationService from "../hooks/useNotificationService";
 import type { NotificationRes } from "@/service/api";
+import { useState } from "react";
 
 export function Sidebar() {
   const [showNotifications, setShowNotifications] = useState(false);
@@ -25,23 +25,11 @@ export function Sidebar() {
     { href: "/create", label: "Create", icon: Plus },
     { href: "/chat", label: "Chat", icon: MessageSquare },
   ];
-  const [notifications, setNotifications] = useState<NotificationRes[]>([]);
   const navigate = useNavigate();
   const { user, logout } = useAuthContext();
-  const { getNotif } = useNotificationService();
   const { showToast } = useToast();
 
-  useEffect(() => {
-    const fetchNotifications = async () => {
-      if (user) {
-        const res = await getNotif(user.user_id);
-        if (res) setNotifications(res);
-      }
-    };
-    fetchNotifications();
-  }, [user]);
-
-  const { followings, load } = useGetUserConnection();
+  const { followings } = useGetUserConnection();
 
   const handleLogout = async () => {
     const refreshToken = document.cookie
@@ -65,11 +53,11 @@ export function Sidebar() {
 
   return (
     <>
-      {notifications && (
+      {showNotifications && (
         <NotificationPanel
           isOpen={showNotifications}
           onClose={() => setShowNotifications(false)}
-          notifications={notifications}
+          user={user!}
         />
       )}
 

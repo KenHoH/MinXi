@@ -181,6 +181,7 @@ export function CreateBoardModal({
   };
 
   useEffect(() => {
+    console.error("Testis Create board modal");
     const fetchLoggedUser = async () => {
       if (user && user.user_id) {
         await findUserById(user.user_id).then((res) => {
