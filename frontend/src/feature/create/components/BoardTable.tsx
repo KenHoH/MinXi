@@ -122,27 +122,28 @@ export function BoardTable({
         currentUserId={currentUserId}
         onBoardCreated={onRefresh && (() => onRefresh())}
       />
-
-      {boards.length === 0 ? (
-        <div className="text-center py-12 bg-dark-800 rounded-lg border border-dark-700 ">
-          <p className="text-gray-400">No boards created yet</p>
-        </div>
-      ) : (
-        <div className="space-y-2 max-h-full overflow-y-auto">
-          {boards.map((board) => (
-            <BoardCard
-              formatDate={formatDate}
-              deletingId={deletingId}
-              getFileIcon={getFileIcon}
-              handleDeleteBoard={handleDeleteBoard}
-              handleRemoveContent={handleRemoveContent}
-              removingContentId={removingContentId}
-              key={board.board_id}
-              board={board}
-            />
-          ))}
-        </div>
-      )}
+      <div className="flex flex-col items-center">
+        {boards.length === 0 ? (
+          <div className="text-center py-12 bg-dark-800 rounded-lg border border-dark-700 ">
+            <p className="text-gray-400">No boards created yet</p>
+          </div>
+        ) : (
+          <div className="space-y-2 max-h-full w-1/2 overflow-y-auto">
+            {boards.map((board) => (
+              <BoardCard
+                formatDate={formatDate}
+                deletingId={deletingId}
+                getFileIcon={getFileIcon}
+                handleDeleteBoard={handleDeleteBoard}
+                handleRemoveContent={handleRemoveContent}
+                removingContentId={removingContentId}
+                key={board.board_id}
+                board={board}
+              />
+            ))}
+          </div>
+        )}
+      </div>
     </div>
   );
 }

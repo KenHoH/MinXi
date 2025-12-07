@@ -1,13 +1,15 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { ContentHeaderInfo } from "./ContentHeaderInfo";
 import { ContentDetailInfo } from "./ContentDetailInfo";
 import { ContentDetailComponent } from "./ContentDetail";
 import type { FullContentWithHistoryProps } from "../models/FullContentWithHistory";
+import type { CreateHistoryDto } from "@/service/api";
+import useHistoryService from "@/shared/hooks/useHistoryService";
 
 interface ContentComponentProps {
   content: FullContentWithHistoryProps;
-  liked: boolean;
-  pinned: boolean;
+  liked?: boolean;
+  pinned?: boolean;
 }
 
 export function ContentComponent({
@@ -21,6 +23,19 @@ export function ContentComponent({
   const [pins, setPins] = useState(content.pins);
   const [likedState, setLikedState] = useState(liked);
   const [pinnedState, setPinnedState] = useState(pinned);
+  const { getByUserAndContent } = useHistoryService();
+  const [history, setHistory] = useState<CreateHistoryDto>();
+
+  useEffect(() => {
+    const fetchHistoryUser = async () => {
+      const histories = await getByUserAndContent(
+        content.creator_id,
+        content.content_id
+      );
+      if (histories) setHistory(histories);
+    };
+    fetchHistoryUser();
+  }, []);
 
   return (
     <>
@@ -43,9 +58,9 @@ export function ContentComponent({
         <ContentDetailInfo
           title={content.title}
           likes={like}
-          liked={likedState}
+          liked={likedState ?? history?.liked ?? false}
           comments={comment}
-          pinned={pinnedState}
+          pinned={pinnedState ?? history?.pinned ?? false}
           pins={pins}
           creator={content.username}
           creatorProfile={
@@ -62,8 +77,8 @@ export function ContentComponent({
           onClose={() => {
             setShowDetail(false);
           }}
-          liked={likedState}
-          pinned={pinnedState}
+          liked={likedState ?? history?.liked ?? false}
+          pinned={pinnedState ?? history?.pinned ?? false}
           likes={like}
           pins={pins}
           comments={comment}

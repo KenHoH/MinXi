@@ -6,6 +6,7 @@ import type { FullContentDto } from "@/service/api";
 import { CreateContentModal } from "./CreateContent/CreateContentModal";
 import useContentService from "@/shared/hooks/useContentService";
 import { useToast } from "@/shared/context/ToastContext";
+import { ContentDetailComponent } from "@/feature/content/components/ContentComponent/ContentDetail";
 
 interface ContentTableProps {
   items: FullContentDto[];
@@ -148,17 +149,17 @@ export function ContentTable({
                 </p>
 
                 {/* Stats */}
-                <div className="grid grid-cols-3 gap-2 text-xs text-gray-400 mb-3">
-                  <span className="flex items-center gap-1">
-                    <Eye className="w-3 h-3" />
+                <div className="grid grid-cols-3 gap-0.5 text-xs text-gray-400 mb-3">
+                  <span className="flex items-center gap-2">
+                    <Eye className="w-6 h-6 hover:text-red-400 transition-colors" />
                     {item.views || 0}
                   </span>
-                  <span className="flex items-center gap-1">
-                    <Heart className="w-3 h-3" />
+                  <span className="flex items-center gap-2">
+                    <Heart className="w-6 h-6  hover:text-red-400 transition-colors" />
                     {item.likes || 0}
                   </span>
-                  <span className="flex items-center gap-1">
-                    <MessageCircle className="w-3 h-3" />
+                  <span className="flex items-center gap-2">
+                    <MessageCircle className="w-6 h-6  hover:text-red-400 transition-colors" />
                     {item.comments || 0}
                   </span>
                 </div>
@@ -172,7 +173,7 @@ export function ContentTable({
                 <button
                   onClick={() => handleDelete(item.content_id, item.area_id)}
                   disabled={deletingId === item.content_id}
-                  className="w-full px-3 py-2 bg-dark-700 hover:bg-red-600/20 text-red-400 rounded text-xs font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="w-full px-3 py-2 bg-dark-700 hover:bg-red-400/20 text-red-400 rounded text-xs font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {deletingId === item.content_id ? "Deleting..." : "Delete"}
                 </button>

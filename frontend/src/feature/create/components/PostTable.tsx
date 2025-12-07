@@ -94,23 +94,20 @@ export function PostTable({ items, onRefreshChild, onDelete }: PostTableProps) {
               className="bg-dark-800 rounded-lg border border-dark-700 overflow-hidden hover:border-burgundy-600/50 transition-colors flex flex-col"
             >
               {/* Thumbnail Image */}
-              <div className="relative w-full bg-dark-750 overflow-hidden h-60">
-                {item.contents && item.contents.length > 0 ? (
-                  (() => {
+              {item.contents?.[0]?.filepath && (
+                <div className="relative w-full bg-dark-750 overflow-hidden h-60">
+                  {(() => {
                     const firstFile = item.contents[0];
                     const fileType = getFileIcon(firstFile.filepath);
                     return fileType === "image" ? (
-                      firstFile && (
-                        <img
-                          src={firstFile.filepath}
-                          alt={item.title}
-                          className="w-full h-full object-fill"
-                          onError={(e) => {
-                            (e.target as HTMLImageElement).style.display =
-                              "none";
-                          }}
-                        />
-                      )
+                      <img
+                        src={firstFile.filepath}
+                        alt={item.title}
+                        className="w-full h-full object-fill"
+                        onError={(e) => {
+                          (e.target as HTMLImageElement).style.display = "none";
+                        }}
+                      />
                     ) : fileType === "video" ? (
                       <video
                         src={firstFile.filepath}
@@ -124,13 +121,9 @@ export function PostTable({ items, onRefreshChild, onDelete }: PostTableProps) {
                         <FileText className="w-12 h-12 text-gray-600" />
                       </div>
                     );
-                  })()
-                ) : (
-                  <div className="w-full h-full flex items-center justify-center">
-                    <Image className="w-12 h-12 text-gray-600" />
-                  </div>
-                )}
-              </div>
+                  })()}
+                </div>
+              )}
 
               {/* Post Info */}
               <div className="flex-1 p-4 flex flex-col">
@@ -156,19 +149,19 @@ export function PostTable({ items, onRefreshChild, onDelete }: PostTableProps) {
                 {/* Stats */}
                 <div className="grid grid-cols-4 gap-2 text-xs text-gray-400 mb-3">
                   <span className="flex items-center gap-1">
-                    <Eye className="w-3 h-3" />
+                    <Eye className="w-6 h-6 hover:text-red-400 transition-colors" />
                     {item.views || 0}
                   </span>
                   <span className="flex items-center gap-1">
-                    <Heart className="w-3 h-3" />
+                    <Heart className="w-6 h-6 hover:text-red-400 transition-colors" />
                     {item.likes || 0}
                   </span>
                   <span className="flex items-center gap-1">
-                    <MessageCircle className="w-3 h-3" />
+                    <MessageCircle className="w-6 h-6 hover:text-red-400 transition-colors" />
                     {item.comments || 0}
                   </span>
                   <span className="flex items-center gap-1">
-                    <Pin className="w-3 h-3" />
+                    <Pin className="w-6 h-6 hover:text-red-400 transition-colors" />
                     {item.pins || 0}
                   </span>
                 </div>
@@ -182,7 +175,7 @@ export function PostTable({ items, onRefreshChild, onDelete }: PostTableProps) {
                 <button
                   onClick={() => handleDelete(item.content_id, item.area_id)}
                   disabled={deletingId === item.content_id}
-                  className="w-full px-3 py-2 bg-dark-700 hover:bg-red-600/20 text-red-400 rounded text-xs font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="w-full px-3 py-2 bg-dark-700 hover:bg-red-400/20 text-red-400 rounded text-xs font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {deletingId === item.content_id ? "Deleting..." : "Delete"}
                 </button>

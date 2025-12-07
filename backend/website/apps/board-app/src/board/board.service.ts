@@ -575,7 +575,7 @@ export class BoardService implements IBoardService {
               });
 
               const thumbnail = files.find((file) => file.type === 'thumbnail');
-              if (!thumbnail) {
+              if (!thumbnail && content.post_type !== 'post') {
                 this.logger.warn(
                   `Content ${content.content_id} missing thumbnail`,
                 );
@@ -612,13 +612,15 @@ export class BoardService implements IBoardService {
                 pins: content.pins,
                 reports: content.reports,
                 score: content.score,
-                thumbnail: {
-                  file_id: thumbnail.file_id,
-                  filepath: thumbnail.filepath,
-                  content_id: thumbnail.content_id,
-                  content_area_id: thumbnail.content_area_id,
-                  type: thumbnail.type,
-                },
+                thumbnail: thumbnail
+                  ? {
+                      file_id: thumbnail.file_id,
+                      filepath: thumbnail.filepath,
+                      content_id: thumbnail.content_id,
+                      content_area_id: thumbnail.content_area_id,
+                      type: thumbnail.type,
+                    }
+                  : null,
                 contents: mappedFiles,
                 profile_url: userdata.profile_picture,
                 username: userdata.username,

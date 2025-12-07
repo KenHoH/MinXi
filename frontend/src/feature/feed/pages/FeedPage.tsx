@@ -9,7 +9,7 @@ export default function FeedPage() {
   const [currentFilter, setCurrentFilter] = useState("All");
 
   const { userBoards, boardContentsMap } = useUserBoards();
-const { loadMore } = useFeedContent(
+  const { loadMore } = useFeedContent(
     currentFilter,
     userBoards,
     boardContentsMap

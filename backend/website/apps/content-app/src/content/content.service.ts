@@ -418,7 +418,6 @@ export class ContentService implements IContentService {
               );
 
               const thumbnail = files.find((file) => file.type === 'thumbnail');
-              // For posts without thumbnail, still include them (text-only posts allowed)
               if (!thumbnail && content.post_type !== 'post') {
                 this.logger.warn(
                   `Content ${content.content_id} missing thumbnail`,

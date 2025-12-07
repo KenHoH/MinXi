@@ -181,7 +181,6 @@ export function CreateBoardModal({
   };
 
   useEffect(() => {
-    console.error("Testis Create board modal");
     const fetchLoggedUser = async () => {
       if (user && user.user_id) {
         await findUserById(user.user_id).then((res) => {
@@ -207,7 +206,7 @@ export function CreateBoardModal({
 
       {/* Modal */}
       <div className="fixed inset-0 flex items-center justify-center z-50 p-4">
-        <div className="bg-dark-800 rounded-lg max-w-5xl w-full max-h-[95vh] overflow-hidden flex flex-col">
+        <div className="bg-dark-800 rounded-lg max-w-3xl w-full max-h-[95vh] overflow-hidden flex flex-col">
           {/* Header */}
           <div className="flex items-center justify-between p-6 border-b border-dark-700 bg-dark-800 z-10 shrink-0">
             <h2 className="text-xl font-bold text-gray-100">Create Board</h2>
@@ -249,13 +248,13 @@ export function CreateBoardModal({
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
                 placeholder="Give your board a name..."
-                className="w-full px-4 py-2 bg-dark-700 border border-dark-600 rounded-lg text-gray-100 placeholder:text-gray-500 focus:outline-none focus:ring-1 focus:ring-burgundy-600"
+                className="w-full px-4 py-2 bg-dark-700 border border-dark-600 rounded-lg text-gray-100 placeholder:text-gray-500 focus:outline-none focus:ring-1 focus:ring-red-400 hover:border-red-400"
               />
             </div>
 
             {/* Description Input */}
             <div>
-              <label className="block text-sm font-medium text-gray-300 mb-2">
+              <label className="block text-sm font-medium text-gray-300 mb-2 ">
                 Description
               </label>
               <textarea
@@ -263,13 +262,13 @@ export function CreateBoardModal({
                 onChange={(e) => setDescription(e.target.value)}
                 placeholder="Describe what this board is about..."
                 rows={3}
-                className="w-full px-4 py-2 bg-dark-700 border border-dark-600 rounded-lg text-gray-100 placeholder:text-gray-500 focus:outline-none focus:ring-1 focus:ring-burgundy-600 resize-none"
+                className="w-full px-4 py-2 bg-dark-700 border border-dark-600 rounded-lg text-gray-100 placeholder:text-gray-500 focus:outline-none focus:ring-1 focus:ring-red-400 resize-none hover:border-red-400"
               />
             </div>
 
             {/* Thumbnail Section */}
-            <div className="space-y-3 p-4 bg-dark-700 rounded-lg border border-dark-600">
-              <div>
+            <div className="space-y-3 p-4 bg-dark-700 rounded-lg border border-dark-600 flex flex-col items-center hover:border-red-400">
+              <div className="w-full">
                 <p className="text-sm font-medium text-gray-300 mb-3">
                   Board Thumbnail <span className="text-burgundy-400">*</span>
                 </p>
@@ -285,35 +284,103 @@ export function CreateBoardModal({
             </div>
 
             {/* Privacy Toggle */}
-            <div className="flex items-center gap-3 p-4 bg-dark-700 rounded-lg border border-dark-600">
-              <label
-                htmlFor="private"
-                className="flex-1 text-sm text-gray-300 cursor-pointer"
-              >
-                Make this Board private (Only you can see it)
-              </label>
-              <Switch
-                checked={isPrivate}
-                onCheckedChange={() => setIsPrivate((prev) => !prev)}
-              />
+            <div className="flex flex-col items-center bg-dark-700 rounded-lg border border-dark-600 hover:border-red-400">
+              <div className="w-3/5 flex items-center  p-4 ">
+                <label
+                  htmlFor="private"
+                  className="flex-1 text-sm text-gray-300 cursor-pointer"
+                >
+                  Make this Board private (Only you can see it)
+                </label>
+                <Switch
+                  checked={isPrivate}
+                  onCheckedChange={() => setIsPrivate((prev) => !prev)}
+                />
+              </div>
             </div>
 
             {/* Divider */}
             <div className="border-t border-dark-700" />
 
             {/* Selection Gallery */}
-            <div className="space-y-6">
+            <div className="space-y-4">
               <p className="text-sm font-medium text-gray-200">
                 Add Items to Board <span className="text-burgundy-400">*</span>
               </p>
 
-              {/* Masonry Gallery */}
-              <MasonrySelector
-                title="Your Posts & Content"
-                items={allItems}
-                selectedIds={selectedIds}
-                onToggleSelect={toggleSelection}
-              />
+              {/* Items Table */}
+              <div className="space-y-2 max-h-96 overflow-y-auto items-center flex flex-col">
+                {allItems.map((item) => {
+                  const isSelected = selectedIds.includes(item.content_id);
+                  const thumbnail = (item as ContentGalleryItem).thumbnail;
+
+                  return (
+                    <div
+                      key={item.content_id}
+                      onClick={() => toggleSelection(item.content_id)}
+                      className={`w-3/4 flex gap-3 p-4 rounded-lg cursor-pointer border-2 transition-all hover:border-red-400  ${
+                        isSelected
+                          ? "border-burgundy-600 bg-burgundy-600/10"
+                          : "border-dark-600 hover:border-burgundy-600/50 bg-dark-700"
+                      }`}
+                    >
+                      {/* Thumbnail */}
+                      <div className="w-16 h-16 rounded overflow-hidden flex-shrink-0 ">
+                        {thumbnail?.filepath ? (
+                          <img
+                            src={thumbnail.filepath}
+                            alt={item.title}
+                            className="w-full h-full object-cover"
+                          />
+                        ) : (
+                          <div className="w-full h-full bg-dark-600 flex items-center justify-center">
+                            <span className="text-xs text-gray-500">
+                              No image
+                            </span>
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Content Info */}
+                      <div className="flex-1 min-w-0 ml-2">
+                        <h4 className="text-sm font-semibold text-gray-100 truncate">
+                          {item.title}
+                        </h4>
+                        <p className="text-xs text-gray-400 line-clamp-2 mt-1">
+                          {item.type === "post"
+                            ? "Post"
+                            : `${item.type} content`}
+                        </p>
+                      </div>
+
+                      {/* Checkbox */}
+                      <div className="flex-shrink-0 flex items-center mr-4">
+                        <div
+                          className={`w-5 h-5 rounded border-2 flex items-center justify-center ${
+                            isSelected
+                              ? "bg-burgundy-600 border-burgundy-600"
+                              : "border-gray-500"
+                          }`}
+                        >
+                          {isSelected && (
+                            <svg
+                              className="w-3 h-3 text-white"
+                              fill="none"
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth="2"
+                              viewBox="0 0 24 24"
+                              stroke="currentColor"
+                            >
+                              <path d="M5 13l4 4L19 7" />
+                            </svg>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
 
               {/* Selected Items Preview */}
               <SelectedItemsPreview
@@ -328,14 +395,14 @@ export function CreateBoardModal({
             <button
               onClick={onClose}
               disabled={isSubmitting}
-              className="flex-1 px-4 py-2 bg-dark-700 text-gray-300 rounded-lg hover:bg-dark-600 transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+              className="flex-1 px-4 py-2 bg-dark-700 text-gray-300 rounded-lg hover:bg-dark-600 transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed hover:bg-red-400 hover:text-black "
             >
               Cancel
             </button>
             <button
               onClick={handleSubmit}
               disabled={!isFormValid || isSubmitting}
-              className="flex-1 px-4 py-2 bg-burgundy-600 text-white rounded-lg hover:bg-burgundy-700 transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+              className="flex-1 px-4 py-2 bg-burgundy-600 text-white rounded-lg hover:bg-burgundy-700 transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed "
             >
               {isSubmitting ? "Creating..." : "Create Board"}
             </button>

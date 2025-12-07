@@ -62,7 +62,7 @@ export function BoardCard({
           <button
             onClick={() => handleDeleteBoard(board.board_id)}
             disabled={deletingId === board.board_id}
-            className="shrink-0 p-2 text-red-400 hover:bg-red-600/20 rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            className="shrink-0 p-2 text-red-400 hover:bg-red-500/20 rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <Trash2 className="w-5 h-5" />
           </button>
@@ -92,11 +92,11 @@ export function BoardCard({
               {board.contents.map((content) => (
                 <div
                   key={content.content_id}
-                  className="flex items-start gap-2 p-2 bg-dark-800 rounded border border-dark-700/50 hover:border-burgundy-600/50 transition-colors"
+                  className="flex items-start gap-2 p-6 bg-dark-800 rounded border border-dark-700/50 hover:border-burgundy-600/50 transition-colors"
                 >
                   {/* Thumbnail */}
                   {content.contents && content.contents.length > 0 && (
-                    <div className="shrink-0">
+                    <div className="shrink-0 mr-2">
                       {(() => {
                         const file = content.contents[0];
                         const type = getFileIcon(file.filepath);
@@ -142,7 +142,7 @@ export function BoardCard({
                       handleRemoveContent(board.board_id, content.content_id)
                     }
                     disabled={removingContentId === content.content_id}
-                    className="shrink-0 p-1 text-red-400 hover:bg-red-600/20 rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="shrink-0 p-1 text-red-400 hover:bg-red-500/20 rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     ×
                   </button>

@@ -25,7 +25,11 @@ export default function AppRouter() {
                 {/* Public routes go here */}
                 <Route path="/login" element={<LoginPage />} />
                 <Route path="/register" element={<RegisterPage />} />
-                <Route path="/feed/*" element={<FeedPage />}></Route>
+                <Route path="/feed" element={<FeedPage />} />
+                <Route
+                  path="/feed/:creator/:item/:type/:area"
+                  element={<FeedPage />}
+                />
                 <Route path="/profile/:username" element={<ProfilePage />} />
                 <Route path="/search" element={<SearchPage />}></Route>
 

@@ -3,15 +3,15 @@ import { useEffect, useState } from "react";
 import { PostFooterInfo } from "./PostFooterInfo";
 import { PostHeaderInfo } from "./PostHeaderInfo";
 import { PostDetailComponent } from "./PostDetail";
-import type { FullContentDto, UserDto } from "@/service/api";
+import type { CreateHistoryDto, FullContentDto, UserDto } from "@/service/api";
 import useContentService from "@/shared/hooks/useContentService";
 import type { FullContentWithHistoryProps } from "../models/FullContentWithHistory";
 import useHistoryService from "@/shared/hooks/useHistoryService";
 
 interface PostComponentProps {
   post: FullContentWithHistoryProps;
-  liked: boolean;
-  pinned: boolean;
+  liked?: boolean;
+  pinned?: boolean;
 }
 
 export function PostComponent({ post, liked, pinned }: PostComponentProps) {
@@ -28,9 +28,21 @@ export function PostComponent({ post, liked, pinned }: PostComponentProps) {
   const [likedState, setLikedState] = useState(liked);
   const [pinnedState, setPinnedState] = useState(pinned);
   const { getAncestorPost, getChildPost } = useContentService();
-
+  const { getByUserAndContent } = useHistoryService();
   const [loggedUserData, setLoggedUserData] = useState<UserDto | null>(null);
   const { getByUser } = useHistoryService();
+  const [history, setHistory] = useState<CreateHistoryDto>();
+
+  useEffect(() => {
+    const fetchHistoryUser = async () => {
+      const histories = await getByUserAndContent(
+        post.creator_id,
+        post.content_id
+      );
+      if (histories) setHistory(histories);
+    };
+    fetchHistoryUser();
+  }, []);
 
   // Get Posts
   const getAncestors = async (
@@ -134,8 +146,8 @@ export function PostComponent({ post, liked, pinned }: PostComponentProps) {
           likes={likes}
           comments={comments}
           pins={pins}
-          liked={likedState}
-          pinned={pinnedState}
+          liked={likedState ?? history?.liked ?? false}
+          pinned={pinnedState ?? history?.pinned ?? false}
           creator={loggedUserData?.username || "anonymous"}
           creatorProfile={
             loggedUserData?.profile_picture ||
@@ -155,8 +167,8 @@ export function PostComponent({ post, liked, pinned }: PostComponentProps) {
             if (newChildren) setChildren(newChildren);
           }}
           onClose={() => setShowDetail(false)}
-          liked={likedState}
-          pinned={pinnedState}
+          liked={likedState ?? history?.liked ?? false}
+          pinned={pinnedState ?? history?.pinned ?? false}
           likes={likes}
           pins={pins}
           comments={comments}

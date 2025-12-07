@@ -76,7 +76,6 @@ export function PostDetailComponent(props: PostDetailComponentProps) {
   const [userBoards, setUserBoards] = useState<BoardDto[]>([]);
   const [pinnedBoardId, setPinnedBoardId] = useState<number | null>(null);
 
-  // ============ SYNC WITH PARENT COMPONENT ============
   useEffect(() => {
     setLiked(propsLiked);
     setPinned(propsPinned);
@@ -201,10 +200,8 @@ export function PostDetailComponent(props: PostDetailComponentProps) {
       }
       case 2: {
         if (pinned) {
-          // Unpin: Remove content from the board
           await handleUnpin();
         } else {
-          // Pin: Show modal to select a board
           setShowPinModal(true);
         }
         break;
@@ -225,23 +222,19 @@ export function PostDetailComponent(props: PostDetailComponentProps) {
     if (!user || !userData || pinnedBoardId === null) return;
 
     try {
-      // Remove content from the board
       await removeContent(pinnedBoardId, userData.area_id, {
         content_id: post.content_id,
       });
 
-      // Update pin count
       await updatePin(post.content_id, userData.area_id, {
         delta: -1,
       });
 
-      // Update state
       const newPinCount = totalPins - 1;
       setTotalPins(newPinCount);
       setPinned(false);
       setPinnedBoardId(null);
 
-      // Notify parent
       onPinClick(newPinCount);
       onPinned(false);
 
@@ -276,12 +269,10 @@ export function PostDetailComponent(props: PostDetailComponentProps) {
   const onPinSuccess = async (boardId: number) => {
     if (!user) return;
     try {
-      // Update pin count
       await updatePin(post.content_id, userData?.area_id || 0, {
         delta: 1,
       });
 
-      // Upsert history
       await upsert({
         content_id: post.content_id,
         user_id: user.user_id,
@@ -296,7 +287,6 @@ export function PostDetailComponent(props: PostDetailComponentProps) {
       setTotalPins(newPinCount);
       setShowPinModal(false);
 
-      // Notify parent
       onPinClick(newPinCount);
       onPinned(true);
     } catch (error) {
@@ -309,7 +299,6 @@ export function PostDetailComponent(props: PostDetailComponentProps) {
     console.error("Testis Post detail");
     fetchUserData(post.creator_id);
 
-    // Check if this is the user's own content
     if (user?.user_id === post.creator_id) {
       setIsOwnContent(true);
     } else {
@@ -317,7 +306,6 @@ export function PostDetailComponent(props: PostDetailComponentProps) {
     }
   }, [post.creator_id, post, user?.user_id]);
 
-  // Check follow status if not own content
   useEffect(() => {
     const checkFollowStatus = async () => {
       if (!user || isOwnContent) {
@@ -363,7 +351,6 @@ export function PostDetailComponent(props: PostDetailComponentProps) {
       }
     };
 
-    // Only refetch if not already provided
     if (!ancestors || ancestors.length === 0) {
       refetchPostTree();
     }
@@ -372,7 +359,6 @@ export function PostDetailComponent(props: PostDetailComponentProps) {
     }
   }, [post.content_id, post.area_id]);
 
-  // Reset media index when post changes
   useEffect(() => {
     setCurrentMediaIndex(0);
   }, [post.content_id]);

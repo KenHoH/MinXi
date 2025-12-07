@@ -7,6 +7,7 @@ import useGetHistory from "../logic/useGetHistory";
 import { useAuthContext } from "@/feature/auth/context/AuthContext";
 import type { FullContentWithHistoryProps } from "@/feature/content/components/models/FullContentWithHistory";
 import { FeedListSkeleton } from "./FeedListSkeleton";
+import { useParams } from "react-router-dom";
 
 interface FeedListProps {
   onLoadMore: () => Promise<FullContentDto[]>;
@@ -52,6 +53,8 @@ export default function FeedList({
       if (newItems.length === 0) {
         setHasMore(false);
       } else {
+        await new Promise((resolve) => setTimeout(resolve, 300));
+
         setItems((prev) => [
           ...prev,
           ...newItems.filter(
@@ -125,18 +128,31 @@ export default function FeedList({
               </div>
             ))}
           </Masonry>
+
+          {isLoading && enableInfiniteScroll && (
+            <div className="mt-4">
+              <div className="grid grid-cols-3 gap-4">
+                {Array.from({ length: 6 }).map((_, index) => (
+                  <div
+                    key={`skeleton-${index}`}
+                    className="bg-dark-800 rounded-lg overflow-hidden animate-pulse"
+                  >
+                    <div className="aspect-square bg-dark-700" />
+                    <div className="p-3 space-y-2">
+                      <div className="h-4 bg-dark-700 rounded w-3/4" />
+                      <div className="h-3 bg-dark-700 rounded w-1/2" />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
       )}
 
-      {enableInfiniteScroll && hasMore && (
+      {enableInfiniteScroll && hasMore && !isLoading && (
         <div ref={observerTarget} className="py-8 text-center">
-          {isLoading ? (
-            <div className="flex justify-center items-center">
-              <div className="w-8 h-8 border-4 border-burgundy-600 border-t-burgundy-400 rounded-full animate-spin" />
-            </div>
-          ) : (
-            <p className="text-gray-400">Scroll for more...</p>
-          )}
+          <p className="text-gray-400">Scroll for more...</p>
         </div>
       )}
 
