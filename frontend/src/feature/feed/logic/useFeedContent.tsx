@@ -60,9 +60,6 @@ export function useFeedContent(
       console.log("FYP Cursor:", fypCursor);
       console.log("Load more for FYP:", response?.contents.length);
       if (!response || response.contents.length === 0) {
-        // const res = await findAllGlobalPage(areaId, allCursor, 10);
-        // setAllCursor(res?.currentPage || 0);
-        // setAreaId(res?.area_id || 1);
         const res = await findAllPage(user.area_id, allCertainAreaCursor, 10);
         setAllCertainAreaCursor(res?.currentPage || 0);
         console.log("All Certain Area Cursor:", allCertainAreaCursor);

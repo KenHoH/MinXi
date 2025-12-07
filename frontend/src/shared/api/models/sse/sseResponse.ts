@@ -15,6 +15,7 @@ export type UserNotification = {
   title: string;
   description: string;
   isSeen: boolean;
+  type: string;
 };
 
 export type SSEPayload = {

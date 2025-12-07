@@ -71,7 +71,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     showLoading();
     setIsLoading(true);
     try {
-      const [token, data] = await Promise.all([
+      const [_, data] = await Promise.all([
         await AuthService.authControllerLogin(dto),
         await UserService.userControllerFindOneByName({
           area_id: dto.area_id,

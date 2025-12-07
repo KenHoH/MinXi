@@ -165,7 +165,6 @@ export default function ChatPage() {
       if (selectedRoom) {
         const res = await getMessage(selectedRoom, 100);
         if (res && Array.isArray(res)) {
-          // Transform MessageResponseDto to RoomMessage format
           const transformedMessages = res.map((msg: any) => ({
             id: msg.id,
             authorId: msg.authorId,

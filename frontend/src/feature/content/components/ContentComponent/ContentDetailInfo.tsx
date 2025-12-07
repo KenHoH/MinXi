@@ -42,20 +42,20 @@ export function ContentDetailInfo({
         <span className="flex items-center gap-1 hover:text-burgundy-400 transition-colors">
           <Heart
             className={`w-4 h-4 ${
-              liked ? "fill-red-400 text-red-400" : " text-burgundy-400"
-            }`}
+              liked ? "fill-red-400 text-red-400" : "text-gray-500"
+            } hover:fill-red-400 hover:text-red-400 transition-colors`}
           />
           {likes}
         </span>
         <span className="flex items-center gap-1 hover:text-burgundy-400 transition-colors">
-          <MessageCircle className="w-4 h-4 " />
+          <MessageCircle className="w-4 h-4 hover:fill-red-400 hover:text-red-400 transition-colors" />
           {comments}
         </span>
         <span className="flex items-center gap-1 hover:text-burgundy-400 transition-colors">
           <Pin
             className={`w-4 h-4 ${
               pinned ? "fill-red-400 text-red-400 " : " text-burgundy-400"
-            }`}
+            }hover:fill-red-400 hover:text-red-400 transition-colors`}
           />
           {pins}
         </span>

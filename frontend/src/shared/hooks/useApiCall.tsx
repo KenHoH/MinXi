@@ -1,5 +1,4 @@
 import { useCallback, useState } from "react";
-import { useLoading } from "../context/LoadingContext";
 import { useToast } from "../context/ToastContext";
 
 export default function useApiCall() {
@@ -7,7 +6,6 @@ export default function useApiCall() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const { showLoading, hideLoading } = useLoading();
   const { showToast } = useToast();
 
   const call = useCallback(
@@ -34,7 +32,7 @@ export default function useApiCall() {
       } finally {
       }
     },
-    [showLoading, hideLoading, showToast]
+    [showToast]
   );
 
   return { data, loading, error, call };

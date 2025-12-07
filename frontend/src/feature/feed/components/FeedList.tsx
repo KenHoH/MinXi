@@ -1,4 +1,4 @@
-import { useEffect, useRef, useCallback, useState } from "react";
+import { useEffect, useRef, useCallback, useState, useMemo } from "react";
 import { useLoading } from "@/shared/context/LoadingContext";
 import { Masonry } from "@/shared/components/Masonry";
 import type { FullContentDto } from "@/service/api";
@@ -6,6 +6,7 @@ import { renderItem } from "../logic/useRenderContent";
 import useGetHistory from "../logic/useGetHistory";
 import { useAuthContext } from "@/feature/auth/context/AuthContext";
 import type { FullContentWithHistoryProps } from "@/feature/content/components/models/FullContentWithHistory";
+import { FeedListSkeleton } from "./FeedListSkeleton";
 
 interface FeedListProps {
   onLoadMore: () => Promise<FullContentDto[]>;
@@ -22,13 +23,13 @@ export default function FeedList({
   const { user, isLoading: authLoading } = useAuthContext();
   const [items, setItems] = useState<FullContentDto[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [isInitialLoading, setIsInitialLoading] = useState(true);
   const [hasMore, setHasMore] = useState(true);
   const observerTarget = useRef<HTMLDivElement>(null);
   const [histories, historiesLoading] = useGetHistory();
-  const [contents, setContents] = useState<FullContentWithHistoryProps[]>([]);
 
-  useEffect(() => {
-    const mergedItems = items.map((item) => {
+  const contents = useMemo(() => {
+    return items.map((item) => {
       const userHistory = histories.find(
         (h) => h.content_id === item.content_id
       );
@@ -38,15 +39,12 @@ export default function FeedList({
         pinned: userHistory?.pinned || false,
       };
     });
-
-    setContents(mergedItems);
-  }, [histories, items]);
+  }, [items, histories]);
 
   const loadMore = useCallback(async () => {
     if (isLoading || !hasMore || !onLoadMore) return;
 
     setIsLoading(true);
-    showLoading();
 
     try {
       const newItems = await onLoadMore();
@@ -66,7 +64,6 @@ export default function FeedList({
       setHasMore(false);
     } finally {
       setIsLoading(false);
-      hideLoading();
     }
   }, [isLoading, hasMore, onLoadMore, showLoading, hideLoading]);
 
@@ -78,10 +75,12 @@ export default function FeedList({
     setItems([]);
     setHasMore(true);
     setIsLoading(false);
+    setIsInitialLoading(true);
 
     onLoadMore().then((newItems) => {
       setItems(newItems);
       if (newItems.length === 0) setHasMore(false);
+      setIsInitialLoading(false);
     });
   }, [currentFilter, user, authLoading]);
 
@@ -111,15 +110,15 @@ export default function FeedList({
 
   return (
     <div className="w-3/4 h-full">
-      {contents.length === 0 ? (
-        authLoading || historiesLoading ? null : (
-          <div className="text-center py-12 text-gray-500">
-            No items to display
-          </div>
-        )
+      {isInitialLoading || authLoading || historiesLoading ? (
+        <FeedListSkeleton />
+      ) : contents.length === 0 ? (
+        <div className="text-center py-12 text-gray-500">
+          No items to display
+        </div>
       ) : (
         <div className="p-4">
-          <Masonry columns={4}>
+          <Masonry columns={3}>
             {contents.map((item) => (
               <div key={item.content_id}>
                 {renderItem(item, item.liked || false, item.pinned || false)}
