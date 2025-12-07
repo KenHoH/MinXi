@@ -185,8 +185,46 @@ export class SocialService implements ISocialService {
     }
   }
 
-  async addUserToRoom(dto: AddUserToRoomDto): Promise<ParticipantResponseDto> {
+  async addUserToRoom(
+    dto: AddUserToRoomDto,
+  ): Promise<ParticipantResponseDto[]> {
     try {
+      const targetRoom = await this.socialClient.room.findUnique({
+        where: { id: dto.roomId },
+      });
+
+      if (!targetRoom) {
+        throw httpToRpc(
+          new HttpException('Room not found', HttpStatus.NOT_FOUND),
+        );
+      }
+
+      if (targetRoom.type === RoomType.GROUP) {
+        const community = await this.socialClient.communityGroup.findMany({
+          where: { groupId: dto.roomId },
+        });
+
+        if (!community) {
+          this.logger.error(`No community found for groupId: ${dto.roomId}`);
+        }
+
+        const communitiesIds = community.map((c) => c.communityId);
+        await this.socialClient.participant.createMany({
+          data: communitiesIds.map((communityId) => ({
+            userId: dto.userId,
+            roomId: communityId,
+            role: ParticipantRole.MEMBER,
+          })),
+        });
+
+        const participants = communitiesIds.map((communityId) => ({
+          userId: dto.userId,
+          roomId: communityId,
+          role: ParticipantRole.MEMBER,
+        }));
+        return participants.map(mapParticipantToResponse);
+      }
+
       const participant = await this.socialClient.participant.create({
         data: {
           userId: dto.userId,
@@ -195,7 +233,10 @@ export class SocialService implements ISocialService {
         },
       });
 
-      return mapParticipantToResponse(participant);
+      const participants: ParticipantResponseDto[] = [];
+      participants.push(mapParticipantToResponse(participant));
+
+      return participants;
     } catch (error: any) {
       throw httpToRpc(
         new HttpException(

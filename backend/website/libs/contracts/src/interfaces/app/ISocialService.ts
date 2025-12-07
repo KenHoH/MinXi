@@ -24,7 +24,7 @@ export interface ISocialService {
   getRoomInfo(dto: GetRoomInfoDto): Promise<RoomResponseDto>;
   getAllRoomID(dto: GetAllRoomsDto): Promise<RoomResponseDto[]>;
   getGroupFromCommunities(communitiesId: string): Promise<RoomResponseDto[]>;
-  addUserToRoom(dto: AddUserToRoomDto): Promise<ParticipantResponseDto>;
+  addUserToRoom(dto: AddUserToRoomDto): Promise<ParticipantResponseDto[]>;
   addGroupToRoom(
     communitiesId: string,
     groupId: string,

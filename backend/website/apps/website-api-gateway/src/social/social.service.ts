@@ -53,7 +53,9 @@ export class SocialService implements ISocialService {
     );
   }
 
-  async addUserToRoom(dto: AddUserToRoomDto): Promise<ParticipantResponseDto> {
+  async addUserToRoom(
+    dto: AddUserToRoomDto,
+  ): Promise<ParticipantResponseDto[]> {
     return firstValueFrom(this.client.send(SOCIAL_MSG.addUserToRoom, dto));
   }
 

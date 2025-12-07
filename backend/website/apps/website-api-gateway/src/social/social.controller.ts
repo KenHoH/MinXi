@@ -186,7 +186,7 @@ export class SocialController {
   @Post('room/add-user')
   addUserToRoom(
     @Body() dto: AddUserToRoomDto,
-  ): Promise<ParticipantResponseDto> {
+  ): Promise<ParticipantResponseDto[]> {
     return this.socialService.addUserToRoom(dto);
   }
 
