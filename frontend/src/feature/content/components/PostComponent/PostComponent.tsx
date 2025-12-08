@@ -210,8 +210,6 @@ export function PostComponent({ post, liked, pinned }: PostComponentProps) {
           }}
           onClose={() => {
             setShowDetail(false);
-            setCurrentPost(post);
-            handleBack(post);
           }}
           liked={likedState ?? history?.liked ?? false}
           pinned={pinnedState ?? history?.pinned ?? false}

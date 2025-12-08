@@ -168,7 +168,6 @@ export function PostDetailComponent(props: PostDetailComponentProps) {
         setLiked(newLiked);
         setTotalLikes(newLikeCount);
         onLikeClick(newLikeCount);
-        onLiked(newLiked);
 
         await Promise.all([
           updateLike(post.content_id, userData?.area_id || 0, {
@@ -186,15 +185,13 @@ export function PostDetailComponent(props: PostDetailComponentProps) {
           }),
         ]);
         if (newLiked) {
-          if (user.user_id !== post.creator_id) {
-            sendNotificatonSystem(
-              post.creator_id,
-              user.user_id,
-              `Your post was liked! by ${user.username || "someone"}`,
-              "Liked post",
-              "LIKE"
-            );
-          }
+          sendNotificatonSystem(
+            post.creator_id,
+            user.user_id,
+            "Your post was liked!",
+            "Liked post",
+            "LIKE"
+          );
         }
 
         onLiked(newLiked);
@@ -486,8 +483,6 @@ export function PostDetailComponent(props: PostDetailComponentProps) {
               );
             }
           }
-
-          setTotalComments(totalComments);
         }}
       />
       <ReportModal
