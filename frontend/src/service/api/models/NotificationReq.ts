@@ -3,10 +3,10 @@
 /* tslint:disable */
 /* eslint-disable */
 export type NotificationReq = {
-  userId: number;
-  sendId?: number;
-  isSeen: boolean;
-  title: string;
-  description: string;
-  type: string;
+    userId: number;
+    isSeen: boolean;
+    title: string;
+    description: string;
+    type: string;
 };
+

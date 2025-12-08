@@ -14,7 +14,6 @@ export default function useNotification() {
 
   const sendNotificatonSystem = async (
     userId: number,
-    sendId: number,
     description: string,
     title: string,
     type: NotifType
@@ -23,7 +22,6 @@ export default function useNotification() {
       sendNotification({
         userId,
         description,
-        sendId: sendId,
         title,
         isSeen: false,
         type,
@@ -31,7 +29,6 @@ export default function useNotification() {
       create({
         isSeen: false,
         userId: userId,
-        sendId: sendId,
         title,
         description,
         type,

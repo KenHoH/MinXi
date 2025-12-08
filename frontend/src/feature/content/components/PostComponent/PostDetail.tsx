@@ -148,7 +148,6 @@ export function PostDetailComponent(props: PostDetailComponentProps) {
         await updateFollowUser(post.creator_id, { delta: 1 });
         sendNotificatonSystem(
           post.creator_id,
-          user.user_id,
           `${userData?.username || "someone"} started following you!`,
           "New Follower",
           "FOLLOW"
@@ -188,7 +187,6 @@ export function PostDetailComponent(props: PostDetailComponentProps) {
         if (newLiked) {
           sendNotificatonSystem(
             post.creator_id,
-            user.user_id,
             "Your post was liked!",
             "Liked post",
             "LIKE"
@@ -296,7 +294,6 @@ export function PostDetailComponent(props: PostDetailComponentProps) {
   };
 
   useEffect(() => {
-    console.error("Testis Post detail");
     fetchUserData(post.creator_id);
 
     if (user?.user_id === post.creator_id) {
@@ -474,7 +471,6 @@ export function PostDetailComponent(props: PostDetailComponentProps) {
           handleBtn(3);
           sendNotificatonSystem(
             post.creator_id,
-            user ? user.user_id : 0,
             "Your post received a new comment!",
             "New Comment",
             "COMMENT"
