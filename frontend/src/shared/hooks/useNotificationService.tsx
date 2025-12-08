@@ -1,7 +1,6 @@
 import { NotificationService } from "../../service/api/services/NotificationService";
 import type { NotificationReq } from "../../service/api/models/NotificationReq";
 import type { NotificationRes } from "../../service/api/models/NotificationRes";
-import type { DeleteNotificationRes } from "../../service/api/models/DeleteNotificationRes";
 import useApiCall from "./useApiCall";
 
 export default function useNotificationService() {
@@ -18,7 +17,7 @@ export default function useNotificationService() {
     );
 
   const remove = (notificationId: number) =>
-    call<DeleteNotificationRes>(() =>
+    call<number>(() =>
       NotificationService.notificationControllerRemove(notificationId)
     );
 

@@ -5,7 +5,6 @@ import { PostHeaderInfo } from "./PostHeaderInfo";
 import { PostDetailComponent } from "./PostDetail";
 import type { CreateHistoryDto, FullContentDto, UserDto } from "@/service/api";
 import useContentService from "@/shared/hooks/useContentService";
-import useUserService from "@/shared/hooks/useUserService";
 import type { FullContentWithHistoryProps } from "../models/FullContentWithHistory";
 import useHistoryService from "@/shared/hooks/useHistoryService";
 
@@ -44,15 +43,6 @@ export function PostComponent({ post, liked, pinned }: PostComponentProps) {
     };
     fetchHistoryUser();
   }, []);
-
-  const { findUserById } = useUserService();
-  useEffect(() => {
-    const fetchCreatorData = async () => {
-      const userData: UserDto | null = await findUserById(post.creator_id);
-      if (userData) setLoggedUserData(userData);
-    };
-    fetchCreatorData();
-  }, [post.creator_id]);
 
   // Get Posts
   const getAncestors = async (
@@ -94,12 +84,10 @@ export function PostComponent({ post, liked, pinned }: PostComponentProps) {
     return res;
   };
 
-  // Navigation handler for MiniPostDetail
   const handlePostNavigate = async (newPost: FullContentDto) => {
     console.log("Navigating to post:", newPost.content_id);
     console.log("New Post Data:", newPost);
 
-    // Fetch user history for the new post
     const histories = await getByUser(loggedUserData?.user_id || 0);
     const userHistory = histories?.find(
       (h) => h.content_id === newPost.content_id
@@ -111,7 +99,6 @@ export function PostComponent({ post, liked, pinned }: PostComponentProps) {
       pinned: userHistory?.pinned || false,
     };
 
-    // Update current post
     setCurrentPost(newPostWithHistory);
     setLikes(newPost.likes);
     setComments(newPost.comments);
@@ -119,7 +106,6 @@ export function PostComponent({ post, liked, pinned }: PostComponentProps) {
     setLikedState(userHistory?.liked || false);
     setPinnedState(userHistory?.pinned || false);
 
-    // Fetch new ancestors and children
     const [newAncestors, newChildren] = await Promise.all([
       getAncestors(
         newPost.content_id,

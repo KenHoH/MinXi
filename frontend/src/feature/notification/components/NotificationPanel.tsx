@@ -1,20 +1,24 @@
 import { X, Bell } from "lucide-react";
-import type { NotificationRes } from "@/service/api";
+import type { NotificationRes, UserDto } from "@/service/api";
+import { useEffect, useState } from "react";
+import useNotificationService from "@/shared/hooks/useNotificationService";
+import useSseService from "@/shared/hooks/useSseService";
+import { useToast } from "@/shared/context/ToastContext";
 
 interface NotificationPanelProps {
   isOpen: boolean;
   onClose: () => void;
-  notifications: NotificationRes[];
+  user: UserDto;
 }
 
 export function NotificationPanel({
   isOpen,
   onClose,
-  notifications,
+  user,
 }: NotificationPanelProps) {
-  const filteredNotifications = notifications.filter(
-    (notif) => notif.isSeen === false
-  );
+  const { getNotif, remove } = useNotificationService();
+  const { showToast } = useToast();
+  const [notifications, setNotifications] = useState<NotificationRes[]>([]);
   const formatTime = (dateString: string) => {
     try {
       const date = new Date(dateString);
@@ -26,6 +30,26 @@ export function NotificationPanel({
       return dateString;
     }
   };
+
+  const deleteAllNotifications = async () => {
+    const res = await remove(user.user_id);
+    if (res) {
+      setNotifications([]);
+      showToast("Success", "All notifications deleted", "success");
+    }
+  };
+  useEffect(() => {
+    const fetchNotifications = async () => {
+      if (user) {
+        const res = await getNotif(user.user_id);
+        if (res) setNotifications(res);
+      }
+    };
+    fetchNotifications();
+  }, [user]);
+  const filteredNotifications = notifications.filter(
+    (notif) => notif.isSeen === false
+  );
 
   if (!isOpen) return null;
 
@@ -113,7 +137,10 @@ export function NotificationPanel({
 
         {/* Footer */}
         <div className="p-4 border-t border-dark-700">
-          <button className="w-full py-2 text-sm text-gray-400 hover:text-white transition-colors">
+          <button
+            className="w-full py-2 text-sm text-gray-400 hover:text-white transition-colors"
+            onClick={deleteAllNotifications}
+          >
             Mark all as read
           </button>
         </div>

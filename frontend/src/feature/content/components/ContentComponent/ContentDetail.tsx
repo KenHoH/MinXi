@@ -148,6 +148,7 @@ export function ContentDetailComponent(props: ContentDetailComponentProps) {
         onCommentClick(totalComments + 1);
         sendNotificatonSystem(
           content.creator_id,
+          user.user_id,
           `Your post received a new comment! from ${
             loggedUserData?.username || "someone"
           }`,
@@ -202,6 +203,7 @@ export function ContentDetailComponent(props: ContentDetailComponentProps) {
       await updateFollowUser(content.creator_id, { delta: 1 });
       sendNotificatonSystem(
         content.creator_id,
+        user.user_id,
         `${loggedUserData.username} started following you!`,
         "New Follower",
         "FOLLOW"
@@ -238,6 +240,7 @@ export function ContentDetailComponent(props: ContentDetailComponentProps) {
         if (newLiked) {
           sendNotificatonSystem(
             content.creator_id,
+            user.user_id,
             `Your post was liked! by ${loggedUserData?.username || "someone"}`,
             "Liked post",
             "LIKE"
@@ -363,6 +366,7 @@ export function ContentDetailComponent(props: ContentDetailComponentProps) {
   }, [content.creator_id, content.content_id, user?.user_id]);
 
   useEffect(() => {
+    console.error("Testis Content Detail");
     const getLoggedUserData = async () => {
       if (user) {
         const data = await findUserById(user.user_id);

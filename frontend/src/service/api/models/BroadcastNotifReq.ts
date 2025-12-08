@@ -3,10 +3,10 @@
 /* tslint:disable */
 /* eslint-disable */
 export type BroadcastNotifReq = {
-    userId: number;
-    isSeen: boolean;
-    title: string;
-    description: string;
-    type: string;
+  userId: number;
+  sendId?: number;
+  isSeen: boolean;
+  title: string;
+  description: string;
+  type: string;
 };
-
