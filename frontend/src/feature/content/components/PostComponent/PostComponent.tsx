@@ -5,6 +5,7 @@ import { PostHeaderInfo } from "./PostHeaderInfo";
 import { PostDetailComponent } from "./PostDetail";
 import type { CreateHistoryDto, FullContentDto, UserDto } from "@/service/api";
 import useContentService from "@/shared/hooks/useContentService";
+import useUserService from "@/shared/hooks/useUserService";
 import type { FullContentWithHistoryProps } from "../models/FullContentWithHistory";
 import useHistoryService from "@/shared/hooks/useHistoryService";
 
@@ -43,6 +44,15 @@ export function PostComponent({ post, liked, pinned }: PostComponentProps) {
     };
     fetchHistoryUser();
   }, []);
+
+  const { findUserById } = useUserService();
+  useEffect(() => {
+    const fetchCreatorData = async () => {
+      const userData: UserDto | null = await findUserById(post.creator_id);
+      if (userData) setLoggedUserData(userData);
+    };
+    fetchCreatorData();
+  }, [post.creator_id]);
 
   // Get Posts
   const getAncestors = async (
