@@ -129,6 +129,38 @@ export function PostComponent({ post, liked, pinned }: PostComponentProps) {
     if (newChildren) setChildren(newChildren);
   };
 
+  const handleBack = async (oldPost: FullContentDto) => {
+    const histories = await getByUser(loggedUserData?.user_id || 0);
+    const userHistory = histories?.find(
+      (h) => h.content_id === oldPost.content_id
+    );
+
+    const newPostWithHistory: FullContentWithHistoryProps = {
+      ...oldPost,
+      liked: userHistory?.liked || false,
+      pinned: userHistory?.pinned || false,
+    };
+
+    setCurrentPost(newPostWithHistory);
+    setLikes(oldPost.likes);
+    setComments(oldPost.comments);
+    setPins(oldPost.pins);
+    setLikedState(userHistory?.liked || false);
+    setPinnedState(userHistory?.pinned || false);
+
+    const [oldAncestors, oldChildren] = await Promise.all([
+      getAncestors(
+        oldPost.content_id,
+        oldPost.area_id,
+        loggedUserData?.user_id || 0
+      ),
+      getChildren(oldPost.content_id),
+    ]);
+
+    if (oldAncestors) setAncestor(oldAncestors);
+    if (oldChildren) setChildren(oldChildren);
+  };
+
   useEffect(() => {
     const fetchInitialData = async () => {
       if (!loggedUserData?.user_id) return;
@@ -176,7 +208,11 @@ export function PostComponent({ post, liked, pinned }: PostComponentProps) {
             const newChildren = await getChildren(currentPost.content_id);
             if (newChildren) setChildren(newChildren);
           }}
-          onClose={() => setShowDetail(false)}
+          onClose={() => {
+            setShowDetail(false);
+            setCurrentPost(post);
+            handleBack(post);
+          }}
           liked={likedState ?? history?.liked ?? false}
           pinned={pinnedState ?? history?.pinned ?? false}
           likes={likes}

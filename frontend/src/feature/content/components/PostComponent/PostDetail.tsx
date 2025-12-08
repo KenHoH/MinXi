@@ -298,7 +298,6 @@ export function PostDetailComponent(props: PostDetailComponentProps) {
   };
 
   useEffect(() => {
-    console.error("Testis Post detail");
     fetchUserData(post.creator_id);
 
     if (user?.user_id === post.creator_id) {
