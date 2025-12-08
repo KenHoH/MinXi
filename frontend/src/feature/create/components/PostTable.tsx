@@ -14,6 +14,7 @@ import { useAuthContext } from "@/feature/auth/context/AuthContext";
 import type { FullContentDto } from "@/service/api";
 import useContentService from "@/shared/hooks/useContentService";
 import { useToast } from "@/shared/context/ToastContext";
+import { replace, useNavigate } from "react-router";
 
 interface PostTableProps {
   items: FullContentDto[];
@@ -64,6 +65,15 @@ export function PostTable({ items, onRefreshChild, onDelete }: PostTableProps) {
     return "file";
   };
 
+  const navigate = useNavigate();
+  const navigateToPost = (
+    username: string,
+    contentId: number,
+    area: number
+  ) => {
+    navigate(`/feed/${username}/${contentId}/post/${area}`, { replace: true });
+  };
+
   return (
     <div className="space-y-6">
       <Button
@@ -92,6 +102,9 @@ export function PostTable({ items, onRefreshChild, onDelete }: PostTableProps) {
             <div
               key={item.content_id}
               className="bg-dark-800 rounded-lg border border-dark-700 overflow-hidden hover:border-burgundy-600/50 transition-colors flex flex-col"
+              onClick={() =>
+                navigateToPost(item.username, item.content_id, item.area_id)
+              }
             >
               {/* Thumbnail Image */}
               {item.contents?.[0]?.filepath && (

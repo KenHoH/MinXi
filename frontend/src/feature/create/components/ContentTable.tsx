@@ -7,6 +7,7 @@ import { CreateContentModal } from "./CreateContent/CreateContentModal";
 import useContentService from "@/shared/hooks/useContentService";
 import { useToast } from "@/shared/context/ToastContext";
 import { ContentDetailComponent } from "@/feature/content/components/ContentComponent/ContentDetail";
+import { useNavigate } from "react-router-dom";
 
 interface ContentTableProps {
   items: FullContentDto[];
@@ -58,6 +59,17 @@ export function ContentTable({
     return "file";
   };
 
+  const navigate = useNavigate();
+  const navigateToContent = (
+    username: string,
+    contentId: number,
+    area: number
+  ) => {
+    navigate(`/feed/${username}/${contentId}/content/${area}`, {
+      replace: true,
+    });
+  };
+
   return (
     <div className="space-y-6">
       <Button
@@ -90,6 +102,9 @@ export function ContentTable({
             <div
               key={item.content_id}
               className="bg-dark-800 rounded-lg border border-dark-700 overflow-hidden hover:border-burgundy-600/50 transition-colors flex flex-col"
+              onClick={() =>
+                navigateToContent(item.username, item.content_id, item.area_id)
+              }
             >
               {/* Thumbnail Image */}
               <div className="relative w-full bg-dark-750 overflow-hidden h-60">

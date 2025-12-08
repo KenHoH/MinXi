@@ -146,15 +146,17 @@ export function ContentDetailComponent(props: ContentDetailComponentProps) {
 
       if (onCommentClick) {
         onCommentClick(totalComments + 1);
-        sendNotificatonSystem(
-          content.creator_id,
-          user.user_id,
-          `Your post received a new comment! from ${
-            loggedUserData?.username || "someone"
-          }`,
-          "New Comment",
-          "COMMENT"
-        );
+        if (user.user_id !== content.creator_id) {
+          sendNotificatonSystem(
+            content.creator_id,
+            user.user_id,
+            `Your post received a new comment! from ${
+              user.username || "someone"
+            }`,
+            "New Comment",
+            "COMMENT"
+          );
+        }
       }
 
       setRefreshComments((prev) => !prev);
@@ -238,13 +240,17 @@ export function ContentDetailComponent(props: ContentDetailComponentProps) {
           }),
         ]);
         if (newLiked) {
-          sendNotificatonSystem(
-            content.creator_id,
-            user.user_id,
-            `Your post was liked! by ${loggedUserData?.username || "someone"}`,
-            "Liked post",
-            "LIKE"
-          );
+          if (user.user_id !== content.creator_id) {
+            sendNotificatonSystem(
+              content.creator_id,
+              user.user_id,
+              `Your post was liked! by ${
+                loggedUserData?.username || "someone"
+              }`,
+              "Liked post",
+              "LIKE"
+            );
+          }
         }
         break;
       }

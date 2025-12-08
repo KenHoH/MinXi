@@ -186,13 +186,15 @@ export function PostDetailComponent(props: PostDetailComponentProps) {
           }),
         ]);
         if (newLiked) {
-          sendNotificatonSystem(
-            post.creator_id,
-            user.user_id,
-            "Your post was liked!",
-            "Liked post",
-            "LIKE"
-          );
+          if (user.user_id !== post.creator_id) {
+            sendNotificatonSystem(
+              post.creator_id,
+              user.user_id,
+              `Your post was liked! by ${user.username || "someone"}`,
+              "Liked post",
+              "LIKE"
+            );
+          }
         }
 
         onLiked(newLiked);
@@ -472,13 +474,20 @@ export function PostDetailComponent(props: PostDetailComponentProps) {
         onUpdateComment={() => {
           console.log("Updating comment count from PostDetail");
           handleBtn(3);
-          sendNotificatonSystem(
-            post.creator_id,
-            user ? user.user_id : 0,
-            "Your post received a new comment!",
-            "New Comment",
-            "COMMENT"
-          );
+          if (user) {
+            if (user.user_id !== post.creator_id) {
+              sendNotificatonSystem(
+                post.creator_id,
+                user.user_id,
+                `Your post received a new comment! from ${
+                  user.username || "someone"
+                }`,
+                "New Comment",
+                "COMMENT"
+              );
+            }
+          }
+
           setTotalComments(totalComments);
         }}
       />
