@@ -7,7 +7,11 @@ import useGetHistory from "../logic/useGetHistory";
 import { useAuthContext } from "@/feature/auth/context/AuthContext";
 import type { FullContentWithHistoryProps } from "@/feature/content/components/models/FullContentWithHistory";
 import { FeedListSkeleton } from "./FeedListSkeleton";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
+import useHistoryService from "@/shared/hooks/useHistoryService";
+import useContentService from "@/shared/hooks/useContentService";
+import { ContentDetailComponent } from "@/feature/content/components/ContentComponent/ContentDetail";
+import { PostDetailComponent } from "@/feature/content/components/PostComponent/PostDetail";
 
 interface FeedListProps {
   onLoadMore: () => Promise<FullContentDto[]>;
@@ -28,7 +32,84 @@ export default function FeedList({
   const [hasMore, setHasMore] = useState(true);
   const observerTarget = useRef<HTMLDivElement>(null);
   const [histories, historiesLoading] = useGetHistory();
+  const navigate = useNavigate();
 
+  const { getByUserAndContent } = useHistoryService();
+  const { findOne, getAncestorPost, getChildPost } = useContentService();
+  const { item, type, area } = useParams();
+
+  const [selectedContent, setSelectedContent] = useState<FullContentDto | null>(
+    null
+  );
+  const [contentHistory, setContentHistory] = useState<{
+    liked: boolean;
+    pinned: boolean;
+    likes: number;
+    pins: number;
+    comments: number;
+    reports: number;
+  } | null>(null);
+  const [ancestors, setAncestors] = useState<
+    FullContentWithHistoryProps[] | null
+  >(null);
+  const [childPosts, setChildPosts] = useState<FullContentDto[] | null>(null);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      if (!item || !type || !area || !user) return;
+
+      try {
+        const content = await findOne(Number(item), Number(area));
+        const userHistory = await getByUserAndContent(
+          user.user_id,
+          Number(item)
+        );
+        if (!content) return;
+
+        setSelectedContent(content);
+        setContentHistory({
+          liked: userHistory?.liked || false,
+          pinned: userHistory?.pinned || false,
+          likes: content.likes || 0,
+          pins: content.pins || 0,
+          comments: content.comments || 0,
+          reports: content.reports || 0,
+        });
+
+        if (type === "post") {
+          const ancestorData = await getAncestorPost(
+            Number(item),
+            Number(area)
+          );
+          const childData = await getChildPost(Number(item));
+          setAncestors(ancestorData);
+          setChildPosts(childData);
+        }
+      } catch (error) {
+        console.error("Failed to fetch content details:", error);
+      }
+    };
+
+    fetchData();
+  }, [item, type, area, user]);
+
+  const handleCloseDetail = () => {
+    setSelectedContent(null);
+    setContentHistory(null);
+    setAncestors(null);
+    setChildPosts(null);
+    navigate(-1);
+  };
+
+  const handleRefreshChild = async () => {
+    if (!item) return;
+    try {
+      const childData = await getChildPost(Number(item));
+      setChildPosts(childData);
+    } catch (error) {
+      console.error("Failed to refresh child posts:", error);
+    }
+  };
   const contents = useMemo(() => {
     return items.map((item) => {
       const userHistory = histories.find(
@@ -160,6 +241,64 @@ export default function FeedList({
         <div className="text-center py-8 text-gray-500">
           <p>No more items to load</p>
         </div>
+      )}
+
+      {selectedContent && contentHistory && type === "content" && (
+        <ContentDetailComponent
+          content={selectedContent}
+          onClose={handleCloseDetail}
+          liked={contentHistory.liked}
+          pinned={contentHistory.pinned}
+          likes={contentHistory.likes}
+          pins={contentHistory.pins}
+          comments={contentHistory.comments}
+          reports={contentHistory.reports}
+          onLikeClick={(newLike) => {
+            setContentHistory({ ...contentHistory, likes: newLike });
+          }}
+          onPinClick={(newPin) => {
+            setContentHistory({ ...contentHistory, pins: newPin });
+          }}
+          onCommentClick={(newComment) => {
+            setContentHistory({ ...contentHistory, comments: newComment });
+          }}
+          onlikedChange={(liked) => {
+            setContentHistory({ ...contentHistory, liked });
+          }}
+          onpinnedChange={(pinned) => {
+            setContentHistory({ ...contentHistory, pinned });
+          }}
+        />
+      )}
+
+      {selectedContent && contentHistory && type === "post" && (
+        <PostDetailComponent
+          post={selectedContent}
+          onClose={handleCloseDetail}
+          ancestors={ancestors}
+          children={childPosts}
+          onRefreshChild={handleRefreshChild}
+          liked={contentHistory.liked}
+          pinned={contentHistory.pinned}
+          likes={contentHistory.likes}
+          pins={contentHistory.pins}
+          comments={contentHistory.comments}
+          onLikeClick={(newLike) => {
+            setContentHistory({ ...contentHistory, likes: newLike });
+          }}
+          onCommentClick={(newComment) => {
+            setContentHistory({ ...contentHistory, comments: newComment });
+          }}
+          onPinClick={(newPin) => {
+            setContentHistory({ ...contentHistory, pins: newPin });
+          }}
+          onLiked={(liked) => {
+            setContentHistory({ ...contentHistory, liked });
+          }}
+          onPinned={(pinned) => {
+            setContentHistory({ ...contentHistory, pinned });
+          }}
+        />
       )}
     </div>
   );

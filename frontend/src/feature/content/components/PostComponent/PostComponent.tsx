@@ -148,9 +148,9 @@ export function PostComponent({ post, liked, pinned }: PostComponentProps) {
           pins={pins}
           liked={likedState ?? history?.liked ?? false}
           pinned={pinnedState ?? history?.pinned ?? false}
-          creator={loggedUserData?.username || "anonymous"}
+          creator={post.username || "anonymous"}
           creatorProfile={
-            loggedUserData?.profile_picture ||
+            post.profile_url ||
             "http://localhost:3000/uploads/profile/1763906830326-69740177.png"
           }
         />
