@@ -31,9 +31,17 @@ export function CreatePostUserInfo({
 
   return (
     <div className="flex items-center gap-3">
-      <ProfilePicture creator={creator} size="md" clickable={false} />
+      <ProfilePicture
+        creator={{
+          user_id: creator.user_id,
+          username: creator.username,
+          profile_picture_url: creator.profile_picture,
+        }}
+        size="md"
+        clickable={false}
+      />
       <div>
-        <p className="font-semibold text-gray-100">@{user?.username}</p>
+        <p className="font-semibold text-gray-100">@{creator.username}</p>
         {parentPostId && (
           <p className="text-xs text-gray-400">
             Replying to Post #{parentPost?.title || parentPostId}

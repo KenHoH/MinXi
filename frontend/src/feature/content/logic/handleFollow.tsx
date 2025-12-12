@@ -1,22 +1,38 @@
-import { useAuthContext } from "@/feature/auth/context/AuthContext";
-import useConnectionService from "@/shared/hooks/useConnectionService";
-import useUserService from "@/shared/hooks/useUserService";
+import type { NotifType } from "@/shared/logic/useNotificatoin";
 
 export default async function handleFollow(
   delta: boolean,
   creatorId: number,
-  userId: number
+  userId: number,
+  username: string,
+  createFollow: (creatorId: number, userId: number) => Promise<any>,
+  deleteFollow: (creatorId: number, userId: number) => Promise<any>,
+  updateFollowUser: (userId: number, data: { delta: number }) => Promise<any>,
+  sendNotification: (
+    recipientId: number,
+    senderId: number,
+    message: string,
+    title: string,
+    type: NotifType
+  ) => Promise<void>
 ) {
-  const { user } = useAuthContext();
-  if (!user) return;
-  const { createFollow, deleteFollow } = useConnectionService();
-  const { updateFollowUser } = useUserService();
-
   if (delta == false) {
-    await createFollow(creatorId, userId);
-    await updateFollowUser(creatorId, { delta: 1 });
+    await Promise.all([
+      createFollow(creatorId, userId),
+      updateFollowUser(creatorId, { delta: 1 }),
+    ]);
+
+    sendNotification(
+      creatorId,
+      userId,
+      `${username || "someone"} started following you!`,
+      "New Follower",
+      "FOLLOW"
+    );
   } else {
-    await deleteFollow(creatorId, userId);
-    await updateFollowUser(creatorId, { delta: -1 });
+    await Promise.all([
+      deleteFollow(creatorId, userId),
+      updateFollowUser(creatorId, { delta: -1 }),
+    ]);
   }
 }

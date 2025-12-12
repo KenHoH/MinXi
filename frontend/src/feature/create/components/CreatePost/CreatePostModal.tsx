@@ -12,13 +12,13 @@ import type FileItem from "@/feature/content/object/FileItem";
 import type MediaItem from "@/feature/content/object/MediaItem";
 import useUserService from "@/shared/hooks/useUserService";
 import type { FullContentDto, UserDto } from "@/service/api";
+import { useAuthContext } from "@/feature/auth/context/AuthContext";
 
 interface CreatePostModalProps {
   post?: FullContentDto | null;
   isOpen: boolean;
   onClose: () => void;
   parentPostId?: number;
-  currentUserId: number;
   currentAreaId: number;
   onRefreshChild: () => void;
   onUpdateComment: (contentId: number, areaId: number) => void;
@@ -28,7 +28,6 @@ export function CreatePostModal({
   isOpen,
   onClose,
   parentPostId,
-  currentUserId,
   currentAreaId,
   onRefreshChild,
   onUpdateComment,
@@ -37,10 +36,9 @@ export function CreatePostModal({
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [media, setMedia] = useState<MediaItem[]>([]);
-  const { findUserById } = useUserService();
-  const [userData, setUserdata] = useState<UserDto | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  const { user } = useAuthContext();
   const { showToast } = useToast();
   const { create } = useContentService();
 
@@ -92,7 +90,7 @@ export function CreatePostModal({
       description,
       media,
       parentPostId,
-      creator_id: currentUserId,
+      creator_id: user?.user_id ?? 0,
     });
 
     setIsSubmitting(true);
@@ -104,7 +102,7 @@ export function CreatePostModal({
     const res = await create({
       area_id: currentAreaId,
       parent_id: parentPostId,
-      creator_id: currentUserId,
+      creator_id: user?.user_id ?? 0,
       post_type: "post",
       title: title,
       description: description,
@@ -123,22 +121,6 @@ export function CreatePostModal({
     }
     onRefreshChild();
   };
-
-  const fetchUserData = useCallback(
-    async (userId: number) => {
-      try {
-        const response = await findUserById(userId);
-        if (response) setUserdata(response);
-      } catch (error) {
-        console.error("Failed to fetch user data:", error);
-      }
-    },
-    [findUserById]
-  );
-
-  useEffect(() => {
-    fetchUserData(currentUserId);
-  }, [currentUserId]);
 
   if (!isOpen) {
     return null;
@@ -161,10 +143,10 @@ export function CreatePostModal({
           {/* Content */}
           <div className="p-6 space-y-4">
             {/* User Info */}
-            {userData && (
+            {user && (
               <CreatePostUserInfo
                 parentPostId={parentPostId}
-                creator={userData}
+                creator={user}
                 parentAreaId={post?.area_id || currentAreaId}
               />
             )}

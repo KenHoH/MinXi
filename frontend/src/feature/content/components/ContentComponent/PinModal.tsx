@@ -9,7 +9,6 @@ interface PinModalProps {
   isOpen: boolean;
   onClose: () => void;
   content: FullContentDto;
-  loggedUserData: UserDto | null;
   userBoards: BoardDto[];
   onPinSuccess: (boardId: number) => void;
 }
@@ -18,7 +17,6 @@ export default function PinModal({
   isOpen,
   onClose,
   content,
-  loggedUserData,
   userBoards,
   onPinSuccess,
 }: PinModalProps) {
@@ -36,7 +34,7 @@ export default function PinModal({
   };
 
   const handleConfirmPin = async () => {
-    if (selectedBoard === null || !user || !loggedUserData) {
+    if (selectedBoard === null || !user) {
       setError("Please select a board");
       return;
     }
@@ -46,7 +44,7 @@ export default function PinModal({
       setError("");
 
       // Add content to the selected board
-      await addContent(selectedBoard, loggedUserData.area_id, {
+      await addContent(selectedBoard, user.area_id, {
         content_id: content.content_id,
       });
 

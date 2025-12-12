@@ -10,7 +10,6 @@ interface ReportModalProps {
   isOpen: boolean;
   onClose: () => void;
   content: FullContentDto;
-  loggedUserData: UserDto | null;
   onReportSuccess: () => void;
 }
 
@@ -39,7 +38,6 @@ export function ReportModal({
   isOpen,
   onClose,
   content,
-  loggedUserData,
   onReportSuccess,
 }: ReportModalProps) {
   const { user } = useAuthContext();
@@ -80,7 +78,7 @@ export function ReportModal({
         type: type as any,
       });
 
-      await updateReport(content.content_id, loggedUserData?.area_id || 0, {
+      await updateReport(content.content_id, user.area_id, {
         delta: 1,
       });
 

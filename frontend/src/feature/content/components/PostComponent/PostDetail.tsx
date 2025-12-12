@@ -5,25 +5,34 @@ import { PostDetailHeader } from "./PostDetailHeader";
 import { PostDetailMain } from "./PostDetailMain";
 import { PostMediaGallery } from "./PostMediaGallery";
 import { MiniPostDetail } from "./MiniPostDetail";
-import type { BoardDto, FullContentDto, UserDto } from "@/service/api";
-import useContentService from "@/shared/hooks/useContentService";
-import useUserService from "@/shared/hooks/useUserService";
-import useHistoryService from "@/shared/hooks/useHistoryService";
+import type { BoardDto, FullContentDto } from "@/service/api";
 import { useAuthContext } from "@/feature/auth/context/AuthContext";
 import { ReportModal } from "../ContentComponent/ReportModal";
 import { useToast } from "@/shared/context/ToastContext";
-import useBoardService from "@/shared/hooks/useBoardService";
 import PinModal from "../ContentComponent/PinModal";
-import useConnectionService from "@/shared/hooks/useConnectionService";
+import handleLike from "../../logic/handleLike";
+import { handleUnpin } from "../../logic/handleUnpin";
+import { handlePinSuccess } from "../../logic/handlePinSuccess";
+import updateReport from "../../logic/handleReport";
+import handleFollow from "../../logic/handleFollow";
+import handleComment from "../../logic/handleComment";
+import { getBoards } from "../../logic/handleGetBoards";
+import checkFollowStatus from "../../logic/handleFollowStatus";
 import type { FullContentWithHistoryProps } from "../models/FullContentWithHistory";
+import handleGetAncestors from "../../logic/handleGetAncestors";
+import handleGetChildren from "../../logic/handleGetChildren";
+import useContentService from "@/shared/hooks/useContentService";
+import useHistoryService from "@/shared/hooks/useHistoryService";
+import useUserService from "@/shared/hooks/useUserService";
 import useNotification from "@/shared/logic/useNotificatoin";
+import useConnectionService from "@/shared/hooks/useConnectionService";
+import useBoardService from "@/shared/hooks/useBoardService";
 
 interface PostDetailComponentProps {
   post: FullContentDto;
   onClose: () => void;
-  ancestors: FullContentWithHistoryProps[] | null;
-  children: FullContentDto[] | null;
-  onRefreshChild: () => void;
+  // ancestors: FullContentWithHistoryProps[] | null;
+  // children: FullContentDto[] | null;
   liked: boolean;
   pinned: boolean;
   likes: number;
@@ -41,9 +50,6 @@ export function PostDetailComponent(props: PostDetailComponentProps) {
   const {
     post,
     onClose,
-    ancestors,
-    children,
-    onRefreshChild,
     liked: propsLiked,
     pinned: propsPinned,
     likes: propsLikes,
@@ -58,12 +64,24 @@ export function PostDetailComponent(props: PostDetailComponentProps) {
   } = props;
   const { user } = useAuthContext();
   const { showToast } = useToast();
+  const {
+    updateLike,
+    updateComment,
+    updatePin,
+    getAncestorPost,
+    getChildPost,
+  } = useContentService();
+  const { upsert: upsertHistory, getByUser } = useHistoryService();
+  const { updateLikeUser, updateFollowUser, updateReportUser } =
+    useUserService();
+  const { sendNotificatonSystem } = useNotification();
+  const { checkFollow, createFollow, deleteFollow } = useConnectionService();
+  const { getBoardByUser, removeContent } = useBoardService();
+
   const [liked, setLiked] = useState(propsLiked);
   const [pinned, setPinned] = useState(propsPinned);
   const [showCreatePost, setShowCreatePost] = useState(false);
   const [currentMediaIndex, setCurrentMediaIndex] = useState(0);
-  const [userData, setUserdata] = useState<UserDto | null>(null);
-  const { findUserById } = useUserService();
   const [currentPost, setCurrentPost] = useState<FullContentDto>(post);
   const [totalLikes, setTotalLikes] = useState(propsLikes);
   const [totalComments, setTotalComments] = useState(propsComments);
@@ -75,6 +93,14 @@ export function PostDetailComponent(props: PostDetailComponentProps) {
   const [reported, setReported] = useState(false);
   const [userBoards, setUserBoards] = useState<BoardDto[]>([]);
   const [pinnedBoardId, setPinnedBoardId] = useState<number | null>(null);
+  const [ancestors, setAncestors] = useState<
+    FullContentWithHistoryProps[] | null
+  >(null);
+  const [children, setChildren] = useState<
+    FullContentWithHistoryProps[] | null
+  >(null);
+  const [isLoadingAncestors, setIsLoadingAncestors] = useState(true);
+  const [isLoadingChildren, setIsLoadingChildren] = useState(true);
 
   useEffect(() => {
     setLiked(propsLiked);
@@ -83,21 +109,6 @@ export function PostDetailComponent(props: PostDetailComponentProps) {
     setTotalPins(propsPins);
     setTotalComments(propsComments);
   }, [propsLiked, propsPinned, propsLikes, propsPins, propsComments]);
-
-  const { upsert, getByUserAndContent } = useHistoryService();
-  const { getBoardByUser, removeContent } = useBoardService();
-  const {
-    updateLike,
-    updatePin,
-    updateComment,
-    findOne,
-    getAncestorPost,
-    getChildPost,
-  } = useContentService();
-  const { updateLikeUser, updateFollowUser, updateReportUser } =
-    useUserService();
-  const { checkFollow, createFollow, deleteFollow } = useConnectionService();
-  const { sendNotificatonSystem } = useNotification();
 
   const handlePrevMedia = () => {
     setCurrentMediaIndex((prev) =>
@@ -110,256 +121,161 @@ export function PostDetailComponent(props: PostDetailComponentProps) {
       prev === currentPost.contents.length - 1 ? 0 : prev + 1
     );
   };
-
-  const getBoards = async () => {
-    if (!userData) return;
-    const boards = await getBoardByUser(userData.user_id, userData.area_id);
-    setUserBoards(boards || []);
-
-    if (pinned && boards) {
-      for (const board of boards) {
-        if (board.contents?.some((c) => c.content_id === post.content_id)) {
-          setPinnedBoardId(board.board_id);
-          break;
-        }
-      }
-    }
-  };
-
-  const updateBoardsWithContent = (boardId: number) => {
-    setPinnedBoardId(boardId);
-  };
-
   const handleClickOutside = (e: React.MouseEvent) => {
     if ((e.target as HTMLElement)?.id === "post-detail-backdrop") {
       onClose();
     }
   };
 
-  const handleFollow = async (isFollowing: boolean) => {
+  const handleBtnLike = async () => {
     if (!user) return;
-
-    try {
-      if (isFollowing) {
-        await deleteFollow(post.creator_id, user.user_id);
-        await updateFollowUser(post.creator_id, { delta: -1 });
-      } else {
-        await createFollow(post.creator_id, user.user_id);
-        await updateFollowUser(post.creator_id, { delta: 1 });
-        sendNotificatonSystem(
-          post.creator_id,
-          user.user_id,
-          `${userData?.username || "someone"} started following you!`,
-          "New Follower",
-          "FOLLOW"
-        );
-      }
-    } catch (error) {
-      console.error("Failed to handle follow:", error);
-    }
+    await handleLike(
+      liked,
+      totalLikes,
+      pinned,
+      post.creator_id,
+      user.user_id,
+      post.area_id,
+      post.content_id,
+      setLiked,
+      setTotalLikes,
+      onLikeClick,
+      onLiked,
+      updateLike,
+      updateLikeUser,
+      upsertHistory,
+      sendNotificatonSystem
+    );
   };
 
-  const handleBtn = async (typeBtn: number) => {
+  const handleBtnPin = async () => {
     if (!user) return;
-    switch (typeBtn) {
-      case 1: {
-        const newLiked = !liked;
-        const newLikeCount = totalLikes + (newLiked ? 1 : -1);
-        setLiked(newLiked);
-        setTotalLikes(newLikeCount);
-        onLikeClick(newLikeCount);
-
-        await Promise.all([
-          updateLike(post.content_id, userData?.area_id || 0, {
-            delta: newLiked ? 1 : -1,
-          }),
-          updateLikeUser(post.creator_id, {
-            delta: newLiked ? 1 : -1,
-          }),
-          upsert({
-            content_id: post.content_id,
-            user_id: user.user_id,
-            liked: newLiked,
-            pinned,
-            reps: 0,
-          }),
-        ]);
-        if (newLiked) {
-          sendNotificatonSystem(
-            post.creator_id,
-            user.user_id,
-            "Your post was liked!",
-            "Liked post",
-            "LIKE"
-          );
-        }
-
-        onLiked(newLiked);
-        break;
-      }
-      case 2: {
-        if (pinned) {
-          await handleUnpin();
-        } else {
-          setShowPinModal(true);
-        }
-        break;
-      }
-      case 3: {
-        await updateComment(post.content_id, userData?.area_id || 0, {
-          delta: 1,
-        });
-        const newCommentCount = totalComments + 1;
-        setTotalComments(newCommentCount);
-        onCommentClick(newCommentCount);
-        break;
-      }
-    }
-  };
-
-  const handleUnpin = async () => {
-    if (!user || !userData || pinnedBoardId === null) return;
-
-    try {
-      await removeContent(pinnedBoardId, userData.area_id, {
-        content_id: post.content_id,
-      });
-
-      await updatePin(post.content_id, userData.area_id, {
-        delta: -1,
-      });
-
-      const newPinCount = totalPins - 1;
-      setTotalPins(newPinCount);
-      setPinned(false);
-      setPinnedBoardId(null);
-
-      onPinClick(newPinCount);
-      onPinned(false);
-
-      await upsert({
-        content_id: post.content_id,
-        user_id: user.user_id,
+    if (pinned) {
+      await handleUnpin(
+        post,
+        user.user_id,
+        user.area_id,
+        pinnedBoardId,
         liked,
-        pinned: false,
-        reps: 0,
-      });
-
-      showToast("Content unpinned successfully");
-    } catch (error) {
-      console.error("Failed to unpin content:", error);
-      showToast("Failed to unpin content");
+        setTotalPins,
+        setPinned,
+        setPinnedBoardId,
+        onPinClick,
+        onPinned,
+        removeContent,
+        updatePin,
+        upsertHistory,
+        showToast
+      );
+    } else {
+      setShowPinModal(true);
     }
   };
 
-  const fetchUserData = async (userId: number) => {
-    try {
-      const response = await findUserById(userId);
-      if (response) setUserdata(response);
-    } catch (error) {
-      console.error("Failed to fetch user data:", error);
-    }
-  };
-
-  const updateReport = async (delta: boolean) => {
+  const handleBtnComment = async () => {
     if (!user) return;
-    await updateReportUser(post.creator_id, { delta: delta ? 1 : -1 });
+    await handleComment(
+      post.content_id,
+      user.user_id,
+      post.creator_id,
+      post.area_id,
+      totalComments,
+      setTotalComments,
+      onCommentClick,
+      updateComment,
+      sendNotificatonSystem
+    );
   };
+
   const onPinSuccess = async (boardId: number) => {
     if (!user) return;
+    await handlePinSuccess(
+      post.content_id,
+      user.user_id,
+      post.area_id,
+      liked,
+      boardId,
+      totalPins,
+      setPinnedBoardId,
+      setPinned,
+      setTotalPins,
+      setShowPinModal,
+      onPinClick,
+      onPinned,
+      updatePin,
+      upsertHistory,
+      showToast
+    );
+  };
+
+  const fetchAncestors = async () => {
+    if (!user) return;
+    setIsLoadingAncestors(true);
     try {
-      await updatePin(post.content_id, userData?.area_id || 0, {
-        delta: 1,
-      });
-
-      await upsert({
-        content_id: post.content_id,
-        user_id: user.user_id,
-        liked,
-        pinned: true,
-        reps: 0,
-      });
-
-      updateBoardsWithContent(boardId);
-      const newPinCount = totalPins + 1;
-      setPinned(true);
-      setTotalPins(newPinCount);
-      setShowPinModal(false);
-
-      onPinClick(newPinCount);
-      onPinned(true);
+      const ancestorsData = await handleGetAncestors(
+        post.content_id,
+        post.area_id,
+        user.user_id,
+        getAncestorPost,
+        getByUser
+      );
+      setAncestors(ancestorsData);
     } catch (error) {
-      console.error("Failed to complete pin:", error);
-      showToast("Failed to complete pin");
+      console.error("Error fetching ancestors:", error);
+      setAncestors([]);
+    } finally {
+      setIsLoadingAncestors(false);
+    }
+  };
+
+  const fetchChildren = async () => {
+    if (!user) return;
+    setIsLoadingChildren(true);
+    try {
+      const childrenData = await handleGetChildren(
+        post.content_id,
+        user.user_id,
+        getChildPost,
+        getByUser
+      );
+      setChildren(childrenData);
+    } catch (error) {
+      console.error("Error fetching children:", error);
+      setChildren([]);
+    } finally {
+      setIsLoadingChildren(false);
     }
   };
 
   useEffect(() => {
-    fetchUserData(post.creator_id);
-
-    if (user?.user_id === post.creator_id) {
-      setIsOwnContent(true);
-    } else {
-      setIsOwnContent(false);
-    }
-  }, [post.creator_id, post, user?.user_id]);
-
-  useEffect(() => {
-    const checkFollowStatus = async () => {
-      if (!user || isOwnContent) {
-        setFollowed(false);
-        return;
-      }
-
-      try {
-        const isFollowing = await checkFollow(post.creator_id, user.user_id);
-        setFollowed(isFollowing || false);
-      } catch (error) {
-        console.error("Failed to check follow status:", error);
-        setFollowed(false);
-      }
-    };
-
-    checkFollowStatus();
+    if (!user) return;
+    checkFollowStatus(
+      user.user_id,
+      isOwnContent,
+      post,
+      setIsOwnContent,
+      setFollowed,
+      checkFollow
+    );
   }, [user, post.creator_id, isOwnContent]);
 
   useEffect(() => {
-    getBoards();
-  }, [userData]);
+    if (!user) return;
+    getBoards(
+      user.user_id,
+      user.area_id,
+      pinned,
+      post,
+      setUserBoards,
+      setPinnedBoardId,
+      getBoardByUser
+    );
+  }, [user]);
 
   useEffect(() => {
-    const refetchPostTree = async () => {
-      try {
-        const ancestorData = await getAncestorPost(
-          post.content_id,
-          post.area_id
-        );
-        if (ancestorData) return ancestorData;
-      } catch (error) {
-        console.error("Failed to fetch ancestors:", error);
-      }
-    };
-
-    const refetchChildren = async () => {
-      try {
-        const childData = await getChildPost(post.content_id);
-        if (childData) return childData;
-      } catch (error) {
-        console.error("Failed to fetch children:", error);
-      }
-    };
-
-    if (!ancestors || ancestors.length === 0) {
-      refetchPostTree();
-    }
-    if (!children || children.length === 0) {
-      refetchChildren();
-    }
-  }, [post.content_id, post.area_id]);
-
-  useEffect(() => {
-    setCurrentMediaIndex(0);
-  }, [post.content_id]);
+    fetchAncestors();
+    fetchChildren();
+  }, [post.content_id, post.area_id, user]);
 
   return (
     <div
@@ -376,25 +292,36 @@ export function PostDetailComponent(props: PostDetailComponentProps) {
         </button>
 
         <div className="p-6 space-y-4">
-          {ancestors && ancestors.length > 0 && (
+          {isLoadingAncestors ? (
             <div className="space-y-2 pb-4 border-b border-dark-700">
-              <h4 className="text-xs font-semibold text-gray-400 uppercase">
-                Replying to:
-              </h4>
-              <div className="space-y-2">
-                {ancestors.map((ancestor, index) => (
-                  <div key={ancestor.content_id}>
-                    <MiniPostDetail
-                      post={ancestor}
-                      onNavigate={onPostNavigate}
-                    />
-                    {index < ancestors.length - 1 && (
-                      <div className="h-10 w-1 bg-red-400 my-2 rounded ml-4" />
-                    )}
-                  </div>
-                ))}
+              <div className="flex items-center justify-center py-4">
+                <div className="text-gray-400 text-sm">
+                  Loading ancestors...
+                </div>
               </div>
             </div>
+          ) : (
+            ancestors &&
+            ancestors.length > 0 && (
+              <div className="space-y-2 pb-4 border-b border-dark-700">
+                <h4 className="text-xs font-semibold text-gray-400 uppercase">
+                  Replying to:
+                </h4>
+                <div className="space-y-2">
+                  {ancestors.map((ancestor, index) => (
+                    <div key={ancestor.content_id}>
+                      <MiniPostDetail
+                        post={ancestor}
+                        onNavigate={onPostNavigate}
+                      />
+                      {index < ancestors.length - 1 && (
+                        <div className="h-10 w-1 bg-red-400 my-2 rounded ml-4" />
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )
           )}
 
           <PostMediaGallery
@@ -405,7 +332,7 @@ export function PostDetailComponent(props: PostDetailComponentProps) {
             title={currentPost.title}
           />
 
-          {userData && (
+          {user && (
             <PostDetailHeader
               creator={{
                 profile_picture_url: post.profile_url,
@@ -415,8 +342,18 @@ export function PostDetailComponent(props: PostDetailComponentProps) {
               followed={followed}
               isOwnContent={isOwnContent}
               onFollowClick={() => {
+                if (!user) return;
                 setFollowed(!followed);
-                handleFollow(followed);
+                handleFollow(
+                  !followed,
+                  post.creator_id,
+                  user.user_id,
+                  user.username,
+                  createFollow,
+                  deleteFollow,
+                  updateFollowUser,
+                  sendNotificatonSystem
+                );
               }}
             />
           )}
@@ -430,8 +367,8 @@ export function PostDetailComponent(props: PostDetailComponentProps) {
             liked={liked}
             pinned={pinned}
             reported={reported}
-            onLikeClick={() => handleBtn(1)}
-            onPinClick={() => (pinned ? handleBtn(2) : setShowPinModal(true))}
+            onLikeClick={() => handleBtnLike()}
+            onPinClick={() => handleBtnPin()}
             onReportClick={() => setShowReportModal(true)}
             onReplyClick={() => {
               setShowCreatePost(true);
@@ -441,7 +378,13 @@ export function PostDetailComponent(props: PostDetailComponentProps) {
           <div className="pt-4 border-t border-dark-700 space-y-4">
             <div>
               <h3 className="font-semibold text-gray-100 mb-4">Replies</h3>
-              {children && children.length > 0 ? (
+              {isLoadingChildren ? (
+                <div className="flex items-center justify-center py-4">
+                  <div className="text-gray-400 text-sm">
+                    Loading replies...
+                  </div>
+                </div>
+              ) : children && children.length > 0 ? (
                 <div className="space-y-2">
                   {children.map((child) => (
                     <MiniPostDetail
@@ -462,37 +405,20 @@ export function PostDetailComponent(props: PostDetailComponentProps) {
       <CreatePostModal
         post={post}
         isOpen={showCreatePost}
-        onRefreshChild={onRefreshChild}
         onClose={() => setShowCreatePost(false)}
+        onRefreshChild={() => fetchChildren()}
         parentPostId={post.content_id}
-        currentUserId={user ? user.user_id : 0}
         currentAreaId={post.area_id}
-        onUpdateComment={() => {
-          console.log("Updating comment count from PostDetail");
-          handleBtn(3);
-          if (user) {
-            if (user.user_id !== post.creator_id) {
-              sendNotificatonSystem(
-                post.creator_id,
-                user.user_id,
-                `Your post received a new comment! from ${
-                  user.username || "someone"
-                }`,
-                "New Comment",
-                "COMMENT"
-              );
-            }
-          }
-        }}
+        onUpdateComment={() => handleBtnComment()}
       />
       <ReportModal
         isOpen={showReportModal}
         onClose={() => setShowReportModal(false)}
         content={post}
-        loggedUserData={userData}
         onReportSuccess={() => {
           setReported(true);
-          updateReport(true);
+          updateReport(true, post.content_id, updateReportUser);
+          showToast("Content reported successfully");
         }}
       />
 
@@ -500,7 +426,6 @@ export function PostDetailComponent(props: PostDetailComponentProps) {
         isOpen={showPinModal}
         onClose={() => setShowPinModal(false)}
         content={post}
-        loggedUserData={userData}
         userBoards={userBoards}
         onPinSuccess={onPinSuccess}
       />

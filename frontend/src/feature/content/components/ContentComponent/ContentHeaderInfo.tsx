@@ -19,7 +19,6 @@ export function ContentHeaderInfo({
     "aspect-[5/4]", // 5:4
     "aspect-[4/3]", // 4:3
     "aspect-[5/3]", // 5:3
-    "aspect-[7/5]", // 7:5
   ];
   const randomAspect =
     aspectRatios[Math.floor(Math.random() * aspectRatios.length)];

@@ -1,13 +1,11 @@
-import { useEffect, useState } from "react";
-
+import { useEffect, useState, useRef } from "react";
 import { PostFooterInfo } from "./PostFooterInfo";
 import { PostHeaderInfo } from "./PostHeaderInfo";
 import { PostDetailComponent } from "./PostDetail";
 import type { CreateHistoryDto, FullContentDto, UserDto } from "@/service/api";
-import useContentService from "@/shared/hooks/useContentService";
-import useUserService from "@/shared/hooks/useUserService";
 import type { FullContentWithHistoryProps } from "../models/FullContentWithHistory";
 import useHistoryService from "@/shared/hooks/useHistoryService";
+import { useAuthContext } from "@/feature/auth/context/AuthContext";
 
 interface PostComponentProps {
   post: FullContentWithHistoryProps;
@@ -21,18 +19,17 @@ export function PostComponent({ post, liked, pinned }: PostComponentProps) {
   const randomHeight = heights[post.content_id % heights.length];
   const [currentPost, setCurrentPost] =
     useState<FullContentWithHistoryProps>(post);
-  const [ancestor, setAncestor] = useState<FullContentWithHistoryProps[]>([]);
-  const [children, setChildren] = useState<FullContentDto[] | null>(null);
   const [likes, setLikes] = useState(post.likes);
   const [comments, setComments] = useState(post.comments);
   const [pins, setPins] = useState(post.pins);
   const [likedState, setLikedState] = useState(liked);
   const [pinnedState, setPinnedState] = useState(pinned);
-  const { getAncestorPost, getChildPost } = useContentService();
-  const { getByUserAndContent } = useHistoryService();
-  const [loggedUserData, setLoggedUserData] = useState<UserDto | null>(null);
-  const { getByUser } = useHistoryService();
   const [history, setHistory] = useState<CreateHistoryDto>();
+  const originalPostRef = useRef<FullContentWithHistoryProps>(post);
+
+  const { getByUserAndContent } = useHistoryService();
+  const { getByUser } = useHistoryService();
+  const { user } = useAuthContext();
 
   useEffect(() => {
     const fetchHistoryUser = async () => {
@@ -45,60 +42,11 @@ export function PostComponent({ post, liked, pinned }: PostComponentProps) {
     fetchHistoryUser();
   }, []);
 
-  const { findUserById } = useUserService();
-  useEffect(() => {
-    const fetchCreatorData = async () => {
-      const userData: UserDto | null = await findUserById(post.creator_id);
-      if (userData) setLoggedUserData(userData);
-    };
-    fetchCreatorData();
-  }, [post.creator_id]);
-
-  // Get Posts
-  const getAncestors = async (
-    postId: number,
-    areaId: number,
-    userId: number
-  ) => {
-    const [ancestorsList, histories] = await Promise.all([
-      getAncestorPost(postId, areaId),
-      getByUser(userId),
-    ]);
-
-    if (!ancestorsList) return [];
-    if (!histories)
-      return ancestorsList.map((item) => ({
-        ...item,
-        liked: false,
-        pinned: false,
-      }));
-
-    const mergedAncestors = ancestorsList.map((item) => {
-      const userHistory = histories.find(
-        (h) => h.content_id === item.content_id
-      );
-      return {
-        ...item,
-        liked: userHistory?.liked || false,
-        pinned: userHistory?.pinned || false,
-      };
-    });
-
-    return mergedAncestors;
-  };
-
-  const getChildren = async (postId: number) => {
-    console.log("Fetching children for post:", postId);
-    const res = await getChildPost(postId);
-    console.log("Children:", res, "for post:", postId);
-    return res;
-  };
-
   const handlePostNavigate = async (newPost: FullContentDto) => {
     console.log("Navigating to post:", newPost.content_id);
     console.log("New Post Data:", newPost);
 
-    const histories = await getByUser(loggedUserData?.user_id || 0);
+    const histories = await getByUser(user?.user_id || 0);
     const userHistory = histories?.find(
       (h) => h.content_id === newPost.content_id
     );
@@ -115,22 +63,10 @@ export function PostComponent({ post, liked, pinned }: PostComponentProps) {
     setPins(newPost.pins);
     setLikedState(userHistory?.liked || false);
     setPinnedState(userHistory?.pinned || false);
-
-    const [newAncestors, newChildren] = await Promise.all([
-      getAncestors(
-        newPost.content_id,
-        newPost.area_id,
-        loggedUserData?.user_id || 0
-      ),
-      getChildren(newPost.content_id),
-    ]);
-
-    if (newAncestors) setAncestor(newAncestors);
-    if (newChildren) setChildren(newChildren);
   };
 
   const handleBack = async (oldPost: FullContentDto) => {
-    const histories = await getByUser(loggedUserData?.user_id || 0);
+    const histories = await getByUser(user?.user_id || 0);
     const userHistory = histories?.find(
       (h) => h.content_id === oldPost.content_id
     );
@@ -147,35 +83,7 @@ export function PostComponent({ post, liked, pinned }: PostComponentProps) {
     setPins(oldPost.pins);
     setLikedState(userHistory?.liked || false);
     setPinnedState(userHistory?.pinned || false);
-
-    const [oldAncestors, oldChildren] = await Promise.all([
-      getAncestors(
-        oldPost.content_id,
-        oldPost.area_id,
-        loggedUserData?.user_id || 0
-      ),
-      getChildren(oldPost.content_id),
-    ]);
-
-    if (oldAncestors) setAncestor(oldAncestors);
-    if (oldChildren) setChildren(oldChildren);
   };
-
-  useEffect(() => {
-    const fetchInitialData = async () => {
-      if (!loggedUserData?.user_id) return;
-
-      const [ancestorsList, childrenList] = await Promise.all([
-        getAncestors(post.content_id, post.area_id, loggedUserData.user_id),
-        getChildren(post.content_id),
-      ]);
-
-      if (ancestorsList) setAncestor(ancestorsList);
-      if (childrenList) setChildren(childrenList);
-    };
-
-    fetchInitialData();
-  }, [loggedUserData?.user_id]);
 
   return (
     <>
@@ -202,14 +110,11 @@ export function PostComponent({ post, liked, pinned }: PostComponentProps) {
         <PostDetailComponent
           key={currentPost.content_id}
           post={currentPost}
-          ancestors={ancestor}
-          children={children}
-          onRefreshChild={async () => {
-            const newChildren = await getChildren(currentPost.content_id);
-            if (newChildren) setChildren(newChildren);
-          }}
           onClose={() => {
             setShowDetail(false);
+            if (currentPost.content_id !== originalPostRef.current.content_id) {
+              handleBack(originalPostRef.current);
+            }
           }}
           liked={likedState ?? history?.liked ?? false}
           pinned={pinnedState ?? history?.pinned ?? false}
