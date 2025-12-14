@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import type { RoomResponseDto } from "@/service/api";
 import useSocialService from "@/shared/hooks/useSocialService";
 import { useAuthContext } from "@/feature/auth/context/AuthContext";
+import { useSSE } from "@/shared/hooks/useSSE";
 
 interface CommunityModalProps {
   isOpen: boolean;
@@ -33,7 +34,27 @@ export default function CommunityModal({
     getRoomGroupJoinedByUserId,
     addGroupToCommunity,
     addUserToRoom,
+    getMessage,
   } = useSocialService();
+  const communityId = community?.id || "";
+  const [lastMessage, setLastMessage] = useState("No announcements yet.");
+  useEffect(() => {
+    const fetchLastAnnouncement = async () => {
+      if (!communityId) return;
+      try {
+        const messages = await getMessage(communityId, 10);
+        if (messages && messages.length > 0) {
+          setLastMessage(messages[0].content);
+        } else {
+          console.error("No messages found for the community.");
+        }
+        console.log("Fetched messages for community:", messages);
+      } catch (error) {
+        console.error("Failed to fetch last announcement:", error);
+      }
+    };
+    fetchLastAnnouncement();
+  }, [communityId]);
 
   useEffect(() => {
     if (isOpen && community) {
@@ -63,7 +84,6 @@ export default function CommunityModal({
       const userGroups = await getRoomGroupJoinedByUserId(user.user_id);
       if (userGroups) {
         setAvailableGroups(userGroups);
-        // Track which groups the user has joined
         const joinedGroupIds = new Set(userGroups.map((g) => g.id));
         setUserJoinedGroups(joinedGroupIds);
       }
@@ -80,7 +100,6 @@ export default function CommunityModal({
         communitiesId: community.id,
         groupId: groupId,
       });
-      // Refresh the groups list
       await fetchCommunityGroups();
       setShowAddGroup(false);
     } catch (error) {
@@ -99,9 +118,7 @@ export default function CommunityModal({
         roomId: groupId,
         userId: user.user_id,
       });
-      // Update the joined groups set
       setUserJoinedGroups((prev) => new Set(prev).add(groupId));
-      // Refresh available groups
       await fetchAvailableGroups();
     } catch (error) {
       console.error("Failed to join group:", error);
@@ -113,7 +130,6 @@ export default function CommunityModal({
 
   if (!isOpen || !community) return null;
 
-  // Filter out groups that are already in the community
   const groupsToAdd = availableGroups.filter(
     (group) => !communityGroups.some((cg) => cg.id === group.id)
   );
@@ -141,7 +157,7 @@ export default function CommunityModal({
                   {community.name}
                 </h2>
                 <p className="text-xs text-muted-foreground">
-                  Komunitas · {communityGroups.length} grup
+                  Community · {communityGroups.length} groups
                 </p>
               </div>
             </div>
@@ -167,22 +183,20 @@ export default function CommunityModal({
                   <p className="text-sm font-medium text-foreground">
                     Announcement
                   </p>
-                  <p className="text-xs text-muted-foreground">
-                    You removed the "General" group
-                  </p>
+                  <p className="text-xs text-muted-foreground">{lastMessage}</p>
                 </div>
               </div>
             </div>
 
             {/* Groups Section Header */}
             <div className="flex items-center justify-between mb-3">
-              <h3 className="text-sm font-semibold text-foreground">Grup</h3>
+              <h3 className="text-sm font-semibold text-foreground">Group</h3>
               {!showAddGroup && groupsToAdd.length > 0 && (
                 <button
                   onClick={() => setShowAddGroup(true)}
                   className="text-xs text-primary hover:text-primary/80 font-medium transition-colors"
                 >
-                  + Tambah grup
+                  + Add Group
                 </button>
               )}
             </div>
@@ -313,7 +327,7 @@ export default function CommunityModal({
                   variant="outline"
                 >
                   <Plus className="w-4 h-4 mr-2" />
-                  Tambah grup
+                  Add Group
                 </Button>
               </div>
             )}

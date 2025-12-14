@@ -200,47 +200,112 @@ export class SocialService implements ISocialService {
       }
 
       if (targetRoom.type === RoomType.GROUP) {
+        const existingGroupParticipant =
+          await this.socialClient.participant.findFirst({
+            where: {
+              userId: dto.userId,
+              roomId: dto.roomId,
+            },
+          });
+
+        let groupParticipant;
+        if (!existingGroupParticipant) {
+          groupParticipant = await this.socialClient.participant.create({
+            data: {
+              userId: dto.userId,
+              roomId: dto.roomId,
+              role: dto.role || ParticipantRole.MEMBER,
+            },
+          });
+        } else {
+          groupParticipant = existingGroupParticipant;
+        }
+
         const community = await this.socialClient.communityGroup.findMany({
           where: { groupId: dto.roomId },
         });
 
-        if (!community) {
-          this.logger.error(`No community found for groupId: ${dto.roomId}`);
+        if (!community || community.length === 0) {
+          this.logger.log(
+            `No parent communities found for groupId: ${dto.roomId}`,
+          );
+          return [mapParticipantToResponse(groupParticipant)];
         }
 
         const communitiesIds = community.map((c) => c.communityId);
-        await this.socialClient.participant.createMany({
-          data: communitiesIds.map((communityId) => ({
+
+        const existingParticipants =
+          await this.socialClient.participant.findMany({
+            where: {
+              userId: dto.userId,
+              roomId: { in: communitiesIds },
+            },
+          });
+
+        const existingRoomIds = new Set(
+          existingParticipants.map((p) => p.roomId),
+        );
+        const newCommunityIds = communitiesIds.filter(
+          (id) => !existingRoomIds.has(id),
+        );
+
+        if (newCommunityIds.length > 0) {
+          await this.socialClient.participant.createMany({
+            data: newCommunityIds.map((communityId) => ({
+              userId: dto.userId,
+              roomId: communityId,
+              role: ParticipantRole.MEMBER,
+            })),
+          });
+        }
+
+        const allParticipants = await this.socialClient.participant.findMany({
+          where: {
             userId: dto.userId,
-            roomId: communityId,
-            role: ParticipantRole.MEMBER,
-          })),
+            roomId: { in: [dto.roomId, ...communitiesIds] },
+          },
         });
 
-        const participants = communitiesIds.map((communityId) => ({
-          userId: dto.userId,
-          roomId: communityId,
-          role: ParticipantRole.MEMBER,
-        }));
-        return participants.map(mapParticipantToResponse);
+        return allParticipants.map(mapParticipantToResponse);
       }
 
-      const participant = await this.socialClient.participant.create({
-        data: {
-          userId: dto.userId,
-          roomId: dto.roomId,
-          role: dto.role || ParticipantRole.MEMBER,
+      const existingParticipant = await this.socialClient.participant.findFirst(
+        {
+          where: {
+            userId: dto.userId,
+            roomId: dto.roomId,
+          },
         },
-      });
+      );
+
+      let participant;
+      if (existingParticipant) {
+        if (dto.role && existingParticipant.role !== dto.role) {
+          participant = await this.socialClient.participant.update({
+            where: { id: existingParticipant.id },
+            data: { role: dto.role },
+          });
+        } else {
+          participant = existingParticipant;
+        }
+      } else {
+        participant = await this.socialClient.participant.create({
+          data: {
+            userId: dto.userId,
+            roomId: dto.roomId,
+            role: dto.role || ParticipantRole.MEMBER,
+          },
+        });
+      }
 
       const participants: ParticipantResponseDto[] = [];
       participants.push(mapParticipantToResponse(participant));
 
       return participants;
-    } catch (error: any) {
+    } catch (error) {
       throw httpToRpc(
         new HttpException(
-          'Failed to add user to room',
+          error?.message || 'Failed to add user to room',
           HttpStatus.INTERNAL_SERVER_ERROR,
         ),
       );

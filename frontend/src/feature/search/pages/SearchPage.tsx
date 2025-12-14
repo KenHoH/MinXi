@@ -13,6 +13,8 @@ import useContentService from "@/shared/hooks/useContentService";
 import { useSearchContent } from "../logic/useSearchContent";
 import type { FullContentWithHistoryProps } from "@/feature/content/components/models/FullContentWithHistory";
 import useHistoryService from "@/shared/hooks/useHistoryService";
+import Skeleton from "react-loading-skeleton";
+import "react-loading-skeleton/dist/skeleton.css";
 
 export default function SearchPage() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -80,7 +82,12 @@ export default function SearchPage() {
       if (newItems.length === 0) {
         setHasMore(false);
       } else {
+        await new Promise((resolve) => setTimeout(resolve, 300));
+
         setAllContent((prev) => [...prev, ...newItems]);
+
+        // Delay 1 second before removing skeleton
+        await new Promise((resolve) => setTimeout(resolve, 1000));
       }
     } catch (error) {
       console.error("Failed to load more items:", error);
@@ -122,7 +129,6 @@ export default function SearchPage() {
     } else if (isPost) {
       return (
         <PostComponent
-          key={item.content_id}
           post={item}
           liked={item.liked ?? false}
           pinned={item.pinned ?? false}
@@ -217,23 +223,69 @@ export default function SearchPage() {
                   searchResults.map((item) => (
                     <div
                       key={`search-${item.post_type}-${item.content_id}`}
-                      className="mb-4"
+                      className="search-item-wrapper mb-4"
                       style={{ breakInside: "avoid", pageBreakInside: "avoid" }}
                     >
                       {renderItem(item)}
                     </div>
                   ))
                 )}
-              </div>
 
-              {/* Search Results Loading Indicator */}
-              {isSearchLoading && (
-                <div className="py-8 text-center">
-                  <div className="flex justify-center items-center">
-                    <div className="w-8 h-8 border-4 border-burgundy-600 border-t-burgundy-400 rounded-full animate-spin" />
-                  </div>
-                </div>
-              )}
+                {isSearchLoading &&
+                  Array.from({ length: 6 }).map((_, index) => (
+                    <div
+                      key={`search-skeleton-${index}`}
+                      className="mb-4"
+                      style={{ breakInside: "avoid", pageBreakInside: "avoid" }}
+                    >
+                      <div className="bg-dark-800 border border-dark-700 rounded-lg p-4 min-h-[180px]">
+                        <Skeleton
+                          height={20}
+                          width="75%"
+                          baseColor="#1f2937"
+                          highlightColor="#374151"
+                          className="mb-2"
+                        />
+                        <Skeleton
+                          count={2}
+                          height={12}
+                          baseColor="#1f2937"
+                          highlightColor="#374151"
+                          className="mb-4"
+                        />
+                        <div className="flex gap-4 items-center">
+                          <Skeleton
+                            circle
+                            height={24}
+                            width={24}
+                            baseColor="#1f2937"
+                            highlightColor="#374151"
+                          />
+                          <div className="flex gap-2 flex-1">
+                            <Skeleton
+                              height={12}
+                              width={40}
+                              baseColor="#1f2937"
+                              highlightColor="#374151"
+                            />
+                            <Skeleton
+                              height={12}
+                              width={40}
+                              baseColor="#1f2937"
+                              highlightColor="#374151"
+                            />
+                            <Skeleton
+                              height={12}
+                              width={40}
+                              baseColor="#1f2937"
+                              highlightColor="#374151"
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+              </div>
 
               {/* Search Results Scroll Trigger */}
               <div ref={searchObserverTarget} className="py-4" />
@@ -261,28 +313,91 @@ export default function SearchPage() {
                 allContent.map((item) => (
                   <div
                     key={`all-${item.post_type}-${item.content_id}`}
-                    className="mb-4"
+                    className="search-item-wrapper mb-4"
                     style={{ breakInside: "avoid", pageBreakInside: "avoid" }}
                   >
                     {renderItem(item)}
                   </div>
                 ))
               )}
-            </div>
 
-            {/* Find All Content Loading Indicator */}
-            {isAllContentLoading && (
-              <div className="py-8 text-center">
-                <div className="flex justify-center items-center">
-                  <div className="w-8 h-8 border-4 border-burgundy-600 border-t-burgundy-400 rounded-full animate-spin" />
-                </div>
-              </div>
-            )}
+              {isAllContentLoading &&
+                Array.from({ length: 6 }).map((_, index) => (
+                  <div
+                    key={`all-skeleton-${index}`}
+                    className="mb-4"
+                    style={{ breakInside: "avoid", pageBreakInside: "avoid" }}
+                  >
+                    <div className="bg-dark-800 border border-dark-700 rounded-lg p-4 min-h-[180px]">
+                      <Skeleton
+                        height={20}
+                        width="75%"
+                        baseColor="#1f2937"
+                        highlightColor="#374151"
+                        className="mb-2"
+                      />
+                      <Skeleton
+                        count={2}
+                        height={12}
+                        baseColor="#1f2937"
+                        highlightColor="#374151"
+                        className="mb-4"
+                      />
+                      <div className="flex gap-4 items-center">
+                        <Skeleton
+                          circle
+                          height={24}
+                          width={24}
+                          baseColor="#1f2937"
+                          highlightColor="#374151"
+                        />
+                        <div className="flex gap-2 flex-1">
+                          <Skeleton
+                            height={12}
+                            width={40}
+                            baseColor="#1f2937"
+                            highlightColor="#374151"
+                          />
+                          <Skeleton
+                            height={12}
+                            width={40}
+                            baseColor="#1f2937"
+                            highlightColor="#374151"
+                          />
+                          <Skeleton
+                            height={12}
+                            width={40}
+                            baseColor="#1f2937"
+                            highlightColor="#374151"
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+            </div>
 
             {/* Find All Content Scroll Trigger */}
             <div ref={allContentObserverTarget} className="py-4" />
           </div>
         </div>
+
+        <style>{`
+          .search-item-wrapper {
+            animation: fadeIn 0.5s ease-in;
+            transition: all 0.3s ease-in-out;
+          }
+          @keyframes fadeIn {
+            from {
+              opacity: 0;
+              transform: translateY(10px);
+            }
+            to {
+              opacity: 1;
+              transform: translateY(0);
+            }
+          }
+        `}</style>
       </div>
     </RootLayout>
   );

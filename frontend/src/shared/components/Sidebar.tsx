@@ -13,8 +13,6 @@ import { useToast } from "../context/ToastContext";
 import useNotification from "../logic/useNotificatoin";
 import useGetUserConnection from "../logic/useGetUserConnection";
 import { NotificationPanel } from "@/feature/notification/components/NotificationPanel";
-import useNotificationService from "../hooks/useNotificationService";
-import type { NotificationRes } from "@/service/api";
 import { useState } from "react";
 
 export function Sidebar() {

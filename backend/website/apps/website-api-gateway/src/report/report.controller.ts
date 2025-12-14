@@ -13,10 +13,10 @@ import { ReportService } from './report.service';
 import { CreateReportDto } from '@app/contracts/shared-dto/report/request';
 import { LogInterceptor } from '@app/common/interceptor/log/log.interceptor';
 import { ApiBearerAuth } from '@nestjs/swagger';
-import { AdminGuard } from '@app/common/guard/admin/admin.guard';
+import { JwtAuthGuard } from '@app/common/guard/jwt-auth-guard/jwt-auth.guard';
 
 @Controller('report')
-@UseGuards(AdminGuard)
+@UseGuards(JwtAuthGuard)
 @UseInterceptors(LogInterceptor)
 @ApiBearerAuth()
 export class ReportController {

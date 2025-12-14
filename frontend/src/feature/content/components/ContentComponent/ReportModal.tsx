@@ -28,8 +28,8 @@ const REPORT_REASONS = [
   },
   {
     id: 3,
-    type: "Misinformation",
-    label: "Misinformation",
+    type: "Missinformation",
+    label: "Missinformation",
     description: "False or misleading information",
   },
 ];
@@ -70,26 +70,30 @@ export function ReportModal({
     setReportLoading(true);
     try {
       setError("");
+      const [reportResult, updateResult] = await Promise.all([
+        createReport({
+          creator_id: content.creator_id,
+          userId: user.user_id,
+          desc: description,
+          type: type as any,
+        }),
+        updateReport(content.content_id, user.area_id, {
+          delta: 1,
+        }),
+      ]);
 
-      await createReport({
-        creator_id: content.creator_id,
-        userId: user.user_id,
-        desc: description,
-        type: type as any,
-      });
-
-      await updateReport(content.content_id, user.area_id, {
-        delta: 1,
-      });
-
-      showToast("Report submitted successfully");
-      handleClose();
-      onReportSuccess();
+      if (reportResult && updateResult) {
+        showToast("Report submitted successfully", "", "success");
+        onReportSuccess();
+      }
     } catch (error) {
       console.error("Failed to submit report:", error);
-      setError("Failed to submit report. Please try again.");
-      showToast("Failed to submit report");
+      const errorMessage =
+        error instanceof Error ? error.message : "Unknown error occurred";
+      setError(`Failed to submit report: ${errorMessage}`);
+      showToast("Failed to submit report. Please try again.");
     } finally {
+      handleClose();
       setReportLoading(false);
     }
   };

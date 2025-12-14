@@ -71,7 +71,20 @@ export class AuthController {
   }
 
   @Post('/logout')
-  logout(@Body() dto: LogoutRequest) {
+  logout(
+    @Body() dto: LogoutRequest,
+    @Res({ passthrough: true }) response: Response,
+  ) {
+    response.clearCookie('accessToken', {
+      httpOnly: false,
+      secure: true,
+      sameSite: 'none',
+    });
+    response.clearCookie('refreshToken', {
+      httpOnly: false,
+      secure: true,
+      sameSite: 'none',
+    });
     return this.authService.logout(dto);
   }
 }

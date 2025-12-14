@@ -88,6 +88,9 @@ export class ReportService implements IReportService {
         );
       }
 
+      this.logger.log(
+        `Creating report: creator_id=${creator_id}, userId=${userId}, type=${type}`,
+      );
       if (creator_id === userId) {
         throw httpToRpc(
           new HttpException('Cannot report yourself', HttpStatus.BAD_REQUEST),
@@ -122,7 +125,7 @@ export class ReportService implements IReportService {
       this.logger.error('Failed to create report', error.message);
       throw httpToRpc(
         new HttpException(
-          'Failed to create report',
+          error.message || 'Failed to create report',
           HttpStatus.INTERNAL_SERVER_ERROR,
         ),
       );

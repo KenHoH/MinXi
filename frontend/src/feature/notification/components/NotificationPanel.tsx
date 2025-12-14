@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import useNotificationService from "@/shared/hooks/useNotificationService";
 import useSseService from "@/shared/hooks/useSseService";
 import { useToast } from "@/shared/context/ToastContext";
+import { useNavigate } from "react-router";
 
 interface NotificationPanelProps {
   isOpen: boolean;
@@ -19,6 +20,7 @@ export function NotificationPanel({
   const { getNotif, remove } = useNotificationService();
   const { showToast } = useToast();
   const [notifications, setNotifications] = useState<NotificationRes[]>([]);
+  const navigate = useNavigate();
   const formatTime = (dateString: string) => {
     try {
       const date = new Date(dateString);
@@ -99,6 +101,9 @@ export function NotificationPanel({
                         }
                         alt={notification.username}
                         className="w-12 h-12 rounded-full object-cover"
+                        onClick={() =>
+                          navigate(`/profile/${notification.username}`)
+                        }
                       />
                     </div>
 

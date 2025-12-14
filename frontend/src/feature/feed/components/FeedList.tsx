@@ -5,13 +5,14 @@ import type { FullContentDto } from "@/service/api";
 import { renderItem } from "../logic/useRenderContent";
 import useGetHistory from "../logic/useGetHistory";
 import { useAuthContext } from "@/feature/auth/context/AuthContext";
-import type { FullContentWithHistoryProps } from "@/feature/content/components/models/FullContentWithHistory";
 import { FeedListSkeleton } from "./FeedListSkeleton";
 import { useParams, useNavigate } from "react-router-dom";
 import useHistoryService from "@/shared/hooks/useHistoryService";
 import useContentService from "@/shared/hooks/useContentService";
 import { ContentDetailComponent } from "@/feature/content/components/ContentComponent/ContentDetail";
 import { PostDetailComponent } from "@/feature/content/components/PostComponent/PostDetail";
+import Skeleton from "react-loading-skeleton";
+import "react-loading-skeleton/dist/skeleton.css";
 
 interface FeedListProps {
   onLoadMore: () => Promise<FullContentDto[]>;
@@ -35,7 +36,7 @@ export default function FeedList({
   const navigate = useNavigate();
 
   const { getByUserAndContent } = useHistoryService();
-  const { findOne, getAncestorPost, getChildPost } = useContentService();
+  const { findOne } = useContentService();
   const { item, type, area } = useParams();
 
   const [selectedContent, setSelectedContent] = useState<FullContentDto | null>(
@@ -49,10 +50,6 @@ export default function FeedList({
     comments: number;
     reports: number;
   } | null>(null);
-  const [ancestors, setAncestors] = useState<
-    FullContentWithHistoryProps[] | null
-  >(null);
-  const [childPosts, setChildPosts] = useState<FullContentDto[] | null>(null);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -75,16 +72,6 @@ export default function FeedList({
           comments: content.comments || 0,
           reports: content.reports || 0,
         });
-
-        if (type === "post") {
-          const ancestorData = await getAncestorPost(
-            Number(item),
-            Number(area)
-          );
-          const childData = await getChildPost(Number(item));
-          setAncestors(ancestorData);
-          setChildPosts(childData);
-        }
       } catch (error) {
         console.error("Failed to fetch content details:", error);
       }
@@ -96,20 +83,9 @@ export default function FeedList({
   const handleCloseDetail = () => {
     setSelectedContent(null);
     setContentHistory(null);
-    setAncestors(null);
-    setChildPosts(null);
     navigate(-1);
   };
 
-  const handleRefreshChild = async () => {
-    if (!item) return;
-    try {
-      const childData = await getChildPost(Number(item));
-      setChildPosts(childData);
-    } catch (error) {
-      console.error("Failed to refresh child posts:", error);
-    }
-  };
   const contents = useMemo(() => {
     return items.map((item) => {
       const userHistory = histories.find(
@@ -122,6 +98,16 @@ export default function FeedList({
       };
     });
   }, [items, histories]);
+  const historyMap = useMemo(() => {
+    const map = new Map();
+    histories.forEach((h) => {
+      map.set(h.content_id, {
+        liked: h.liked || false,
+        pinned: h.pinned || false,
+      });
+    });
+    return map;
+  }, [histories]);
 
   const loadMore = useCallback(async () => {
     if (isLoading || !hasMore || !onLoadMore) return;
@@ -142,6 +128,7 @@ export default function FeedList({
             (item) => !prev.some((p) => p.content_id === item.content_id)
           ),
         ]);
+        await new Promise((resolve) => setTimeout(resolve, 1000));
       }
     } catch (error) {
       console.error("Failed to load more items:", error);
@@ -203,31 +190,89 @@ export default function FeedList({
       ) : (
         <div className="p-4">
           <Masonry columns={3}>
-            {contents.map((item) => (
-              <div key={item.content_id}>
-                {renderItem(item, item.liked || false, item.pinned || false)}
-              </div>
-            ))}
-          </Masonry>
+            {items.map((item) => {
+              const history = historyMap.get(item.content_id) || {
+                liked: false,
+                pinned: false,
+              };
+              return (
+                <div key={item.content_id} className="feed-item-wrapper">
+                  {renderItem(item, history.liked, history.pinned)}
+                </div>
+              );
+            })}
 
-          {isLoading && enableInfiniteScroll && (
-            <div className="mt-4">
-              <div className="grid grid-cols-3 gap-4">
-                {Array.from({ length: 6 }).map((_, index) => (
-                  <div
-                    key={`skeleton-${index}`}
-                    className="bg-dark-800 rounded-lg overflow-hidden animate-pulse"
-                  >
-                    <div className="aspect-square bg-dark-700" />
-                    <div className="p-3 space-y-2">
-                      <div className="h-4 bg-dark-700 rounded w-3/4" />
-                      <div className="h-3 bg-dark-700 rounded w-1/2" />
+            {isLoading &&
+              enableInfiniteScroll &&
+              Array.from({ length: 6 }).map((_, index) => (
+                <div
+                  key={`skeleton-${index}`}
+                  className="mb-4 transition-all duration-300 ease-in-out"
+                >
+                  <div className="bg-dark-800 border border-dark-700 rounded-lg p-4 min-h-[180px]">
+                    <Skeleton
+                      height={20}
+                      width="75%"
+                      baseColor="#1f2937"
+                      highlightColor="#374151"
+                      className="mb-2"
+                    />
+                    <Skeleton
+                      count={2}
+                      height={12}
+                      baseColor="#1f2937"
+                      highlightColor="#374151"
+                      className="mb-4"
+                    />
+                    <div className="flex gap-4 items-center">
+                      <Skeleton
+                        circle
+                        height={24}
+                        width={24}
+                        baseColor="#1f2937"
+                        highlightColor="#374151"
+                      />
+                      <div className="flex gap-2 flex-1">
+                        <Skeleton
+                          height={12}
+                          width={40}
+                          baseColor="#1f2937"
+                          highlightColor="#374151"
+                        />
+                        <Skeleton
+                          height={12}
+                          width={40}
+                          baseColor="#1f2937"
+                          highlightColor="#374151"
+                        />
+                        <Skeleton
+                          height={12}
+                          width={40}
+                          baseColor="#1f2937"
+                          highlightColor="#374151"
+                        />
+                      </div>
                     </div>
                   </div>
-                ))}
-              </div>
-            </div>
-          )}
+                </div>
+              ))}
+          </Masonry>
+          <style>{`
+            .feed-item-wrapper {
+              animation: fadeIn 0.5s ease-in;
+              transition: all 0.3s ease-in-out;
+            }
+            @keyframes fadeIn {
+              from {
+                opacity: 0;
+                transform: translateY(10px);
+              }
+              to {
+                opacity: 1;
+                transform: translateY(0);
+              }
+            }
+          `}</style>
         </div>
       )}
 
@@ -275,9 +320,6 @@ export default function FeedList({
         <PostDetailComponent
           post={selectedContent}
           onClose={handleCloseDetail}
-          ancestors={ancestors}
-          children={childPosts}
-          onRefreshChild={handleRefreshChild}
           liked={contentHistory.liked}
           pinned={contentHistory.pinned}
           likes={contentHistory.likes}

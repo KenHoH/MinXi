@@ -7,7 +7,7 @@ import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Link } from "react-router";
+import { Link, useNavigate } from "react-router";
 import useUserService from "@/shared/hooks/useUserService";
 import { useToast } from "@/shared/context/ToastContext";
 import {
@@ -31,7 +31,7 @@ export default function RegisterPage() {
   const [areaId, setAreaId] = useState(1);
   const { create } = useUserService();
   const { showToast } = useToast();
-
+  const navigate = useNavigate();
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -51,6 +51,7 @@ export default function RegisterPage() {
 
     if (res && res.Valid) {
       showToast("Account created successfully! Please login.");
+      navigate("/login");
     }
   };
   return (

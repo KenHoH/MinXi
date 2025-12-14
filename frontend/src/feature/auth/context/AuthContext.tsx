@@ -106,6 +106,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       await AuthService.authControllerLogout(dto);
       setUser(undefined);
       showToast("Logout successful!");
+      
     } catch (error: any) {
       const errorMessage =
         error?.body?.errorMessage || "Logout failed. Please try again.";

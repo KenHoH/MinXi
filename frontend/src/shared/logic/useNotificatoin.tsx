@@ -3,14 +3,12 @@ import { useToast } from "../context/ToastContext";
 import { useEffect } from "react";
 import { useSSE } from "../hooks/useSSE";
 import useSseService from "../hooks/useSseService";
-import useNotificationService from "../hooks/useNotificationService";
 export type NotifType = "LIKE" | "COMMENT" | "FOLLOW" | "SYSTEM";
 export default function useNotification() {
   const { user } = useAuthContext();
   const { notifications } = useSSE(user?.user_id ? String(user.user_id) : "");
   const { showToast } = useToast();
   const { sendNotification } = useSseService();
-  const { create } = useNotificationService();
 
   const sendNotificatonSystem = async (
     userId: number,
@@ -26,14 +24,6 @@ export default function useNotification() {
         sendId: sendId,
         title,
         isSeen: false,
-        type,
-      }),
-      create({
-        isSeen: false,
-        userId: userId,
-        sendId: sendId,
-        title,
-        description,
         type,
       }),
     ]);

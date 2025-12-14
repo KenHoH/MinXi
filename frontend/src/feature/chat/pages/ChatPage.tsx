@@ -14,7 +14,6 @@ import { useSSE } from "@/shared/hooks/useSSE";
 import useSseService from "@/shared/hooks/useSseService";
 
 export default function ChatPage() {
-  // State declarations first
   const [selectedRoom, setSelectedRoom] = useState<string | null>(null);
   const [messageList, setMessageList] = useState<any[]>([]);
   const [chatType, setChatType] = useState<"DIRECT" | "GROUP" | "COMMUNITY">(
@@ -30,7 +29,6 @@ export default function ChatPage() {
     useState<RoomResponseDto | null>(null);
   const { messages: sseMessages, isConnected } = useSSE(selectedRoom || "");
 
-  // Hooks
   const { user } = useAuthContext();
   const { findUserById } = useUserService();
   const {
@@ -43,7 +41,6 @@ export default function ChatPage() {
   } = useSocialService();
   const { sendBroadcast } = useSseService();
 
-  // Derived state (can use state variables now)
   const currentRoom = selectedRoom
     ? roomDm.find((r) => r.id === selectedRoom) ||
       groups.find((r) => r.id === selectedRoom) ||
@@ -65,14 +62,12 @@ export default function ChatPage() {
 
   const filteredRooms = getRoomsByType();
 
-  // Debug: Log room changes
   useEffect(() => {
     console.log("Updated Rooms - DMs:", roomDm);
     console.log("Updated Rooms - Groups:", groups);
     console.log("Updated Rooms - Communities:", communities);
   }, [roomDm, groups, communities]);
 
-  // Merge SSE messages with fetched messages
   useEffect(() => {
     if (sseMessages && sseMessages.length > 0 && selectedRoom) {
       setMessageList((prevMessages) => {
@@ -127,22 +122,13 @@ export default function ChatPage() {
       setCommunities(res);
     }
   };
-  const getAllCommunitiesInstance = async () => {
-    const res = await getRoomCommunityAll();
-    if (res) {
-      setCommunities(res);
-    }
-  };
 
   useEffect(() => {
     if (!user) return;
 
     const fetchAllRooms = async () => {
       console.log("Fetching rooms for user:", user.user_id);
-      await getUserDM();
-      await getUserGroups();
-      await getUserCommunities();
-      await getAllCommunitiesInstance();
+      await Promise.all([getUserDM(), getUserGroups(), getUserCommunities()]);
     };
 
     fetchAllRooms();
@@ -255,11 +241,13 @@ export default function ChatPage() {
         </main>
 
         {/* Community Modal */}
-        <CommunityModal
-          isOpen={!!selectedCommunity}
-          community={selectedCommunity}
-          onClose={() => setSelectedCommunity(null)}
-        />
+        {selectedCommunity && (
+          <CommunityModal
+            isOpen={!!selectedCommunity}
+            community={selectedCommunity}
+            onClose={() => setSelectedCommunity(null)}
+          />
+        )}
       </div>
     </RootLayout>
   );

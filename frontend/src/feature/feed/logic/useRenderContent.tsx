@@ -11,23 +11,9 @@ export const renderItem = (
   const isContent = item.post_type === "image" || item.post_type === "video";
 
   if (isContent) {
-    return (
-      <ContentComponent
-        key={item.content_id}
-        content={item}
-        liked={liked}
-        pinned={pinned}
-      />
-    );
+    return <ContentComponent content={item} liked={liked} pinned={pinned} />;
   } else if (isPost) {
-    return (
-      <PostComponent
-        key={item.content_id}
-        post={item}
-        liked={liked}
-        pinned={pinned}
-      />
-    );
+    return <PostComponent post={item} liked={liked} pinned={pinned} />;
   }
 
   return null;

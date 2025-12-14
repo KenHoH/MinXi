@@ -8,7 +8,7 @@ export default function RootLayout({
 }) {
   return (
     <div className="flex h-screen bg-dark-900">
-      <Snowfall />
+      <Snowfall snowflakeCount={20} />
       <Sidebar />
       <main className="ml-20 flex-1 overflow-auto">{children}</main>
     </div>

@@ -13,12 +13,17 @@ import UserNotFoundPage from "@/feature/not-found/UserNotFoundPage";
 import { useToast } from "@/shared/context/ToastContext";
 import useConnectionService from "@/shared/hooks/useConnectionService";
 import { ConnectionModal } from "@/feature/profile/components/ConnectionModal";
+import Skeleton from "react-loading-skeleton";
+import "react-loading-skeleton/dist/skeleton.css";
+import useSocialService from "@/shared/hooks/useSocialService";
+import type { Room } from "@/feature/chat/types";
+import useNotification from "@/shared/logic/useNotificatoin";
 
 export default function ProfilePage() {
   const { user } = useAuthContext();
   const { username } = useParams();
 
-  const { findUserById, findOneByUsername } = useUserService();
+  const { findOneByUsername } = useUserService();
   const { getPinnedByUser, getLikedByUser, getByUserAll, getByUser } =
     useContentService();
   const { getBoardByUser, getContentByBoardId } = useBoardService();
@@ -30,14 +35,17 @@ export default function ProfilePage() {
     getFriendsInstanceByUser,
   } = useConnectionService();
   const navigate = useNavigate();
-
-  const [loggedUserData, setLoggedUserData] = useState<UserDto | null>(null);
+  const { createRoom } = useSocialService();
+  const { checkFollow, createFollow, deleteFollow } = useConnectionService();
+  const { updateFollowUser } = useUserService();
+  const { sendNotificatonSystem } = useNotification();
   const [creatorUserData, setCreatorUserData] = useState<UserDto | null>(null);
   const [followerData, setFollowerData] = useState<UserDto[]>([]);
   const [followingData, setFollowingData] = useState<UserDto[]>([]);
   const [friendData, setFriendData] = useState<UserDto[]>([]);
   const [totalFollowing, setTotalFollowing] = useState(0);
   const [owned, setOwned] = useState(false);
+  const [isFollowed, setIsFollowed] = useState(false);
 
   const [contentItems, setContentItems] = useState<FullContentDto[] | []>([]);
   const [savedItems, setSavedItems] = useState<FullContentDto[] | []>([]);
@@ -46,9 +54,29 @@ export default function ProfilePage() {
   const [boardItems, setBoardItems] = useState<FullContentDto[] | []>([]);
   const [showConnectionModal, setShowConnectionModal] = useState(false);
 
+  const [isLoadingProfile, setIsLoadingProfile] = useState(true);
+  const [isLoadingContent, setIsLoadingContent] = useState(false);
+  const [profileNotFound, setProfileNotFound] = useState(false);
+
   const goToSettings = () => {
-    if (!loggedUserData) return;
-    navigate(`https://localhost:5173/settings/${loggedUserData.username}`);
+    if (!user) return;
+    navigate(`https://localhost:5173/settings/${user.username}`);
+  };
+
+  const handleSendMessage = async () => {
+    if (!creatorUserData || !user) return;
+    try {
+      const room = await createRoom({
+        members: [user.user_id, creatorUserData.user_id],
+        room_type: "DIRECT",
+      });
+      if (room) {
+        navigate(`https://localhost:5173/chat`);
+      }
+    } catch (error) {
+      console.error("Failed to create chat room:", error);
+      showToast("Failed to send message");
+    }
   };
 
   const [activeTab, setActiveTab] = useState("");
@@ -64,61 +92,132 @@ export default function ProfilePage() {
     }
   };
 
+  const handleFollow = async (shouldFollow: boolean) => {
+    if (!user || !creatorUserData) return;
+
+    try {
+      if (shouldFollow) {
+        await Promise.all([
+          createFollow(creatorUserData.user_id, user.user_id),
+          updateFollowUser(creatorUserData.user_id, { delta: 1 }),
+        ]);
+        sendNotificatonSystem(
+          creatorUserData.user_id,
+          user.user_id,
+          `${user.username} started following you!`,
+          "New Follower",
+          "FOLLOW"
+        );
+        setIsFollowed(true);
+      } else {
+        await Promise.all([
+          deleteFollow(creatorUserData.user_id, user.user_id),
+          updateFollowUser(creatorUserData.user_id, { delta: -1 }),
+        ]);
+        setIsFollowed(false);
+      }
+    } catch (error) {
+      console.error("Failed to update follow status:", error);
+      showToast("Failed to update follow status");
+    }
+  };
+
+  useEffect(() => {
+    const checkFollowStatus = async () => {
+      if (!user || owned || !creatorUserData) {
+        setIsFollowed(false);
+        return;
+      }
+
+      try {
+        const isFollowing = await checkFollow(
+          creatorUserData.user_id,
+          user.user_id
+        );
+        setIsFollowed(isFollowing || false);
+      } catch (error) {
+        console.error("Failed to check follow status:", error);
+        setIsFollowed(false);
+      }
+    };
+
+    checkFollowStatus();
+  }, [user, creatorUserData, owned]);
+
   useEffect(() => {
     const loadLoggedUser = async () => {
-      if (!user) return;
-      const dto = await findUserById(user.user_id);
-      if (dto) setLoggedUserData(dto);
+      if (!username || !user) return;
 
-      const followingCount = await getFollowingCount(user.user_id);
-      if (followingCount) setTotalFollowing(followingCount);
+      setIsLoadingProfile(true);
+      setProfileNotFound(false);
 
-      const followersInstance = await getFollowersInstanceByCreator(
-        user.user_id
-      );
-      if (followersInstance) setFollowerData(followersInstance);
+      try {
+        const dto = await findOneByUsername(username, user.area_id);
 
-      const followingInstance = await getFollowingInstanceByUser(user.user_id);
-      if (followingInstance) setFollowingData(followingInstance);
-      const friendsInstance = await getFriendsInstanceByUser(user.user_id);
-      if (friendsInstance) setFriendData(friendsInstance);
+        if (!dto) {
+          setProfileNotFound(true);
+          setCreatorUserData(null);
+          return;
+        }
+
+        setCreatorUserData(dto);
+
+        // Calculate owned state immediately with fetched data
+        const isOwned = user.user_id === dto.user_id;
+        setOwned(isOwned);
+
+        // Load connection data in parallel
+        const [
+          followingCount,
+          followersInstance,
+          followingInstance,
+          friendsInstance,
+        ] = await Promise.all([
+          getFollowingCount(dto.user_id),
+          getFollowersInstanceByCreator(dto.user_id),
+          getFollowingInstanceByUser(dto.user_id),
+          getFriendsInstanceByUser(dto.user_id),
+        ]);
+
+        if (followingCount) setTotalFollowing(followingCount);
+        if (followersInstance) setFollowerData(followersInstance);
+        if (followingInstance) setFollowingData(followingInstance);
+        if (friendsInstance) setFriendData(friendsInstance);
+
+        await new Promise((resolve) => setTimeout(resolve, 500));
+      } catch (error) {
+        console.error("Failed to load profile:", error);
+        showToast("Failed to load profile data");
+        setProfileNotFound(true);
+      } finally {
+        setIsLoadingProfile(false);
+      }
     };
     loadLoggedUser();
-  }, [user]);
-
-  useEffect(() => {
-    const loadCreatorUser = async () => {
-      if (!username) return;
-      if (!loggedUserData) return;
-      const found = await findOneByUsername(username, loggedUserData.area_id);
-      if (!found) return;
-
-      if (found) setCreatorUserData(found);
-    };
-    loadCreatorUser();
-  }, [username, loggedUserData?.area_id]);
-
-  useEffect(() => {
-    if (loggedUserData && creatorUserData) {
-      setOwned(loggedUserData.user_id === creatorUserData.user_id);
-    }
-  }, [loggedUserData, creatorUserData]);
+  }, [username, user]);
 
   useEffect(() => {
     const loadBoards = async () => {
-      if (!creatorUserData || !loggedUserData) return;
+      if (!creatorUserData || !user) return;
 
-      const list = await getBoardByUser(
-        creatorUserData.user_id,
-        loggedUserData.area_id
-      );
-      if (!list) return;
+      try {
+        const list = await getBoardByUser(
+          creatorUserData.user_id,
+          user.area_id
+        );
+        if (!list) return;
 
-      const filtered = owned ? list : list.filter((b) => !b.visibilityPrivate);
-      setBoards(filtered);
+        const filtered = owned
+          ? list
+          : list.filter((b) => !b.visibilityPrivate);
+        setBoards(filtered);
+      } catch (error) {
+        console.error("Failed to load boards:", error);
+        showToast("Failed to load boards");
+      }
     };
     loadBoards();
-  }, [creatorUserData, owned, loggedUserData]);
+  }, [creatorUserData, owned, user]);
 
   useEffect(() => {
     const loadTabData = async () => {
@@ -131,61 +230,55 @@ export default function ProfilePage() {
         user_id,
       } = creatorUserData;
 
-      // Content tab
-      if (activeTab === "content") {
-        const data = owned
-          ? await getByUserAll(user_id)
-          : !content_visibilityPrivate
-          ? await getByUser(user_id)
-          : [];
+      setIsLoadingContent(true);
 
-        setContentItems(data || []);
-      }
+      try {
+        if (activeTab === "content") {
+          const data = owned
+            ? await getByUserAll(user_id)
+            : !content_visibilityPrivate
+            ? await getByUser(user_id)
+            : [];
 
-      // Liked tab
-      if (activeTab === "liked") {
-        if (owned || !liked_visibilityPrivate) {
-          const data = await getLikedByUser(user_id);
-          setLikedItems(data || []);
+          setContentItems(data || []);
         }
-      }
 
-      // Pinned tab
-      if (activeTab === "pinned") {
-        if (owned || !pinned_visibilityPrivate) {
-          const data = await getPinnedByUser(user_id);
-          setSavedItems(data || []);
+        // Liked tab
+        if (activeTab === "liked") {
+          if (owned || !liked_visibilityPrivate) {
+            const data = await getLikedByUser(user_id);
+            setLikedItems(data || []);
+          }
         }
-      }
 
-      // Board tabs
-      if (activeTab.startsWith("board-")) {
-        const boardId = Number(activeTab.replace("board-", ""));
-        const data = await getContentByBoardId(
-          boardId,
-          creatorUserData.area_id
-        );
-        setBoardItems(data || []);
+        // Pinned tab
+        if (activeTab === "pinned") {
+          if (owned || !pinned_visibilityPrivate) {
+            const data = await getPinnedByUser(user_id);
+            setSavedItems(data || []);
+          }
+        }
+
+        // Board tabs
+        if (activeTab.startsWith("board-")) {
+          const boardId = Number(activeTab.replace("board-", ""));
+          const data = await getContentByBoardId(
+            boardId,
+            creatorUserData.area_id
+          );
+          setBoardItems(data || []);
+        }
+      } catch (error) {
+        console.error("Failed to load tab content:", error);
+        showToast("Failed to load content");
+      } finally {
+        await new Promise((resolve) => setTimeout(resolve, 500));
+        setIsLoadingContent(false);
       }
     };
 
     loadTabData();
   }, [activeTab, creatorUserData, owned]);
-
-  useEffect(() => {
-    const loadBoardItems = async () => {
-      if (!activeTab || !activeTab.startsWith("board-")) return;
-      if (!creatorUserData) return;
-
-      const boardId = Number(activeTab.replace("board-", ""));
-      const contents = await getContentByBoardId(
-        boardId,
-        creatorUserData.area_id
-      );
-      setBoardItems(contents || []);
-    };
-    loadBoardItems();
-  }, [activeTab, creatorUserData]);
 
   const tabs = useMemo(() => {
     if (!creatorUserData) return [];
@@ -204,10 +297,15 @@ export default function ProfilePage() {
       list.push({ id: `board-${b.board_id}`, label: b.title, type: "board" })
     );
 
-    if (!activeTab && list.length > 0) setActiveTab(list[0].id);
-
     return list;
-  }, [creatorUserData, boards]);
+  }, [creatorUserData, boards, owned]);
+
+  // Set initial active tab
+  useEffect(() => {
+    if (!activeTab && tabs.length > 0) {
+      setActiveTab(tabs[0].id);
+    }
+  }, [tabs, activeTab]);
 
   const renderContentMasonry = (items: FullContentDto[]) => {
     const renderItem = (item: FullContentDto) => {
@@ -251,7 +349,64 @@ export default function ProfilePage() {
           <div className="max-w-4xl mx-auto">
             <div className="pt-12 pb-8 px-8 border-b border-border/50">
               <div className="flex flex-col items-center gap-6 text-center">
-                {creatorUserData ? (
+                {isLoadingProfile ? (
+                  <>
+                    <Skeleton
+                      circle
+                      width={128}
+                      height={128}
+                      baseColor="#1f2937"
+                      highlightColor="#374151"
+                    />
+                    <Skeleton
+                      width={200}
+                      height={32}
+                      baseColor="#1f2937"
+                      highlightColor="#374151"
+                    />
+                    <Skeleton
+                      width={300}
+                      height={20}
+                      count={2}
+                      baseColor="#1f2937"
+                      highlightColor="#374151"
+                    />
+                    <div className="flex gap-8">
+                      <Skeleton
+                        width={80}
+                        height={60}
+                        baseColor="#1f2937"
+                        highlightColor="#374151"
+                      />
+                      <Skeleton
+                        width={80}
+                        height={60}
+                        baseColor="#1f2937"
+                        highlightColor="#374151"
+                      />
+                      <Skeleton
+                        width={80}
+                        height={60}
+                        baseColor="#1f2937"
+                        highlightColor="#374151"
+                      />
+                      <Skeleton
+                        width={80}
+                        height={60}
+                        baseColor="#1f2937"
+                        highlightColor="#374151"
+                      />
+                    </div>
+                    <Skeleton
+                      width={200}
+                      height={40}
+                      baseColor="#1f2937"
+                      highlightColor="#374151"
+                    />
+                  </>
+                ) : profileNotFound || !creatorUserData ? (
+                  <UserNotFoundPage />
+                ) : creatorUserData ? (
                   <>
                     <img
                       src={creatorUserData.profile_picture}
@@ -297,6 +452,19 @@ export default function ProfilePage() {
                       </div>
                     </div>
                     <div className="flex gap-3 mt-4">
+                      {!owned && (
+                        <>
+                          <Button
+                            onClick={() => handleFollow(!isFollowed)}
+                            variant="outline"
+                          >
+                            {isFollowed ? "Unfollow" : "Follow"}
+                          </Button>
+                          <Button onClick={handleSendMessage} variant="outline">
+                            {"Send Message"}
+                          </Button>
+                        </>
+                      )}
                       {owned && (
                         <Button onClick={goToSettings}>Edit Profile</Button>
                       )}
@@ -327,7 +495,67 @@ export default function ProfilePage() {
               ))}
             </div>
 
-            <div className="px-8 py-12">{renderActiveTab()}</div>
+            <div className="px-8 py-12">
+              {isLoadingContent ? (
+                <div style={{ columnCount: 4, columnGap: "1rem" }}>
+                  {Array.from({ length: 8 }).map((_, index) => (
+                    <div
+                      key={`skeleton-${index}`}
+                      className="mb-4"
+                      style={{ breakInside: "avoid" }}
+                    >
+                      <div className="bg-dark-800 border border-dark-700 rounded-lg p-4 min-h-[180px]">
+                        <Skeleton
+                          height={20}
+                          width="75%"
+                          baseColor="#1f2937"
+                          highlightColor="#374151"
+                          className="mb-2"
+                        />
+                        <Skeleton
+                          count={2}
+                          height={12}
+                          baseColor="#1f2937"
+                          highlightColor="#374151"
+                          className="mb-4"
+                        />
+                        <div className="flex gap-4 items-center">
+                          <Skeleton
+                            circle
+                            height={24}
+                            width={24}
+                            baseColor="#1f2937"
+                            highlightColor="#374151"
+                          />
+                          <div className="flex gap-2 flex-1">
+                            <Skeleton
+                              height={12}
+                              width={40}
+                              baseColor="#1f2937"
+                              highlightColor="#374151"
+                            />
+                            <Skeleton
+                              height={12}
+                              width={40}
+                              baseColor="#1f2937"
+                              highlightColor="#374151"
+                            />
+                            <Skeleton
+                              height={12}
+                              width={40}
+                              baseColor="#1f2937"
+                              highlightColor="#374151"
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                renderActiveTab()
+              )}
+            </div>
           </div>
         </main>
       </div>

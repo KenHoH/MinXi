@@ -19,6 +19,7 @@ export function Masonry({ children, columns = 4 }: MasonryProps) {
             breakInside: "avoid",
             pageBreakInside: "avoid",
             marginBottom: "1rem",
+            transition: "all 0.3s ease-in-out",
           }}
         >
           {child}
