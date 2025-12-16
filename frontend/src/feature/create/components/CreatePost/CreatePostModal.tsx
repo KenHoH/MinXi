@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useState } from "react";
 import { CreatePostHeader } from "./CreatePostHeader";
 import { CreatePostUserInfo } from "./CreatePostUserInfo";
 import { UploadImages } from "./UploadImages";
@@ -10,8 +10,7 @@ import { useToast } from "@/shared/context/ToastContext";
 import useContentService from "@/shared/hooks/useContentService";
 import type FileItem from "@/feature/content/object/FileItem";
 import type MediaItem from "@/feature/content/object/MediaItem";
-import useUserService from "@/shared/hooks/useUserService";
-import type { FullContentDto, UserDto } from "@/service/api";
+import type { FullContentDto } from "@/service/api";
 import { useAuthContext } from "@/feature/auth/context/AuthContext";
 
 interface CreatePostModalProps {

@@ -1,5 +1,3 @@
-"use client";
-
 import type React from "react";
 import { useEffect, useState } from "react";
 import { useAuthContext } from "@/feature/auth/context/AuthContext";
@@ -518,7 +516,6 @@ export function ContentDetailComponent(props: ContentDetailComponentProps) {
         isOpen={showReportModal}
         onClose={() => setShowReportModal(false)}
         content={content}
-        loggedUserData={loggedUserData}
         onReportSuccess={() => {
           setReported(true);
           setTotalReports((prev) => prev + 1);
@@ -529,7 +526,6 @@ export function ContentDetailComponent(props: ContentDetailComponentProps) {
         isOpen={showPinModal}
         onClose={() => setShowPinModal(false)}
         content={content}
-        loggedUserData={loggedUserData}
         userBoards={userBoards}
         onPinSuccess={onPinSuccess}
       />

@@ -12,7 +12,6 @@ import ChatPage from "@/feature/chat/pages/ChatPage";
 import SettingsPage from "@/feature/settings/pages/SettingPage";
 import SearchPage from "@/feature/search/pages/SearchPage";
 import ProfilePage from "@/feature/profile/pages/ProfilePage";
-import { ContentDetailProvider } from "@/shared/context/ContentDetailContext";
 
 export default function AppRouter() {
   return (
@@ -20,31 +19,29 @@ export default function AppRouter() {
       <ToastProvider>
         <LoadingProvider>
           <AuthProvider>
-            <ContentDetailProvider>
-              <Routes>
-                {/* Public routes go here */}
-                <Route path="/login" element={<LoginPage />} />
-                <Route path="/register" element={<RegisterPage />} />
-                <Route path="/feed" element={<FeedPage />} />
-                <Route
-                  path="/feed/:creator/:item/:type/:area"
-                  element={<FeedPage />}
-                />
-                <Route path="/profile/:username" element={<ProfilePage />} />
-                <Route path="/search" element={<SearchPage />}></Route>
+            <Routes>
+              {/* Public routes go here */}
+              <Route path="/login" element={<LoginPage />} />
+              <Route path="/register" element={<RegisterPage />} />
+              <Route path="/feed" element={<FeedPage />} />
+              <Route
+                path="/feed/:creator/:item/:type/:area"
+                element={<FeedPage />}
+              />
+              <Route path="/profile/:username" element={<ProfilePage />} />
+              <Route path="/search" element={<SearchPage />}></Route>
 
-                <Route element={<ProtectedRoute />}>
-                  {/* Protected routes go here */}
-                  <Route path="/chat" element={<ChatPage />} />
-                  <Route path="/create" element={<CreatePage />} />
-                  <Route
-                    path="/settings/:username"
-                    element={<SettingsPage />}
-                  ></Route>
-                </Route>
-                <Route path="*" element={<NotFoundPage />} />
-              </Routes>
-            </ContentDetailProvider>
+              <Route element={<ProtectedRoute />}>
+                {/* Protected routes go here */}
+                <Route path="/chat" element={<ChatPage />} />
+                <Route path="/create" element={<CreatePage />} />
+                <Route
+                  path="/settings/:username"
+                  element={<SettingsPage />}
+                ></Route>
+              </Route>
+              <Route path="*" element={<NotFoundPage />} />
+            </Routes>
           </AuthProvider>
         </LoadingProvider>
       </ToastProvider>

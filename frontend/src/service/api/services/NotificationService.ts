@@ -2,7 +2,6 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-import type { DeleteNotificationRes } from "../models/DeleteNotificationRes";
 import type { NotificationReq } from "../models/NotificationReq";
 import type { NotificationRes } from "../models/NotificationRes";
 import type { CancelablePromise } from "../core/CancelablePromise";

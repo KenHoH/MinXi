@@ -2,7 +2,6 @@ import { X, Bell } from "lucide-react";
 import type { NotificationRes, UserDto } from "@/service/api";
 import { useEffect, useState } from "react";
 import useNotificationService from "@/shared/hooks/useNotificationService";
-import useSseService from "@/shared/hooks/useSseService";
 import { useToast } from "@/shared/context/ToastContext";
 
 interface NotificationPanelProps {

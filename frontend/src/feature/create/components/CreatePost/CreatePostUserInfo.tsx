@@ -1,4 +1,3 @@
-import { useAuthContext } from "@/feature/auth/context/AuthContext";
 import { ProfilePicture } from "../../../content/components/ProfilePicture";
 import type { FullContentDto, UserDto } from "@/service/api";
 import useContentService from "@/shared/hooks/useContentService";
@@ -15,7 +14,6 @@ export function CreatePostUserInfo({
   creator,
   parentAreaId,
 }: CreatePostUserInfoProps) {
-  const { user } = useAuthContext();
   const [parentPost, setParentPost] = useState<FullContentDto | null>(null);
   const { findOne } = useContentService();
 

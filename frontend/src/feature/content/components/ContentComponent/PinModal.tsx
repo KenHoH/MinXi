@@ -1,4 +1,4 @@
-import type { BoardDto, FullContentDto, UserDto } from "@/service/api";
+import type { BoardDto, FullContentDto } from "@/service/api";
 import { useToast } from "@/shared/context/ToastContext";
 import { useAuthContext } from "@/feature/auth/context/AuthContext";
 import { X, Pin } from "lucide-react";

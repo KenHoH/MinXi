@@ -10,11 +10,10 @@ import { CreateContentModal } from "./CreateContent/CreateContentModal";
 
 interface ContentCreationProps {
   items: FullContentDto[];
-  onDelete: (id: number) => void;
   refresh: () => void;
 }
 
-export function ContentCreation({ items, onDelete }: ContentCreationProps) {
+export function ContentCreation({ items }: ContentCreationProps) {
   const [showCreateModal, setShowCreateModal] = useState(false);
   const { user } = useAuthContext();
   const currentUserId = user?.user_id || 0;

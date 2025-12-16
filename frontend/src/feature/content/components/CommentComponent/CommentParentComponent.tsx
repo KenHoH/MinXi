@@ -1,4 +1,4 @@
-import type { CommentFullRes, CommentRes } from "@/service/api";
+import type { CommentFullRes } from "@/service/api";
 import { useEffect, useState, useCallback, useMemo, memo } from "react";
 import { ChevronDown, ChevronUp, MessageCircle } from "lucide-react";
 import useCommentService from "@/shared/hooks/useCommentService";

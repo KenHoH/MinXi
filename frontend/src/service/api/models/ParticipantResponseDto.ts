@@ -3,31 +3,20 @@
 /* tslint:disable */
 /* eslint-disable */
 export type ParticipantResponseDto = {
-    /**
-     * Participant ID
-     */
-    id: string;
-    /**
-     * User ID
-     */
-    userId: number;
-    /**
-     * Room ID
-     */
-    roomId: string;
-    /**
-     * Participant role in the room
-     */
-    role: ParticipantResponseDto.role;
+  /**
+   * Participant ID
+   */
+  id: string;
+  /**
+   * User ID
+   */
+  userId: number;
+  /**
+   * Room ID
+   */
+  roomId: string;
+  /**
+   * Participant role in the room
+   */
+  role: "OWNER" | "ADMIN" | "MEMBER";
 };
-export namespace ParticipantResponseDto {
-    /**
-     * Participant role in the room
-     */
-    export enum role {
-        OWNER = 'OWNER',
-        ADMIN = 'ADMIN',
-        MEMBER = 'MEMBER',
-    }
-}
-

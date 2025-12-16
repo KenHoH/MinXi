@@ -15,7 +15,7 @@ export function useSSE(roomId: string) {
 
   useEffect(() => {
     if (!roomId) return;
-    const url = `http://localhost:3000/sse/subscribe/rooms/${roomId}`;
+    const url = `https://localhost/api/sse/subscribe/rooms/${roomId}`;
 
     try {
       const es = new EventSource(url);

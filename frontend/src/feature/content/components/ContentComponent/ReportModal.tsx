@@ -1,4 +1,4 @@
-import type { FullContentDto, UserDto } from "@/service/api";
+import type { FullContentDto } from "@/service/api";
 import useContentService from "@/shared/hooks/useContentService";
 import useReportService from "@/shared/hooks/useReportService";
 import { useToast } from "@/shared/context/ToastContext";

@@ -1,4 +1,4 @@
-import { Trash2, X } from "lucide-react";
+import { Trash2 } from "lucide-react";
 
 interface ThumbnailPreviewProps {
   preview: string | null;

@@ -1,10 +1,7 @@
-"use client";
-
 import { useState } from "react";
 import { Plus, Info } from "lucide-react";
 import type { RoomResponseDto } from "@/service/api";
 import CreateRoomModal from "./CreateRoomModal";
-import CommunityModal from "./CommunityModal";
 
 interface RoomListProps {
   rooms: RoomResponseDto[];

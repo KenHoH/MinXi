@@ -1,4 +1,4 @@
-import { Heart, MessageCircle, Share2, Reply, Pin, Flag } from "lucide-react";
+import { Heart, MessageCircle, Reply, Pin, Flag } from "lucide-react";
 
 interface PostDetailMainProps {
   title: string;

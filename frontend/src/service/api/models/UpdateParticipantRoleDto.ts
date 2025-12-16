@@ -3,27 +3,16 @@
 /* tslint:disable */
 /* eslint-disable */
 export type UpdateParticipantRoleDto = {
-    /**
-     * Room ID
-     */
-    roomId: string;
-    /**
-     * User ID to update
-     */
-    userId: number;
-    /**
-     * New role for the participant
-     */
-    newRole: UpdateParticipantRoleDto.newRole;
+  /**
+   * Room ID
+   */
+  roomId: string;
+  /**
+   * User ID to update
+   */
+  userId: number;
+  /**
+   * New role for the participant
+   */
+  newRole: "OWNER" | "ADMIN" | "MEMBER";
 };
-export namespace UpdateParticipantRoleDto {
-    /**
-     * New role for the participant
-     */
-    export enum newRole {
-        OWNER = 'OWNER',
-        ADMIN = 'ADMIN',
-        MEMBER = 'MEMBER',
-    }
-}
-

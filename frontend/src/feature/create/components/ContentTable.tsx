@@ -6,7 +6,6 @@ import type { FullContentDto } from "@/service/api";
 import { CreateContentModal } from "./CreateContent/CreateContentModal";
 import useContentService from "@/shared/hooks/useContentService";
 import { useToast } from "@/shared/context/ToastContext";
-import { ContentDetailComponent } from "@/feature/content/components/ContentComponent/ContentDetail";
 import { useNavigate } from "react-router-dom";
 
 interface ContentTableProps {

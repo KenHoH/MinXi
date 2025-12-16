@@ -2,7 +2,6 @@ import { useState, useCallback } from "react";
 import { useAuthContext } from "@/feature/auth/context/AuthContext";
 import useContentService from "@/shared/hooks/useContentService";
 import useHistoryService from "@/shared/hooks/useHistoryService";
-import type { FullContentDto } from "@/service/api";
 import type { FullContentWithHistoryProps } from "@/feature/content/components/models/FullContentWithHistory";
 
 export function useSearchContent() {

@@ -3,27 +3,16 @@
 /* tslint:disable */
 /* eslint-disable */
 export type AddUserToRoomDto = {
-    /**
-     * Room ID
-     */
-    roomId: string;
-    /**
-     * User ID to add
-     */
-    userId: number;
-    /**
-     * Role for the new participant
-     */
-    role?: AddUserToRoomDto.role;
+  /**
+   * Room ID
+   */
+  roomId: string;
+  /**
+   * User ID to add
+   */
+  userId: number;
+  /**
+   * Role for the new participant
+   */
+  role?: "OWNER" | "ADMIN" | "MEMBER";
 };
-export namespace AddUserToRoomDto {
-    /**
-     * Role for the new participant
-     */
-    export enum role {
-        OWNER = 'OWNER',
-        ADMIN = 'ADMIN',
-        MEMBER = 'MEMBER',
-    }
-}
-

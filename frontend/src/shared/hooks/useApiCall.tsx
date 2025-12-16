@@ -3,7 +3,7 @@ import { useToast } from "../context/ToastContext";
 
 export default function useApiCall() {
   const [data, setData] = useState<any>(null);
-  const [loading, setLoading] = useState(false);
+  const loading = false;
   const [error, setError] = useState<string | null>(null);
 
   const { showToast } = useToast();

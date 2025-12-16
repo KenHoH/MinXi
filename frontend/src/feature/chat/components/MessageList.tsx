@@ -1,7 +1,4 @@
-"use client";
-
 import { useEffect, useRef } from "react";
-import type { RoomMessage } from "@/shared/api/models/sse/sseResponse";
 import type { MessageResponseDto } from "@/service/api";
 
 interface MessageListProps {

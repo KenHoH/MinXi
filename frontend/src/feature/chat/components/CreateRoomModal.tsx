@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { X, Plus, Upload } from "lucide-react";
+import { X, Upload } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import type { UserDto } from "@/service/api";
 import useSocialService from "@/shared/hooks/useSocialService";

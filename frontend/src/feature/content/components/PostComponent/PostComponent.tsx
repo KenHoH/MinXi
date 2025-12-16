@@ -2,7 +2,7 @@ import { useEffect, useState, useRef } from "react";
 import { PostFooterInfo } from "./PostFooterInfo";
 import { PostHeaderInfo } from "./PostHeaderInfo";
 import { PostDetailComponent } from "./PostDetail";
-import type { CreateHistoryDto, FullContentDto, UserDto } from "@/service/api";
+import type { CreateHistoryDto, FullContentDto } from "@/service/api";
 import type { FullContentWithHistoryProps } from "../models/FullContentWithHistory";
 import useHistoryService from "@/shared/hooks/useHistoryService";
 import { useAuthContext } from "@/feature/auth/context/AuthContext";

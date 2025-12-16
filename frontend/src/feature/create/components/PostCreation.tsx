@@ -21,7 +21,6 @@ export function PostCreation({
 }: PostCreationProps) {
   const [showCreateModal, setShowCreateModal] = useState(false);
   const { user } = useAuthContext();
-  const currentUserId = user?.user_id || 0;
   const currentAreaId = user?.area_id || 0;
   const { updateComment } = useContentService();
   const handleUpdateComment = async (conteId: number, areaId: number) => {
@@ -42,7 +41,6 @@ export function PostCreation({
         onUpdateComment={handleUpdateComment}
         isOpen={showCreateModal}
         onClose={() => setShowCreateModal(false)}
-        currentUserId={currentUserId}
         currentAreaId={currentAreaId}
       />
       <Masonry columns={4}>

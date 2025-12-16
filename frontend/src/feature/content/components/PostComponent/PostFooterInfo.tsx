@@ -1,4 +1,4 @@
-import { Heart, MessageCircle, Share2, Pin } from "lucide-react";
+import { Heart, MessageCircle, Pin } from "lucide-react";
 
 interface PostFooterInfoProps {
   likes: number;

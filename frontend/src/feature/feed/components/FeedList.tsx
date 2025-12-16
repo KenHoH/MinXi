@@ -5,7 +5,6 @@ import type { FullContentDto } from "@/service/api";
 import { renderItem } from "../logic/useRenderContent";
 import useGetHistory from "../logic/useGetHistory";
 import { useAuthContext } from "@/feature/auth/context/AuthContext";
-import type { FullContentWithHistoryProps } from "@/feature/content/components/models/FullContentWithHistory";
 import { FeedListSkeleton } from "./FeedListSkeleton";
 import { useParams, useNavigate } from "react-router-dom";
 import useHistoryService from "@/shared/hooks/useHistoryService";
@@ -35,7 +34,7 @@ export default function FeedList({
   const navigate = useNavigate();
 
   const { getByUserAndContent } = useHistoryService();
-  const { findOne, getAncestorPost, getChildPost } = useContentService();
+  const { findOne } = useContentService();
   const { item, type, area } = useParams();
 
   const [selectedContent, setSelectedContent] = useState<FullContentDto | null>(
@@ -49,10 +48,6 @@ export default function FeedList({
     comments: number;
     reports: number;
   } | null>(null);
-  const [ancestors, setAncestors] = useState<
-    FullContentWithHistoryProps[] | null
-  >(null);
-  const [childPosts, setChildPosts] = useState<FullContentDto[] | null>(null);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -75,16 +70,6 @@ export default function FeedList({
           comments: content.comments || 0,
           reports: content.reports || 0,
         });
-
-        if (type === "post") {
-          const ancestorData = await getAncestorPost(
-            Number(item),
-            Number(area)
-          );
-          const childData = await getChildPost(Number(item));
-          setAncestors(ancestorData);
-          setChildPosts(childData);
-        }
       } catch (error) {
         console.error("Failed to fetch content details:", error);
       }
@@ -96,20 +81,9 @@ export default function FeedList({
   const handleCloseDetail = () => {
     setSelectedContent(null);
     setContentHistory(null);
-    setAncestors(null);
-    setChildPosts(null);
     navigate(-1);
   };
 
-  const handleRefreshChild = async () => {
-    if (!item) return;
-    try {
-      const childData = await getChildPost(Number(item));
-      setChildPosts(childData);
-    } catch (error) {
-      console.error("Failed to refresh child posts:", error);
-    }
-  };
   const contents = useMemo(() => {
     return items.map((item) => {
       const userHistory = histories.find(
@@ -275,9 +249,6 @@ export default function FeedList({
         <PostDetailComponent
           post={selectedContent}
           onClose={handleCloseDetail}
-          ancestors={ancestors}
-          children={childPosts}
-          onRefreshChild={handleRefreshChild}
           liked={contentHistory.liked}
           pinned={contentHistory.pinned}
           likes={contentHistory.likes}

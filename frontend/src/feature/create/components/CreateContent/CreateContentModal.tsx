@@ -1,19 +1,16 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useToast } from "@/shared/context/ToastContext";
 import useContentService from "@/shared/hooks/useContentService";
 import type ThumbnailFile from "@/feature/content/object/ThumbnailFile";
 import type ContentFile from "@/feature/content/object/ContenFile";
 import type FileItem from "@/feature/content/object/FileItem";
 import { CreateContentHeader } from "./CreateContentHeader";
-import { CreateContentUserInfo } from "./CreateContentUserInfo";
 import { ContentTypeSelector } from "./ContentTypeSelector";
 import { UploadContentFiles } from "./UploadContentFiles";
 import { FileGalleryContent } from "./FileGalleryContent";
 import { UploadThumbnail } from "./UploadThumbnail";
 import { ThumbnailGallery } from "./ThumbnailGallery";
 import { Input } from "@/components/ui/input";
-import type { UserDto } from "@/service/api";
-import useUserService from "@/shared/hooks/useUserService";
 import { Calendar } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 interface CreateContentModalProps {
@@ -39,10 +36,8 @@ export function CreateContentModal({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isPrivate, setIsPrivate] = useState(false);
   const [publishedAt, setPublishedAt] = useState("");
-  const [user, setUser] = useState<UserDto | null>(null);
   const { showToast } = useToast();
   const { create, loading } = useContentService();
-  const { findUserById } = useUserService();
 
   const isFormValid =
     contentTitle.trim() !== "" &&
@@ -156,13 +151,6 @@ export function CreateContentModal({
     }
   };
 
-  useEffect(() => {
-    const fetchUser = async () => {
-      const userData = await findUserById(currentUserId);
-      setUser(userData);
-    };
-    fetchUser();
-  }, []);
   if (!isOpen) {
     return null;
   }

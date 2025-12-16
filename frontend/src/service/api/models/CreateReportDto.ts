@@ -3,16 +3,8 @@
 /* tslint:disable */
 /* eslint-disable */
 export type CreateReportDto = {
-    creator_id: number;
-    userId: number;
-    desc: string;
-    type: CreateReportDto.type;
+  creator_id: number;
+  userId: number;
+  desc: string;
+  type: "Abuse" | "Spam" | "Missinformation";
 };
-export namespace CreateReportDto {
-    export enum type {
-        ABUSE = 'Abuse',
-        SPAM = 'Spam',
-        MISSINFORMATION = 'Missinformation',
-    }
-}
-

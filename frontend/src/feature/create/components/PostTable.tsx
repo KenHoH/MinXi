@@ -1,20 +1,12 @@
 import { useState } from "react";
-import {
-  Plus,
-  Image,
-  FileText,
-  Eye,
-  Heart,
-  MessageCircle,
-  Pin,
-} from "lucide-react";
+import { Plus, FileText, Eye, Heart, MessageCircle, Pin } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { CreatePostModal } from "@/feature/create/components/CreatePost/CreatePostModal";
 import { useAuthContext } from "@/feature/auth/context/AuthContext";
 import type { FullContentDto } from "@/service/api";
 import useContentService from "@/shared/hooks/useContentService";
 import { useToast } from "@/shared/context/ToastContext";
-import { replace, useNavigate } from "react-router";
+import { useNavigate } from "react-router";
 
 interface PostTableProps {
   items: FullContentDto[];
@@ -26,7 +18,6 @@ export function PostTable({ items, onRefreshChild, onDelete }: PostTableProps) {
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [deletingId, setDeletingId] = useState<number | null>(null);
   const { user } = useAuthContext();
-  const currentUserId = user?.user_id || 0;
   const currentAreaId = user?.area_id || 0;
   const { updateComment, remove } = useContentService();
   const { showToast } = useToast();
@@ -88,7 +79,6 @@ export function PostTable({ items, onRefreshChild, onDelete }: PostTableProps) {
         onUpdateComment={handleUpdateComment}
         isOpen={showCreateModal}
         onClose={() => setShowCreateModal(false)}
-        currentUserId={currentUserId}
         currentAreaId={currentAreaId}
       />
 

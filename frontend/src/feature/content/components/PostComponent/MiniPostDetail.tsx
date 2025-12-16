@@ -17,7 +17,6 @@ interface MiniPostDetailProps {
 
 export function MiniPostDetail({
   post,
-  onRefresh,
   onNavigate,
 }: MiniPostDetailProps) {
   const [currentMediaIndex, setCurrentMediaIndex] = useState(0);

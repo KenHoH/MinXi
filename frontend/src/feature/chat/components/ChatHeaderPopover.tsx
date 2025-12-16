@@ -4,7 +4,6 @@ import { useState, useEffect } from "react";
 import { X, Plus, Trash2, Play } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import type {
-  AddUserToRoomDto,
   MessageResponseDto,
   RoomResponseDto,
   UserDto,
@@ -62,7 +61,7 @@ export default function ChatHeaderPopover({
     await addUserToRoom({
       roomId: room.id,
       userId: userId,
-      role: "MEMBER" as AddUserToRoomDto.role.MEMBER,
+      role: "MEMBER",
     });
     setFriends((prevFriends) =>
       prevFriends.filter((f) => f.user_id !== userId)

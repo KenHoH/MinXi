@@ -82,7 +82,7 @@ export function PostDetailComponent(props: PostDetailComponentProps) {
   const [pinned, setPinned] = useState(propsPinned);
   const [showCreatePost, setShowCreatePost] = useState(false);
   const [currentMediaIndex, setCurrentMediaIndex] = useState(0);
-  const [currentPost, setCurrentPost] = useState<FullContentDto>(post);
+  const currentPost = post;
   const [totalLikes, setTotalLikes] = useState(propsLikes);
   const [totalComments, setTotalComments] = useState(propsComments);
   const [totalPins, setTotalPins] = useState(propsPins);
