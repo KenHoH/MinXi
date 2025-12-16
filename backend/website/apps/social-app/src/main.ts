@@ -9,6 +9,7 @@ async function bootstrap() {
     {
       transport: Transport.TCP,
       options: {
+        host: 'social-service',
         port: SOCIAL_SERVICES.PORT,
       },
     },

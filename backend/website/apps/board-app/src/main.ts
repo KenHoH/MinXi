@@ -9,6 +9,7 @@ async function bootstrap() {
     {
       transport: Transport.TCP,
       options: {
+        host: 'board-service',
         port: BOARD_SERVICES.PORT,
       },
     },

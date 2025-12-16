@@ -15,6 +15,7 @@ import { ScheduleModule } from '@nestjs/schedule';
         name: CONTENT_SERVICES.CLIENT,
         transport: Transport.TCP,
         options: {
+          host: 'content-service',
           port: CONTENT_SERVICES.PORT,
         },
       },
@@ -22,6 +23,7 @@ import { ScheduleModule } from '@nestjs/schedule';
         name: HISTORY_SERVICES.CLIENT,
         transport: Transport.TCP,
         options: {
+          host: 'history-service',
           port: HISTORY_SERVICES.PORT,
         },
       },

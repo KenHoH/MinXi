@@ -5,23 +5,27 @@ import { JwtStrategy } from './jwt-strategy/jwt-strategy';
 import { JwtRefresh } from './jwt-refresh/jwt-refresh';
 import { JwtRefreshGuard } from './jwt-refresh-guard/jwt-refresh.guard';
 import { ConfigModule } from '@nestjs/config';
-
-import * as dotenv from 'dotenv';
+import { ConfigService } from '@nestjs/config';
 import { AdminGuard } from './admin/admin.guard';
 import { JwtModule } from '@nestjs/jwt';
 
-dotenv.config({ path: './libs/common/src/guard/.env' });
 @Module({
   imports: [
     PassportModule.register({ defaultStrategy: 'access' }),
     ConfigModule.forRoot({
       isGlobal: true,
-      envFilePath: './libs/common/src/auth/.env',
+      ignoreEnvFile: true, // IMPORTANT
     }),
-    JwtModule.register({
-      global: true,
-      secret: process.env.JWT_SECRET,
-      signOptions: { expiresIn: '60s' },
+    JwtModule.registerAsync({
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useFactory: (config: ConfigService) => ({
+        global: true,
+        secret: config.get<string>('JWT_SECRET'),
+        signOptions: {
+          expiresIn: '60s',
+        },
+      }),
     }),
   ],
   providers: [

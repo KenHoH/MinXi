@@ -9,6 +9,7 @@ async function bootstrap() {
     {
       transport: Transport.TCP,
       options: {
+        host: 'comment-service',
         port: COMMENT_SERVICES.PORT,
       },
     },

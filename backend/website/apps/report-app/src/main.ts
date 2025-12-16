@@ -8,7 +8,7 @@ async function bootstrap() {
     ReportAppModule,
     {
       transport: Transport.TCP,
-      options: { port: REPORT_SERVICES.PORT },
+      options: { host: 'report-service', port: REPORT_SERVICES.PORT },
     },
   );
   await app.listen();

@@ -1,0 +1,245 @@
+version: '3.9'
+
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: mysql-db
+    environment:
+      MYSQL_ROOT_PASSWORD: duaenamsatu
+    ports:
+      - '3306:3306'
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./docker/mysql/init:/docker-entrypoint-initdb.d
+    healthcheck:
+      test:
+        [
+          'CMD',
+          'mysqladmin',
+          'ping',
+          '-h',
+          'localhost',
+          '-u',
+          'root',
+          '-pduaenamsatu',
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - app-network
+
+  user-service:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: website-backend
+    container_name: user-service
+    command: ['node', 'dist/apps/user/main.js']
+    env_file:
+      - ./.env.docker
+    ports: ['3001:3001']
+    environment:
+      - SERVICE=user-service
+    depends_on:
+      mysql:
+        condition: service_healthy
+    networks:
+      - app-network
+
+  auth-service:
+    image: website-backend
+    container_name: auth-service
+    command: ['node', 'dist/apps/auth/main.js']
+    env_file:
+      - ./.env.docker
+    ports: ['3002:3002']
+    environment:
+      - SERVICE=auth-service
+    depends_on:
+      mysql:
+        condition: service_healthy
+    networks:
+      - app-network
+
+  log-service:
+    image: website-backend
+    container_name: log-service
+    command: ['node', 'dist/apps/log-app/main.js']
+    env_file:
+      - ./.env.docker
+    ports: ['3005:3005']
+    environment:
+      - SERVICE=log-service
+    depends_on:
+      mysql:
+        condition: service_healthy
+    networks:
+      - app-network
+
+  content-service:
+    image: website-backend
+    container_name: content-service
+    command: ['node', 'dist/apps/content-app/main.js']
+    env_file:
+      - ./.env.docker
+    ports: ['3006:3006']
+    environment:
+      - SERVICE=content-service
+    depends_on:
+      mysql:
+        condition: service_healthy
+    networks:
+      - app-network
+
+  history-service:
+    image: website-backend
+    container_name: history-service
+    command: ['node', 'dist/apps/history-app/main.js']
+    env_file:
+      - ./.env.docker
+    ports: ['3007:3007']
+    environment:
+      - SERVICE=history-service
+    depends_on:
+      mysql:
+        condition: service_healthy
+    networks:
+      - app-network
+
+  board-service:
+    image: website-backend
+    container_name: board-service
+    command: ['node', 'dist/apps/board-app/main.js']
+    env_file:
+      - ./.env.docker
+    ports: ['3008:3008']
+    environment:
+      - SERVICE=board-service
+    depends_on:
+      mysql:
+        condition: service_healthy
+    networks:
+      - app-network
+
+  connect-service:
+    image: website-backend
+    container_name: connect-service
+    command: ['node', 'dist/apps/connection-app/main.js']
+    env_file:
+      - ./.env.docker
+    ports: ['3009:3009']
+    environment:
+      - SERVICE=connect-service
+    depends_on:
+      mysql:
+        condition: service_healthy
+    networks:
+      - app-network
+
+  report-service:
+    image: website-backend
+    container_name: report-service
+    command: ['node', 'dist/apps/report-app/main.js']
+    env_file:
+      - ./.env.docker
+    ports: ['3010:3010']
+    environment:
+      - SERVICE=report-service
+    depends_on:
+      mysql:
+        condition: service_healthy
+    networks:
+      - app-network
+
+  algo-service:
+    image: website-backend
+    container_name: algo-service
+    command: ['node', 'dist/apps/algorithm-app/main.js']
+    env_file:
+      - ./.env.docker
+    ports: ['3011:3011']
+    environment:
+      - SERVICE=algorithm-service
+    depends_on:
+      mysql:
+        condition: service_healthy
+    networks:
+      - app-network
+
+  social-service:
+    image: website-backend
+    container_name: social-service
+    command: ['node', 'dist/apps/social-app/main.js']
+    env_file:
+      - ./.env.docker
+    ports: ['3013:3013']
+    environment:
+      - SERVICE=social-service
+    depends_on:
+      mysql:
+        condition: service_healthy
+    networks:
+      - app-network
+
+  comment-service:
+    image: website-backend
+    container_name: comment-service
+    command: ['node', 'dist/apps/comment-app/main.js']
+    env_file:
+      - ./.env.docker
+    ports: ['3014:3014']
+    environment:
+      - SERVICE=comment-service
+    depends_on:
+      mysql:
+        condition: service_healthy
+    networks:
+      - app-network
+
+  notif-service:
+    image: website-backend
+    container_name: notif-service
+    command: ['node', 'dist/apps/notification-app/main.js']
+    env_file:
+      - ./.env.docker
+    ports: ['3015:3015']
+    environment:
+      - SERVICE=notification-service
+    depends_on:
+      mysql:
+        condition: service_healthy
+    networks:
+      - app-network
+
+  api-gateway:
+    image: website-backend
+    container_name: api-gateway
+    command: ['node', 'dist/apps/website-api-gateway/main.js']
+    env_file:
+      - ./.env.docker
+    ports: ['3000:3000']
+    environment:
+      - SERVICE=website-api-gateway
+    depends_on:
+      - user-service
+      - auth-service
+      - log-service
+      - content-service
+      - history-service
+      - board-service
+      - connect-service
+      - report-service
+      - algo-service
+      - social-service
+      - comment-service
+      - notif-service
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge
+
+volumes:
+  mysql_data:

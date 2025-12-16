@@ -9,6 +9,7 @@ async function bootstrap() {
     {
       transport: Transport.TCP,
       options: {
+        host: 'content-service',
         port: CONTENT_SERVICES.PORT,
       },
     },

@@ -8,7 +8,7 @@ async function bootstrap() {
     AlgorithmAppModule,
     {
       transport: Transport.TCP,
-      options: { port: ALGO_SERVICES.PORT },
+      options: { host: 'algo-service', port: ALGO_SERVICES.PORT },
     },
   );
   await app.listen();

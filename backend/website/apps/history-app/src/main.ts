@@ -9,6 +9,7 @@ async function bootstrap() {
     {
       transport: Transport.TCP,
       options: {
+        host: 'history-service',
         port: HISTORY_SERVICES.PORT,
       },
     },

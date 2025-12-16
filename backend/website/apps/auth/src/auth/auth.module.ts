@@ -6,22 +6,24 @@ import { AuthController } from './auth.controller';
 import { CacheModule } from '@nestjs/cache-manager';
 import { ClientsModule, Transport } from '@nestjs/microservices';
 import { USER_SERVICES } from '@app/common/constants/services';
-import * as dotenv from 'dotenv';
-
-dotenv.config({ path: './libs/common/src/guard/.env' });
+import { ConfigService } from '@nestjs/config';
 
 @Module({
   imports: [
     CacheModule.register(),
     ConfigModule.forRoot({
       isGlobal: true,
-      envFilePath: './libs/common/src/auth/.env',
+      ignoreEnvFile: true,
     }),
     JwtModule.registerAsync({
-      useFactory: () => ({
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useFactory: (config: ConfigService) => ({
         global: true,
-        secret: process.env.JWT_SECRET,
-        signOptions: { expiresIn: '60s' },
+        secret: config.get<string>('JWT_SECRET'),
+        signOptions: {
+          expiresIn: '60s',
+        },
       }),
     }),
     ClientsModule.register([

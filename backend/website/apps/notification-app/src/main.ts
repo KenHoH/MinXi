@@ -9,6 +9,7 @@ async function bootstrap() {
     {
       transport: Transport.TCP,
       options: {
+        host: 'notif-service',
         port: NOTIF_SERVICES.PORT,
       },
     },

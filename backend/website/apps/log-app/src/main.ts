@@ -9,6 +9,7 @@ async function bootstrap() {
     {
       transport: Transport.TCP,
       options: {
+        host: 'log-service',
         port: LOG_SERVICES.PORT,
       },
     },
