@@ -18,6 +18,7 @@ import {
         name: CONNECT_SERVICES.CLIENT,
         transport: Transport.TCP,
         options: {
+          host: 'connect-service',
           port: CONNECT_SERVICES.PORT,
         },
       },
@@ -25,6 +26,7 @@ import {
         name: HISTORY_SERVICES.CLIENT,
         transport: Transport.TCP,
         options: {
+          host: 'history-service',
           port: HISTORY_SERVICES.PORT,
         },
       },
@@ -32,6 +34,7 @@ import {
         name: USER_SERVICES.CLIENT,
         transport: Transport.TCP,
         options: {
+          host: 'user-service',
           port: USER_SERVICES.PORT,
         },
       },

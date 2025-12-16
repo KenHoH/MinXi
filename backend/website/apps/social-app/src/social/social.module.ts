@@ -15,6 +15,7 @@ import { USER_SERVICES } from '@app/common/constants/services';
         name: USER_SERVICES.CLIENT,
         transport: Transport.TCP,
         options: {
+          host: 'user-service',
           port: USER_SERVICES.PORT,
         },
       },

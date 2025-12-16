@@ -14,6 +14,7 @@ import { SOCIAL_SERVICES, USER_SERVICES } from '@app/common/constants/services';
         name: SOCIAL_SERVICES.CLIENT,
         transport: Transport.TCP,
         options: {
+          host: 'social-service',
           port: SOCIAL_SERVICES.PORT,
         },
       },
@@ -21,6 +22,7 @@ import { SOCIAL_SERVICES, USER_SERVICES } from '@app/common/constants/services';
         name: USER_SERVICES.CLIENT,
         transport: Transport.TCP,
         options: {
+          host: 'user-service',
           port: USER_SERVICES.PORT,
         },
       },

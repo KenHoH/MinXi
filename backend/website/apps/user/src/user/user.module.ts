@@ -14,6 +14,7 @@ import { CONTENT_SERVICES } from '@app/common/constants/services';
         name: CONTENT_SERVICES.CLIENT,
         transport: Transport.TCP,
         options: {
+          host: 'content-service',
           port: CONTENT_SERVICES.PORT,
         },
       },

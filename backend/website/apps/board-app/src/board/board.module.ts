@@ -17,6 +17,7 @@ import {
         name: CONTENT_SERVICES.CLIENT,
         transport: Transport.TCP,
         options: {
+          host: 'content-service',
           port: CONTENT_SERVICES.PORT,
         },
       },
@@ -24,6 +25,7 @@ import {
         name: USER_SERVICES.CLIENT,
         transport: Transport.TCP,
         options: {
+          host: 'user-service',
           port: USER_SERVICES.PORT,
         },
       },
