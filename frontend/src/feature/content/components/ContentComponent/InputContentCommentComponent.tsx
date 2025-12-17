@@ -20,7 +20,7 @@ export function InputContentCommentComponent({
   onCancelReply,
 }: InputContentCommentComponentProps) {
   return (
-    <div className="border-b border-dark-700 p-3">
+    <div className="border-b border-dark-700 p-3 ">
       {replyingToComment && (
         <div className="mb-3 p-2 bg-dark-700 rounded border-l-2 border-burgundy-600 flex items-start justify-between gap-2">
           <div className="flex-1 min-w-0">

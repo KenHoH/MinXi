@@ -35,8 +35,8 @@ export function FooterContentComponent({
         <Heart
           className={`w-6 h-6 ${
             liked
-              ? "fill-red-400 text-red-400 "
-              : "text-gray-300 group-hover:text-burgundy-400"
+              ? "fill-red-400 text-red-400"
+              : "hover:fill-red-400 hover:text-red-400 transition-colors"
           }`}
         />
 
@@ -46,7 +46,7 @@ export function FooterContentComponent({
       </button>
 
       <button className="flex flex-col items-center gap-1 text-gray-300 hover:text-burgundy-400 transition-colors group">
-        <MessageCircle className="w-6 h-6 group-hover:text-burgundy-400" />
+        <MessageCircle className="w-6 h-6 hover:fill-red-400 hover:text-red-400 transition-colors" />
         <span className="text-xs group-hover:text-burgundy-400">
           {comments}
         </span>
@@ -58,7 +58,9 @@ export function FooterContentComponent({
       >
         <Pin
           className={`w-6 h-6 ${
-            pinned ? "fill-red-400 text-red-400" : "text-gray-300"
+            pinned
+              ? "fill-red-400 text-red-400"
+              : "text-gray-300 hover:fill-red-400 hover:text-red-400 transition-colors"
           }`}
         />
 
@@ -73,7 +75,9 @@ export function FooterContentComponent({
       >
         <Flag
           className={`w-6 h-6 ${
-            reported ? "fill-red-400 text-red-400" : "text-gray-300"
+            reported
+              ? "fill-red-400 text-red-400"
+              : "text-gray-300 hover:fill-red-400 hover:text-red-400 transition-colors"
           }`}
         />
 
@@ -81,8 +85,10 @@ export function FooterContentComponent({
       </button>
       {/* Share */}
       <button className="flex flex-col items-center gap-1 text-gray-300 hover:text-burgundy-400 transition-colors group">
-        <Share2 className="w-6 h-6 group-hover:text-burgundy-400" />
-        <span className="text-xs group-hover:text-burgundy-400">Share</span>
+        <Share2 className="w-6 h-6 hover:fill-red-400 hover:text-red-400 transition-colors" />
+        <span className="text-xs hover:text-red-400 transition-colors">
+          Share
+        </span>
       </button>
     </div>
   );

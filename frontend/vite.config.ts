@@ -14,6 +14,10 @@ export default defineConfig({
         secure: false,
       },
     },
+    watch: {
+      usePolling: true,
+      interval: 100,
+    },
   },
   plugins: [react(), tailwindcss(), mkcert()],
   resolve: {

@@ -24,7 +24,7 @@ export function PostDetailHeader({
       <button
         onClick={onFollowClick}
         disabled={isOwnContent}
-        className={`px-4 py-1 rounded-full text-sm font-medium transition-all ${
+        className={`px-4 py-1 rounded-full text-sm font-medium transition-all hover:fill-red-400 hover:text-red-400  ${
           isOwnContent
             ? "bg-gray-700 text-gray-500 cursor-not-allowed opacity-50"
             : followed

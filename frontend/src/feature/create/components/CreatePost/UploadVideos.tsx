@@ -21,7 +21,7 @@ export function UploadVideos({ onFilesSelected }: UploadVideosProps) {
     <>
       <button
         onClick={() => inputRef.current?.click()}
-        className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-dark-700 border border-dark-600 rounded-lg text-gray-300 hover:border-burgundy-600 hover:text-burgundy-400 transition-colors"
+        className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-dark-700 border border-dark-600 rounded-lg text-gray-300 hover:border-red-400 hover:text-burgundy-400 transition-colors"
       >
         <Video className="w-5 h-5" />
         Add Videos

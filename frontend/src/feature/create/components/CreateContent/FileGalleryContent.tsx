@@ -56,10 +56,10 @@ export function FileGalleryContent({
               {/* Remove button overlay */}
               <button
                 onClick={() => onRemove(file.id)}
-                className="absolute top-2 right-2 p-1.5 bg-red-500/90 hover:bg-red-600 rounded-full text-white opacity-0 group-hover:opacity-100 transition-opacity"
+                className="absolute top-2 right-2 p-2 bg-black/60 rounded-full hover:bg-black/80 transition-colors opacity-0 group-hover:opacity-100"
                 title="Remove file"
               >
-                <Trash2 className="w-3.5 h-3.5" />
+                <Trash2 className="w-3.5 h-3.5 text-red-400" />
               </button>
             </div>
 

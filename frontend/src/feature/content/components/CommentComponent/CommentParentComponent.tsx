@@ -124,7 +124,10 @@ const CommentItem = memo(
                   : "text-gray-400 hover:text-burgundy-400"
               }`}
             >
-              <MessageCircle size={14} />
+              <MessageCircle
+                size={14}
+                className="hover:text-red-400 transition-colors"
+              />
               Reply
             </button>
           </div>

@@ -73,7 +73,7 @@ export function ContentTable({
     <div className="space-y-6">
       <Button
         onClick={() => setShowCreateModal(true)}
-        className="bg-burgundy-600 text-white hover:bg-burgundy-700 flex items-center gap-2"
+        className="bg-burgundy-600 text-white hover:bg-red-400 flex items-center gap-2 transition-colors delay-100"
       >
         <Plus className="w-5 h-5" />
         Create New Content
@@ -187,7 +187,7 @@ export function ContentTable({
                 <button
                   onClick={() => handleDelete(item.content_id, item.area_id)}
                   disabled={deletingId === item.content_id}
-                  className="w-full px-3 py-2 bg-dark-700 hover:bg-red-400/20 text-red-400 rounded text-xs font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="w-full px-3 py-2 bg-dark-700 hover:bg-primary text-white rounded text-xs font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {deletingId === item.content_id ? "Deleting..." : "Delete"}
                 </button>

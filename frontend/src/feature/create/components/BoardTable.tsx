@@ -107,7 +107,7 @@ export function BoardTable({
     <div className="space-y-6">
       <Button
         onClick={() => setShowCreateModal(true)}
-        className="bg-burgundy-600 text-white hover:bg-burgundy-700 flex items-center gap-2"
+        className="bg-burgundy-600 text-white hover:bg-red-400 flex items-center gap-2 transition-colors delay-100"
       >
         <Plus className="w-5 h-5" />
         Create New Board
@@ -122,9 +122,9 @@ export function BoardTable({
         currentUserId={currentUserId}
         onBoardCreated={onRefresh && (() => onRefresh())}
       />
-      <div className="flex flex-col items-center">
+      <div className="flex flex-col items-center gap-4">
         {boards.length === 0 ? (
-          <div className="text-center py-12 bg-dark-800 rounded-lg border border-dark-700 ">
+          <div className="w-full text-center py-12 bg-dark-800 rounded-lg border border-dark-700 ">
             <p className="text-gray-400">No boards created yet</p>
           </div>
         ) : (

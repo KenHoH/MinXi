@@ -21,7 +21,7 @@ export function TopFeedBar({ filters, onFilterChange }: TopFeedBarProps) {
           onClick={() => handleFilterClick(filter)}
           className={`px-4 py-2 rounded-full whitespace-nowrap transition-colors text-sm font-medium ${
             activeFilter === filter
-              ? "bg-burgundy-600 text-white"
+              ? "bg-primary text-white"
               : "bg-dark-800 text-gray-300 border border-dark-700 hover:border-burgundy-600 hover:text-burgundy-400"
           }`}
         >

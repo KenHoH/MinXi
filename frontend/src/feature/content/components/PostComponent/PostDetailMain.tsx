@@ -42,12 +42,16 @@ export function PostDetailMain({
           className="flex items-center gap-2 px-4 py-2 rounded-lg hover:bg-dark-700 transition-colors text-gray-300 hover:text-burgundy-400"
         >
           <Heart
-            className={`w-5 h-5 ${liked ? "fill-red-400 text-red-400 " : ""}`}
+            className={`w-5 h-5 ${
+              liked
+                ? "fill-red-400 text-red-400 "
+                : "hover:fill-red-400 hover:text-red-400 transition-colors"
+            }`}
           />
           <span className="text-sm font-medium">{likes}</span>
         </button>
 
-        <button className="flex items-center gap-2 px-4 py-2 rounded-lg hover:bg-dark-700 transition-colors text-gray-300 hover:text-burgundy-400">
+        <button className="flex items-center gap-2 px-4 py-2 rounded-lg hover:bg-dark-700 transition-colors text-gray-300 hover:text-burgundy-400 hover:fill-red-400 hover:text-red-400 ">
           <MessageCircle className="w-5 h-5" />
           <span className="text-sm font-medium">{comments}</span>
         </button>
@@ -57,7 +61,11 @@ export function PostDetailMain({
           className="flex items-center gap-2 px-4 py-2 rounded-lg hover:bg-dark-700 transition-colors text-gray-300 "
         >
           <Pin
-            className={`w-5 h-5 ${pinned ? "fill-red-400 text-red-400" : ""}`}
+            className={`w-5 h-5 ${
+              pinned
+                ? "fill-red-400 text-red-400"
+                : "hover:fill-red-400 hover:text-red-400 transition-colors"
+            }`}
           />
           <span className="text-sm font-medium">{pins}</span>
         </button>
@@ -67,13 +75,17 @@ export function PostDetailMain({
           className="flex items-center gap-2 px-4 py-2 rounded-lg hover:bg-dark-700 transition-colors text-gray-300 hover:text-red-400"
         >
           <Flag
-            className={`w-5 h-5 ${reported ? "fill-red-500 text-red-500" : ""}`}
+            className={`w-5 h-5 ${
+              reported
+                ? "fill-red-400 text-red-400"
+                : "hover:fill-red-400 hover:text-red-400 transition-colors"
+            }`}
           />
         </button>
 
         <button
           onClick={onReplyClick}
-          className="flex items-center gap-2 px-4 py-2 rounded-lg hover:bg-dark-700 transition-colors text-gray-300 hover:text-burgundy-400"
+          className="flex items-center gap-2 px-4 py-2 rounded-lg hover:bg-dark-700 transition-colors text-gray-300 hover:fill-red-400 hover:text-red-400 "
         >
           <Reply className="w-5 h-5" />
         </button>

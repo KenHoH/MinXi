@@ -160,7 +160,7 @@ export function CreatePostModal({
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
                 placeholder="What's your post about?"
-                className="w-full px-4 py-2 bg-dark-700 border border-dark-600 rounded-lg text-gray-100 placeholder:text-gray-500 focus:outline-none focus:ring-1 focus:ring-burgundy-600"
+                className="w-full px-4 py-2 bg-dark-700 border border-dark-600 rounded-lg text-gray-100 placeholder:text-gray-500 focus:outline-none focus:ring-1 focus:ring-red-400"
               />
             </div>
 
@@ -174,7 +174,7 @@ export function CreatePostModal({
                 onChange={(e) => setDescription(e.target.value)}
                 placeholder="Add more details..."
                 rows={4}
-                className="w-full px-4 py-2 bg-dark-700 border border-dark-600 rounded-lg text-gray-100 placeholder:text-gray-500 focus:outline-none focus:ring-1 focus:ring-burgundy-600 resize-none"
+                className="w-full px-4 py-2 bg-dark-700 border border-dark-600 rounded-lg text-gray-100 placeholder:text-gray-500 focus:outline-none focus:ring-1 focus:ring-red-400 resize-none"
               />
             </div>
 
@@ -200,14 +200,14 @@ export function CreatePostModal({
           <div className="flex gap-3 p-6 border-t border-dark-700 bg-dark-900">
             <button
               onClick={onClose}
-              className="flex-1 px-4 py-2 bg-dark-700 text-gray-300 rounded-lg hover:bg-dark-600 transition-colors font-medium"
+              className="flex-1 px-4 py-2 bg-dark-700 text-gray-300 rounded-lg hover:bg-red-400 transition-colors font-medium"
             >
               Cancel
             </button>
             <button
               onClick={handleSubmit}
               disabled={!title.trim() || isSubmitting}
-              className="flex-1 px-4 py-2 bg-burgundy-600 text-white rounded-lg hover:bg-burgundy-700 transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+              className="flex-1 px-4 py-2 bg-burgundy-600 text-white rounded-lg hover:bg-red-400 transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed "
             >
               {isSubmitting ? "Posting..." : parentPostId ? "Reply" : "Post"}
             </button>

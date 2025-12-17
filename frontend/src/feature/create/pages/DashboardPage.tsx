@@ -90,7 +90,7 @@ export default function CreatePage() {
                   onClick={() => setActiveTab(tab)}
                   className={`px-4 py-3 font-medium transition-colors border-b-2 ${
                     activeTab === tab
-                      ? "border-burgundy-600 text-burgundy-400"
+                      ? "border-red-400 text-burgundy-400"
                       : "border-transparent text-gray-400 hover:text-gray-200"
                   }`}
                 >

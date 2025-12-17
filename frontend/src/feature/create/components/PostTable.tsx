@@ -69,7 +69,7 @@ export function PostTable({ items, onRefreshChild, onDelete }: PostTableProps) {
     <div className="space-y-6">
       <Button
         onClick={() => setShowCreateModal(true)}
-        className="bg-burgundy-600 text-white hover:bg-burgundy-700 flex items-center gap-2"
+        className="bg-burgundy-600 text-white hover:bg-red-400 flex items-center gap-2 transition-colors delay-100"
       >
         <Plus className="w-5 h-5" />
         Create New Post
@@ -96,38 +96,6 @@ export function PostTable({ items, onRefreshChild, onDelete }: PostTableProps) {
                 navigateToPost(item.username, item.content_id, item.area_id)
               }
             >
-              {/* Thumbnail Image */}
-              {item.contents?.[0]?.filepath && (
-                <div className="relative w-full bg-dark-750 overflow-hidden h-60">
-                  {(() => {
-                    const firstFile = item.contents[0];
-                    const fileType = getFileIcon(firstFile.filepath);
-                    return fileType === "image" ? (
-                      <img
-                        src={firstFile.filepath}
-                        alt={item.title}
-                        className="w-full h-full object-fill"
-                        onError={(e) => {
-                          (e.target as HTMLImageElement).style.display = "none";
-                        }}
-                      />
-                    ) : fileType === "video" ? (
-                      <video
-                        src={firstFile.filepath}
-                        className="w-full h-full object-fill"
-                        onError={(e) => {
-                          (e.target as HTMLVideoElement).style.display = "none";
-                        }}
-                      />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center">
-                        <FileText className="w-12 h-12 text-gray-600" />
-                      </div>
-                    );
-                  })()}
-                </div>
-              )}
-
               {/* Post Info */}
               <div className="flex-1 p-4 flex flex-col">
                 <div className="flex items-start justify-between gap-2 mb-2">
@@ -178,7 +146,7 @@ export function PostTable({ items, onRefreshChild, onDelete }: PostTableProps) {
                 <button
                   onClick={() => handleDelete(item.content_id, item.area_id)}
                   disabled={deletingId === item.content_id}
-                  className="w-full px-3 py-2 bg-dark-700 hover:bg-red-400/20 text-red-400 rounded text-xs font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="w-full px-3 py-2 bg-dark-700 hover:bg-primary text-white rounded text-xs font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {deletingId === item.content_id ? "Deleting..." : "Delete"}
                 </button>

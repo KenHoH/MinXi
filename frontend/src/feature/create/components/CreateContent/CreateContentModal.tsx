@@ -175,7 +175,7 @@ export function CreateContentModal({
                 value={contentTitle}
                 onChange={(e) => setContentTitle(e.target.value)}
                 placeholder="What's your content about?"
-                className="w-full px-4 py-2 bg-dark-700 border border-dark-600 rounded-lg text-gray-100 placeholder:text-gray-500 focus:outline-none focus:ring-1 focus:ring-red-500 "
+                className="w-full px-4 py-2 bg-dark-700 border border-dark-600 rounded-lg text-gray-100 placeholder:text-gray-500 focus:outline-none focus:ring-1 focus:ring-red-400 "
               />
             </div>
             {/* Date Input */}
@@ -187,17 +187,17 @@ export function CreateContentModal({
                 </span>
               </label>
               <div className="relative">
-                <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500 pointer-events-none" />
+                <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-red-500 pointer-events-none transition-colors" />
                 <Input
                   type="datetime-local"
                   value={publishedAt}
                   onChange={(e) => setPublishedAt(e.target.value)}
                   placeholder="Select publish date and time"
-                  className="pl-10 bg-dark-700 border border-dark-600 text-gray-100 placeholder:text-gray-500"
+                  className="pl-10 bg-dark-400 border border-dark-600 text-gray-100 placeholder:text-gray-500 transition-colors"
                 />
               </div>
               {publishedAt && (
-                <p className="mt-2 text-xs text-gray-400 flex items-center gap-1">
+                <p className="mt-2 text-xs text-gray-400 flex items-center gap-1 transition-colors">
                   <Calendar className="w-3 h-3" />
                   Publishing on: {new Date(publishedAt).toLocaleString()}
                 </p>
@@ -214,7 +214,7 @@ export function CreateContentModal({
                 onChange={(e) => setDescription(e.target.value)}
                 placeholder="Add more details about your content..."
                 rows={3}
-                className="w-full px-4 py-2 bg-dark-700 border border-dark-600 rounded-lg text-gray-100 placeholder:text-gray-500 focus:outline-none focus:ring-1 focus:ring-burgundy-600 resize-none"
+                className="w-full px-4 py-2 bg-dark-700 border border-dark-600 rounded-lg text-gray-100 placeholder:text-gray-500 focus:outline-none focus:ring-1 focus:ring-red-400 resize-none"
               />
             </div>
 
@@ -285,14 +285,14 @@ export function CreateContentModal({
             <button
               onClick={onClose}
               disabled={isSubmitting || loading}
-              className="flex-1 px-4 py-2 bg-dark-700 text-gray-300 rounded-lg hover:bg-dark-600 transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+              className="flex-1 px-4 py-2 bg-dark-700 text-gray-300 rounded-lg hover:bg-dark-600 transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed hover:bg-red-400"
             >
               Cancel
             </button>
             <button
               onClick={handleSubmit}
               disabled={!isFormValid || isSubmitting || loading}
-              className="flex-1 px-4 py-2 bg-burgundy-600 text-white rounded-lg hover:bg-burgundy-700 transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+              className="flex-1 px-4 py-2 bg-burgundy-600 text-white rounded-lg hover:bg-burgundy-700 transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed hover:bg-red-400 "
             >
               {isSubmitting || loading ? "Creating..." : "Create Content"}
             </button>

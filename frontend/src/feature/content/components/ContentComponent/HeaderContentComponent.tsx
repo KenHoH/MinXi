@@ -50,7 +50,7 @@ export function HeaderContentComponent({
         <button
           onClick={onFollowClick}
           disabled={isOwnContent}
-          className={`px-3 py-1 rounded-full text-xs font-medium transition-all whitespace-nowrap ${
+          className={`px-3 py-1 rounded-full text-xs font-medium transition-all whitespace-nowrap hover:fill-red-400 hover:text-red-400  ${
             isOwnContent
               ? "bg-gray-700 text-gray-500 cursor-not-allowed opacity-50"
               : followed

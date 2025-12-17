@@ -28,7 +28,7 @@ export function UploadContentFiles({
     <>
       <button
         onClick={() => inputRef.current?.click()}
-        className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-dark-700 border border-dark-600 rounded-lg text-gray-300 hover:border-burgundy-600 hover:text-burgundy-400 transition-colors"
+        className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-dark-700 border border-dark-600 rounded-lg text-gray-300 hover:border-burgundy-600 hover:text-burgundy-400 transition-colors focus:border-primary"
       >
         {contentType === "image" ? (
           <>

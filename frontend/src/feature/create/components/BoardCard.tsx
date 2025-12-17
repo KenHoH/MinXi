@@ -35,7 +35,7 @@ export function BoardCard({
   const [expanded, setExpanded] = useState(false);
 
   return (
-    <div className="bg-dark-800 rounded-lg border border-dark-700 overflow-hidden hover:border-burgundy-600/50 transition-colors">
+    <div className="bg-dark-800 rounded-lg border border-dark-700 overflow-hidden hover:border-burgundy-600/50 transition-colors mb-8">
       {/* Header */}
       <div className="p-4 sm:p-6">
         <div className="flex items-start justify-between gap-4">
@@ -92,7 +92,7 @@ export function BoardCard({
               {board.contents.map((content) => (
                 <div
                   key={content.content_id}
-                  className="flex items-start gap-2 p-6 bg-dark-800 rounded border border-dark-700/50 hover:border-burgundy-600/50 transition-colors"
+                  className="flex items-start gap-6 p-6 bg-dark-800 rounded border border-dark-700/50 hover:border-burgundy-600/50 transition-colors"
                 >
                   {/* Thumbnail */}
                   {content.contents && content.contents.length > 0 && (
@@ -142,9 +142,9 @@ export function BoardCard({
                       handleRemoveContent(board.board_id, content.content_id)
                     }
                     disabled={removingContentId === content.content_id}
-                    className="shrink-0 p-1 text-red-400 hover:bg-red-500/20 rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="shrink-0 p-2 text-red-400 hover:bg-red-500/20 rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                    ×
+                    <Trash2 className="w-5 h-5" />
                   </button>
                 </div>
               ))}

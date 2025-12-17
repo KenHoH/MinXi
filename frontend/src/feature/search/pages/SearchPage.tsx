@@ -180,7 +180,7 @@ export default function SearchPage() {
   return (
     <RootLayout>
       <div className="w-full min-h-screen bg-dark-900 flex flex-col justify-start items-center">
-        <div className="w-3/4 pt-4 mb-4">
+        <div className="w-3/4 pt-4 mb-4 ">
           <div className="relative">
             <Search className="absolute left-3 top-3 w-5 h-5 text-gray-400" />
             <input
@@ -188,12 +188,12 @@ export default function SearchPage() {
               placeholder="Search posts, content, and people..."
               value={searchQuery}
               onChange={(e) => handleSearchChange(e.target.value)}
-              className="w-full bg-dark-800 border border-dark-700 rounded-lg pl-10 pr-4 py-2 text-gray-100 placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-burgundy-600"
+              className="w-full bg-dark-800 border border-dark-700 rounded-lg pl-10 pr-4 py-2 text-gray-100 placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-red-400"
             />
           </div>
         </div>
 
-        <div className="w-3/4">
+        <div className="w-3/4 ">
           {/* ============= Section 1: Search Results ============= */}
           {searchQuery.trim() && (
             <>

@@ -247,7 +247,7 @@ export function CreateBoardModal({
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
                 placeholder="Give your board a name..."
-                className="w-full px-4 py-2 bg-dark-700 border border-dark-600 rounded-lg text-gray-100 placeholder:text-gray-500 focus:outline-none focus:ring-1 focus:ring-red-400 hover:border-red-400"
+                className="w-full px-4 py-2 bg-dark-700 border border-dark-600 rounded-lg text-gray-100 placeholder:text-gray-500 focus:outline-none focus:ring-1 focus:ring-red-400 "
               />
             </div>
 
@@ -261,12 +261,12 @@ export function CreateBoardModal({
                 onChange={(e) => setDescription(e.target.value)}
                 placeholder="Describe what this board is about..."
                 rows={3}
-                className="w-full px-4 py-2 bg-dark-700 border border-dark-600 rounded-lg text-gray-100 placeholder:text-gray-500 focus:outline-none focus:ring-1 focus:ring-red-400 resize-none hover:border-red-400"
+                className="w-full px-4 py-2 bg-dark-700 border border-dark-600 rounded-lg text-gray-100 placeholder:text-gray-500 focus:outline-none focus:ring-1 focus:ring-red-400 resize-none "
               />
             </div>
 
             {/* Thumbnail Section */}
-            <div className="space-y-3 p-4 bg-dark-700 rounded-lg border border-dark-600 flex flex-col items-center hover:border-red-400">
+            <div className="space-y-3 p-4 bg-dark-700 rounded-lg border border-dark-600 flex flex-col items-center focus:border-red-400">
               <div className="w-full">
                 <p className="text-sm font-medium text-gray-300 mb-3">
                   Board Thumbnail <span className="text-burgundy-400">*</span>
@@ -283,7 +283,7 @@ export function CreateBoardModal({
             </div>
 
             {/* Privacy Toggle */}
-            <div className="flex flex-col items-center bg-dark-700 rounded-lg border border-dark-600 hover:border-red-400">
+            <div className="flex flex-col items-center bg-dark-700 rounded-lg border border-dark-600 focus:border-red-400">
               <div className="w-3/5 flex items-center  p-4 ">
                 <label
                   htmlFor="private"
@@ -311,7 +311,6 @@ export function CreateBoardModal({
               <div className="space-y-2 max-h-96 overflow-y-auto items-center flex flex-col">
                 {allItems.map((item) => {
                   const isSelected = selectedIds.includes(item.content_id);
-                  const thumbnail = (item as ContentGalleryItem).thumbnail;
 
                   return (
                     <div
@@ -320,26 +319,9 @@ export function CreateBoardModal({
                       className={`w-3/4 flex gap-3 p-4 rounded-lg cursor-pointer border-2 transition-all hover:border-red-400  ${
                         isSelected
                           ? "border-burgundy-600 bg-burgundy-600/10"
-                          : "border-dark-600 hover:border-burgundy-600/50 bg-dark-700"
+                          : "border-dark-600 hover:border-red-400 bg-dark-700"
                       }`}
                     >
-                      {/* Thumbnail */}
-                      <div className="w-16 h-16 rounded overflow-hidden flex-shrink-0 ">
-                        {thumbnail?.filepath ? (
-                          <img
-                            src={thumbnail.filepath}
-                            alt={item.title}
-                            className="w-full h-full object-cover"
-                          />
-                        ) : (
-                          <div className="w-full h-full bg-dark-600 flex items-center justify-center">
-                            <span className="text-xs text-gray-500">
-                              No image
-                            </span>
-                          </div>
-                        )}
-                      </div>
-
                       {/* Content Info */}
                       <div className="flex-1 min-w-0 ml-2">
                         <h4 className="text-sm font-semibold text-gray-100 truncate">
@@ -394,14 +376,14 @@ export function CreateBoardModal({
             <button
               onClick={onClose}
               disabled={isSubmitting}
-              className="flex-1 px-4 py-2 bg-dark-700 text-gray-300 rounded-lg hover:bg-dark-600 transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed hover:bg-red-400 hover:text-black "
+              className="flex-1 px-4 py-2 bg-dark-700 text-gray-300 rounded-lg hover:bg-red-400 transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed hover:text-black "
             >
               Cancel
             </button>
             <button
               onClick={handleSubmit}
               disabled={!isFormValid || isSubmitting}
-              className="flex-1 px-4 py-2 bg-burgundy-600 text-white rounded-lg hover:bg-burgundy-700 transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed "
+              className="flex-1 px-4 py-2 bg-burgundy-600 text-white rounded-lg hover:bg-red-400 transition-colors font-medium disabled:opacity-50  disabled:cursor-not-allowed "
             >
               {isSubmitting ? "Creating..." : "Create Board"}
             </button>
