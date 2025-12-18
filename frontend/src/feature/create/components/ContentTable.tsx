@@ -113,7 +113,7 @@ export function ContentTable({
                     const fileType = getFileIcon(firstFile.filepath);
                     return fileType === "image" ? (
                       <img
-                        src={firstFile.filepath}
+                        src={item.thumbnail?.filepath || firstFile.filepath}
                         alt={item.title}
                         className="w-full h-full object-fit"
                         onError={(e) => {

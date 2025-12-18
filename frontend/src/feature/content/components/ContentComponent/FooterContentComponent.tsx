@@ -1,4 +1,4 @@
-import { Heart, MessageCircle, Share2, Flag, Pin } from "lucide-react";
+import { Heart, MessageCircle, Flag, Pin } from "lucide-react";
 
 interface FooterContentComponentProps {
   likes: number;
@@ -82,13 +82,6 @@ export function FooterContentComponent({
         />
 
         <span className="text-xs text-gray-300">{reports}</span>
-      </button>
-      {/* Share */}
-      <button className="flex flex-col items-center gap-1 text-gray-300 hover:text-burgundy-400 transition-colors group">
-        <Share2 className="w-6 h-6 hover:fill-red-400 hover:text-red-400 transition-colors" />
-        <span className="text-xs hover:text-red-400 transition-colors">
-          Share
-        </span>
       </button>
     </div>
   );

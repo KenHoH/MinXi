@@ -81,7 +81,7 @@ export default function ProfilePage() {
   const handleFollow = async (delta: boolean) => {
     if (!user) return;
     if (!creatorUserData) return;
-
+    setFollowed(!delta);
     if (delta == false) {
       await createFollow(creatorUserData.user_id, user.user_id);
       await updateFollowUser(creatorUserData.user_id, { delta: 1 });
@@ -128,25 +128,28 @@ export default function ProfilePage() {
   };
 
   useEffect(() => {
-    const loadLoggedUser = async () => {
-      if (!user) return;
+    const loadCreator = async () => {
+      if (!creatorUserData) return;
 
-      const followingCount = await getFollowingCount(user.user_id);
+      const followingCount = await getFollowingCount(creatorUserData.user_id);
       if (followingCount) setTotalFollowing(followingCount);
 
       const followersInstance = await getFollowersInstanceByCreator(
-        user.user_id
+        creatorUserData.user_id
       );
       if (followersInstance) setFollowerData(followersInstance);
 
-      const followingInstance = await getFollowingInstanceByUser(user.user_id);
+      const followingInstance = await getFollowingInstanceByUser(
+        creatorUserData.user_id
+      );
       if (followingInstance) setFollowingData(followingInstance);
-      const friendsInstance = await getFriendsInstanceByUser(user.user_id);
+      const friendsInstance = await getFriendsInstanceByUser(
+        creatorUserData.user_id
+      );
       if (friendsInstance) setFriendData(friendsInstance);
     };
-    loadLoggedUser();
-  }, [user]);
-
+    loadCreator();
+  }, [creatorUserData]);
   useEffect(() => {
     const loadCreatorUser = async () => {
       if (!username) return;
@@ -354,12 +357,14 @@ export default function ProfilePage() {
                       </div>
                     </div>
                     <div className="flex gap-3 mt-4">
-                      {owned && (
-                        <Button onClick={goToSettings}>Edit Profile</Button>
-                      )}
                       <Button onClick={handleShare} variant="outline">
                         Share
                       </Button>
+                      {!owned && (
+                        <Button onClick={handleMessage} variant="outline">
+                          Message
+                        </Button>
+                      )}
                       <Button
                         onClick={() => handleFollow(followed)}
                         disabled={owned}
@@ -370,9 +375,9 @@ export default function ProfilePage() {
                           ? "Following"
                           : "Follow"}
                       </Button>
-                      <Button onClick={handleMessage} variant="outline">
-                        Message
-                      </Button>
+                      {owned && (
+                        <Button onClick={goToSettings}>Edit Profile</Button>
+                      )}
                     </div>
                   </>
                 ) : (

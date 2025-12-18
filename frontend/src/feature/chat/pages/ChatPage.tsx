@@ -255,11 +255,13 @@ export default function ChatPage() {
         </main>
 
         {/* Community Modal */}
-        <CommunityModal
-          isOpen={!!selectedCommunity}
-          community={selectedCommunity}
-          onClose={() => setSelectedCommunity(null)}
-        />
+        {selectedCommunity && (
+          <CommunityModal
+            isOpen={!!selectedCommunity}
+            community={selectedCommunity}
+            onClose={() => setSelectedCommunity(null)}
+          />
+        )}
       </div>
     </RootLayout>
   );

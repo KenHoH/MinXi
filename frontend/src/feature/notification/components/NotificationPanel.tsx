@@ -3,6 +3,7 @@ import type { NotificationRes, UserDto } from "@/service/api";
 import { useEffect, useState } from "react";
 import useNotificationService from "@/shared/hooks/useNotificationService";
 import { useToast } from "@/shared/context/ToastContext";
+import { useNavigate } from "react-router";
 
 interface NotificationPanelProps {
   isOpen: boolean;
@@ -29,6 +30,8 @@ export function NotificationPanel({
       return dateString;
     }
   };
+
+  const navigate = useNavigate();
 
   const deleteAllNotifications = async () => {
     const res = await remove(user.user_id);
@@ -92,6 +95,9 @@ export function NotificationPanel({
                     {/* User Avatar */}
                     <div className="relative flex-shrink-0">
                       <img
+                        onClick={() =>
+                          navigate(`/profile/${notification.username}`)
+                        }
                         src={
                           notification.profilePicture ||
                           "http://localhost:3000/uploads/profile/1763906830326-69740177.png"

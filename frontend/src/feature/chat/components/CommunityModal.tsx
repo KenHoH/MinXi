@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import type { RoomResponseDto } from "@/service/api";
 import useSocialService from "@/shared/hooks/useSocialService";
 import { useAuthContext } from "@/feature/auth/context/AuthContext";
+import { useSSE } from "@/shared/hooks/useSSE";
 
 interface CommunityModalProps {
   isOpen: boolean;
@@ -26,14 +27,46 @@ export default function CommunityModal({
   const [showAddGroup, setShowAddGroup] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [joiningGroupId, setJoiningGroupId] = useState<string | null>(null);
-
   const { user } = useAuthContext();
   const {
     getGroupFromCommunity,
     getRoomGroupJoinedByUserId,
     addGroupToCommunity,
     addUserToRoom,
+    getMessage,
   } = useSocialService();
+
+  const { messages: sseMessages, isConnected } = useSSE(
+    community ? community.id : ""
+  );
+
+  const [lastMessage, setLastMessage] = useState("No Announcement yet");
+
+  useEffect(() => {
+    const fetchLastMessage = async () => {
+      if (community) {
+        try {
+          const last = sseMessages[sseMessages.length - 1];
+          console.log("Last SSE message:", last);
+          console.log("isConnected:", isConnected);
+          if (!last) {
+            const messageData = await getMessage(community.id, 100);
+            if (messageData) {
+              setLastMessage(
+                messageData[messageData.length - 1]?.content ||
+                  "No Announcement yet"
+              );
+            }
+          } else {
+            setLastMessage(last.content);
+          }
+        } catch (error) {
+          console.error("Failed to fetch last message:", error);
+        }
+      }
+    };
+    fetchLastMessage();
+  }, [community, sseMessages]);
 
   useEffect(() => {
     if (isOpen && community) {
@@ -141,7 +174,7 @@ export default function CommunityModal({
                   {community.name}
                 </h2>
                 <p className="text-xs text-muted-foreground">
-                  Komunitas · {communityGroups.length} grup
+                  Community · {communityGroups.length} Group
                 </p>
               </div>
             </div>
@@ -167,9 +200,7 @@ export default function CommunityModal({
                   <p className="text-sm font-medium text-foreground">
                     Announcement
                   </p>
-                  <p className="text-xs text-muted-foreground">
-                    You removed the "General" group
-                  </p>
+                  <p className="text-xs text-muted-foreground">{lastMessage}</p>
                 </div>
               </div>
             </div>
@@ -182,7 +213,7 @@ export default function CommunityModal({
                   onClick={() => setShowAddGroup(true)}
                   className="text-xs text-primary hover:text-primary/80 font-medium transition-colors"
                 >
-                  + Tambah grup
+                  + add group
                 </button>
               )}
             </div>
@@ -313,7 +344,7 @@ export default function CommunityModal({
                   variant="outline"
                 >
                   <Plus className="w-4 h-4 mr-2" />
-                  Tambah grup
+                  Add Group
                 </Button>
               </div>
             )}

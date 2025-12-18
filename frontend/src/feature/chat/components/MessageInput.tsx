@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef } from "react";
-import { Send } from "lucide-react";
+import { Send, Trash2 } from "lucide-react";
 
 interface MessageInputProps {
   onSendMessage: (content: string, fileBlob?: Blob) => void;
@@ -12,12 +12,19 @@ export default function MessageInput({ onSendMessage }: MessageInputProps) {
   const [fileBlob, setFileBlob] = useState<Blob | null>(null);
   const [fileName, setFileName] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [fileType, setFileType] = useState("");
 
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
       setFileBlob(file);
       setFileName(file.name);
+
+      if (file.type.startsWith("image/")) {
+        setFileType("IMAGE");
+      } else if (file.type.startsWith("video/")) {
+        setFileType("VIDEO");
+      }
     }
   };
 
@@ -35,10 +42,28 @@ export default function MessageInput({ onSendMessage }: MessageInputProps) {
 
   return (
     <div className="p-4 border-t border-border">
-      {/* File Preview */}
-      {fileName && (
-        <div className="mb-3 p-2 bg-muted rounded-lg flex items-center justify-between text-sm text-foreground">
-          <span>📎 {fileName}</span>
+      {fileName && fileBlob && (
+        <div className="relative mb-3 p-3 bg-input rounded-lg text-sm text-foreground">
+          <div className="flex flex-col items-baseline gap-2">
+            {fileType === "IMAGE" ? (
+              <img
+                src={URL.createObjectURL(fileBlob)}
+                alt={fileName}
+                className="max-h-40 rounded-lg"
+              />
+            ) : (
+              <video
+                src={URL.createObjectURL(fileBlob)}
+                className="max-h-40 rounded-lg"
+                controls={false}
+              />
+            )}
+
+            <p className="text-xs text-muted-foreground break-all text-center">
+              {fileName}
+            </p>
+          </div>
+
           <button
             onClick={() => {
               setFileBlob(null);
@@ -47,9 +72,10 @@ export default function MessageInput({ onSendMessage }: MessageInputProps) {
                 fileInputRef.current.value = "";
               }
             }}
-            className="text-xs text-muted-foreground hover:text-foreground"
+            className="absolute top-4 left-4 flex items-center justify-center w-7 h-7 rounded-full bg-red-400 text-white hover:bg-red-500 transition"
+            aria-label="Remove file"
           >
-            ✕
+            <Trash2 className="w-4 h-4" />
           </button>
         </div>
       )}

@@ -1,10 +1,6 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { X } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import type { UserDto } from "@/service/api";
-import { useAuthContext } from "@/feature/auth/context/AuthContext";
-import useConnectionService from "@/shared/hooks/useConnectionService";
-import { useToast } from "@/shared/context/ToastContext";
 
 interface ConnectionModalProps {
   isOpen: boolean;
@@ -21,65 +17,9 @@ export function ConnectionModal({
   followingData,
   friendData,
 }: ConnectionModalProps) {
-  const { user } = useAuthContext();
-  const { createFollow, deleteFollow } = useConnectionService();
-  const { showToast } = useToast();
   const [activeTab, setActiveTab] = useState<
     "followers" | "following" | "friends"
   >("followers");
-  const [followStatus, setFollowStatus] = useState<Record<number, boolean>>({});
-  const [isLoading, setIsLoading] = useState<Record<number, boolean>>({});
-
-  useEffect(() => {
-    if (!isOpen) return;
-    // Initialize follow status for all users
-    const status: Record<number, boolean> = {};
-
-    // Followers are already following the current user
-    followerData.forEach((u) => {
-      status[u.user_id] = true;
-    });
-
-    // Check following list to mark as followed
-    followingData.forEach((u) => {
-      status[u.user_id] = true;
-    });
-
-    // Friends are mutually connected
-    friendData.forEach((u) => {
-      status[u.user_id] = true;
-    });
-
-    setFollowStatus(status);
-  }, [isOpen, followerData, followingData, friendData]);
-
-  const handleFollowToggle = async (targetUserId: number) => {
-    if (!user) {
-      showToast("Please login to follow users");
-      return;
-    }
-
-    setIsLoading((prev) => ({ ...prev, [targetUserId]: true }));
-
-    try {
-      if (followStatus[targetUserId]) {
-        // Unfollow
-        await deleteFollow(user.user_id, targetUserId);
-        setFollowStatus((prev) => ({ ...prev, [targetUserId]: false }));
-        showToast("Unfollowed successfully");
-      } else {
-        // Follow
-        await createFollow(user.user_id, targetUserId);
-        setFollowStatus((prev) => ({ ...prev, [targetUserId]: true }));
-        showToast("Followed successfully");
-      }
-    } catch (error) {
-      showToast("Failed to update follow status");
-      console.error(error);
-    } finally {
-      setIsLoading((prev) => ({ ...prev, [targetUserId]: false }));
-    }
-  };
 
   const getTabData = () => {
     switch (activeTab) {
@@ -177,24 +117,6 @@ export function ConnectionModal({
                       </p>
                     </div>
                   </div>
-
-                  {/* Follow Button */}
-                  {user?.user_id !== userData.user_id && (
-                    <Button
-                      onClick={() => handleFollowToggle(userData.user_id)}
-                      disabled={isLoading[userData.user_id]}
-                      variant={
-                        followStatus[userData.user_id] ? "outline" : "default"
-                      }
-                      className="ml-4"
-                    >
-                      {isLoading[userData.user_id]
-                        ? "Loading..."
-                        : followStatus[userData.user_id]
-                        ? "Following"
-                        : "Follow"}
-                    </Button>
-                  )}
                 </div>
               ))}
             </div>

@@ -180,7 +180,7 @@ export default function CreateRoomModal({
                 {/* Thumbnail Upload */}
                 <div>
                   <label className="block text-sm font-medium text-foreground mb-2">
-                    Profile Picture (Optional)
+                    Profile Picture
                   </label>
                   <div className="relative">
                     {thumbnailPreview ? (
@@ -231,7 +231,7 @@ export default function CreateRoomModal({
                   <Button
                     className="flex-1"
                     onClick={() => setStep("members-select")}
-                    disabled={!roomName.trim()}
+                    disabled={!roomName.trim() || !thumbnail}
                   >
                     Next
                   </Button>
@@ -296,7 +296,9 @@ export default function CreateRoomModal({
                   <Button
                     className="flex-1"
                     onClick={handleCreateRoom}
-                    disabled={selectedMembers.length === 0 || isCreating}
+                    disabled={
+                      selectedMembers.length === 0 || isCreating || !thumbnail
+                    }
                   >
                     {isCreating ? "Creating..." : "Create Room"}
                   </Button>

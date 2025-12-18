@@ -219,7 +219,7 @@ export function PostDetailComponent(props: PostDetailComponentProps) {
         getAncestorPost,
         getByUser
       );
-      setAncestors(ancestorsData);
+      setAncestors(ancestorsData.reverse());
     } catch (error) {
       console.error("Error fetching ancestors:", error);
       setAncestors([]);

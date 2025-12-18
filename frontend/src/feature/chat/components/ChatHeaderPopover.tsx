@@ -226,31 +226,38 @@ export default function ChatHeaderPopover({
                     Select friends to add
                   </p>
                   {friends.length > 0 ? (
-                    friends.map((friend) => (
-                      <div
-                        key={friend.user_id}
-                        className="flex items-center justify-between p-3 rounded-lg bg-muted/50 hover:bg-muted transition-colors"
-                      >
-                        <div className="flex items-center gap-3 flex-1 min-w-0">
-                          <img
-                            src={friend.profile_picture || ""}
-                            alt={friend.username}
-                            className="w-8 h-8 rounded-full object-cover flex-shrink-0"
-                          />
-                          <div className="min-w-0 flex-1">
-                            <p className="text-sm font-medium text-foreground truncate">
-                              {friend.username}
-                            </p>
-                          </div>
-                        </div>
-                        <button
-                          onClick={() => addMember(friend.user_id)}
-                          className="p-1 hover:bg-primary/20 rounded transition-colors ml-2 flex-shrink-0"
+                    friends
+                      .filter(
+                        (friend) =>
+                          !memberList.some(
+                            (member) => member.user_id === friend.user_id
+                          )
+                      )
+                      .map((friend) => (
+                        <div
+                          key={friend.user_id}
+                          className="flex items-center justify-between p-3 rounded-lg bg-muted/50 hover:bg-muted transition-colors"
                         >
-                          <Plus className="w-4 h-4 text-primary" />
-                        </button>
-                      </div>
-                    ))
+                          <div className="flex items-center gap-3 flex-1 min-w-0">
+                            <img
+                              src={friend.profile_picture || ""}
+                              alt={friend.username}
+                              className="w-8 h-8 rounded-full object-cover flex-shrink-0"
+                            />
+                            <div className="min-w-0 flex-1">
+                              <p className="text-sm font-medium text-foreground truncate">
+                                {friend.username}
+                              </p>
+                            </div>
+                          </div>
+                          <button
+                            onClick={() => addMember(friend.user_id)}
+                            className="p-1 hover:bg-primary/20 rounded transition-colors ml-2 flex-shrink-0"
+                          >
+                            <Plus className="w-4 h-4 text-primary" />
+                          </button>
+                        </div>
+                      ))
                   ) : (
                     <p className="text-sm text-muted-foreground text-center py-4">
                       No friends available to add
