@@ -1026,9 +1026,18 @@ export class ContentService implements IContentService {
         new HttpException('Invalid area ID', HttpStatus.BAD_REQUEST),
       );
     try {
+      const response = await firstValueFrom(
+        this.historyClient.send(HISTORY_MSG.deleteByContentId, content_id),
+      );
+
+      if (response.Valid === false) {
+        this.logger.error('Failed to delete related histories', response.Msg);
+        return { Valid: false, Msg: 'Failed to delete related histories' };
+      }
       await this.prisma.content.delete({
         where: { content_id_area_id: { content_id, area_id } },
       });
+
       return { Valid: true, Msg: 'Content removed successfully' };
     } catch (error) {
       this.logger.error('Failed to delete content', error.message);

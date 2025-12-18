@@ -8,7 +8,7 @@ services:
       - "3306:3306"
     volumes:
       - mysql_data:/var/lib/mysql
-      - ./backend/website/docker/mysql/init:/docker-entrypoint-initdb.d
+      - ./website/docker/mysql/init:/docker-entrypoint-initdb.d
     healthcheck:
       test:
         [
@@ -28,14 +28,11 @@ services:
       - app-network
 
   user-service:
-    build:
-      context: ./backend/website
-      dockerfile: Dockerfile
-    image:  
+    image: kenhoh/website-backend:1.2.0
     container_name: user-service
     command: ["node", "dist/apps/user/main.js"]
     env_file:
-      - ./backend/website/.env.docker
+      - ./website/.env.docker
     ports: ["3001:3001"]
     environment:
       - SERVICE=user-service
@@ -46,11 +43,11 @@ services:
       - app-network
 
   auth-service:
-    image: website-backend
+    image: kenhoh/website-backend:1.2.0
     container_name: auth-service
     command: ["node", "dist/apps/auth/main.js"]
     env_file:
-      - ./backend/website/.env.docker
+      - ./website/.env.docker
     ports: ["3002:3002"]
     environment:
       - SERVICE=auth-service
@@ -61,11 +58,11 @@ services:
       - app-network
 
   log-service:
-    image: website-backend
+    image: kenhoh/website-backend:1.2.0
     container_name: log-service
     command: ["node", "dist/apps/log-app/main.js"]
     env_file:
-      - ./backend/website/.env.docker
+      - ./website/.env.docker
     ports: ["3005:3005"]
     environment:
       - SERVICE=log-service
@@ -76,11 +73,11 @@ services:
       - app-network
 
   content-service:
-    image: website-backend
+    image: kenhoh/website-backend:1.2.0
     container_name: content-service
     command: ["node", "dist/apps/content-app/main.js"]
     env_file:
-      - ./backend/website/.env.docker
+      - ./website/.env.docker
     ports: ["3006:3006"]
     environment:
       - SERVICE=content-service
@@ -91,11 +88,11 @@ services:
       - app-network
 
   history-service:
-    image: website-backend
+    image: kenhoh/website-backend:1.2.0
     container_name: history-service
     command: ["node", "dist/apps/history-app/main.js"]
     env_file:
-      - ./backend/website/.env.docker
+      - ./website/.env.docker
     ports: ["3007:3007"]
     environment:
       - SERVICE=history-service
@@ -106,11 +103,11 @@ services:
       - app-network
 
   board-service:
-    image: website-backend
+    image: kenhoh/website-backend:1.2.0
     container_name: board-service
     command: ["node", "dist/apps/board-app/main.js"]
     env_file:
-      - ./backend/website/.env.docker
+      - ./website/.env.docker
     ports: ["3008:3008"]
     environment:
       - SERVICE=board-service
@@ -121,11 +118,11 @@ services:
       - app-network
 
   connect-service:
-    image: website-backend
+    image: kenhoh/website-backend:1.2.0
     container_name: connect-service
     command: ["node", "dist/apps/connection-app/main.js"]
     env_file:
-      - ./backend/website/.env.docker
+      - ./website/.env.docker
     ports: ["3009:3009"]
     environment:
       - SERVICE=connect-service
@@ -136,11 +133,11 @@ services:
       - app-network
 
   report-service:
-    image: website-backend
+    image: kenhoh/website-backend:1.2.0
     container_name: report-service
     command: ["node", "dist/apps/report-app/main.js"]
     env_file:
-      - ./backend/website/.env.docker
+      - ./website/.env.docker
     ports: ["3010:3010"]
     environment:
       - SERVICE=report-service
@@ -151,11 +148,11 @@ services:
       - app-network
 
   algo-service:
-    image: website-backend
+    image: kenhoh/website-backend:1.2.0
     container_name: algo-service
     command: ["node", "dist/apps/algorithm-app/main.js"]
     env_file:
-      - ./backend/website/.env.docker
+      - ./website/.env.docker
     ports: ["3011:3011"]
     environment:
       - SERVICE=algorithm-service
@@ -166,11 +163,11 @@ services:
       - app-network
 
   social-service:
-    image: website-backend
+    image: kenhoh/website-backend:1.2.0
     container_name: social-service
     command: ["node", "dist/apps/social-app/main.js"]
     env_file:
-      - ./backend/website/.env.docker
+      - ./website/.env.docker
     ports: ["3013:3013"]
     environment:
       - SERVICE=social-service
@@ -181,11 +178,11 @@ services:
       - app-network
 
   comment-service:
-    image: website-backend
+    image: kenhoh/website-backend:1.2.0
     container_name: comment-service
     command: ["node", "dist/apps/comment-app/main.js"]
     env_file:
-      - ./backend/website/.env.docker
+      - ./website/.env.docker
     ports: ["3014:3014"]
     environment:
       - SERVICE=comment-service
@@ -196,11 +193,11 @@ services:
       - app-network
 
   notif-service:
-    image: website-backend
+    image: kenhoh/website-backend:1.2.0
     container_name: notif-service
     command: ["node", "dist/apps/notification-app/main.js"]
     env_file:
-      - ./backend/website/.env.docker
+      - ./website/.env.docker
     ports: ["3015:3015"]
     environment:
       - SERVICE=notification-service
@@ -211,11 +208,11 @@ services:
       - app-network
 
   api-gateway:
-    image: website-backend
+    image: kenhoh/website-backend:1.2.0
     container_name: api-gateway
     command: ["node", "dist/apps/website-api-gateway/main.js"]
     env_file:
-      - ./backend/website/.env.docker
+      - ./website/.env.docker
     ports: ["3000:3000"]
     environment:
       - SERVICE=website-api-gateway
@@ -233,13 +230,13 @@ services:
       - comment-service
       - notif-service
     volumes:
-      - ./backend/website/uploads:/app/uploads
+      - ./website/uploads:/app/uploads
     networks:
       - app-network
   nginx:
     build:
-      context: ./frontend
-      dockerfile: Dockerfile
+      context: ./website
+      dockerfile: Dockerfile.nginx
     container_name: nginx
     ports:
       - "80:80"
@@ -251,6 +248,13 @@ services:
       - api-gateway
     networks:
       - app-network
+  frontend:
+    image: kenhoh/frontend-static:1.0.0
+    container_name: frontend
+    expose:
+      - "80"
+    depends_on:
+      - api-gateway
 
 networks:
   app-network:

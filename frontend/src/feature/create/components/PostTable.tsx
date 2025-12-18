@@ -134,7 +134,10 @@ export function PostTable({ items, onRefreshChild, onDelete }: PostTableProps) {
 
                 {/* Delete Button */}
                 <button
-                  onClick={() => handleDelete(item.content_id, item.area_id)}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleDelete(item.content_id, item.area_id);
+                  }}
                   disabled={deletingId === item.content_id}
                   className="w-full px-3 py-2 bg-dark-700 hover:bg-primary text-white rounded text-xs font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >

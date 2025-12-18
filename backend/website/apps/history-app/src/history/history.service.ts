@@ -91,4 +91,21 @@ export class HistoryService implements IHistoryService {
       };
     }
   }
+
+  async deleteByContentId(content_id: number): Promise<Ack> {
+    try {
+      await this.prisma.historyContent.deleteMany({
+        where: {
+          content_id: content_id,
+        },
+      });
+      return { Msg: 'Histories deleted successfully', Valid: true };
+    } catch (error) {
+      this.logger.log('Failed to delete histories', error.message);
+      return {
+        Msg: 'Failed to delete histories',
+        Valid: false,
+      };
+    }
+  }
 }

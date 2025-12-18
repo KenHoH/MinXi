@@ -6,7 +6,6 @@ import { Button } from "@/components/ui/button";
 import type { RoomResponseDto } from "@/service/api";
 import useSocialService from "@/shared/hooks/useSocialService";
 import { useAuthContext } from "@/feature/auth/context/AuthContext";
-import { useSSE } from "@/shared/hooks/useSSE";
 
 interface CommunityModalProps {
   isOpen: boolean;
@@ -33,40 +32,7 @@ export default function CommunityModal({
     getRoomGroupJoinedByUserId,
     addGroupToCommunity,
     addUserToRoom,
-    getMessage,
   } = useSocialService();
-
-  const { messages: sseMessages, isConnected } = useSSE(
-    community ? community.id : ""
-  );
-
-  const [lastMessage, setLastMessage] = useState("No Announcement yet");
-
-  useEffect(() => {
-    const fetchLastMessage = async () => {
-      if (community) {
-        try {
-          const last = sseMessages[sseMessages.length - 1];
-          console.log("Last SSE message:", last);
-          console.log("isConnected:", isConnected);
-          if (!last) {
-            const messageData = await getMessage(community.id, 100);
-            if (messageData) {
-              setLastMessage(
-                messageData[messageData.length - 1]?.content ||
-                  "No Announcement yet"
-              );
-            }
-          } else {
-            setLastMessage(last.content);
-          }
-        } catch (error) {
-          console.error("Failed to fetch last message:", error);
-        }
-      }
-    };
-    fetchLastMessage();
-  }, [community, sseMessages]);
 
   useEffect(() => {
     if (isOpen && community) {
@@ -188,23 +154,6 @@ export default function CommunityModal({
 
           {/* Content */}
           <div className="p-4">
-            {/* Announcement Section */}
-            <div className="mb-4 p-3 bg-muted/30 rounded-lg">
-              <div className="flex items-center gap-2 mb-1">
-                <div className="w-8 h-8 bg-primary/20 rounded-full flex items-center justify-center">
-                  <span className="text-sm">
-                    <Plus className="w-4 h-4 text-primary" />
-                  </span>
-                </div>
-                <div>
-                  <p className="text-sm font-medium text-foreground">
-                    Announcement
-                  </p>
-                  <p className="text-xs text-muted-foreground">{lastMessage}</p>
-                </div>
-              </div>
-            </div>
-
             {/* Groups Section Header */}
             <div className="flex items-center justify-between mb-3">
               <h3 className="text-sm font-semibold text-foreground">Grup</h3>

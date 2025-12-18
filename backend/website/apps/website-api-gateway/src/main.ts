@@ -11,7 +11,7 @@ async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(
     WebsiteApiGatewayModule,
   );
-
+  app.set('trust proxy', 1);
   app.use(
     '/uploads',
     express.static('uploads', {

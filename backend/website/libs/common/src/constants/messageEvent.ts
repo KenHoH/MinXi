@@ -66,6 +66,7 @@ export const HISTORY_MSG = {
   upsert: 'history.upsert',
   getByUser: 'history.getByUser',
   getByUserAndContent: 'history.getByUserAndContent',
+  deleteByContentId: 'history.deleteByContentId',
 };
 
 export const BOARD_MSG = {

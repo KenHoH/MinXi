@@ -1,3 +1,4 @@
+import { Ack } from '@app/contracts/shared-dto/ack.dto';
 import { CreateHistoryDto } from '@app/contracts/shared-dto/content/req/CreateHistory.dto';
 
 export interface IHistoryService {
