@@ -35,7 +35,7 @@ async function bootstrap() {
 
   const methods = ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'];
   app.enableCors({
-    origin: 'https://localhost:5173',
+    origin: 'http://localhost:5173',
     methods: methods,
     credentials: true,
     allowedHeaders: ['Content-Type', 'Authorization'],
