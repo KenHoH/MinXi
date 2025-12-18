@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Plus, FileText, Eye, Heart, MessageCircle, Pin } from "lucide-react";
+import { Plus, Eye, Heart, MessageCircle, Pin } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { CreatePostModal } from "@/feature/create/components/CreatePost/CreatePostModal";
 import { useAuthContext } from "@/feature/auth/context/AuthContext";
@@ -44,16 +44,6 @@ export function PostTable({ items, onRefreshChild, onDelete }: PostTableProps) {
     } finally {
       setDeletingId(null);
     }
-  };
-
-  const getFileIcon = (filepath: string) => {
-    if (filepath.match(/\.(jpg|jpeg|png|gif|webp)$/i)) {
-      return "image";
-    }
-    if (filepath.match(/\.(mp4|webm|mov|avi)$/i)) {
-      return "video";
-    }
-    return "file";
   };
 
   const navigate = useNavigate();

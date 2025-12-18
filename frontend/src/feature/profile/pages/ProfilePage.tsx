@@ -13,12 +13,14 @@ import UserNotFoundPage from "@/feature/not-found/UserNotFoundPage";
 import { useToast } from "@/shared/context/ToastContext";
 import useConnectionService from "@/shared/hooks/useConnectionService";
 import { ConnectionModal } from "@/feature/profile/components/ConnectionModal";
+import useNotification from "@/shared/logic/useNotificatoin";
+import useSocialService from "@/shared/hooks/useSocialService";
 
 export default function ProfilePage() {
   const { user } = useAuthContext();
   const { username } = useParams();
 
-  const { findUserById, findOneByUsername } = useUserService();
+  const { findOneByUsername } = useUserService();
   const { getPinnedByUser, getLikedByUser, getByUserAll, getByUser } =
     useContentService();
   const { getBoardByUser, getContentByBoardId } = useBoardService();
@@ -31,7 +33,7 @@ export default function ProfilePage() {
   } = useConnectionService();
   const navigate = useNavigate();
 
-  const [loggedUserData, setLoggedUserData] = useState<UserDto | null>(null);
+  // const [loggedUserData, setLoggedUserData] = useState<UserDto | null>(null);
   const [creatorUserData, setCreatorUserData] = useState<UserDto | null>(null);
   const [followerData, setFollowerData] = useState<UserDto[]>([]);
   const [followingData, setFollowingData] = useState<UserDto[]>([]);
@@ -45,16 +47,66 @@ export default function ProfilePage() {
   const [boards, setBoards] = useState<BoardDto[] | []>([]);
   const [boardItems, setBoardItems] = useState<FullContentDto[] | []>([]);
   const [showConnectionModal, setShowConnectionModal] = useState(false);
+  const [followed, setFollowed] = useState(false);
+  const { checkFollow, createFollow, deleteFollow } = useConnectionService();
+  const { updateFollowUser } = useUserService();
+  const { sendNotificatonSystem } = useNotification();
+  const { createRoom } = useSocialService();
+
+  useEffect(() => {
+    const checkFollowStatus = async () => {
+      if (!user || owned) {
+        setFollowed(false);
+        return;
+      }
+      if (!creatorUserData) {
+        setFollowed(false);
+        return;
+      }
+
+      try {
+        const isFollowing = await checkFollow(
+          creatorUserData.user_id,
+          user.user_id
+        );
+        setFollowed(isFollowing || false);
+      } catch (error) {
+        console.error("Failed to check follow status:", error);
+        setFollowed(false);
+      }
+    };
+
+    checkFollowStatus();
+  }, [user, creatorUserData, owned]);
+  const handleFollow = async (delta: boolean) => {
+    if (!user) return;
+    if (!creatorUserData) return;
+
+    if (delta == false) {
+      await createFollow(creatorUserData.user_id, user.user_id);
+      await updateFollowUser(creatorUserData.user_id, { delta: 1 });
+      sendNotificatonSystem(
+        creatorUserData.user_id,
+        user.user_id,
+        `${creatorUserData.username} started following you!`,
+        "New Follower",
+        "FOLLOW"
+      );
+    } else {
+      await deleteFollow(creatorUserData.user_id, user.user_id);
+      await updateFollowUser(creatorUserData.user_id, { delta: -1 });
+    }
+  };
 
   const goToSettings = () => {
-    if (!loggedUserData) return;
-    navigate(`https://localhost:5173/settings/${loggedUserData.username}`);
+    if (!creatorUserData) return;
+    navigate(`/settings/${creatorUserData.username}`);
   };
 
   const [activeTab, setActiveTab] = useState("");
   const handleShare = async () => {
     if (!creatorUserData) return;
-    const link = `https://localhost:5173/profile/${creatorUserData.username}`;
+    const link = `profile/${creatorUserData.username}`;
 
     try {
       await navigator.clipboard.writeText(link);
@@ -63,12 +115,21 @@ export default function ProfilePage() {
       showToast("Failed to copy link");
     }
   };
+  const handleMessage = async () => {
+    if (!creatorUserData || !user) return;
+    if (owned) return;
+
+    await createRoom({
+      members: [user.user_id, creatorUserData.user_id],
+      room_type: "DIRECT",
+    });
+
+    navigate(`/chat`);
+  };
 
   useEffect(() => {
     const loadLoggedUser = async () => {
       if (!user) return;
-      const dto = await findUserById(user.user_id);
-      if (dto) setLoggedUserData(dto);
 
       const followingCount = await getFollowingCount(user.user_id);
       if (followingCount) setTotalFollowing(followingCount);
@@ -89,36 +150,32 @@ export default function ProfilePage() {
   useEffect(() => {
     const loadCreatorUser = async () => {
       if (!username) return;
-      if (!loggedUserData) return;
-      const found = await findOneByUsername(username, loggedUserData.area_id);
+      if (!user) return;
+      const found = await findOneByUsername(username, user.area_id);
       if (!found) return;
 
       if (found) setCreatorUserData(found);
     };
     loadCreatorUser();
-  }, [username, loggedUserData?.area_id]);
+  }, [username, user?.area_id]);
 
   useEffect(() => {
-    if (loggedUserData && creatorUserData) {
-      setOwned(loggedUserData.user_id === creatorUserData.user_id);
+    if (user && creatorUserData) {
+      setOwned(user.user_id === creatorUserData.user_id);
     }
-  }, [loggedUserData, creatorUserData]);
+  }, [user, creatorUserData]);
 
   useEffect(() => {
     const loadBoards = async () => {
-      if (!creatorUserData || !loggedUserData) return;
-
-      const list = await getBoardByUser(
-        creatorUserData.user_id,
-        loggedUserData.area_id
-      );
+      if (!creatorUserData || !user) return;
+      const list = await getBoardByUser(creatorUserData.user_id, user.area_id);
       if (!list) return;
 
       const filtered = owned ? list : list.filter((b) => !b.visibilityPrivate);
       setBoards(filtered);
     };
     loadBoards();
-  }, [creatorUserData, owned, loggedUserData]);
+  }, [creatorUserData, owned, user]);
 
   useEffect(() => {
     const loadTabData = async () => {
@@ -302,6 +359,19 @@ export default function ProfilePage() {
                       )}
                       <Button onClick={handleShare} variant="outline">
                         Share
+                      </Button>
+                      <Button
+                        onClick={() => handleFollow(followed)}
+                        disabled={owned}
+                      >
+                        {owned
+                          ? "Following"
+                          : followed
+                          ? "Following"
+                          : "Follow"}
+                      </Button>
+                      <Button onClick={handleMessage} variant="outline">
+                        Message
                       </Button>
                     </div>
                   </>

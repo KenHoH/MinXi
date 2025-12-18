@@ -30,7 +30,7 @@ services:
   user-service:
     build:
       context: ./backend/website
-      dockerfile: ./Dockerfile.backend
+      dockerfile: Dockerfile
     image: website-backend
     container_name: user-service
     command: ["node", "dist/apps/user/main.js"]
