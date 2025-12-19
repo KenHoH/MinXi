@@ -122,7 +122,7 @@ export class ReportService implements IReportService {
       this.logger.error('Failed to create report', error.message);
       throw httpToRpc(
         new HttpException(
-          'Failed to create report',
+          error.message || 'Failed to create report',
           HttpStatus.INTERNAL_SERVER_ERROR,
         ),
       );

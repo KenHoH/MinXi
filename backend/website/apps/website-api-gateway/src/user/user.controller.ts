@@ -115,7 +115,7 @@ export class UserController {
     if (!profileFile) {
       throw new BadRequestException('Profile file is required');
     }
-    const profilePath = `http://localhost:3000/uploads/profile/${profileFile.filename}`;
+    const profilePath = `/api/uploads/profile/${profileFile.filename}`;
 
     const dto: UpdateProfileUserDto = {
       desc: body.description,

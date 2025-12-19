@@ -22,8 +22,7 @@ export class Repository {
         password: newUser.password,
         desc: '你好很高興見到你',
         follower: 0,
-        profile_picture:
-          'http://localhost:3000/uploads/profile/1763906830326-69740177.png',
+        profile_picture: '/api/uploads/profile/1763906830326-69740177.png',
         total_like: 0,
         total_reports: 0,
         liked_visibilityPrivate: false,

@@ -28,7 +28,7 @@ const REPORT_REASONS = [
   },
   {
     id: 3,
-    type: "Misinformation",
+    type: "Missinformation",
     label: "Misinformation",
     description: "False or misleading information",
   },
@@ -70,21 +70,25 @@ export function ReportModal({
     setReportLoading(true);
     try {
       setError("");
+      const [_, res2] = await Promise.all([
+        createReport({
+          creator_id: content.creator_id,
+          userId: user.user_id,
+          desc: description,
+          type: type as any,
+        }),
+        updateReport(content.content_id, user.area_id, {
+          delta: 1,
+        }),
+      ]);
 
-      await createReport({
-        creator_id: content.creator_id,
-        userId: user.user_id,
-        desc: description,
-        type: type as any,
-      });
+      if (res2?.Valid == true) {
+        onReportSuccess();
+      } else {
+        showToast("Failed to submit report");
+      }
 
-      await updateReport(content.content_id, user.area_id, {
-        delta: 1,
-      });
-
-      showToast("Report submitted successfully");
       handleClose();
-      onReportSuccess();
     } catch (error) {
       console.error("Failed to submit report:", error);
       setError("Failed to submit report. Please try again.");

@@ -1,4 +1,14 @@
+import { useEffect } from "react";
+import { useNavigate } from "react-router";
+
 export default function NotFoundPage() {
+  const navigate = useNavigate();
+  useEffect(() => {
+    setTimeout(() => {
+      navigate("/login");
+    }, 3000);
+  }, []);
+
   return (
     <div className="min-h-screen w-full fixed inset-0 flex items-center justify-center bg-background text-foreground">
       <div className="text-center space-y-8">
@@ -25,7 +35,7 @@ export default function NotFoundPage() {
 
         <p className="text-lg text-foreground/70 max-w-md">
           The page you're looking for doesn't exist. It might have been moved or
-          deleted.
+          deleted, redirect in 3 seconds.
         </p>
       </div>
     </div>

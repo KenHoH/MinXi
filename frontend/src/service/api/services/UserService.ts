@@ -99,7 +99,7 @@ export class UserService {
     ): CancelablePromise<UserDto> {
         return __request(OpenAPI, {
             method: 'PATCH',
-            url: '/user/{id}/profile',
+            url: `/user/${formData.creator_id}/profile`,
             formData: formData,
             mediaType: 'multipart/form-data',
             errors: {

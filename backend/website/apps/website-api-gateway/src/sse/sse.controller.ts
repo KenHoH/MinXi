@@ -97,7 +97,7 @@ export class SseController {
 
     let profilePath: string = '';
     if (metadataFile) {
-      profilePath = `http://localhost:3000/uploads/metadata/${metadataFile.filename}`;
+      profilePath = `/api/uploads/metadata/${metadataFile.filename}`;
       typeMetadata = metadataFile.mimetype.startsWith('image/')
         ? 'IMAGE'
         : 'VIDEO';

@@ -7,4 +7,3 @@ export type CreateUserDto = {
     password: string;
     area_id: number;
 };
-

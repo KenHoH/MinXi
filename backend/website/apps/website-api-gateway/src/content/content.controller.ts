@@ -119,14 +119,14 @@ export class ContentController {
     const thumbnailFile = files.thumbnail ? files.thumbnail[0] : null;
 
     const thumbnailPath = thumbnailFile
-      ? `http://localhost:3000/uploads/thumbnail/${thumbnailFile.filename}`
+      ? `/api/uploads/thumbnail/${thumbnailFile.filename}`
       : null;
 
     const posts: FileDtoReq[] =
       files.contents?.map((file) => ({
         content_area_id: area_id,
         type: file.mimetype.startsWith('image/') ? 'image' : 'video',
-        filepath: `http://localhost:3000/uploads/content/${file.filename}`,
+        filepath: `/api/uploads/content/${file.filename}`,
       })) || [];
 
     if (post_type !== 'post') {

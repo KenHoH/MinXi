@@ -16,7 +16,6 @@ import { ApiBearerAuth } from '@nestjs/swagger';
 import { AdminGuard } from '@app/common/guard/admin/admin.guard';
 
 @Controller('report')
-@UseGuards(AdminGuard)
 @UseInterceptors(LogInterceptor)
 @ApiBearerAuth()
 export class ReportController {

@@ -146,7 +146,7 @@ export class BoardController {
       contents,
       title,
       description,
-      board_thumbnail: `http://localhost:3000/uploads/thumbnail/${thumbnailFile.filename}`,
+      board_thumbnail: `/api/uploads/thumbnail/${thumbnailFile.filename}`,
       visibilityPrivate: visibility === 'true' || visibility === true,
     };
 

@@ -40,6 +40,7 @@ export default function AppRouter() {
                   element={<SettingsPage />}
                 ></Route>
               </Route>
+              <Route path="/" element={<LoginPage />} />
               <Route path="*" element={<NotFoundPage />} />
             </Routes>
           </AuthProvider>

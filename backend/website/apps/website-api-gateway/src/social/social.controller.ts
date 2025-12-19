@@ -141,7 +141,7 @@ export class SocialController {
 
     let url: string = '';
     if (thumbnailFile) {
-      url = `http://localhost:3000/uploads/thumbnail/${thumbnailFile.filename}`;
+      url = `/api/uploads/thumbnail/${thumbnailFile.filename}`;
     }
 
     const dto: CreateRoomDto = {

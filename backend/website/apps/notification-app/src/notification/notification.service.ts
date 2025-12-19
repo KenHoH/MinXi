@@ -115,7 +115,7 @@ export class NotificationService implements INotifService {
               username: sender?.username || 'Unknown',
               profilePicture:
                 sender?.profile_picture ||
-                'http://localhost:3000/uploads/profile/1763906830326-69740177.png',
+                '/api/uploads/profile/1763906830326-69740177.png',
               isSeen: notification.isSeen,
               title: notification.title,
               description: notification.description,
