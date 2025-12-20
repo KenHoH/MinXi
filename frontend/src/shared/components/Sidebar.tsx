@@ -73,7 +73,7 @@ export function Sidebar() {
                 className="rounded-full"
                 src={
                   user?.profile_picture ||
-                  "http://localhost:3000/uploads/profile/1763906830326-69740177.png"
+                  "/api/uploads/profile/1763906830326-69740177.png"
                 }
                 alt="Profile"
               />
@@ -106,7 +106,6 @@ export function Sidebar() {
             title="Notifications"
           >
             <Inbox className="w-5 h-5" />
-            <span className="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full"></span>
           </button>
         </nav>
         <br />
@@ -122,8 +121,7 @@ export function Sidebar() {
               <div className="relative">
                 <img
                   src={
-                    item.profile_picture ||
-                    "http://localhost:3000/uploads/profile/default.png"
+                    item.profile_picture || "/api/uploads/profile/default.png"
                   }
                   alt={item.username}
                   className="w-8 h-8 rounded-full "

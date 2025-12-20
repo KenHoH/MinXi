@@ -216,6 +216,7 @@ services:
     command: ["node", "dist/apps/website-api-gateway/main.js"]
     env_file:
       - ./backend/website/.env.docker
+      
     ports: ["3000:3000"]
     environment:
       - SERVICE=website-api-gateway

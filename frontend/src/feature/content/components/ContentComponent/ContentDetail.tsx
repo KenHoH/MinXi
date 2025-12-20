@@ -130,17 +130,21 @@ export function ContentDetailComponent(props: ContentDetailComponentProps) {
         return;
       }
 
-      await updateComment(content.content_id, user.area_id, { delta: 1 });
+      const [res, _] = await Promise.all([
+        create({
+          content_id: content.content_id,
+          parent_id: parentId ? parentId : 0,
+          text: commentText,
+          creator_id: user.user_id,
+          id: 0,
+        }),
+        updateComment(content.content_id, user.area_id, { delta: 1 }),
+      ]);
 
-      await create({
-        content_id: content.content_id,
-        parent_id: parentId ? parentId : 0,
-        text: commentText,
-        creator_id: user.user_id,
-        id: 0,
-      });
-
-      setTotalComments((prev) => prev + 1);
+      if (!res) {
+        setTotalComments((prev) => prev + 1);
+        return;
+      }
 
       if (onCommentClick) {
         onCommentClick(totalComments + 1);
@@ -199,18 +203,25 @@ export function ContentDetailComponent(props: ContentDetailComponentProps) {
     if (!loggedUserData) return;
 
     if (delta == false) {
-      await createFollow(content.creator_id, user.user_id);
-      await updateFollowUser(content.creator_id, { delta: 1 });
-      sendNotificatonSystem(
-        content.creator_id,
-        user.user_id,
-        `${loggedUserData.username} started following you!`,
-        "New Follower",
-        "FOLLOW"
-      );
+      const [res, _] = await Promise.all([
+        createFollow(content.creator_id, user.user_id),
+        updateFollowUser(content.creator_id, { delta: 1 }),
+      ]);
+
+      if (res?.Valid === true) {
+        sendNotificatonSystem(
+          content.creator_id,
+          user.user_id,
+          `${loggedUserData.username} started following you!`,
+          "New Follower",
+          "FOLLOW"
+        );
+      }
     } else {
-      await deleteFollow(content.creator_id, user.user_id);
-      await updateFollowUser(content.creator_id, { delta: -1 });
+      await Promise.all([
+        deleteFollow(content.creator_id, user.user_id),
+        updateFollowUser(content.creator_id, { delta: -1 }),
+      ]);
     }
   };
 

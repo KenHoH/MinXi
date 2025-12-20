@@ -113,7 +113,8 @@ export function ConnectionModal({
                         {userData.username}
                       </h3>
                       <p className="text-sm text-muted-foreground">
-                        {userData.follower} followers
+                        {userData.follower < 0 ? 0 : userData.follower}{" "}
+                        followers
                       </p>
                     </div>
                   </div>

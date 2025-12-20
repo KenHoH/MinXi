@@ -21,6 +21,14 @@ http.interceptors.response.use(
   async (error) => {
     const original = error.config;
 
+    if (error.response?.status === 413) {
+      return Promise.reject({
+        isHttpException: true,
+        status: 413,
+        message: "Request payload is too large. Max file size is 100MB.",
+      });
+    }
+
     if (error.response?.status === 403 && !original._retry) {
       original._retry = true;
 

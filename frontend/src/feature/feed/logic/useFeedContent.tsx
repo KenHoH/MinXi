@@ -10,12 +10,8 @@ export function useFeedContent(
   boardContentsMap: Map<number, FullContentDto[]>
 ) {
   const { user, isLoading } = useAuthContext();
-  const {
-    findAllGlobalPage,
-    getFollowingContent,
-    getFriendContent,
-    findAllPage,
-  } = useContentService();
+  const { getFollowingContent, getFriendContent, findAllPage } =
+    useContentService();
   const { findFyp } = useAlgorithmService();
 
   const [allCursor, setAllCursor] = useState(0);
@@ -36,7 +32,7 @@ export function useFeedContent(
     console.log("User:", user);
 
     if (!user && !isLoading) {
-      const res = await findAllGlobalPage(areaId, allCursor, 10);
+      const res = await findAllPage(areaId, allCursor, 10);
       setAllCursor(res?.currentPage || 0);
       setAreaId(res?.area_id || 1);
       console.log("All Cursor:", allCursor);

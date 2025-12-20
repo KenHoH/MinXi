@@ -81,20 +81,26 @@ export default function ProfilePage() {
   const handleFollow = async (delta: boolean) => {
     if (!user) return;
     if (!creatorUserData) return;
-    setFollowed(!delta);
+
     if (delta == false) {
-      await createFollow(creatorUserData.user_id, user.user_id);
-      await updateFollowUser(creatorUserData.user_id, { delta: 1 });
-      sendNotificatonSystem(
-        creatorUserData.user_id,
-        user.user_id,
-        `${creatorUserData.username} started following you!`,
-        "New Follower",
-        "FOLLOW"
-      );
+      const [res1, _] = await Promise.all([
+        createFollow(creatorUserData.user_id, user.user_id),
+        updateFollowUser(creatorUserData.user_id, { delta: 1 }),
+      ]);
+      if (res1?.Valid === true) {
+        sendNotificatonSystem(
+          creatorUserData.user_id,
+          user.user_id,
+          `${creatorUserData.username} started following you!`,
+          "New Follower",
+          "FOLLOW"
+        );
+      }
     } else {
-      await deleteFollow(creatorUserData.user_id, user.user_id);
-      await updateFollowUser(creatorUserData.user_id, { delta: -1 });
+      await Promise.all([
+        deleteFollow(creatorUserData.user_id, user.user_id),
+        updateFollowUser(creatorUserData.user_id, { delta: -1 }),
+      ]);
     }
   };
 
@@ -106,7 +112,7 @@ export default function ProfilePage() {
   const [activeTab, setActiveTab] = useState("");
   const handleShare = async () => {
     if (!creatorUserData) return;
-    const link = `profile/${creatorUserData.username}`;
+    const link = `https://narcore.apps.binus.ac.id/profile/${creatorUserData.username}`;
 
     try {
       await navigator.clipboard.writeText(link);
@@ -329,7 +335,9 @@ export default function ProfilePage() {
                     <div className="flex gap-8 text-sm justify-center">
                       <div>
                         <p className="text-lg font-bold">
-                          {creatorUserData.total_reports}
+                          {creatorUserData.total_reports < 0
+                            ? 0
+                            : creatorUserData.total_reports}
                         </p>
                         <p className="text-muted-foreground">Reports</p>
                       </div>
@@ -338,7 +346,9 @@ export default function ProfilePage() {
                         className="cursor-pointer hover:opacity-80 transition-opacity"
                       >
                         <p className="text-lg font-bold">
-                          {creatorUserData.follower}
+                          {creatorUserData.follower < 0
+                            ? 0
+                            : creatorUserData.follower}
                         </p>
                         <p className="text-muted-foreground">Followers</p>
                       </button>
@@ -366,7 +376,10 @@ export default function ProfilePage() {
                         </Button>
                       )}
                       <Button
-                        onClick={() => handleFollow(followed)}
+                        onClick={() => {
+                          setFollowed(!followed);
+                          handleFollow(followed);
+                        }}
                         disabled={owned}
                       >
                         {owned

@@ -343,9 +343,8 @@ export function PostDetailComponent(props: PostDetailComponentProps) {
               isOwnContent={isOwnContent}
               onFollowClick={() => {
                 if (!user) return;
-                setFollowed(!followed);
                 handleFollow(
-                  !followed,
+                  followed,
                   post.creator_id,
                   user.user_id,
                   user.username,
@@ -354,6 +353,7 @@ export function PostDetailComponent(props: PostDetailComponentProps) {
                   updateFollowUser,
                   sendNotificatonSystem
                 );
+                setFollowed(!followed);
               }}
             />
           )}

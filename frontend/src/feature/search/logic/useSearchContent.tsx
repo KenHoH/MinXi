@@ -6,7 +6,7 @@ import type { FullContentWithHistoryProps } from "@/feature/content/components/m
 
 export function useSearchContent() {
   const { user, isLoading } = useAuthContext();
-  const { findAllGlobalPage } = useContentService();
+  const { findAllPage } = useContentService();
   const { getByUser } = useHistoryService();
 
   const [allCursor, setAllCursor] = useState(0);
@@ -25,11 +25,7 @@ export function useSearchContent() {
     console.log("User:", user);
 
     // Fetch content with pagination
-    const response = await findAllGlobalPage(
-      user?.area_id || areaId,
-      allCursor,
-      10
-    );
+    const response = await findAllPage(user?.area_id || areaId, allCursor, 10);
 
     if (response) {
       setAllCursor(response.currentPage || 0);
@@ -66,7 +62,7 @@ export function useSearchContent() {
     }
 
     return [];
-  }, [user, allCursor, areaId, isLoading, findAllGlobalPage, getByUser]);
+  }, [user, allCursor, areaId, isLoading, findAllPage, getByUser]);
 
   const resetCursor = useCallback(() => {
     setAllCursor(0);
